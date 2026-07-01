@@ -1,0 +1,8 @@
+# Data artifacts — never commit (5+ GB); rebuild from the pipeline
+output/
+*.parquet
+*.dta
+*.csv
+*.log
+__pycache__/
+*.pyc
