@@ -27,6 +27,11 @@ DEMEAN_ITERS = 30
 SEED = 20260702
 
 con = duckdb.connect()
+# R3-F6 freshness: regenerate the parquet from the CURRENT .dta so this script can
+# never silently run on a stale panel left over from an earlier build.
+import pyreadstat
+_df, _ = pyreadstat.read_dta((OUT / "audit_c6_panel.dta").as_posix())
+_df.to_parquet(OUT / "audit_c6_panel.parquet", index=False)
 d = con.execute(f"""
 SELECT firm_str, rdate,
        any_value(cn_lag) AS cn, any_value(shock) AS s,
