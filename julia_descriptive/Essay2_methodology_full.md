@@ -76,7 +76,7 @@ The country-pair β₁ (US·S_{c,t}, formerly "+17.7, p=0.098, opposite H2.1") i
 - **F2 (Cartesian grid vs firm existence span).** `06_cartesian_grid.jl` crosses the universe with ALL quarters 1999Q1–2023Q4 without intersecting each firm's own existence span, so pre-IPO / post-delisting structural Δw=0 rows enter the estimation panel. Measured: **25.03%** of the panel is out-of-span, ~96.6% of it exactly Δw=0. These attenuate β₃, inflate N, and understate SE. Re-running the headline on the in-span subset only: β₃ ≈ 1.86× larger (+1.28→+2.4×10⁻⁶) but still **null** (RI p=0.58). The conclusion is unchanged; the headline N / SE / §5.5 extensive-margin figures are affected. `build_audit_panel_f1f2f7.py` (`in_span`).
 - **F3 / F9 (inference — few clusters, overlapping windows).** The tail-dummy specs (§7.3, 6/4/2 treated quarters) and the overlapping-window LP have unreliable CRVE (MacKinnon–Webb; `reghdfe` flagged a non-positive-semi-definite VCV on the LP), and the previously-planned wild cluster bootstrap fails with few treated clusters. **Randomization inference** is the correct design-based test and is now the arbiter for these specs. Its exact algebra (US−NONUS pairwise difference + quarter FE reproduces the two-way-FE β₃; per-quarter sufficient statistics make a permutation an O(82) weighted sum) was independently verified to reproduce reghdfe's β₃ to 7 significant figures. `run_randomization_inference.py`. The tail-dummy k=2/3 specs (2 and 4 treated quarters) are **inference-invalid** and reported as such / dropped, not as "low power."
 - **F4 (country-pair β₁ clustering).** See Headline change 2 above. `run_audit_f4f8.do`.
-- **F5 (MDE units).** The §7.6 "25–35 bps" MDE conflated the per-unit-CN·S coefficient scale with the outcome scale. Corrected: with SE(β₃_flow)=1.13×10⁻³ and σ(S_t)=2.42, the 80%-power MDE for a *representative* firm-quarter (CN∈[0.05,0.15], 1σ shock) is **≈ 4–12 bps of float** (0.7–2.2% of the outcome sd), not 25–35 bps; the quarter-end-only shock is classical measurement error that attenuates β₃ and enlarges the true MDE. §7.6 Caveat 2 corrected.
+- **F5 (MDE units).** The §7.6 "25–35 bps" MDE conflated the per-unit-CN·S coefficient scale with the outcome scale. Corrected: with SE(β₃_flow)=1.15×10⁻³ and σ(S_t)=2.578 (see σ_S note, §7.3), the 80%-power MDE for a *representative* firm-quarter (CN∈[0.05,0.15], 1σ shock) is **≈ 4.1–12.4 bps of float** (0.7–2.2% of the outcome sd), not 25–35 bps; the quarter-end-only shock is classical measurement error that attenuates β₃ and enlarges the true MDE. §7.6 Caveat 2 corrected.
 - **F6 (ownership flow denominator).** The §7.6 dos = ownership_share_t − ownership_share_{t−1} was NOT denominator-immune: with each term over its own *current* float, a buyback/issuance moves it with zero trading, by a term ∝ the group's own lagged level (differs across US/NONUS, so not absorbed by firm×quarter FE). Fixed: the primary outcome is now the pure flow **(held_t − held_{t−1}) / out_{t−1}** (fixed lagged float). β₃ = +8.8×10⁻⁴ (p=0.44), **null** — same conclusion, but the "net buying/selling" language is now literally correct. The old dos is retained as a labelled comparison column. `build_ownership_share_c6_panel.py`.
 - **F7 (generated regressor / full-sample AR(1)).** The AR(1) shock is estimated once on the full ~1957–2023 monthly series (its (a,b) embed future data) and is a generated regressor. Robustness: replacing the composite shock with **US·CN·GPR_t + US·CN·GPR_{t−1}** (raw GPR level + previous-quarter lag) gives both interactions **null** (p=0.34 / 0.74). This nests the *quarterly* AR(1) family and removes the full-sample look-ahead, but note it does not exactly reproduce the monthly-fitted residual, whose autoregressive term is the quarter's second-to-last month gpr(M2), not the previous quarter's gpr — an exact-nesting variant adding a `US·CN·gpr(M2)` interaction is a one-column addition, deferred (Second review round, R2-F2). Disclosed in §9. `run_audit_f1f2f7.do`.
 - **F8 (risk-set lead membership).** The main risk set (§7.4) conditions membership on t+1 holdings (a post-treatment variable). A **lag-only** variant (held at t or t−1, no look-ahead) gives β₃ = +2.6×10⁻⁶ (p=0.44), **null** — insensitive to the membership rule. `build_riskset_lagonly.py`.
@@ -314,7 +314,7 @@ The three pairwise FEs among {firm, group, quarter} are firm×quarter (have it),
 
 **Every coefficient is null (p ≥ 0.44).** **The current headline FE is the three-way pairwise (it+gt+ig; §7.2 and the "Second external review round" section); column (2) here is the it+gt comparison, β₃ = +1.28.** The headline β₃ (3-pairwise) is +1.80 (p=0.35), positive (opposite the H2.1 prediction) but indistinguishable from zero; the null is from a large SE, not a tight zero. (Also run: "β₃-only" spec = +1.37 (1.63), p=0.405; "full triple" spec identical to Headline with lower-order terms auto-omitted — confirms the absorption logic.)
 
-**Formal MDE (w-based headline).** With SE(β₃)=1.91×10⁻⁶ (3-pairwise) and σ_S=2.42, the 80%-power MDE for a representative firm-quarter (CN∈[0.05,0.15], 1σ shock) is ≈ 0.6–1.9×10⁻⁶ in Δw units = **0.08–0.25% of σ(Δw)=7.6×10⁻⁴**. The design rules out within-Europe reallocations larger than ~0.2% of a typical quarterly weight change; it cannot rule out smaller ones. (Both outcome families — w and shares-flow — now carry an explicit MDE.)
+**Formal MDE (w-based headline).** With SE(β₃)=1.91×10⁻⁶ (3-pairwise) and σ_S=2.578, the 80%-power MDE for a representative firm-quarter (CN∈[0.05,0.15], 1σ shock) is ≈ 0.7–2.1×10⁻⁶ in Δw units = **0.09–0.27% of σ(Δw)=7.6×10⁻⁴**. The design rules out within-Europe reallocations larger than ~0.2% of a typical quarterly weight change; it cannot rule out smaller ones. (Both outcome families — w and shares-flow — now carry an explicit MDE.)
 
 ### 7.2 + firm × group FE (`07e_firmgroup_tail.do`)
 
@@ -327,7 +327,7 @@ Still null. Interpretation: the null is **not** an artifact of structural US-vs-
 
 ### 7.3 Tail-dummy shock menu (`07e_firmgroup_tail.do`) — with power diagnostic
 
-σ_S over 82 quarters = **2.42** (on the 82 distinct quarter-end residuals; an earlier draft wrote 2.58, corrected — Second review round, F5/R2-N5). One-sided right (escalation):
+σ_S over 82 quarters = **2.578** (verified independently on both the estimation-sample panel and the audit panel; a second-review-round "correction" to 2.42 was itself in error — it was computed over a wider, non-estimation-sample quarter range — and is reverted here, R3 shock-lag work, 2026-07-02). One-sided right (escalation):
 
 | k | **treated quarters** | β₃^tail | SE | p |
 |---|---|---|---|---|
@@ -336,6 +336,23 @@ Still null. Interpretation: the null is **not** an artifact of structural US-vs-
 | 3 | 2 / 82 | +8.59 | 39.0 | 0.826 |
 
 All null; SE explodes as k rises. Empirical distribution is **fat-tailed** (k=1.645 gives 6 quarters = 7.3%, not the 5% of a normal). **With only 6 / 4 / 2 treated quarters the CRVE + t(81) inference here is not merely low-powered but statistically *invalid* (MacKinnon–Webb 2017): few treated clusters bias the CRVE and break the t(G−1) reference, and the standard wild bootstrap fails in the same regime.** These tail rows are reported as *descriptive* robustness only; the correct inference is design-based randomization (Second review round, F3). The dummy coefficient is on a different scale from the continuous one — do not compare point estimates.
+
+### 7.3b Shock timing and units (advisor request, 2026-06-28 meeting)
+
+The advisor's meeting comment on the shock was three-part: (a) the shock should *also* be lagged, since CN exposure is already CN_{t-1} — measuring both regressors as of the start of the period over which Δw_t is measured, rather than mixing a lagged CN with a contemporaneous S_t; (b) report it in standard-deviation units; (c) a two-standard-deviation threshold, matching the capital-flow-episode convention (Forbes and Warnock 2012, 2σ main / 3σ robustness) and the GPR-spike convention (Caldara and Iacoviello 2022, AER, 2σ; their earlier IFDP 1222 draft used 1.68σ on the AR(1) residual — structurally the closest precedent to our S_t). Point (c) is already covered by the k=2 row in §7.3 above. Points (a)-(b):
+
+**(a) Lagged shock S_{t-1}: Δw_t ~ US·CN_{t-1}·S_{t-1}**, vs the current headline Δw_t ~ US·CN_{t-1}·S_t.
+
+| spec | FE | β₃ | SE | p (CRVE) | RI p |
+|---|---|---|---|---|---|
+| S_t (current headline) | it+gt | +1.28×10⁻⁶ | 1.66×10⁻⁶ | 0.443 | 0.617 |
+| S_t (current headline) | 3-pairwise | +1.80×10⁻⁶ | 1.91×10⁻⁶ | 0.350 | 0.508 |
+| **S_{t-1} (advisor spec)** | it+gt | **−8.65×10⁻⁷** | 2.08×10⁻⁶ | 0.679 | **0.735** |
+| S_{t-1} (advisor spec) | 3-pairwise | −6.51×10⁻⁷ | 2.03×10⁻⁶ | 0.749 | — |
+
+Under the advisor's timing the point estimate **flips sign** (now negative, i.e. nominally in the disengagement direction) but remains solidly null — if anything *less* distinguishable from zero than the contemporaneous spec (RI p=0.735 vs 0.617). Given randomization inference (design-based, CRVE-independent) shows both signs are equally consistent with the sharp null, **the sign flip is noise, not a finding**: β₃ is not stably signed across reasonable timing conventions, which is itself informative about how weak any signal is, not evidence of disengagement under the "correct" timing. `build_shocklag_panel.py`, `run_shocklag.do`, `run_ri_shocklag.py`.
+
+**(b) SD-standardized reporting.** Since σ_S is a pure rescaling of the shock, standardizing changes only the coefficient's unit (interpretable as "effect per 1-SD tension shock"), not any t-statistic or p-value. At σ_S=2.578: the current headline β₃ (3-pairwise) is +4.64×10⁻⁶ per 1-SD shock; the advisor's S_{t-1} spec is −1.68×10⁻⁶ per 1-SD shock (3-pairwise). Both remain null under the same p-values reported above.
 
 ### 7.4 Conditional "spell-boundary" sample (advisor request) — including an error we made and fixed
 
@@ -393,7 +410,7 @@ It is immune to price (numerator and denominator are both in shares) and to port
 
 **Caveat 1 (ADR / non-primary exclusion).** The measure is primary-EQ only, so it does not observe stake adjustment through ADR/GDR or non-primary classes. US investors hold **8.92%** of their European exposure off the primary class versus **3.32%** for non-US (2.69× asymmetric). The shares-based null is therefore *complementary* to the USD portfolio-weight main spec, which does capture the ADR channel — not a substitute. An ADR-inclusive ownership measure needs the ADR conversion ratio and is deferred (§10).
 
-**Caveat 2 (power / MDE).** With 82 quarter-clusters the design rules out *large* stake reductions but has limited power against small ones. The 80%-power MDE for a *representative* firm-quarter (CN∈[0.05,0.15], 1σ shock, σ_S=2.42) is **≈ 4–12 bps of float** (≈8 bps at CN=0.10), i.e. 0.7–2.2% of the outcome sd — an order of magnitude below the ~25–35 bps that 2.8·SE(β₃) implies at the non-existent CN·S=1 point (Second review round, F5). The quarter-end-only shock is classical measurement error that attenuates β₃ and *enlarges* the true MDE. Read the estimate as bounding the effect near zero, not as proving an exact zero.
+**Caveat 2 (power / MDE).** With 82 quarter-clusters the design rules out *large* stake reductions but has limited power against small ones. The 80%-power MDE for a *representative* firm-quarter (CN∈[0.05,0.15], 1σ shock, σ_S=2.578) is **≈ 4.1–12.4 bps of float** (≈8.3 bps at CN=0.10), i.e. 0.7–2.2% of the outcome sd — an order of magnitude below the ~25–35 bps that 2.8·SE(β₃) implies at the non-existent CN·S=1 point (Second review round, F5). The quarter-end-only shock is classical measurement error that attenuates β₃ and *enlarges* the true MDE. Read the estimate as bounding the effect near zero, not as proving an exact zero.
 
 ---
 
@@ -475,6 +492,9 @@ Point estimate barely moves (+1.38 → +1.28); **SE roughly triples (0.54 → 1.
 | `run_headline_3pairwise.do` | **headline** = three-way pairwise FE, all main specs | `audit_c6_panel.dta` |
 | `run_audit_f1f2f7.do` / `run_audit_f4f8.do` | second-round tests (F1/F2/F7, F4/F8) | audit CSVs |
 | `run_randomization_inference.py` / `run_ri_3pairwise.py` | design-based RI (F1/F3) | RI CSVs |
+| `build_shocklag_panel.py` / `run_shocklag.do` / `run_ri_shocklag.py` | advisor shock-timing revision (§7.3b): S_{t-1} spec + RI | `shocklag_panel.dta`, `shocklag_ri_results.csv` |
+| `02_russia_exposure.jl` / `06_russia_grid.jl` / `build_russia_shock.py` / `build_russia_c6_panel.py` | Russia positive control (isomorphic pipeline) | `c6_panel_russia.dta` |
+| `run_russia_headline.do` / `run_ri_russia*.py` / `build_russia_lp_panel.py` / `run_russia_lp_test.py` | Russia positive-control regressions + inference (mixed evidence, pending re-review) | Russia result CSVs |
 | `build_audit_panel_f1f2f7.py` / `build_riskset_lagonly.py` | second-round panels | audit / lag-only dta |
 
 Stata specification pattern (headline; all reghdfe calls share it):
@@ -564,6 +584,12 @@ The full source is in `github.com/fidio728/practice`, branch `essay2-code-review
 | `build_ownership_share_c6_panel.py` | #5 step 3: ownership **FLOW** panel `ownership_c6_panel.dta` (F6: `(held_t−held_{t−1})/out_{t−1}`) |
 | `build_audit_panel_f1f2f7.py` | F1/F2/F7 audit panel `audit_c6_panel.dta` (leads, cumulative, `in_span`, raw GPR) |
 | `build_riskset_lagonly.py` | F8 lag-only risk set `c6_panel_riskset_lagonly.dta` |
+| `build_shocklag_panel.py` | §7.3b: shock lagged to S_{t-1}, paired with the existing CN_{t-1} → `shocklag_panel.dta` |
+| `02_russia_exposure.jl` (isomorphic copy of `02_china_exposure.jl`) | Russia positive-control exposure panel `firm_quarter_russia_exposure.parquet` |
+| `06_russia_grid.jl` (isomorphic copy of `06_cartesian_grid.jl`) | Russia positive-control zero-filled grid `merged_us_ru_zero_filled.parquet` |
+| `build_russia_shock.py` | US-Russia AR(1) GPR shock (isomorphic to `build_country_pair_shock.py`) → `russia_shock_monthly.csv` |
+| `build_russia_c6_panel.py` | Russia estimation panel (isomorphic to `build_c6_panel.py`) → `c6_panel_russia.dta` |
+| `build_russia_lp_panel.py` | Russia cumulative event-study panel (2022Q1-2023Q4 vs 2021Q4 base) → `russia_lp_panel.parquet` |
 
 ### Stata regressions
 | file | runs |
@@ -574,6 +600,16 @@ The full source is in `github.com/fidio728/practice`, branch `essay2-code-review
 | `run_audit_f4f8.do` | F4 country-pair β₁ under 3 clustering levels, F8 lag-only risk set |
 | `run_audit_f1b_robust.do` | F1b CRVE-vs-alternate-FE sensitivity (see also RI) |
 | `07g_spell_riskset.do` | risk-set regression; `07_regression.do`/`07b`/`07c`/`07d`/`07e` legacy main/robustness (`07f` superseded) |
+| `run_shocklag.do` | §7.3b advisor shock-timing spec (S_{t-1}) — CRVE + SD-standardized reporting |
+| `run_russia_headline.do` | Russia positive control: continuous-shock (it+gt, 3-pairwise) + 2022Q1-Q2 event dummy |
+
+### Design-based inference — Russia extension
+| file | does |
+|---|---|
+| `run_ri_shocklag.py` | RI for the S_{t-1} spec (§7.3b) — confirms sign flip is noise (RI p=0.735) |
+| `run_ri_russia.py` | Russia continuous-shock RI (it+gt) + 2022Q1-Q2 vs all rolling 2-quarter windows placebo |
+| `run_ri_russia_3pairwise.py` | Russia 3-pairwise RI |
+| `run_russia_lp_test.py` | Russia cumulative event-study, firm-level permutation test per horizon (h=0..7) — **mixed evidence, pending adversarial re-review (workflow wy0r0wgv2 failed on a session-limit error, not yet re-run)** |
 
 ### Design-based inference (Python)
 | file | does |
@@ -602,3 +638,6 @@ The full source is in `github.com/fidio728/practice`, branch `essay2-code-review
 | F8 risk-set lag-only β₃ | +2.6×10⁻⁶ (p=0.44) | `run_audit_f4f8.do` | `c6_panel_riskset_lagonly.dta` |
 | ADR off-primary share | US 8.92% / NONUS 3.32% | `build_ownership_share_panel.py` | `ownership_share_diagnostics.csv` |
 | Revere match cascade | 12,743→10,171→8,014→7,928 | `05_combine_visualize.jl` / `build_c6_panel.py` | `05_unmatched_profile_by_country.csv` |
+| §7.3b shock-timing S_{t-1} | −8.65×10⁻⁷ (CRVE p=0.68, RI p=0.735) | `run_shocklag.do` / `run_ri_shocklag.py` | `shocklag_panel.dta` |
+| σ_S (corrected) | 2.578 over 82 estimation quarters | `run_shocklag.do` | `shocklag_panel.dta` |
+| Russia positive control | mixed/fragile; **pending adversarial re-review** | `run_russia_headline.do` / `run_ri_russia*.py` | `c6_panel_russia.dta` |
