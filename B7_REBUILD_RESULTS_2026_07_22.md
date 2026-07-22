@@ -1,0 +1,76 @@
+# B7 fix — full rebuild results (2026-07-22)
+
+**Fix (measure B):** `china_share` = CN CUSTOMER+SUPPLIER links / total CUSTOMER+SUPPLIER
+links. Drops COMPETITOR (14.85% of CN edges) and all PARTNER-* (21%) from both
+numerator and denominator. Aligns the regression exposure variable with the
+descriptive Figure 1 universe and the doc §4.2 estimand.
+
+**Recompute sites (all fixed — china_share is rebuilt in 3 places):**
+- `02_china_exposure.jl`: china_share column + new `n_supplychain_links` + `china_share_alltypes` diagnostic.
+- `05_combine_visualize.jl:~292`: SUM-aggregated exposure_by_sec_entity (multi-match).
+- `06_cartesian_grid.jl:~232`: 1:1-join exposure_by_sec_entity.
+- Python builders (build_c6/country/firm_ladder) read china_share directly — no change.
+
+**Panel impact:**
+- HIGH cutoff (median positive lagged CN): 0.0476 → **0.0625**
+- Estimation universe: 7,928 → **6,854 firms** (−13.5%); china_share_lag1q non-null 462,600 → 347,952 rows.
+- Firms dropped = those whose only China links were competitor/partner (no CUST/SUPP link) → NULL exposure.
+
+**Regression results (old → new):**
+
+| spec | old | new (B7) | note |
+|---|---|---|---|
+| DDD headline β₃ (us_cn_shock, dw, 3-pairwise) | +1.80e-6, p=0.35, N=462,096 | **+2.75e-6 (se 1.70e-6), p=0.110, N=347,490** | still null; point est +50%, p lower |
+| Firm ladder M1 (firm+qtr FE, level w) | +9.1e-5, p=0.037 | +9.0e-5, p=0.048 | marginal |
+| Firm ladder M2 (firm×grp FE) | −1.6e-5, p=0.739 | −5.4e-5, p=0.324 | null |
+| **Firm ladder M3 (fq+gq FE)** | +8.6e-5, **p=0.046** ⭐ | +8.6e-5, **p=0.060** | **loses significance** |
+| Firm ladder M4 (3-pairwise) | −2.1e-5, p=0.637 | −6.1e-5, p=0.230 | null |
+| Country ladder M1–M4 (Step 1) | all null | all null (us_cn −0.04~−0.01, p≥0.17) | unchanged |
+
+**Bottom line:** the null conclusion is preserved. The cleaner supply-chain measure
+gives somewhat LARGER point estimates (β₃ +50%, p 0.35→0.11) but nothing crosses
+5%, and the sole starred ladder cell (M3) loses its star. Consistent with, and
+slightly reinforcing, the overall null.
+
+**Follow-ups still owed:**
+1. Hardcoded "gate" checks in `run_ddd_nofe_bil.do` (β₃=1.80e-6, N=462,096) and any
+   other `.do` with locked pre-B7 values must be updated to the new numbers (the
+   gate correctly tripped and stopped Stage B/C — those columns not re-run yet).
+2. Full doc number-refresh: `Essay2_methodology_full.md` has many pre-B7 hardcoded
+   numbers (β₃ table §~310, firm counts, tail menu, F1/F2 rows) now stale.
+3. Russia positive-control chain (`02_russia_exposure.jl` etc.) has the SAME B7
+   contamination — russia_share also counts all rel_types. Apply the same fix +
+   rebuild before citing Russia numbers.
+4. RI / bootstrap / did_imputation robustness re-runs on the new panel.
+5. The earlier NULLS FIRST dedup fix rode along in this same rebuild.
+
+---
+
+# B10 fix — Russia LP pre-invasion anchoring (2026-07-22)
+
+**Fix:** `build_russia_lp_panel.py` — LP regressor now FIXED at pre-invasion
+exposure (russia_share as of 2021Q4 = ru_lag at 2022Q1), held across all
+horizons, mirroring the w_base anchor. Previously it used time-varying
+russia_share_lag1q, so h>=1 used POST-invasion exposure (contradicting the
+docstring's "as of 2021Q4"). Note: russia_share here is still pre-B7
+(all-rel-type) — B10 is orthogonal to the Russia B7 contamination.
+
+**Result (permutation p, 20k perms; all beta negative = divestment direction):**
+
+| h | quarter | old perm_p | new perm_p (B10) |
+|---|---|---|---|
+| 0 | 2022Q1 | 0.042 | 0.040 (marginal) |
+| 1 | 2022Q2 | **0.046** | **0.052** (now null at 5%) |
+| 2 | 2022Q3 | — | 0.099 |
+| 3 | 2022Q4 | — | 0.068 |
+| 4–7 | 2023 | — | 0.14–0.19 |
+
+Sample now uniform across horizons (n=5,466, balanced 10,932 rows/horizon) —
+the correct event-study design. The previously-cited h=1 significance was
+partly an artifact of post-invasion exposure; under correct anchoring only h=0
+is marginal. Reinforces B12 (Russia positive control is underpowered); do not
+cite the LP h=1 as design validation.
+
+**Russia branch still owed:** B7 rel-type fix on russia_share (02_russia +
+06_russia + merged_us_ru rebuild) and B9 (R1 degenerate VCE / SE='.' silent
+CSV) — bundle into one Russia rebuild.

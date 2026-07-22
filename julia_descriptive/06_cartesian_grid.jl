@@ -229,7 +229,13 @@ DBInterface.execute(con, """
            e.quarter_end,
            e.n_cn_total,
            e.n_total_links,
-           e.n_cn_total::DOUBLE / NULLIF(e.n_total_links, 0) AS china_share
+           e.n_supplychain_links,
+           -- (B7 FIX, 2026-07-22) supply-chain china_share = CN CUSTOMER+SUPPLIER
+           -- / total CUSTOMER+SUPPLIER (matches 02 and 05). Crosswalk is unique
+           -- on sec_entity_id here (asserted above), so a direct ratio is exact.
+           (e.n_cn_customer + e.n_cn_supplier)::DOUBLE
+               / NULLIF(e.n_supplychain_links, 0) AS china_share,
+           e.n_cn_total::DOUBLE / NULLIF(e.n_total_links, 0) AS china_share_alltypes
     FROM matched_eu_sec_links m
     JOIN read_parquet('$EXP_PATH') e ON m.eu_company_id = e.eu_company_id
 """)

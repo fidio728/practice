@@ -10,6 +10,14 @@ known calendar date, not a continuous-shock design.
 
 cum_h = w_{2022Q1 + h} - w_{2021Q4}, for h = 0..7 (covers 2022Q1 through 2023Q4).
 Outcome: (US - NONUS) cumulative Delta-w from the quarter before the invasion.
+
+B10 FIX (2026-07-22): the regressor is FIXED at the pre-invasion exposure
+(russia_share as of 2021Q4, i.e. russia_share_lag1q evaluated at 2022Q1) and
+held constant across all horizons. Previously it used the time-varying
+russia_share_lag1q at each horizon quarter, so for h>=1 the regressor was
+POST-invasion exposure — contradicting the docstring's "ru_lag as of 2021Q4"
+claim and letting the invasion's own effect on exposure feed the regressor.
+h=0 is unchanged (its lag already equals the 2021Q4 value).
 """
 from pathlib import Path
 import duckdb
@@ -32,11 +40,20 @@ base AS (
     SELECT sec_entity_id, holder_group, w AS w_base
     FROM g WHERE report_date = DATE '2021-12-31'
 ),
+-- B10 FIX: pre-invasion exposure, fixed across horizons. ru_lag at 2022Q1
+-- lags to 2021Q4 (the quarter before the invasion), so it is the clean
+-- pre-treatment exposure; anchoring the regressor here mirrors w_base.
+ru_base AS (
+    SELECT sec_entity_id, holder_group, ru_lag AS ru_base
+    FROM g WHERE report_date = DATE '2022-03-31'
+),
 joined AS (
-    SELECT g.sec_entity_id, g.holder_group, g.report_date, g.us, g.ru_lag,
+    SELECT g.sec_entity_id, g.holder_group, g.report_date, g.us,
+           rb.ru_base AS ru_lag,
            g.w - b.w_base AS cum_dw
     FROM g
     JOIN base b USING (sec_entity_id, holder_group)
+    JOIN ru_base rb USING (sec_entity_id, holder_group)
     WHERE g.report_date BETWEEN DATE '2022-03-31' AND DATE '2023-12-31'
 )
 SELECT * FROM joined

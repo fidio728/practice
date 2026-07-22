@@ -26,6 +26,18 @@
 #     either source or target; EU-EU edges contribute once to each endpoint's
 #     denominator — symmetric with how every other edge is counted.
 #
+# B7 (rel_type contamination, 2026-07-22): china_share previously counted
+#     ALL relationship types (COMPETITOR = 14.85% of CN edges, PARTNER-* =
+#     21%) in both numerator and denominator, while the doc §4.2 defined the
+#     estimand as supply-chain dependence and Figure 1 used CUSTOMER+SUPPLIER
+#     only. Fix (measure B): china_share = CN CUSTOMER+SUPPLIER links / total
+#     CUSTOMER+SUPPLIER links. Drops COMPETITOR and PARTNER-* from both. The
+#     all-type share is retained as china_share_alltypes for diagnostics; the
+#     per-type breakdown columns (n_cn_customer/supplier/jv/manuf/partner_any/
+#     total) and n_total_links are unchanged. Impact (numerator-only proxy on
+#     the old parquet): ~18.5% of positive firm-quarters change HIGH/LOW.
+#     Downstream (05 -> 06 -> regressions) MUST be rebuilt.
+#
 # Medium fixes also applied here:
 #   - Removed firm_month_china_exposure.parquet alias (silent type-pun;
 #     month_end column held quarter-end values). Downstream now reads
@@ -194,7 +206,16 @@ DBInterface.execute(con, """
         SELECT *,
                ROW_NUMBER() OVER (
                    PARTITION BY company_id, start_d
-                   ORDER BY end_d DESC NULLS LAST, company_id ASC
+                   -- NULLS FIRST (2026-07-21 fix): NULL end_d = open segment =
+                   -- +inf, must beat a same-start_d zero-length closed row
+                   -- (s,s) — the WRDS same-day-correction pattern. NULLS LAST
+                   -- kept the dead row, opened an artificial coverage gap and
+                   -- silently dropped live firms from all later quarters
+                   -- (independent audit, 11 firms, tail-quarter undercount
+                   -- <=0.36%). Static dedup above (line ~130) already used
+                   -- NULLS FIRST. Downstream parquets NOT yet rebuilt under
+                   -- this fix — re-run 02→05→06 before next regression update.
+                   ORDER BY end_d DESC NULLS FIRST, company_id ASC
                ) AS rn
         FROM rev_co_raw
     )
@@ -555,7 +576,14 @@ DBInterface.execute(con, """
     SELECT
         a.eu_company_id,
         q.qend,
-        COUNT(*) AS n_total_links
+        COUNT(*) AS n_total_links,
+        -- (B7 FIX, 2026-07-22) supply-chain-only denominator: CUSTOMER +
+        -- SUPPLIER edges only, dropping COMPETITOR (14.85% of CN edges) and
+        -- all PARTNER-* types. Matches Figure 1's descriptive universe and
+        -- the doc §4.2 estimand ("supply-chain dependence"). n_total_links
+        -- kept as an all-relationship diagnostic.
+        COUNT(*) FILTER (WHERE a.rel_type IN ('CUSTOMER','SUPPLIER'))
+            AS n_supplychain_links
     FROM eu_any_edge a
     JOIN quarters q
       ON q.qend >= a.rel_start
@@ -584,7 +612,17 @@ DBInterface.execute(con, """
         COALESCE(c.n_cn_partner_any, 0) AS n_cn_partner_any,
         COALESCE(c.n_cn_total,    0) AS n_cn_total,
         t.n_total_links,
-        CAST(COALESCE(c.n_cn_total, 0) AS DOUBLE) / NULLIF(t.n_total_links, 0) AS china_share
+        t.n_supplychain_links,
+        -- (B7 FIX, 2026-07-22) china_share = CN supply-chain links / total
+        -- supply-chain links (CUSTOMER + SUPPLIER, both endpoints). Excludes
+        -- COMPETITOR and PARTNER-*. Firms with supply-chain links but none to
+        -- China get 0; firms with only competitor/partner links get NULL
+        -- (undefined supply-chain exposure), correctly dropped downstream.
+        CAST(COALESCE(c.n_cn_customer, 0) + COALESCE(c.n_cn_supplier, 0) AS DOUBLE)
+            / NULLIF(t.n_supplychain_links, 0) AS china_share,
+        -- legacy all-relationship-type share, retained for diagnostics only
+        CAST(COALESCE(c.n_cn_total, 0) AS DOUBLE) / NULLIF(t.n_total_links, 0)
+            AS china_share_alltypes
     FROM firm_quarter_total t
     JOIN eu_revere_universe_qend u
       ON u.eu_company_id = t.eu_company_id AND u.qend = t.qend
@@ -594,8 +632,10 @@ DBInterface.execute(con, """
 
 n_panel = qdf(con, "SELECT COUNT(*) AS n FROM firm_quarter_exposure").n[1]
 n_firms = qdf(con, "SELECT COUNT(DISTINCT eu_company_id) AS n FROM firm_quarter_exposure").n[1]
-n_exposed = qdf(con, "SELECT COUNT(*) AS n FROM firm_quarter_exposure WHERE n_cn_total > 0").n[1]
-println("  panel rows: $n_panel ; unique EU firms with any supply-chain link: $n_firms ; rows with positive CN exposure: $n_exposed")
+n_exposed = qdf(con, "SELECT COUNT(*) AS n FROM firm_quarter_exposure WHERE (n_cn_customer + n_cn_supplier) > 0").n[1]
+n_exposed_all = qdf(con, "SELECT COUNT(*) AS n FROM firm_quarter_exposure WHERE n_cn_total > 0").n[1]
+println("  panel rows: $n_panel ; unique EU firms with any supply-chain link: $n_firms")
+println("  rows with positive CN supply-chain (CUST+SUPP) exposure: $n_exposed ; (all rel-types, diagnostic): $n_exposed_all")
 
 # Save panel as parquet for downstream use (atomic write)
 firm_quarter_path = test_suffix_path(joinpath(OUT_DIR, "firm_quarter_china_exposure.parquet"))

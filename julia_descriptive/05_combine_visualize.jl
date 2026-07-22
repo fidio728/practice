@@ -284,12 +284,20 @@ DBInterface.execute(con, """
     )
     SELECT m.sec_entity_id,
            e.quarter_end,
-           SUM(e.n_cn_total)     AS n_cn_total,
-           SUM(e.n_cn_customer)  AS n_cn_customer,
-           SUM(e.n_cn_supplier)  AS n_cn_supplier,
-           SUM(e.n_cn_jv)        AS n_cn_jv,
-           SUM(e.n_total_links)  AS n_total_links,
-           SUM(e.n_cn_total)::DOUBLE / NULLIF(SUM(e.n_total_links), 0) AS china_share
+           SUM(e.n_cn_total)         AS n_cn_total,
+           SUM(e.n_cn_customer)      AS n_cn_customer,
+           SUM(e.n_cn_supplier)      AS n_cn_supplier,
+           SUM(e.n_cn_jv)            AS n_cn_jv,
+           SUM(e.n_total_links)      AS n_total_links,
+           SUM(e.n_supplychain_links) AS n_supplychain_links,
+           -- (B7 FIX, 2026-07-22) supply-chain china_share: CN CUSTOMER+SUPPLIER
+           -- links / total CUSTOMER+SUPPLIER links, SUM-aggregated across
+           -- multi-matched Revere companies (self-consistent ratio, matches 02).
+           -- The old all-rel-type ratio is kept as china_share_alltypes.
+           (SUM(e.n_cn_customer) + SUM(e.n_cn_supplier))::DOUBLE
+               / NULLIF(SUM(e.n_supplychain_links), 0) AS china_share,
+           SUM(e.n_cn_total)::DOUBLE / NULLIF(SUM(e.n_total_links), 0)
+               AS china_share_alltypes
     FROM crosswalk m
     JOIN read_parquet('$EXP_PATH') e ON m.eu_company_id = e.eu_company_id
     GROUP BY m.sec_entity_id, e.quarter_end

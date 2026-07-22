@@ -180,19 +180,20 @@ FROM grid_zfilled
 
 CN_{i,t} = R^{CN}_{i,t} / R_{i,t}, then lagged one quarter.
 
-- R_{i,t} = active supply-chain edges where firm *i* is on **either** side (**symmetric** counting), summed across five `rel_type`s: `CUSTOMER`, `SUPPLIER`, `PARTNER-JVENTUR`, `PARTNER-MANUFAC`, other `PARTNER-*`.
+- R_{i,t} = active **supply-chain** edges where firm *i* is on **either** side (**symmetric** counting), counting only the two buyer–seller `rel_type`s: `CUSTOMER` and `SUPPLIER`. `COMPETITOR` (14.85% of CN edges) and all `PARTNER-*` types (joint venture, manufacturing, licensing, marketing; 21% of CN edges) are **excluded**: they capture rivalry or looser cooperation, not input dependence. This matches the descriptive Figure 1 universe. (B7 fix, 2026-07-22; the earlier version summed all `rel_type`s. The all-type share is kept in the parquet as `china_share_alltypes` for diagnostics.)
 - R^{CN}_{i,t} = **bilateral union**: {firm i = source, CN = target} ∪ {CN = source, firm i = target}.
 - Home-region classification is **point-in-time** (time-versioned), not a single end-of-sample label → no look-ahead in exposure.
 
 Exact SQL for the share (`02_china_exposure.jl`):
 
 ```sql
-CAST(COALESCE(c.n_cn_total, 0) AS DOUBLE) / NULLIF(t.n_total_links, 0) AS china_share
+CAST(COALESCE(c.n_cn_customer, 0) + COALESCE(c.n_cn_supplier, 0) AS DOUBLE)
+    / NULLIF(t.n_supplychain_links, 0) AS china_share
 ```
 
 Note `NULLIF(..., 0)`: a firm-quarter with **no supply-chain links at all** gets china_share = **NULL** (not 0), and does not enter the exposure table. This is deliberate (see MISSING bucket, §5.5).
 
-**HIGH-exposure cutoff.** `HIGH` if CN_{i,t−1} > **0.0476** = the median of strictly-positive CN_{i,t−1} across firm-quarters. **Disclosed nuance:** "high exposure" therefore means "at least ~4% of a firm's reported supply-chain edges touch China" — meaningful but **not extreme**.
+**HIGH-exposure cutoff.** `HIGH` if CN_{i,t−1} > **0.0625** = the median of strictly-positive CN_{i,t−1} across firm-quarters (CUSTOMER+SUPPLIER share, post-B7 rebuild 2026-07-22; the pre-B7 all-`rel_type` value was 0.0476). **Disclosed nuance:** "high exposure" therefore means "at least ~6% of a firm's reported supply-chain edges touch China" — meaningful but **not extreme**. The estimation universe is now **6,854 firms** (was 7,928; firms whose only China links were competitor/partner ties, with no customer/supplier link, now carry NULL exposure and drop out).
 
 ### 4.3 Shock S_t
 

@@ -203,7 +203,11 @@ DBInterface.execute(con, """
         SELECT *,
                ROW_NUMBER() OVER (
                    PARTITION BY company_id, start_d
-                   ORDER BY end_d DESC NULLS LAST, company_id ASC
+                   -- NULLS FIRST (2026-07-21 fix, mirrors 02_china_exposure):
+                   -- open segment (NULL end_d) beats same-start_d zero-length
+                   -- closed row; NULLS LAST silently dropped live firms.
+                   -- Downstream parquets NOT yet rebuilt under this fix.
+                   ORDER BY end_d DESC NULLS FIRST, company_id ASC
                ) AS rn
         FROM rev_co_raw
     )
