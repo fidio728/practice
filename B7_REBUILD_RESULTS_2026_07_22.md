@@ -74,3 +74,55 @@ cite the LP h=1 as design validation.
 **Russia branch still owed:** B7 rel-type fix on russia_share (02_russia +
 06_russia + merged_us_ru rebuild) and B9 (R1 degenerate VCE / SE='.' silent
 CSV) — bundle into one Russia rebuild.
+
+---
+
+# B8 fix + flow inference under B7 (2026-07-22)
+
+**B8 bug:** doc §7.6 "not a zero-fill artifact" cited a held-only verification
+(+0.00122) that `test_obs_only.do` ran on the superseded `dos` outcome, not the
+primary `flow` (the obsonly panel has no flow column). Fixed: `run_flow_heldonly.do`
+runs the held-only zero-fill robustness on `flow` (B7 panel). Held-only 3-pairwise
+β₃ = +0.00135 (still positive, further from disengagement).
+
+**Bigger finding surfaced (B7 side-effect on flow inference):**
+Rebuilding ownership_c6_panel.dta on the B7 grid made the flow two-way-cluster CRVE
+UNRELIABLE — primary fq-gq spec has a degenerate/singular VCV (SE not computable,
+the B9 pathology on a China spec), 3-pairwise gives p=0.0001. Cause: `flow` is
+un-winsorized and fat-tailed (kurtosis 5167, max +9.83 = +983% of float from tiny
+lagged denominators).
+
+Resolution:
+- Winsorize p1/p99 → kurtosis 5167→5.3, degeneracy gone; CRVE R1 p=0.003, R2 p=0.056.
+- **Design-based RI (permute 82 quarter shocks, `run_ri_flow.py`): raw p=0.369,
+  winsor p=0.384 — NULL both.**
+
+Conclusion: the flow null STANDS under B7 and is reinforced (the CRVE "significance"
+is a fat-tail/few-cluster artifact killed by RI). β₃ positive throughout = wrong sign
+for disengagement anyway. New files: run_flow_heldonly.do, run_flow_winsor.do,
+run_ri_flow.py.
+
+Follow-up: refresh the pre-B7 flow numbers scattered in §7.6 (+0.00088/p=0.44/N=300,866
+at lines 27/80/404/551) to the B7 panel + RI; the conclusion is unchanged.
+Also note: B9 (degenerate two-way-cluster VCE) is NOT Russia-only — it hits the
+China flow fq-gq spec too; winsorization is the fix there.
+
+---
+
+# B9 fix — degenerate VCE no longer silently written (2026-07-22)
+
+**Bug:** run_russia_headline.do R1 (it+gt, two-way cluster) has a degenerate
+CGM VCE (non-PSD/singular -> reghdfe returns missing SE) because the Russia
+event has very few treated quarters. The column was written to
+russia_headline_results.csv with se='.' and no assertion/diagnostic.
+
+**Fix:** after every spec, detect a missing/zero SE, warn loudly, and write
+russia_headline_vce_diag.csv marking each spec's VCE validity; esttab now
+carries an addnote pointing to the diag file + run_ri_russia.py. Verified:
+r1 flagged se_valid=0 (degenerate), r2/r3 se_valid=1.
+
+**Note:** the degenerate two-way-cluster VCE is NOT Russia-only — the China
+flow fq-gq spec (B8 work) has the same pathology, there driven by fat tails and
+fixed by winsorization. The valid inference for both is design-based RI. This
+run used the pre-B7 c6_panel_russia.dta; the Russia B7 rel_type fix + rebuild
+is still owed (bundle with a single Russia rebuild).
