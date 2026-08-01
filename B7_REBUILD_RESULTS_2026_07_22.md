@@ -126,3 +126,36 @@ flow fq-gq spec (B8 work) has the same pathology, there driven by fat tails and
 fixed by winsorization. The valid inference for both is design-based RI. This
 run used the pre-B7 c6_panel_russia.dta; the Russia B7 rel_type fix + rebuild
 is still owed (bundle with a single Russia rebuild).
+
+---
+
+# Shock-tercile dose menu (advisor request) — built, reviewed, run (2026-08-02)
+
+Advisor's ask (2026-07-02 meeting): replace the 2-sigma tail dummy (4 treated
+quarters, MacKinnon-Webb few-cluster pathology) with shock TERCILES
+(bottom/middle/top thirds of the 82 quarterly shocks; realized bins 28/27/27).
+Written + 3-angle multi-agent review (econ / Stata / RI-consistency; caught a
+direction-interpretation error, 4 wrong RI pointers, bin-count mislabels);
+fixes applied. Files: run_tercile_3pairwise.do, run_ri_tercile.py.
+
+**Results (B7 panel, MAIN = 3-pairwise fq gq ig, N=347,490; T2 middle = base):**
+
+| coef | b | CRVE p | RI p (5000 perms) |
+|---|---|---|---|
+| us_cn (middle-tercile base) | -1.02e-5 | 0.570 | — |
+| us_cn x T1 (bottom) | +1.37e-5 | 0.535 | — |
+| us_cn x T3 (top) | +2.05e-5 | 0.264 | **0.233** |
+| T3 - T1 contrast (decoupling => negative) | +6.76e-6 | 0.623 | **0.670** |
+
+Python RI reproduces Stata coefficients to 6 significant figures. No degenerate
+VCE (both specs valid; every tercile activates 27-28 month-clusters — the
+few-cluster problem is cured, which was the point). All estimates positive =
+against the decoupling direction; nothing approaches significance under CRVE or
+design-based RI. The dose dimension is a clean null, consistent with the
+continuous headline, the tail dummy, and the flow outcome. Supersedes the old
+tail menu (retires the B14 no-RI critique).
+
+One-liner for the advisor: "Cutting the shock into terciles (27-28 quarters per
+bin, restoring valid clustered inference) shows no differential US response in
+any dose bin and no dose monotonicity; point estimates are small, positive, and
+insignificant under both clustered and permutation inference."
