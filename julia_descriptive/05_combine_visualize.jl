@@ -287,6 +287,8 @@ DBInterface.execute(con, """
            SUM(e.n_cn_total)         AS n_cn_total,
            SUM(e.n_cn_customer)      AS n_cn_customer,
            SUM(e.n_cn_supplier)      AS n_cn_supplier,
+           SUM(e.n_cn_sell)          AS n_cn_sell,
+           SUM(e.n_cn_buy)           AS n_cn_buy,
            SUM(e.n_cn_jv)            AS n_cn_jv,
            SUM(e.n_total_links)      AS n_total_links,
            SUM(e.n_supplychain_links) AS n_supplychain_links,
@@ -296,6 +298,15 @@ DBInterface.execute(con, """
            -- The old all-rel-type ratio is kept as china_share_alltypes.
            (SUM(e.n_cn_customer) + SUM(e.n_cn_supplier))::DOUBLE
                / NULLIF(SUM(e.n_supplychain_links), 0) AS china_share,
+           -- (DIRECTION FIX, 2026-08-02) directional link-count shares over the
+           -- same denominator; sell + buy = china_share row-wise (see 02).
+           -- NOTE: descriptive-parity only in 05 — the REGRESSION path for the
+           -- direction split is 02(parquet) -> 06 -> build_c6; 06 rebuilds its
+           -- own exposure_by_sec_entity and does not read this table.
+           SUM(e.n_cn_sell)::DOUBLE / NULLIF(SUM(e.n_supplychain_links), 0)
+               AS china_sell_link_share,
+           SUM(e.n_cn_buy)::DOUBLE / NULLIF(SUM(e.n_supplychain_links), 0)
+               AS china_buy_link_share,
            SUM(e.n_cn_total)::DOUBLE / NULLIF(SUM(e.n_total_links), 0)
                AS china_share_alltypes
     FROM crosswalk m

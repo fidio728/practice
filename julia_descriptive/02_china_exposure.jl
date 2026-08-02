@@ -555,6 +555,35 @@ DBInterface.execute(con, """
         q.qend,
         SUM(CASE WHEN e.rel_type = 'CUSTOMER' THEN 1 ELSE 0 END) AS n_cn_customer,
         SUM(CASE WHEN e.rel_type = 'SUPPLIER' THEN 1 ELSE 0 END) AS n_cn_supplier,
+        -- (DIRECTION FIX, 2026-08-02) n_cn_customer/n_cn_supplier above are raw
+        -- rel_type label counts and MIX the two paths: the FactSet convention
+        -- (methodology guide p.3) is source-perspective — CUSTOMER: source
+        -- SELLS to target; SUPPLIER: source BUYS from target. From the EU
+        -- firm's perspective the economic direction needs rel_type x path:
+        --   sell-to-China = EU_SRC x CUSTOMER  +  CN_SRC x SUPPLIER
+        --   buy-from-China = EU_SRC x SUPPLIER +  CN_SRC x CUSTOMER
+        -- Row-level identity: n_cn_sell + n_cn_buy = n_cn_customer + n_cn_supplier
+        -- (asserted below). These are LINK-COUNT proxies (revenue-exposure /
+        -- input-dependence), NOT revenue or cost shares.
+        SUM(CASE WHEN (e.rel_type = 'CUSTOMER' AND e.path = 'EU_SRC')
+                   OR (e.rel_type = 'SUPPLIER' AND e.path = 'CN_SRC')
+                 THEN 1 ELSE 0 END) AS n_cn_sell,
+        SUM(CASE WHEN (e.rel_type = 'SUPPLIER' AND e.path = 'EU_SRC')
+                   OR (e.rel_type = 'CUSTOMER' AND e.path = 'CN_SRC')
+                 THEN 1 ELSE 0 END) AS n_cn_buy,
+        -- unique CN counterparties per direction — DESCRIPTIVE-ONLY columns
+        -- (not propagated to 05/06/regression panels). They quantify the
+        -- reciprocal double-record issue (A->B CUSTOMER and B->A SUPPLIER are
+        -- one economic relationship recorded from both sides; row counts take
+        -- it twice, distinct-counterparty counts once). The double-record
+        -- robustness that actually reaches the regression is the INDICATOR
+        -- (any-sell/any-buy) spec in run_direction_split.do.
+        COUNT(DISTINCT CASE WHEN (e.rel_type = 'CUSTOMER' AND e.path = 'EU_SRC')
+                              OR (e.rel_type = 'SUPPLIER' AND e.path = 'CN_SRC')
+                            THEN e.cn_company_id END) AS n_cn_cp_sell,
+        COUNT(DISTINCT CASE WHEN (e.rel_type = 'SUPPLIER' AND e.path = 'EU_SRC')
+                              OR (e.rel_type = 'CUSTOMER' AND e.path = 'CN_SRC')
+                            THEN e.cn_company_id END) AS n_cn_cp_buy,
         SUM(CASE WHEN e.rel_type = 'PARTNER-JVENTUR' THEN 1 ELSE 0 END) AS n_cn_jv,
         SUM(CASE WHEN e.rel_type = 'PARTNER-MANUFAC' THEN 1 ELSE 0 END) AS n_cn_manuf,
         SUM(CASE WHEN e.rel_type LIKE 'PARTNER%' THEN 1 ELSE 0 END) AS n_cn_partner_any,
@@ -607,6 +636,10 @@ DBInterface.execute(con, """
         t.qend AS quarter_end,
         COALESCE(c.n_cn_customer, 0) AS n_cn_customer,
         COALESCE(c.n_cn_supplier, 0) AS n_cn_supplier,
+        COALESCE(c.n_cn_sell,     0) AS n_cn_sell,
+        COALESCE(c.n_cn_buy,      0) AS n_cn_buy,
+        COALESCE(c.n_cn_cp_sell,  0) AS n_cn_cp_sell,
+        COALESCE(c.n_cn_cp_buy,   0) AS n_cn_cp_buy,
         COALESCE(c.n_cn_jv,       0) AS n_cn_jv,
         COALESCE(c.n_cn_manuf,    0) AS n_cn_manuf,
         COALESCE(c.n_cn_partner_any, 0) AS n_cn_partner_any,
@@ -620,6 +653,16 @@ DBInterface.execute(con, """
         -- (undefined supply-chain exposure), correctly dropped downstream.
         CAST(COALESCE(c.n_cn_customer, 0) + COALESCE(c.n_cn_supplier, 0) AS DOUBLE)
             / NULLIF(t.n_supplychain_links, 0) AS china_share,
+        -- (DIRECTION FIX, 2026-08-02) directional LINK-COUNT shares over the
+        -- SAME supply-chain denominator, so that
+        --   china_sell_link_share + china_buy_link_share = china_share
+        -- holds row-wise (additive decomposition of the headline measure).
+        -- Proxies for revenue exposure (sell) / input dependence (buy) — NOT
+        -- revenue or cost shares.
+        CAST(COALESCE(c.n_cn_sell, 0) AS DOUBLE)
+            / NULLIF(t.n_supplychain_links, 0) AS china_sell_link_share,
+        CAST(COALESCE(c.n_cn_buy, 0) AS DOUBLE)
+            / NULLIF(t.n_supplychain_links, 0) AS china_buy_link_share,
         -- legacy all-relationship-type share, retained for diagnostics only
         CAST(COALESCE(c.n_cn_total, 0) AS DOUBLE) / NULLIF(t.n_total_links, 0)
             AS china_share_alltypes
@@ -636,6 +679,52 @@ n_exposed = qdf(con, "SELECT COUNT(*) AS n FROM firm_quarter_exposure WHERE (n_c
 n_exposed_all = qdf(con, "SELECT COUNT(*) AS n FROM firm_quarter_exposure WHERE n_cn_total > 0").n[1]
 println("  panel rows: $n_panel ; unique EU firms with any supply-chain link: $n_firms")
 println("  rows with positive CN supply-chain (CUST+SUPP) exposure: $n_exposed ; (all rel-types, diagnostic): $n_exposed_all")
+
+# (DIRECTION FIX) hard identity check: sell + buy must equal customer + supplier
+# on every row (the direction split is a re-partition of the same records).
+id_viol = qdf(con, """
+    SELECT COUNT(*) AS n FROM firm_quarter_exposure
+    WHERE (n_cn_sell + n_cn_buy) != (n_cn_customer + n_cn_supplier)
+""").n[1]
+@assert id_viol == 0 "direction split violates additive identity on $id_viol rows"
+println("  direction identity: n_cn_sell + n_cn_buy == n_cn_customer + n_cn_supplier on every row ✓")
+
+# reciprocal-record diagnostic: the same economic EU-CN relationship recorded
+# from both sides (A->B CUSTOMER and B->A SUPPLIER) classifies consistently by
+# direction but is counted twice in row counts. Quantify how common that is.
+recip = qdf(con, """
+    WITH sell_pairs AS (
+        SELECT DISTINCT eu_company_id, cn_company_id, path
+        FROM eu_china_edge
+        WHERE (rel_type = 'CUSTOMER' AND path = 'EU_SRC')
+           OR (rel_type = 'SUPPLIER' AND path = 'CN_SRC')
+    )
+    SELECT
+        COUNT(*) AS n_pairs,
+        COUNT(*) FILTER (WHERE n_paths = 2) AS n_both_sides
+    FROM (
+        SELECT eu_company_id, cn_company_id, COUNT(DISTINCT path) AS n_paths
+        FROM sell_pairs GROUP BY 1, 2
+    )
+""")
+println("  reciprocal-record diagnostic (sell direction): $(recip.n_both_sides[1]) of $(recip.n_pairs[1]) EU-CN pairs recorded from both sides (double-counted in link counts; distinct-counterparty columns n_cn_cp_sell/buy are immune)")
+
+recip_buy = qdf(con, """
+    WITH buy_pairs AS (
+        SELECT DISTINCT eu_company_id, cn_company_id, path
+        FROM eu_china_edge
+        WHERE (rel_type = 'SUPPLIER' AND path = 'EU_SRC')
+           OR (rel_type = 'CUSTOMER' AND path = 'CN_SRC')
+    )
+    SELECT
+        COUNT(*) AS n_pairs,
+        COUNT(*) FILTER (WHERE n_paths = 2) AS n_both_sides
+    FROM (
+        SELECT eu_company_id, cn_company_id, COUNT(DISTINCT path) AS n_paths
+        FROM buy_pairs GROUP BY 1, 2
+    )
+""")
+println("  reciprocal-record diagnostic (buy direction):  $(recip_buy.n_both_sides[1]) of $(recip_buy.n_pairs[1]) EU-CN pairs recorded from both sides")
 
 # Save panel as parquet for downstream use (atomic write)
 firm_quarter_path = test_suffix_path(joinpath(OUT_DIR, "firm_quarter_china_exposure.parquet"))

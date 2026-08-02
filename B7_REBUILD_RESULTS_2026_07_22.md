@@ -159,3 +159,44 @@ One-liner for the advisor: "Cutting the shock into terciles (27-28 quarters per
 bin, restoring valid clustered inference) shows no differential US response in
 any dose bin and no dose monotonicity; point estimates are small, positive, and
 insignificant under both clustered and permutation inference."
+
+---
+
+# Direction split — sell-to-China vs buy-from-China (2026-08-02)
+
+Design-agenda rank 1. china_share decomposed additively (common supply-chain
+denominator, sell+buy=china_share row-wise, double-asserted) into
+china_sell_link_share (revenue-exposure link-count proxy: EU_SRC×CUSTOMER +
+CN_SRC×SUPPLIER) and china_buy_link_share (input-dependence proxy: EU_SRC×
+SUPPLIER + CN_SRC×CUSTOMER), per the FactSet source-perspective convention
+(methodology guide p.3, verified by the pipeline reviewer). Pipeline: 02
+(counts+cp+shares+identity assert+reciprocal diagnostics both directions) ->
+06 -> build_c6 (sell_lag/buy_lag); 05 descriptive-parity only. 3-Opus review:
+no must-fix; all should-fixes applied (corr restricted to cn_lag>0, str12,
+dropna+cn, cond(XtX) print, group-invariance assert).
+
+**Descriptives (exposed firm-quarters, n=24,345):** corr(sell,buy)=−0.135;
+cells: sell-only 46.9%, buy-only 35.1%, both 18.0% — the two directions are
+largely carried by different firms; ample independent variation
+(cond(XtX)=24).
+
+**Results (MAIN 3-pairwise, N=347,490; CRVE two-way cluster + RI 5000 perms):**
+
+| stat | b | CRVE p | RI p |
+|---|---|---|---|
+| β₃(sell) | +2.53e-7 | 0.618 | **0.931** |
+| β₃(buy) | +5.50e-6 | 0.147 | **0.136** |
+| β₃(sell)−β₃(buy) | −5.25e-6 | 0.198 | **0.205** |
+| joint β₃s=β₃b=0 | — | F=2.18, p=0.120 | — |
+| pooling (β₂ & β₃ equal) | — | F=0.87, p=0.424 | — |
+
+Indicator (any-sell/any-buy, reciprocal-double-record-immune): all null
+(p=0.61/0.54, equality 0.52). Python RI reproduces Stata to 6 sig figs.
+
+**Reading:** the offset/attenuation alternative for the aggregate null is
+TESTED and not supported — both directions null, equality and pooling not
+rejected, and in the decoupling (negative) direction both CIs are tight
+(sell lower bound −0.75e-6, buy −2.0e-6 vs headline scale ~2.7e-6). The only
+near-marginal cell is buy-side POSITIVE (+5.5e-6, RI p=0.14) — against the
+decoupling direction, consistent with the project-wide pattern. Aggregate
+china_share specification is statistically valid to pool.

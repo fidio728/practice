@@ -52,6 +52,10 @@ df = con.execute(f"""
         CAST(report_date AS TIMESTAMP)                  AS rdate,
         delta_w                                         AS dw,
         china_share_lag1q                               AS cn_lag,
+        -- (DIRECTION FIX, 2026-08-02) directional link-count shares, lagged;
+        -- sell_lag + buy_lag = cn_lag row-wise (additive decomposition).
+        sell_share_lag1q                                AS sell_lag,
+        buy_share_lag1q                                 AS buy_lag,
         shock_us_cn                                     AS shock,
         CASE WHEN holder_group = 'US' THEN 1 ELSE 0 END AS us
     FROM read_parquet('{panel_uri}')
@@ -99,6 +103,8 @@ df["hgroup"]   = df["hgroup"].astype(str)
 df["rdate"]    = pd.to_datetime(df["rdate"])
 df["dw"]       = pd.to_numeric(df["dw"],     errors="raise").astype("float64")
 df["cn_lag"]   = pd.to_numeric(df["cn_lag"], errors="raise").astype("float64")
+df["sell_lag"] = pd.to_numeric(df["sell_lag"], errors="raise").astype("float64")
+df["buy_lag"]  = pd.to_numeric(df["buy_lag"],  errors="raise").astype("float64")
 df["shock"]    = pd.to_numeric(df["shock"],  errors="raise").astype("float64")
 df["us"]       = df["us"].astype("int8")
 
@@ -132,6 +138,12 @@ assert (df.groupby("rdate")["shock"].nunique() == 1).all(), \
     "shock varies within a quarter — expected a single common S_t per quarter"
 # (d) cn_lag in [0, 1] (it is a share)
 assert df["cn_lag"].between(0, 1).all(), "cn_lag outside [0,1]"
+# (d2) DIRECTION FIX: additive decomposition must survive the pipeline —
+#      sell_lag + buy_lag == cn_lag on every estimation row (float tolerance).
+assert df["sell_lag"].notna().all() and df["buy_lag"].notna().all(), \
+    "sell_lag/buy_lag NaN where cn_lag is non-null — 06 lag propagation bug"
+assert (df["sell_lag"] + df["buy_lag"] - df["cn_lag"]).abs().max() < 1e-12, \
+    "sell_lag + buy_lag != cn_lag — direction split lost additivity in the pipeline"
 # (e) quarter coverage is contiguous — no missing quarters in the estimation span
 _q = df["rdate"].dt.to_period("Q").drop_duplicates().sort_values()
 _expected = pd.period_range(_q.iloc[0], _q.iloc[-1], freq="Q")

@@ -235,6 +235,12 @@ DBInterface.execute(con, """
            -- on sec_entity_id here (asserted above), so a direct ratio is exact.
            (e.n_cn_customer + e.n_cn_supplier)::DOUBLE
                / NULLIF(e.n_supplychain_links, 0) AS china_share,
+           -- (DIRECTION FIX, 2026-08-02) directional link-count shares, same
+           -- denominator: sell + buy = china_share row-wise (see 02).
+           e.n_cn_sell::DOUBLE / NULLIF(e.n_supplychain_links, 0)
+               AS china_sell_link_share,
+           e.n_cn_buy::DOUBLE / NULLIF(e.n_supplychain_links, 0)
+               AS china_buy_link_share,
            e.n_cn_total::DOUBLE / NULLIF(e.n_total_links, 0) AS china_share_alltypes
     FROM matched_eu_sec_links m
     JOIN read_parquet('$EXP_PATH') e ON m.eu_company_id = e.eu_company_id
@@ -263,6 +269,10 @@ DBInterface.execute(con, """
                 ELSE NULL END AS portfolio_weight_eu,
            CASE WHEN g.quarter_end < DATE '2003-03-31' THEN NULL
                 ELSE e.china_share END AS china_share,
+           CASE WHEN g.quarter_end < DATE '2003-03-31' THEN NULL
+                ELSE e.china_sell_link_share END AS china_sell_link_share,
+           CASE WHEN g.quarter_end < DATE '2003-03-31' THEN NULL
+                ELSE e.china_buy_link_share END AS china_buy_link_share,
            gpr.gpr_us_cn,
            gpr.shock_us_cn
     FROM cartesian_grid g
@@ -294,6 +304,10 @@ atomic_copy_to(con, """
          - LAG(portfolio_weight_eu, 1) OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end)) AS delta_w,
         china_share,
         LAG(china_share, 1) OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end) AS china_share_lag1q,
+        china_sell_link_share,
+        china_buy_link_share,
+        LAG(china_sell_link_share, 1) OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end) AS sell_share_lag1q,
+        LAG(china_buy_link_share, 1)  OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end) AS buy_share_lag1q,
         gpr_us_cn,
         shock_us_cn
     FROM grid_zfilled
