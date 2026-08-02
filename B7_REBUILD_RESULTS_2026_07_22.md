@@ -200,3 +200,41 @@ rejected, and in the decoupling (negative) direction both CIs are tight
 near-marginal cell is buy-side POSITIVE (+5.5e-6, RI p=0.14) — against the
 decoupling direction, consistent with the project-wide pattern. Aggregate
 china_share specification is statistically valid to pool.
+
+---
+
+# Active-only four-group design (2026-08-03)
+
+Design-agenda rank 2 v2. Feasibility gate passed (US 2021Q4 passive share
+39.78% reproduced the external anchor exactly; NONUS UNKNOWN 2018+ mean 10.2%,
+far under the 40% degradation threshold -> symmetric four-group design).
+Labeling: Funds.STYLE=='Index' -> PASSIVE; explicit non-Index -> ACTIVE;
+missing/unmatched -> UNKNOWN (never active). Funds master ~2018-08 snapshot:
+post-2018 subsample = PRIMARY (predetermined labels); full period carries a
+look-ahead caveat. build_fourgroup_panel.py: reconciliation exact (label
+partition sums back to pooled side, 0 dev), 4 balanced books (695,904 rows,
+6,854 firms x 82 quarters), sum-to-1 on the full grid. Written+run by a
+5-agent workflow; 3-angle review caught one must-fix (sum-to-1 assert on the
+filtered panel would always abort — converted to coverage diagnostic) and the
+dilution-algebra wording (multiplier = ACTIVE VALUE SHARE, UNKNOWN dilutes
+too); all applied.
+
+**Results (t_cn_s; CRVE two-way cluster + RI 5000 perms):**
+
+| contrast | full period | post-2018 (PRIMARY) |
+|---|---|---|
+| MAIN US_ACTIVE vs NONUS_ACTIVE | +2.79e-6, CRVE p=0.069, **RI p=0.289** | +1.16e-6, CRVE p=0.376, **RI p=0.561** |
+| PASSIVE vs PASSIVE (inert benchmark) | +1.03e-6, p=0.760 | −0.14e-6, p=0.963 |
+| US-internal ACTIVE vs PASSIVE | +1.56e-6, p=0.135 | −0.18e-6, p=0.842 |
+
+Python RI reproduces Stata to 6 sig figs both samples; no degenerate VCE; book
+coverage diagnostic p50=0.84 (<1 expected on the filtered panel).
+
+**Reading:** the passive-dilution hypothesis FAILS — the pure-active contrast
+is not more negative than the pooled headline (+2.79e-6 vs pooled +2.75e-6,
+essentially identical), and the primary post-2018 sample is a clean null. The
+passive benchmark is near-exactly zero (validating that the label carries
+content). The full-period CRVE p=0.069 is positive (against decoupling) and
+dies under design-based RI (0.289). Third composition alternative retired:
+after direction-offset and passive-dilution, the aggregate null keeps
+standing on active money alone.
