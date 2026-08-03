@@ -272,3 +272,46 @@ significance (p<0.001) = fat-tail/weak-FE artifact, adjudicated null by RI.
 Estimand rewrite + this block integrated into Essay2_methodology_full.md §7.6;
 four "every point estimate is positive" universal claims carved to
 quarterly-shock specs pending sagg re-adjudication.
+
+## Audit fixes 5-10 batch — FINAL (2026-08-03, wf_1c0735b0-24c, 6/6 CONFIRMED)
+
+### Russia positive control on B7 (CUSTOMER+SUPPLIER)
+06_russia_grid.jl was silently recomputing the old all-rel-type ratio (same
+lesson as China B7: the treatment is recomputed downstream — fix every site).
+After the full chain rebuild (347,952 rows / 6,854 firms; ru_lag>0 5.20%):
+
+| spec | b3 | CRVE p | RI/perm p |
+|---|---|---|---|
+| headline it+gt | −4.2147e-6 | 0.0354 | 0.2425 |
+| headline 3-pairwise | −4.2812e-6 | 0.0358 | 0.2456 |
+| event-window 2022Q1-Q2 | −3.444e-5 | DEGENERATE (se_valid=0) | placebo share 0.457 |
+| LP h=0 | −3.613e-5 | t=−0.88 | perm_p 0.2893 (was 0.040 pre-fix) |
+| LP h=1 | −5.125e-5 | t=−1.21 | perm_p 0.2181 (was 0.052 pre-fix) |
+| LP h=2..7 | all negative | — | perm_p 0.27–0.41 |
+
+**The LP "significance" was an artifact of the all-relationship-type
+denominator.** Only the negative sign survives. CRVE strengthening (p=0.035)
+is NOT the honest read for a concentrated event; RI (0.24) is. Russia cannot
+be cited as passing design validation; B12 power limitation reinforced.
+Old refs (h=0 0.040 / h=1 0.052 / b3=−7.33e-6 p=0.085) = pre-B7-fix, superseded.
+
+### F6 flow on rebuilt ownership panel (2026-08-03)
+Rebuild changes nothing: 3pw flow +8.900e-04 (CRVE p=0.0001, fat-tail), RI raw
+p=0.3691 / winsor p=0.3841 — flow null stable, NOT stale-contaminated.
+Degeneracy is vintage-dependent: this vintage the degenerate spec is the OLD
+dos comparison (B9 guard fired, se_valid=0), flow specs all valid.
+Kurtosis 5169.7, max 9.828 (983% of float).
+
+### F4 country-pair rebuilt on B7
+N=172,860 / 3,208 firm clusters. b1=+2.22e-5: firm-quarter cluster p=0.086,
+honest 3-country cluster p=0.246 — still clustering-fragile, not evidence.
+b3=−1.21e-6 wrong-sign null (p 0.93–0.97). Conclusion unchanged.
+
+### Infrastructure
+- Living canonical artifact: output/headline_3pairwise_canonical.csv
+  (3pw +2.745538e-6/1.696663e-6/0.109507/347,490; itgt +2.081030e-6/347,952)
+- ddd gate retargeted (+2.746e-6/347,490), GATE PASS |diff|=4.6e-10; Stage B
+  no-FE point ests valid but ALL SEs missing (non-PSD; inference-degenerate);
+  Stage C1 +2.94e-6 p=0.090; C2 +2.83e-6 p=0.100, us_bil +2.41e-5 p=0.208
+- 07d refreshed: spec0 +5.83e-10 p=0.999; spec1 +2.081e-6 p=0.1511; spec4
+  +5.38e-7 p=0.411; headers in 07d/07e/07f/07g B7-tagged
