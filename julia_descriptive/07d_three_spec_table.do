@@ -12,13 +12,13 @@
 *   (2) Col 2  - SPEC 1  -  HEADLINE             -> estimates m1
 *       reghdfe dw us_cn us_cn_shock, absorb(fq gq) vce(cluster firm_n rd_m)
 *       fq = group(firm_str rd_day), gq = group(hgroup rd_day).
-*       Already locked: beta_3 = +1.28e-06, SE = 1.66e-06, p = 0.443,
-*       N = 462,564, R2 = 0.6215, F(2,81) = 0.41 p = 0.668.
+*       Already locked (B7 2026-08-03): beta_3 = +2.081e-06, SE = 1.44e-06, p = 0.151,
+*       N = 347,952, R2 = 0.6235, F(2,81) = 1.31 p = 0.276.
 *
 *   (3) Col 3  - SPEC 4  -  WEAK FE              -> estimates m4
 *       reghdfe dw us_cn us_cn_shock, absorb(firm_n rd_m) vce(cluster firm_n rd_m)
-*       Already locked: beta_3 = -1.22e-07, SE = 7.14e-07, p = 0.865,
-*       N = 462,564, R2 = 0.0058.
+*       Already locked (B7 2026-08-03): beta_3 = +5.38e-07, SE = 6.51e-07, p = 0.411,
+*       N = 347,952, R2 = 0.0073.
 *
 * BLOCKING fix from adversarial review: reghdfe does NOT save e(p_F),
 * so we add `estadd scalar p_F = Ftail(e(df_m), e(df_r), e(F))` after

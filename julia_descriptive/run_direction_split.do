@@ -16,7 +16,8 @@
 * SPEC. dw = b2s us*sell + b2b us*buy + b3s us*sell*S + b3b us*buy*S
 *            + fq + gq + ig, two-way cluster (firm, month). All lower-order
 * terms absorbed exactly as in the headline (same argument, two regressor
-* blocks instead of one).
+* blocks instead of one). Pooled headline b3 living source (canonical artifact):
+* output/headline_3pairwise_canonical.csv (2026-08-03).
 *
 * INFERENCE MENU (per external review): equality test b3s=b3b; joint b3s=b3b=0;
 * pooling validity b2s=b2b & b3s=b3b; corr(sell_lag, buy_lag); firm-quarter

@@ -23,6 +23,11 @@ N_PERM = 200000
 SEED = 20260702
 
 con = duckdb.connect()
+# R3-F6 freshness: regenerate the parquet from the CURRENT .dta so this script can
+# never silently run on a stale panel left over from an earlier build.
+import pyreadstat
+_df, _ = pyreadstat.read_dta((OUT / "c6_panel_russia.dta").as_posix())
+_df.to_parquet(OUT / "c6_panel_russia.parquet", index=False)
 d = con.execute(f"""
 SELECT firm_str, rdate,
        any_value(ru_lag) AS cn, any_value(shock) AS s,
@@ -71,7 +76,7 @@ def beta3_and_ri(df, ycol, n_perm=N_PERM, seed=0):
 print("===== Russia positive control: continuous-shock RI =====")
 b3, p, nq, nfq = beta3_and_ri(d, "d_dw", seed=SEED)
 print(f"  b3 = {b3:.4e}   RI p (2-sided) = {p:.4f}   n_quarters={nq}   n_firmquarters={nfq:,}")
-print(f"  (Stata CRVE 3-pairwise reference: b3=-7.327e-06, p=0.085)")
+print(f"  (Stata CRVE 3-pairwise reference: b3=-4.281e-06, p=0.036)")
 
 pd.DataFrame([{"spec": "russia headline continuous-shock", "b3": b3, "ri_p_2sided": p,
                "n_quarters": nq, "n_firmquarters": nfq}]).to_csv(

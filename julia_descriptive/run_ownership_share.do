@@ -49,8 +49,10 @@ estimates store r3
 *==============================================================
 * B9 convention: degenerate two-way-cluster VCE detection + diag CSV.
 * A missing/non-positive SE on us_cn / us_cn_shock means the CRVE column is NOT
-* valid inference for that spec; defer to the RI companion. run_ri_flow.py
-* documents the fq-gq flow CRVE as degenerate (SE missing) after the B7 rebuild.
+* valid inference for that spec; defer to the RI companion. Degeneracy is
+* vintage-dependent: on the 2026-08-03 rebuild the fq-gq FLOW CRVE is valid
+* (se_valid=1) and the OLD dos comparison spec is the degenerate one — read
+* ownshare_vce_diag.csv for the current vintage, never assume which spec.
 *==============================================================
 tempname fh
 file open `fh' using "`OUT'/ownshare_vce_diag.csv", write replace

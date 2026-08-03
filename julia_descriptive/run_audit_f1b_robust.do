@@ -1,10 +1,13 @@
 * run_audit_f1b_robust.do — robust inference for the F1b local-projection
-* horizons significant under CRVE (h=1 p=0.013, h=4 p=0.044).
+* horizons significant under CRVE (h=1 p=0.0166, h=2 p=0.0025, h=4 p=0.0349; B7 2026-08-03).
 * Overlapping cumulative windows + only 82 quarter-clusters => CRVE SE likely
 * understated. Re-test with wild cluster bootstrap (Webb weights), bootstrapping
 * on the QUARTER cluster (the few-cluster / serial-overlap dimension), keeping the
 * same two-way (firm, quarter) error clustering and the same firm#quarter +
 * group#quarter FE.
+* WCB: boottest OOM at 10,000 reps on this machine ([155k-169k x 10k] allocation) -
+* WCB p/CI missing; inference for LP horizons is anchored by the design-based RI
+* (run_ri_3pairwise.py: cum1 p=0.105, cum4 p=0.0388).
 
 clear all
 set more off

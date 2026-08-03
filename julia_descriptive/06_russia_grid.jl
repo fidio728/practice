@@ -240,7 +240,15 @@ DBInterface.execute(con, """
            e.quarter_end,
            e.n_ru_total,
            e.n_total_links,
-           e.n_ru_total::DOUBLE / NULLIF(e.n_total_links, 0) AS russia_share
+           e.n_supplychain_links,
+           -- (B7 FIX, 2026-08-03) supply-chain russia_share = RU CUSTOMER+SUPPLIER
+           -- / total CUSTOMER+SUPPLIER (matches 02_russia_exposure.jl and the
+           -- China 06 fix). Crosswalk is unique on sec_entity_id here (asserted
+           -- above), so a direct ratio is exact.
+           (e.n_ru_customer + e.n_ru_supplier)::DOUBLE
+               / NULLIF(e.n_supplychain_links, 0) AS russia_share,
+           -- legacy all-relationship-type share, retained for diagnostics only
+           e.n_ru_total::DOUBLE / NULLIF(e.n_total_links, 0) AS russia_share_alltypes
     FROM matched_eu_sec_links m
     JOIN read_parquet('$EXP_PATH_RU') e ON m.eu_company_id = e.eu_company_id
 """)

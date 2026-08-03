@@ -62,5 +62,5 @@ keep = ["firm_str", "hgroup", "rdate", "dw", "cn_lag", "shock", "us"]
 est[keep].to_stata(DTA, write_index=False, convert_dates={"rdate": "tc"}, version=118)
 print(f"lag-only risk set: {len(est):,} rows, {est['firm_str'].nunique():,} firms, "
       f"{est.groupby(['firm_str','rdate']).ngroups:,} firm-quarters")
-print(f"  (compare with-lead risk set c6_panel_riskset.dta = 342,262 rows)")
+print(f"  (compare with-lead risk set c6_panel_riskset.dta = 268,282 rows; B7 2026-08-03)")
 print(f"  wrote {DTA.name}")

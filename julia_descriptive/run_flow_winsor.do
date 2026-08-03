@@ -24,7 +24,8 @@ gen us_cn_shock = us * cn_lag * shock
 * B9 convention: no estimates store here, so VCE validity is checked from e()
 * right after each reghdfe. A missing/non-positive SE on us_cn / us_cn_shock
 * means the CRVE is degenerate for that spec; defer to the RI companion.
-* run_ri_flow.py documents the fq-gq flow CRVE as degenerate after the B7 rebuild.
+* Degeneracy is vintage-dependent (2026-08-03 rebuild: no winsor spec degenerate;
+* the OLD dos spec in run_ownership_share.do is) — read the vce_diag CSV, never assume.
 tempname fh
 file open `fh' using "`OUT'/flowwinsor_vce_diag.csv", write replace
 file write `fh' "spec,coef,b,se,se_valid" _n

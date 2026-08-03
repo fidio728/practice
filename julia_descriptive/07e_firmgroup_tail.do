@@ -8,7 +8,7 @@
 *       (escalation = right tail), k = 1.645 / 2 / 3. Report treated-quarter
 *       counts at each k (power diagnostic).
 *
-* Headline reference: beta_3 = +1.28 (SE 1.66, p=0.443), N=462,564.
+* Headline reference (B7 2026-08-03): beta_3 = +2.081 (SE 1.44, p=0.151), N=347,952.
 *
 * Design notes / self-review:
 *   - sigma_S computed over the 82 DISTINCT quarters (tag(rd_m)), NOT over the

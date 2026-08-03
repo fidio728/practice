@@ -23,7 +23,8 @@ gen us_cn_shock = us * cn_lag * shock
 * B9 convention: no estimates store here, so VCE validity is checked from e()
 * right after each reghdfe. A missing/non-positive SE on us_cn / us_cn_shock
 * means the CRVE is degenerate for that spec; defer to the RI companion.
-* run_ri_flow.py documents the fq-gq flow CRVE as degenerate after the B7 rebuild.
+* Degeneracy is vintage-dependent (2026-08-03 rebuild: no held-only spec degenerate;
+* the OLD dos spec in run_ownership_share.do is) — read the vce_diag CSV, never assume.
 * The file handle and any_degen flag survive preserve/restore (locals + open file
 * handles are not touched by restore), so held-only rows write to the same CSV.
 tempname fh

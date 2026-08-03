@@ -36,6 +36,32 @@ gen us_cn_gprlag = us*cn_lag*gpr_lag
 display _newline "===== 3-PAIRWISE HEADLINE (fq gq ig) vs it+gt (fq gq) ====="
 _row "headline dw"      dw       "fq gq ig" ""
 _row "headline dw"      dw       "fq gq"    ""
+
+*=======================================================================
+* CANONICAL MACHINE-READABLE ARTIFACT (audit fix 6): the two HEADLINE specs.
+* Values are READ FROM THE STORED ESTIMATES of the two regressions below,
+* never hardcoded. This is the LIVING source cited by run_ddd_nofe_bil.do
+* (Stage-A gate), run_fourgroup.do, run_direction_split.do and
+* run_tercile_3pairwise.do. Re-run this .do to refresh it.
+*=======================================================================
+tempname cf
+file open `cf' using "`OUT'/headline_3pairwise_canonical.csv", write replace
+file write `cf' "spec,b3,se,p,N" _n
+qui reghdfe dw us_cn us_cn_shock, absorb(fq gq ig) vce(cluster firm_n rd_m)
+file write `cf' "3pairwise_fq_gq_ig," ///
+    (strtrim(strofreal(_b[us_cn_shock], "%14.6e"))) "," ///
+    (strtrim(strofreal(_se[us_cn_shock], "%14.6e"))) "," ///
+    (strtrim(strofreal(2*ttail(e(df_r), abs(_b[us_cn_shock]/_se[us_cn_shock])), "%9.6f"))) "," ///
+    (strtrim(strofreal(e(N), "%15.0f"))) _n
+qui reghdfe dw us_cn us_cn_shock, absorb(fq gq) vce(cluster firm_n rd_m)
+file write `cf' "itgt_fq_gq," ///
+    (strtrim(strofreal(_b[us_cn_shock], "%14.6e"))) "," ///
+    (strtrim(strofreal(_se[us_cn_shock], "%14.6e"))) "," ///
+    (strtrim(strofreal(2*ttail(e(df_r), abs(_b[us_cn_shock]/_se[us_cn_shock])), "%9.6f"))) "," ///
+    (strtrim(strofreal(e(N), "%15.0f"))) _n
+file close `cf'
+display "Wrote `OUT'/headline_3pairwise_canonical.csv"
+
 _row "F1a lead dw_t+1"  dw_lead1 "fq gq ig" ""
 _row "F1a lead dw_t+1"  dw_lead1 "fq gq"    ""
 _row "F1b LP cum1"      cum1     "fq gq ig" ""

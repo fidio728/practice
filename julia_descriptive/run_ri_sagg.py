@@ -1,7 +1,8 @@
 """
 run_ri_sagg.py — internal permutation check for the AGGREGATED-shock h=0 spec
-(the first spec to show a negative, near-marginal beta_3: CRVE p=0.086 two-way /
-0.105 three-pairwise). Same exact pairwise-collapse algebra as
+(negative beta_3 across specs; on the B7 2026-08-03 rebuild it is a clean null:
+CRVE p=0.348 two-way / 0.411 three-pairwise, RI free-perm p=0.512 — the pre-B7
+near-marginal CRVE p=0.086 did not survive the rebuild). Same exact pairwise-collapse algebra as
 run_randomization_inference.py (independently verified in review), with s_agg
 in place of the stamped shock. Permutes the 82 quarterly s_agg values.
 
@@ -48,7 +49,7 @@ def solve_b3(Svec):
     return np.nan if abs(det) < 1e-300 else (sA * sSC - sSA * sC) / det
 
 b_obs = solve_b3(S)
-print(f"observed b3 (it+gt collapse) = {b_obs:.4e}   (Stata 2-way CRVE: -1.93e-06, p=0.0855)")
+print(f"observed b3 (it+gt collapse) = {b_obs:.4e}   (Stata 2-way CRVE: -1.06e-06, p=0.3478; B7 2026-08-03)")
 
 # --- free permutation ---
 rng = np.random.default_rng(SEED)

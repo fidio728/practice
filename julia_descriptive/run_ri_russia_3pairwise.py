@@ -14,6 +14,11 @@ DEMEAN_ITERS = 30
 SEED = 20260702
 
 con = duckdb.connect()
+# R3-F6 freshness: regenerate the parquet from the CURRENT .dta so this script can
+# never silently run on a stale panel left over from an earlier build.
+import pyreadstat
+_df, _ = pyreadstat.read_dta((OUT / "c6_panel_russia.dta").as_posix())
+_df.to_parquet(OUT / "c6_panel_russia.parquet", index=False)
 d = con.execute(f"""
 SELECT firm_str, rdate,
        any_value(ru_lag) AS cn, any_value(shock) AS s,
@@ -72,6 +77,6 @@ for _ in range(N_PERM):
         cnt += 1
 p = (cnt + 1) / (N_PERM + 1)
 print(f"Russia 3-pairwise RI: b3 = {b_obs:.4e}  RI p = {p:.4f}  n_fq={sub.shape[0]:,}  (N_PERM={N_PERM})")
-print(f"  (Stata CRVE 3-pairwise reference: b3=-7.3265e-06, p=0.0853)")
+print(f"  (Stata CRVE 3-pairwise reference: b3=-4.2812e-06, p=0.0358)")
 pd.DataFrame([{"spec": "russia 3-pairwise", "b3": b_obs, "ri_p_2sided": p, "n_firmquarters": sub.shape[0]}]).to_csv(
     OUT / "russia_ri_3pairwise.csv", index=False)

@@ -4,7 +4,7 @@
 * ever held. Deep never-held zeros and never-held firms are excluded.
 * Sample: c6_panel_spell.dta (296,590 rows, 6,355 firms, uneven US/NONUS).
 *
-* Compare to the full-grid headline (beta_3 = +1.28, p=0.443, N=462,564).
+* Compare to the full-grid headline (beta_3 = +2.081, p=0.151, N=347,952) (B7 2026-08-03).
 
 clear all
 set more off

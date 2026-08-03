@@ -1,7 +1,8 @@
 * run_tercile_3pairwise.do — shock-TERCILE triple-difference (bottom/middle/top
 * thirds of the 82 distinct quarterly US-NONUS shocks S_t), under the 3-pairwise
 * FE (fq gq ig), consistent with the new headline FE and with the retired tail menu
-* (run_tail_3pairwise.do).
+* (run_tail_3pairwise.do). Headline b3 living source (canonical artifact):
+* output/headline_3pairwise_canonical.csv (2026-08-03).
 *
 * DESIGN PROVENANCE. Advisor request: replace the 2-sigma tail dummy (few-treated-
 * cluster inference problem) with shock TERCILES (bottom/middle/top ~33% each; 82

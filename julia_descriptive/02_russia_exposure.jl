@@ -568,7 +568,15 @@ DBInterface.execute(con, """
     SELECT
         a.eu_company_id,
         q.qend,
-        COUNT(*) AS n_total_links
+        COUNT(*) AS n_total_links,
+        -- (B7 FIX, 2026-08-03) supply-chain-only denominator: CUSTOMER +
+        -- SUPPLIER edges only, dropping COMPETITOR and all PARTNER-* types.
+        -- Mirrors the China script's B7 fix (02_china_exposure.jl). Matches
+        -- Figure 1's descriptive universe and the doc §4.2 estimand
+        -- ("supply-chain dependence"). n_total_links kept as an
+        -- all-relationship diagnostic.
+        COUNT(*) FILTER (WHERE a.rel_type IN ('CUSTOMER','SUPPLIER'))
+            AS n_supplychain_links
     FROM eu_any_edge a
     JOIN quarters q
       ON q.qend >= a.rel_start
@@ -597,7 +605,18 @@ DBInterface.execute(con, """
         COALESCE(c.n_ru_partner_any, 0) AS n_ru_partner_any,
         COALESCE(c.n_ru_total,    0) AS n_ru_total,
         t.n_total_links,
-        CAST(COALESCE(c.n_ru_total, 0) AS DOUBLE) / NULLIF(t.n_total_links, 0) AS russia_share
+        t.n_supplychain_links,
+        -- (B7 FIX, 2026-08-03) russia_share = RU supply-chain links / total
+        -- supply-chain links (CUSTOMER + SUPPLIER, both endpoints). Excludes
+        -- COMPETITOR and PARTNER-*. Mirrors the China script's B7 fix exactly.
+        -- Firms with supply-chain links but none to Russia get 0; firms with
+        -- only competitor/partner links get NULL (undefined supply-chain
+        -- exposure), correctly dropped downstream.
+        CAST(COALESCE(c.n_ru_customer, 0) + COALESCE(c.n_ru_supplier, 0) AS DOUBLE)
+            / NULLIF(t.n_supplychain_links, 0) AS russia_share,
+        -- legacy all-relationship-type share, retained for diagnostics only
+        CAST(COALESCE(c.n_ru_total, 0) AS DOUBLE) / NULLIF(t.n_total_links, 0)
+            AS russia_share_alltypes
     FROM firm_quarter_total t
     JOIN eu_revere_universe_qend u
       ON u.eu_company_id = t.eu_company_id AND u.qend = t.qend

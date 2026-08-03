@@ -38,6 +38,8 @@
 *       tests active-minus-passive responsiveness holding side fixed.
 *   pooled headline is the two-group US/NONUS c6 spec (separate panel,
 *   c6_panel.dta) and is the DILUTION BENCHMARK cited in the addnote below.
+*   Pooled headline b3 living source (canonical artifact):
+*   output/headline_3pairwise_canonical.csv (2026-08-03) — b3=+2.746e-06 (3-pairwise).
 * Every column reports N, #firms, #(firm clusters)=#firms, #(month clusters).
 * B9 convention: degenerate two-way-cluster VCE detection + output diag CSV.
 

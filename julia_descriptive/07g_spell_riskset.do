@@ -1,10 +1,14 @@
 * 07g_spell_riskset.do
 * CORRECTED conditional sample: firm-quarter risk set (both groups kept), so the
 * within-firm-quarter US-vs-NONUS comparison is preserved (no group singletons).
-* Sample: c6_panel_riskset.dta (342,262 rows, balanced 171,131 US / 171,131 NONUS,
-* 6,355 firms). Supersedes 07f (per-group selection, which broke the pairing).
+* Sample: c6_panel_riskset.dta (268,282 rows, 5,564 firms; B7 2026-08-03).
+* Supersedes 07f (per-group selection, which broke the pairing).
+* Reconciliation note: pre-B7 references disagreed. 342,262 rows was cited with both
+* 7,928 and 6,355 firms in different places (alongside a balanced 171,131/171,131
+* US/NONUS split). The current verified counts are 268,282 rows / 5,564 firms; the old
+* numbers are retained only as historical markers.
 *
-* Compare: full grid beta_3 = +1.28 (p=0.443, N=462,564);
+* Compare: full grid beta_3 = +2.081 (p=0.151, N=347,952) (B7 2026-08-03);
 *          per-group spell (07f, biased) beta_3 = +4.38 (p=0.441, 45,672 singletons).
 
 clear all

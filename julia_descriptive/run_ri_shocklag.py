@@ -2,7 +2,7 @@
 run_ri_shocklag.py — randomization inference for the advisor's S_(t-1) spec
 (it+gt), same exact pairwise-difference-collapse algebra used throughout this
 project (proven to reproduce reghdfe's beta3 exactly). Checks whether the
-sign flip (S_t: +1.28e-6 -> S_(t-1): -8.65e-7) is a real pattern or noise.
+sign flip (B7 2026-08-03: S_t +2.08e-6 -> S_(t-1) -5.90e-7) is a real pattern or noise.
 """
 from pathlib import Path
 import duckdb
@@ -61,7 +61,7 @@ def beta3_and_ri(df, ycol, n_perm=N_PERM, seed=0):
 
 b3, p, nq, nfq = beta3_and_ri(d, "d_dw", seed=SEED)
 print(f"S_(t-1) spec, it+gt:  b3 = {b3:.4e}   RI p (2-sided) = {p:.4f}   n_quarters={nq}   n_firmquarters={nfq:,}")
-print(f"  (Stata CRVE reference: b3=-8.65e-07, p=0.679)")
+print(f"  (Stata CRVE reference: b3=-5.90e-07, p=0.7503; B7 2026-08-03)")
 pd.DataFrame([{"spec": "S_(t-1) it+gt", "b3": b3, "ri_p_2sided": p,
                "n_quarters": nq, "n_firmquarters": nfq}]).to_csv(
     OUT / "shocklag_ri_results.csv", index=False)
