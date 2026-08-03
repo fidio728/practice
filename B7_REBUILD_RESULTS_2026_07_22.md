@@ -346,3 +346,37 @@ cum2 (new, no pre-registered anchor): most consistently sub-0.05 cell
 positive sign; disclosed, not the arbiter horizon.
 Doc integrated (§0/F1/F10 rewrite + §6.3 + new hardening subsection + §13);
 docCheck 2 MUST-FIXes (cum2 vs "sole rejection" overclaims) applied by hand.
+
+## A1 extensive-margin (G1) — FINAL (2026-08-03, wf_24a302bb-7b5)
+
+Holder-count/breadth/exit outcomes from holdings_eom (fund_id kept, not
+collapsed) on the same C6 grid + identical 3pw+RI spec. Circular-shift RI =
+arbiter (post-A0). RI b3 reproduces Stata to ~1e-7.
+
+| outcome | β₃ | CRVE p | free-RI | circ-shift (arbiter) | riskset RI |
+|---|---|---|---|---|---|
+| d_breadth (PRIMARY) | +2.42e-5 | 0.764 | 0.805 | 0.768 | 0.829 |
+| d_nh | -1.17 | 0.553 | 0.616 | 0.549 | 0.573 |
+| exit | +1.73e-3 | 0.482 | 0.621 | 0.695 | 0.695 |
+| init | -1.11e-3 | 0.715 | 0.767 | 0.805 | 0.561 |
+
+N = 347,490 (breadth/d_nh) / 199,146 (exit) / 89,896 (init). ALL NULL, full +
+riskset. Extensive margin (where divestment appears first) is null like the
+intensive margin → completeness branch, not a partial-divestment finding.
+
+Four-cell (exit/init pairing): both-held 204,314 / US-only 12,356 / NONUS-only
+155,352 / neither 889,535 (domain 1,261,557). NONUS-only is 12x US-only — US
+holds these firms more narrowly at the extensive margin.
+
+Caveat cell: exit under it+gt (companion, NOT headline) CRVE p=0.006 NEGATIVE
+(US exits LESS = anti-disengagement); RI run on 3pw headline only; not a finding.
+
+Live B7 motivating fact (replaces retired pre-B7 +11.26pp, NEVER CITE):
+US firm-quarter zero-holder rate 82.80% vs NONUS 71.50% = +11.30pp gap,
+reproduces pre-B7 on B7 panel. Firm-level: US 98.9% / NONUS 100% coverage —
+gap is in WHICH quarters held, not whether ever held. Sparse but not
+tension-responsive.
+
+Doc: new §7.10 + §5.5 gap refreshed to +11.30pp + §0/§13 hooks + §12/§14/§15
+registered. NOTE: workflow runner stalled after writing all CSVs; adversarial
+verify + docCheck phases did NOT run (user deferred verification — "后面还要改").
