@@ -74,7 +74,7 @@ display _newline _newline "=== REPORTED vs OBSERVED ==="
 display "REPORTED (from paper):"
 display "  R1: b3 = +0.000599, se = 0.001165, p = 0.609"
 display "       b2 = -0.00108, p = 0.601"
-display "       N = 300,866; firms = 5,704; quarters = 82"
+display "       N = 240,246; firms = 6,854; quarters = 82"
 display "OBSERVED (re-run):"
 display "  R1: b3 = " `b3_r1' ", se = " `se3_r1' ", p = " `p3_r1'
 display "Done."

@@ -24,7 +24,8 @@ df = pd.read_stata(OUT / "ownership_c6_panel.dta")
 for c in ["flow", "cn_lag", "shock", "us"]:
     df[c] = pd.to_numeric(df[c], errors="coerce")
 
-# winsorize flow at p1/p99 (two-sided), same spirit as the Δw main-spec convention
+# winsorize flow at p1/p99 (two-sided) as a fat-tail robustness; dw is never
+# winsorized, only flow is
 lo, hi = df["flow"].quantile([0.01, 0.99])
 df["flow_w"] = df["flow"].clip(lo, hi)
 print(f"flow winsor bounds: p1={lo:.4e}  p99={hi:.4e}")

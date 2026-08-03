@@ -20,10 +20,31 @@ egen ig     = group(firm_str hgroup)
 gen us_cn       = us * cn_lag
 gen us_cn_shock = us * cn_lag * shock
 
+* B9 convention: no estimates store here, so VCE validity is checked from e()
+* right after each reghdfe. A missing/non-positive SE on us_cn / us_cn_shock
+* means the CRVE is degenerate for that spec; defer to the RI companion.
+* run_ri_flow.py documents the fq-gq flow CRVE as degenerate after the B7 rebuild.
+* The file handle and any_degen flag survive preserve/restore (locals + open file
+* handles are not touched by restore), so held-only rows write to the same CSV.
+tempname fh
+file open `fh' using "`OUT'/flowheldonly_vce_diag.csv", write replace
+file write `fh' "spec,coef,b,se,se_valid" _n
+local any_degen 0
+
 display _newline "=== FLOW full grid (reference): 3-pairwise (fq gq ig) ==="
 reghdfe flow us_cn us_cn_shock, absorb(fq gq ig) vce(cluster firm_n rd_m)
 display "full-grid flow b3 = " %12.4e _b[us_cn_shock] "  p = " %6.4f ///
         (2*ttail(e(df_r), abs(_b[us_cn_shock]/_se[us_cn_shock])))  "  N = " e(N)
+foreach cf in us_cn us_cn_shock {
+    local bb = _b[`cf']
+    local ss = _se[`cf']
+    local ok = (!missing(`ss') & `ss' > 0)
+    file write `fh' "fullgrid_3pw,`cf',`bb',`ss',`ok'" _n
+    if `ok' == 0 {
+        local any_degen 1
+        display as error ">>> fullgrid_3pw/`cf': DEGENERATE VCE — CRVE p INVALID; use run_ri_flow.py RI. <<<"
+    }
+}
 
 * ---- Held-only: drop extensive-margin zeros (os==0 / missing), re-pair ----
 preserve
@@ -40,11 +61,36 @@ display _newline "=== FLOW held-only (os>0, re-paired): absorb fq gq ==="
 reghdfe flow us_cn us_cn_shock, absorb(fq gq) vce(cluster firm_n rd_m)
 display "held-only flow b3 (fq gq) = " %12.4e _b[us_cn_shock] "  p = " %6.4f ///
         (2*ttail(e(df_r), abs(_b[us_cn_shock]/_se[us_cn_shock])))  "  N = " e(N)
+foreach cf in us_cn us_cn_shock {
+    local bb = _b[`cf']
+    local ss = _se[`cf']
+    local ok = (!missing(`ss') & `ss' > 0)
+    file write `fh' "heldonly_fqgq,`cf',`bb',`ss',`ok'" _n
+    if `ok' == 0 {
+        local any_degen 1
+        display as error ">>> heldonly_fqgq/`cf': DEGENERATE VCE — CRVE p INVALID; use run_ri_flow.py RI. <<<"
+    }
+}
 
 display _newline "=== FLOW held-only: 3-pairwise (fq gq ig) ==="
 reghdfe flow us_cn us_cn_shock, absorb(fq gq ig) vce(cluster firm_n rd_m)
 display "held-only flow b3 (3-pw) = " %12.4e _b[us_cn_shock] "  p = " %6.4f ///
         (2*ttail(e(df_r), abs(_b[us_cn_shock]/_se[us_cn_shock])))  "  N = " e(N)
+foreach cf in us_cn us_cn_shock {
+    local bb = _b[`cf']
+    local ss = _se[`cf']
+    local ok = (!missing(`ss') & `ss' > 0)
+    file write `fh' "heldonly_3pw,`cf',`bb',`ss',`ok'" _n
+    if `ok' == 0 {
+        local any_degen 1
+        display as error ">>> heldonly_3pw/`cf': DEGENERATE VCE — CRVE p INVALID; use run_ri_flow.py RI. <<<"
+    }
+}
 restore
 
+file close `fh'
+di "Wrote `OUT'/flowheldonly_vce_diag.csv"
+if `any_degen' == 1 {
+    display as error "Degenerate two-way-cluster VCE detected; the affected CRVE se/p above are NOT valid inference — use the RI companion (run_ri_flow.py)."
+}
 display _newline "Done."

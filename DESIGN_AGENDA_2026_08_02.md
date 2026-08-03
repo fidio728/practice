@@ -2,11 +2,11 @@
 
 4 视角(identification/measurement/groups/scope) Opus 设计评审+综合。已知项(tier-2、B15-B18、C6、MDE 等15项)已排除。
 
-## 1. [DO-NOW] 重建 treatment:按 rel_type×path 拆 sell/buy(现有 china_share 方向混合 + path 聚合 BUG)
-(measurement) 已核实的真实 BUG:firm_quarter_cn 按 rel_type 分组丢掉 path,n_cn_customer 把 Path1/Path2 反向边混在一起;方向抵消是 null 的一级机械解释
+## 1. [DONE 2026-08-03 B7_REBUILD:path 拆分为分解检验,pooling 确认有效(F p=0.424),offset 备择被拒] [DO-NOW] 重建 treatment:按 rel_type×path 拆 sell/buy(现有 china_share 方向混合 + path 聚合 BUG)
+(measurement) 已核实的真实 BUG:firm_quarter_cn 按 rel_type 分组丢掉 path,n_cn_customer 把 Path1/Path2 反向边混在一起;方向抵消是 null 的一级机械解释 〔2026-08-03 更正:path 拆分实为一项分解检验,非确认 BUG;pooling 已确认有效(F p=0.424)〕
 **How**: 改 02(约 548-570 行 CASE WHEN 同时用 rel_type+path):n_cn_sell=Path1-CUSTOMER∪Path2-SUPPLIER,n_cn_buy=Path1-SUPPLIER∪Path2-CUSTOMER,各除对应方向分母得 sell_share/buy_share。重跑 02→06→build_c6;回归 dw~us*sell_share*S + us*buy_share*S(fq gq ig 双向 cluster)+ RI。两者反号且各自可辨=合并掩盖机制;两者皆 null=抵消假说被排除、null 更硬。
 
-## 2. [DO-NOW, 修订版 2026-08-02 v2] Active-only:四组对称拆分 + Funds.STYLE 三状态打标
+## 2. [DONE 2026-08-03 B7_REBUILD:four-group active-only completed;passive-dilution rejected(active +2.79e-6 ≈ pooled +2.75e-6,post-2018 primary null RI p=0.561)] [DO-NOW, 修订版 2026-08-02 v2] Active-only:四组对称拆分 + Funds.STYLE 三状态打标
 (groups) 本地核实:US 欧洲持仓中 Funds.STYLE='Index' 占市值 39.78%(2021Q4);NULL entity_type 桶(34.37%)里 95.99% 是 Index。近四成指数型资金"预计响应较弱"(非恒等零:申赎/指数调整/公司行动/相对价格仍会动它),pooled β₃≈(1−p)·β_active 是**待检验的稀释假说**。
 **打标(v2,取代旧三层合并)**:主标签 = Funds.STYLE=='Index'→PASSIVE;明确非 Index 风格→ACTIVE;缺失/未匹配→UNKNOWN(**绝不当 active**)。FUND_TYPE='ETF'(仅覆盖 15.5%,且 index 钱里 OEF 占 6 成)、MANAGER_STYLE(仅 3.7%,Vanguard 常标 Generalist)、名称只作交叉核验;名称补录按 fund_id 白名单,**禁止品牌整体硬编码**(这些集团也有主动产品)。
 **时间维度**:Funds master ≈ 2018-08 snapshot——post-2018 冲击 predetermined(优点);回填 2003-2017 =前视分类(披露或截断);匹配 MV 覆盖率 2021Q4≈95%→2023Q4≈90% 衰减。每季度报 passive/active/unknown MV share + matched share;主检验限制到分类覆盖稳定期。
@@ -14,7 +14,7 @@
 **前置检查**:NONUS 侧 UNKNOWN 份额可能远大于 US(STYLE 对欧洲 UCITS 覆盖差)——打标后先按组×季度报 unknown share;若 NONUS unknown>~40%,降级为 US_ACTIVE vs US_PASSIVE 组内对比 + US_ACTIVE vs pooled NONUS 附注。
 **实现**:STYLE join 加在 04 层(holdings_eom 有 fund_id),不动 03 重 ETL。与方向拆分的 06 下游重建合并成一次。
 
-## 3. [Rank 2, 解释性诊断, 修订版 2026-08-02 v2] §7.6 flow 的会计分解(非"会计恒等式威胁")
+## 3. [DONE 2026-08-03 B7_REBUILD:会计分解全 null,corr 锚定 +0.20] [Rank 2, 解释性诊断, 修订版 2026-08-02 v2] §7.6 flow 的会计分解(非"会计恒等式威胁")
 (identification) **只适用于 shares-based flow(§7.6),不适用于主回归的 w**——w 是组内归一化组合权重,US/NONUS 之间无相加恒等式;主回归 §6 只需一句均衡解释语言(β₃=净差异化再配置,含均衡吸收),不构成识别威胁。
 **正确恒等式**:flow_US + flow_NONUS + flow_R = Δout/out_{t-1}(R=未观测剩余部门:散户+内部人+未申报机构+战略持股,**不叫散户**;右边≠0 除非 float 不变,residual flow 用同一滞后分母构造并显式保留 issuance/buyback 项)。
 **本地初步事实(已跑,待正式化)**:高-CN 三分位 firm-quarter 的 corr(flow_US, flow_NONUS) ≈ **+0.20**(stable-float 子样本与 winsorize 后仍 +0.20~0.23)——两组**同向流动**,共同资金流主导,对手盘 margin 在 residual 部门;corr≈−1 的预设不成立。
@@ -88,7 +88,7 @@
 # DO-NOW TOP 3
 现有数据、无需导师、且互为前置/决定 null 可解释性的三件,应按此顺序做:
 
-1) 【重建 treatment,修 path/方向 BUG】(rank1,约 1 天)。已核实真实 BUG:02_china_exposure.jl 的 eu_china_edge(360-387 行)带 path,但 firm_quarter_cn(548-570 行)只按 rel_type 分组、丢掉 path,导致 n_cn_customer 把 Path1 与 Path2 的反向 CUSTOMER 边混在一起。改 CASE WHEN 同时用 rel_type+path,产 sell_share/buy_share,重跑 02→06→build_c6,回归加 us*sell_share*S 与 us*buy_share*S 两列 + RI。这是一切下游的前置:在方向混合的 treatment 上跑出的 null 不可信,且方向抵消本身是 null 的一级机械解释。
+1) 【重建 treatment,修 path/方向 BUG】(rank1,约 1 天)。已核实真实 BUG:02_china_exposure.jl 的 eu_china_edge(360-387 行)带 path,但 firm_quarter_cn(548-570 行)只按 rel_type 分组、丢掉 path,导致 n_cn_customer 把 Path1 与 Path2 的反向 CUSTOMER 边混在一起。改 CASE WHEN 同时用 rel_type+path,产 sell_share/buy_share,重跑 02→06→build_c6,回归加 us*sell_share*S 与 us*buy_share*S 两列 + RI。这是一切下游的前置:在方向混合的 treatment 上跑出的 null 不可信,且方向抵消本身是 null 的一级机械解释。〔2026-08-03 更正:path 拆分实为一项分解检验;pooling 已确认有效(F p=0.424),offset 备择被拒——方向抵消不构成机械 BUG〕
 
 2) 【market-clearing / interference 诊断】(rank2,约半天)。在 §7.6 已建好的 ownership_share 面板上,对高-CN firm-quarter 算 within-fq 的 corr(ΔShare_US, ΔShare_NONUS) 与未覆盖 float 残差份额对 S_t 的反应,把 β₃ 的 estimand 在 §6 明写为 market-clearing net differential。这决定 null 到底是不是'US 没减持'。零新数据、零建管线。
 

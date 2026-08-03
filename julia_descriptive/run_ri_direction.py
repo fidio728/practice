@@ -107,6 +107,10 @@ b3s_obs, b3b_obs, bdiff_obs = stats_from_shock(Svec)
 print(f"observed b3_sell        = {b3s_obs:.6e}")
 print(f"observed b3_buy         = {b3b_obs:.6e}")
 print(f"observed b3_sell-b3_buy = {bdiff_obs:.6e}")
+# hardcoded Stata anchors for drift protection (run_direction_split.do MAIN,
+# reghdfe fq gq ig; 2026-08-02): sell +2.53e-07, buy +5.50e-06, sell-buy -5.25e-06
+print("expected (Stata MAIN)   = sell +2.53e-07, buy +5.50e-06, sell-buy -5.25e-06 "
+      "— investigate if far off")
 print("cross-check the three numbers against run_direction_split.do MAIN "
       "(reghdfe fq gq ig) before citing — a material mismatch means a stale "
       "panel or broken collapse.")

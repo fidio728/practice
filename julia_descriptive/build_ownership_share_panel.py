@@ -192,7 +192,7 @@ diag = {
     # ADR / non-primary materiality (dropped by the primary-class restriction)
     "frac_us_holdings_mv_on_primary_eq": round(float(adr.get("US", float("nan"))), 6),
     "frac_nonus_holdings_mv_on_primary_eq": round(float(adr.get("NONUS", float("nan"))), 6),
-    "ref_main_panel_firms": 7928,
+    "ref_main_panel_firms": 6854,
     "ref_main_panel_quarters": 82,
 }
 pd.DataFrame([diag]).to_csv(DIAG_CSV, index=False)

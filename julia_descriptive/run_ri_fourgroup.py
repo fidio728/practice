@@ -184,7 +184,11 @@ print(f"{'sample':10s} {'b3_obs':>14s} {'ri_p_2side':>12s} {'n_fq':>10s} {'firms
 for r in rows:
     print(f"{r['sample']:10s} {r['b_obs']:14.6e} {r['ri_p']:12.4f} "
           f"{r['n_fq']:10,d} {r['n_firms']:8,d} {r['n_quarters']:9d}")
-print("\ncross-check each b3_obs against run_fourgroup.do MAIN t_cn_s "
+# hardcoded Stata anchors for drift protection (run_fourgroup.do MAIN t_cn_s,
+# reghdfe absorb(fq gq ig); 2026-08-02): full +2.789446e-06, post2018 +1.159757e-06
+print("\nexpected (Stata MAIN)  = full +2.789446e-06, post2018 +1.159757e-06 "
+      "— investigate if far off")
+print("cross-check each b3_obs against run_fourgroup.do MAIN t_cn_s "
       "(reghdfe absorb(fq gq ig)): full column m_act_full, post column m_act_post. "
       "A material mismatch means a stale panel or broken collapse.")
 print("post-2018 is the PRIMARY report (predetermined labels); full is disclosed "

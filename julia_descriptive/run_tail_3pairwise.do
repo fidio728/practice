@@ -2,6 +2,8 @@
 * right) under the 3-pairwise FE (fq gq ig) so the meeting table is consistent
 * with the new headline FE. Mirrors 07e_firmgroup_tail.do's construction exactly:
 * sigma computed over the 82 distinct quarters (tag(rd_m)), z > k one-sided.
+* SUPERSEDED by run_tercile_3pairwise.do (advisor 2026-08-02); retained for
+* provenance/few-cluster-invalidity (F3) only
 
 clear all
 set more off

@@ -1,9 +1,9 @@
 """
 run_ri_tercile.py — randomization inference for the SHOCK-TERCILE dose menu
 under the 3-pairwise FE (fq firm×quarter + gq group×quarter + ig firm×group),
-the tercile analogue of run_tail_3pairwise.do / run_ri_3pairwise.py.
+the tercile analogue of the retired tail menu (run_tail_3pairwise.do) / run_ri_3pairwise.py.
 
-Design (mirrors run_tail_3pairwise.do exactly, but replaces the single 2σ tail
+Design (mirrors the retired tail menu, run_tail_3pairwise.do, exactly, but replaces the single 2σ tail
 dummy with three shock terciles cut on the 82 DISTINCT quarters):
 
     dw_it = β2·cn_it
@@ -162,7 +162,7 @@ print(f"observed b3(T3)        = {b_T3_obs:.6e}")
 print(f"observed b3(T3)-b3(T1) = {b_diff_obs:.6e}")
 # cross-check against run_tercile_3pairwise.do MAIN (reghdfe absorb(fq gq ig)):
 #   us_cn_t3 = +2.0465e-5 ; lincom us_cn_t3 - us_cn_t1 = +6.7563e-6 (B7 panel,
-#   2026-07-22). A material mismatch => stale panel or broken collapse.
+#   2026-08-02). A material mismatch => stale panel or broken collapse.
 print("expected (Stata MAIN)  = +2.0465e-05 and +6.7563e-06 — investigate if far off")
 
 # ----------------------------------------------------------------------------

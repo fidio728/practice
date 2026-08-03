@@ -1,4 +1,6 @@
 * 07e_firmgroup_tail.do
+* SUPERSEDED by run_tercile_3pairwise.do (advisor 2026-08-02); retained for
+*   provenance/few-cluster-invalidity (F3) only
 * Two robustness blocks on the backward-diff C6 panel (c6_panel.dta):
 *   (A) Add firm x group FE  mu_{i,g}  -- the "missing third pairwise" FE
 *       (advisor's "another two-way interaction"). absorb(fq gq ig).

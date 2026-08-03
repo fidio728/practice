@@ -46,6 +46,35 @@ display _newline _newline "=== R3: OLD dos (share-of-float change, F6-confounded
 reghdfe dos us_cn us_cn_shock, absorb(fq gq) vce(cluster firm_n rd_m)
 estimates store r3
 
+*==============================================================
+* B9 convention: degenerate two-way-cluster VCE detection + diag CSV.
+* A missing/non-positive SE on us_cn / us_cn_shock means the CRVE column is NOT
+* valid inference for that spec; defer to the RI companion. run_ri_flow.py
+* documents the fq-gq flow CRVE as degenerate (SE missing) after the B7 rebuild.
+*==============================================================
+tempname fh
+file open `fh' using "`OUT'/ownshare_vce_diag.csv", write replace
+file write `fh' "spec,coef,b,se,se_valid" _n
+local any_degen 0
+foreach m in r1 r2 r3 {
+    estimates restore `m'
+    foreach cf in us_cn us_cn_shock {
+        local bb = _b[`cf']
+        local ss = _se[`cf']
+        local ok = (!missing(`ss') & `ss' > 0)
+        file write `fh' "`m',`cf',`bb',`ss',`ok'" _n
+        if `ok' == 0 {
+            local any_degen 1
+            display as error ">>> `m'/`cf': DEGENERATE VCE — CRVE p INVALID; use run_ri_flow.py RI. <<<"
+        }
+    }
+}
+file close `fh'
+di "Wrote `OUT'/ownshare_vce_diag.csv"
+if `any_degen' == 1 {
+    display as error "Degenerate two-way-cluster VCE detected; affected CRVE columns in ownership_share_results.csv are NOT valid inference — use the RI companion (run_ri_flow.py)."
+}
+
 capture which esttab
 if _rc == 0 {
     esttab r1 r2 r3 using "`OUT'/ownership_share_results.csv", replace ///

@@ -1,6 +1,7 @@
 * run_tercile_3pairwise.do — shock-TERCILE triple-difference (bottom/middle/top
 * thirds of the 82 distinct quarterly US-NONUS shocks S_t), under the 3-pairwise
-* FE (fq gq ig), consistent with the new headline FE and with run_tail_3pairwise.do.
+* FE (fq gq ig), consistent with the new headline FE and with the retired tail menu
+* (run_tail_3pairwise.do).
 *
 * DESIGN PROVENANCE. Advisor request: replace the 2-sigma tail dummy (few-treated-
 * cluster inference problem) with shock TERCILES (bottom/middle/top ~33% each; 82
@@ -19,7 +20,7 @@
 * hgroup('US'/'NONUS'), rdate(%tc), dw(backward dW), cn_lag(china_share_lag1q,
 * CUST+SUPP), shock(S_t, constant within quarter), us(0/1).
 *
-* SPEC LOGIC (isomorphic to run_tail_3pairwise.do). Tercile dummies D_T1(bottom)
+* SPEC LOGIC (isomorphic to the retired tail menu, run_tail_3pairwise.do). Tercile dummies D_T1(bottom)
 * and D_T3(top); T2(middle) is the omitted base. Under the saturated FE
 * (fq=firm x quarter, gq=group x quarter, ig=firm x group) every lower-order term
 * (cn_lag, D_T1, D_T3, us, and their firm/quarter/group interactions) is absorbed;
