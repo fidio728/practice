@@ -238,3 +238,37 @@ content). The full-period CRVE p=0.069 is positive (against decoupling) and
 dies under design-based RI (0.289). Third composition alternative retired:
 after direction-offset and passive-dilution, the aggregate null keeps
 standing on active money alone.
+
+## §7.6 accounting decomposition — FINAL (2026-08-03)
+
+Producer/consumer contract closed: `run_flow_decomposition.py` is the ONE
+producer (parquet + .dta with materialized flow_R/flow_common/flow_diff AND
+the winsorized `*_w` columns, cutoffs on the estimation sample) and the RI
+engine; `run_flow_decomp_step3.do` is the CRVE companion reading the .dta.
+
+Determinism fixes (both required, verified by two bitwise-identical full runs):
+1. duckdb `SET threads=1` — parallel hash aggregation summed floats in
+   nondeterministic order; last-bit input noise made ri_p jitter ±0.005.
+2. RI panel sorted (firm_str, rdate) before factorize, and RI reads the FROZEN
+   parquet artifact (bitwise-shared with the .dta) instead of the in-memory frame.
+
+Cross-validation: CRVE reproduces ALL SIX b3 cells to 5 sig figs (winsor cells
+matched only after shipping python winsor columns — `_pctile` vs `np.quantile`
+definitional drift plus full-panel-vs-estimation-sample cutoff base had CRVE at
++7.13e-4 vs RI +6.65e-4 on flow_diff_w).
+
+Canonical results (N_PERM=5000, seed 20260702; RI panel 120,123 fq, 82 q,
+5,061 firms; identity residual 2.2e-16 on 316,691 fq; corr anchor +0.22 winsor
+/ +0.20 stable-float):
+
+| outcome | winsor b3 (RI p) | raw b3 (RI p) |
+|---|---|---|
+| flow_R      | +3.81e-4 (0.69) | −6.14e-5 (0.99) |
+| flow_common | +3.31e-5 (0.97) | +1.14e-4 (0.90) |
+| flow_diff   | +6.65e-4 (0.41) | +8.90e-4 (0.37) |
+
+All six null; no degenerate VCE (12/12 se_valid). CRVE flow_diff nominal
+significance (p<0.001) = fat-tail/weak-FE artifact, adjudicated null by RI.
+Estimand rewrite + this block integrated into Essay2_methodology_full.md §7.6;
+four "every point estimate is positive" universal claims carved to
+quarterly-shock specs pending sagg re-adjudication.
