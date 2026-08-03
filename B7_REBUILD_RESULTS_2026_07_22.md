@@ -315,3 +315,34 @@ b3=−1.21e-6 wrong-sign null (p 0.93–0.97). Conclusion unchanged.
   Stage C1 +2.94e-6 p=0.090; C2 +2.83e-6 p=0.100, us_bil +2.41e-5 p=0.208
 - 07d refreshed: spec0 +5.83e-10 p=0.999; spec1 +2.081e-6 p=0.1511; spec4
   +5.38e-7 p=0.411; headers in 07d/07e/07f/07g B7-tagged
+
+## A0 cum4 inference hardening — FINAL (2026-08-03, wf_022fbe28-025, verify CONFIRMED)
+
+Engine: run_cum4_inference.py (gates: h0/cum1/cum4 b3 reproduce canonical to 6
+sig figs; free-perm p reproduces up to MC noise under the new seed-aligned
+draw stream: cum4 0.039→0.042). Shock serial structure RE-DERIVED: acf1=+0.271,
+acf2=+0.163, Ljung-Box Q(1) p=0.0125, Q(4) p=0.0228 — S_t is NOT white; free
+permutation is anti-conservative on cumulative outcomes (G5 confirmed).
+
+| horizon | b (e-6) | free | circ-shift | mb-L5/L8 | FWER free/mb | WCB |
+|---|---|---|---|---|---|---|
+| h0   | +2.746 | 0.311 | 0.305 | 0.258/0.256 | 0.563/0.555 | 0.208 |
+| cum1 | +4.094 | 0.105 | 0.159 | 0.117/0.132 | 0.047/0.049 | 0.024 |
+| cum2 | +7.131 | 0.022 | 0.073 | 0.042/0.054 | 0.017/0.014 | 0.005 |
+| cum3 | +6.467 | 0.082 | 0.232 | 0.123/0.139 | 0.159/0.157 | 0.027 |
+| cum4 | +8.826 | 0.042 | 0.110 | 0.077/0.086 | 0.159/0.157 | 0.024 |
+
+VERDICT (verify agent, CONFIRMED): the cum4 rejection does NOT survive
+serial-robust inference. Every method built for the G5 serial gap
+(circular-shift, moving-block) and the G7 multiplicity gap (max-|t| FWER)
+clears cum4 above 0.05; only free-perm (documented anti-conservative) and the
+score-based quarter-cluster WCB (cross-sectional correction only, does not
+model serial dependence) still reject — both positive-signed, against H2.1.
+Arbiter = circular-shift → LP family has NO rejection. G8 delivered: WCB IS
+feasible (score-based, O(82·B), Webb weights, B=9999) — "boottest OOM" was a
+dense-matrix tooling artifact.
+cum2 (new, no pre-registered anchor): most consistently sub-0.05 cell
+(free 0.022/FWER 0.014-0.017/WCB 0.005) but null under circular-shift (0.073);
+positive sign; disclosed, not the arbiter horizon.
+Doc integrated (§0/F1/F10 rewrite + §6.3 + new hardening subsection + §13);
+docCheck 2 MUST-FIXes (cum2 vs "sole rejection" overclaims) applied by hand.
