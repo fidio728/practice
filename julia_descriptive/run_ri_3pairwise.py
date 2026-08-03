@@ -97,7 +97,7 @@ def ri_twoway(df, ycol, n_perm=N_PERM, seed=SEED):
     return b_obs, (cnt + 1) / (n_perm + 1), sub.shape[0]
 
 print(f"{'spec':16s} {'b3(chk vs Stata)':>18s} {'RI_p_2side':>12s} {'n_fq':>9s}   (N_PERM={N_PERM}, iters={DEMEAN_ITERS})")
-print("  Stata 3-pairwise b3: headline +1.800e-6, cum1 +2.373e-6, cum4 +6.621e-6")
+print("  Stata 3-pairwise b3: headline +2.746e-6, cum1 +4.094e-6, cum4 +8.826e-6")
 rows = []
 for lbl, y in [("headline dw", "d_dw"), ("LP cum1", "d_c1"), ("LP cum4", "d_c4")]:
     b, p, n = ri_twoway(d, y)

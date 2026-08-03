@@ -35,7 +35,7 @@ PROJ = Path(r"c:/Users/xl/OneDrive - Universitat Ramón Llull/git/practice/julia
 OUT = PROJ / "output"
 DTA = (OUT / "audit_c6_panel.dta").as_posix()
 N_PERM = 200000
-SEED_STREAM = 12345  # deterministic; Math.random unavailable-style reproducibility
+SEED_STREAM = 20260702  # deterministic; project-convention seed (2026-07-02)
 
 con = duckdb.connect()
 
