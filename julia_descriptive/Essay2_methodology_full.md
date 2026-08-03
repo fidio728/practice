@@ -2,7 +2,7 @@
 
 **Purpose.** This document is a complete, deliberately unflattering technical record of Essay 2, written to be handed to an independent reviewer (human or AI). It states the research design, every variable and how it is built, the exact code and commands, the data-cleaning decisions, all estimation results, and every caveat, limitation, and mistake we found and corrected. Nothing is hidden. Where the design is weak, underpowered, or where an earlier build was wrong, it is flagged explicitly.
 
-**One-line status.** The headline coefficient is **statistically indistinguishable from zero** under the preferred backward-timing specification with the fully-saturated **three-way pairwise FE** (firm×quarter + group×quarter + firm×group; see "Second external review round"), with standard errors large enough that economically meaningful effects of either sign cannot be ruled out; the null is robust across fixed-effect choices, shock definitions, sample constructions, a firm-existence-span restriction, a raw-GPR-level shock, and — decisively — **design-based randomization inference** (which shows the only CRVE-significant coefficients, at cumulative local-projection horizons, to be few-cluster/overlapping-window artifacts; the lowest randomization-inference p is 0.07, at one cumulative horizon under the saturated FE — every single-quarter spec is ≥ 0.23 — and every quarterly-shock point estimate is *positive*, i.e. opposite to disengagement; the sole exception is the aggregated-shock robustness spec, whose sign is negative on a pre-rebuild panel and is pending RI re-adjudication on the rebuilt panel before being cited either way). It also holds on a **shares-based ownership measure** (§7.6): US investors do not reduce their ownership *stake* — a pure trading flow, the change in group shares held over the lagged primary-EQ float (F6) — any more than non-US investors when tension rises (β₃ = +0.00088, p=0.44, positive and insignificant), so the null is not an artifact of value-weighting — subject to an ADR-exclusion caveat. An earlier significant estimate came from a forward-window specification vulnerable to post-treatment timing contamination, and is retracted. The project's current contribution is a measurement/design one (the panel + identification), and the empirical question is treated as open, with a planned pivot to a firm-level price channel.
+**One-line status.** The headline coefficient is **statistically indistinguishable from zero** under the preferred backward-timing specification with the fully-saturated **three-way pairwise FE** (firm×quarter + group×quarter + firm×group; see "Second external review round"), with standard errors large enough that economically meaningful effects of either sign cannot be ruled out; the null is robust across fixed-effect choices, shock definitions, sample constructions, a firm-existence-span restriction, a raw-GPR-level shock, and — decisively — **design-based randomization inference**, which clears every single-quarter specification (all RI p ≥ 0.23) with every quarterly-shock point estimate *positive*, i.e. opposite to disengagement. The one horizon that reaches RI significance is a single cumulative local-projection step (cum4, RI p = 0.039) — and its sign is *positive*, so even taken at face value it points against disengagement rather than toward it; it carries the overlapping-cumulative-window caveat and its wild-cluster-bootstrap robustness check could not be completed (boottest exhausted memory at 10k reps). The aggregated-shock robustness spec is now a cleanly adjudicated null (negative sign, RI free-permutation p = 0.51, circular-shift p = 0.46). It also holds on a **shares-based ownership measure** (§7.6): US investors do not reduce their ownership *stake* — a pure trading flow, the change in group shares held over the lagged primary-EQ float (F6) — any more than non-US investors when tension rises (β₃ = +0.00089, positive; the two-way CRVE is fat-tail-deflated here, so inference is anchored by randomization inference, RI p = 0.37, null), so the null is not an artifact of value-weighting — subject to an ADR-exclusion caveat. An earlier significant estimate came from a forward-window specification vulnerable to post-treatment timing contamination, and is retracted. The project's current contribution is a measurement/design one (the panel + identification), and the empirical question is treated as open, with a planned pivot to a firm-level price channel.
 
 ---
 
@@ -15,7 +15,7 @@ This document was hardened over one working session in response to two external 
 1. **Universe wording downgraded to "holdings-observed European issuer universe"** (§3 title, §3 Caveat 2, §5.2, §7.4). The firm universe is every `sec_entity_id` that ever appears with a European `sec_country` in the FactSet Ownership holdings panel — **not** the full FactSet Security Coverage listing universe. Estimand phrasing corrected accordingly. This does not change β₃; it makes the claim honest. (Definition of "European-listed": a security in FactSet Ownership whose `SEC_FIRM_ISO_COUNTRY` ∈ the 28 jurisdictions of §3, restricted to those held by ≥1 institution.)
 2. **Attenuation claim softened** (§3 Caveat 2, §9 limitation 11). Rebuilding from the full Security Coverage universe is *expected* to attenuate β₃ toward zero (added zero-difference rows), but this is the mechanical expectation under a simplified argument, to be **verified by running the rebuild, not asserted** — corrected an earlier over-strong "would reinforce the null." Also corrected an earlier wrong claim that never-held firms "do not affect β₃" (they do, via attenuation).
 3. **Retraction language softened** (§0 one-liner, §8). "Causally clean specification" / "look-ahead artifact" → "preferred backward-timing specification" / "forward-window specification vulnerable to post-treatment timing contamination." We do not claim to have decomposed *why* the SE tripled (§8).
-4. **Firm-count cascade clause added** (§2): 12,743 European securities → 10,171 Revere-matched → 8,014 carry a non-null China share → 7,928 carry a non-null lagged CN and enter the estimation panel. The gaps are the documented MISSING bucket and the one-quarter lag, not contradictory counts. All five figures re-derived from `merged_us_eu_zero_filled.parquet` and `05_unmatched_profile_by_country.csv`.
+4. **Firm-count cascade clause added** (§2): 12,743 European securities → 10,171 Revere-matched → 8,014 carry a non-null all-`rel_type` China share; under the B7 CUSTOMER+SUPPLIER restriction plus the one-quarter lag, **6,854** distinct firms carry a non-null lagged CN and enter the estimation panel (the pre-B7 all-`rel_type` in-panel count was 7,928). The gaps are the documented MISSING bucket, the CUSTOMER+SUPPLIER restriction, and the one-quarter lag, not contradictory counts. Figures re-derived from `merged_us_eu_zero_filled.parquet` and `05_unmatched_profile_by_country.csv`.
 5. **Revere match country structure disclosed** (§9 limitation 12): GB 32.78% unmatched (1,307 of 3,987), the worst among large countries; GB is 60.85% of the country-pair subsample, so the matched sample drops ~⅓ of GB issuers (selection concern).
 6. **Hard asserts added to the build scripts** (`build_c6_panel.py`, `build_spell_riskset.py`): duplicate-key fail, full US/NONUS pairing per firm-quarter, one common shock per quarter, `cn_lag ∈ [0,1]`, contiguous quarter coverage, and a **NULL-aware group-quarter weight-sum** (portfolio weights sum to 1 within each group-quarter; an all-NULL cell is allowed only when the group's book is empty, `I_ict = 0`, and a held-but-all-NULL cell hard-fails as a 06 bug — 0 found). Verified: 199 non-empty group-quarters sum to 1 with max abs deviation 4.44×10⁻¹⁶; 82 contiguous quarters.
 7. **Schema-collision fix**: `06_cartesian_grid.jl` and `plots/fig13_two_panel.py` both wrote `05_diff_us_vs_nonus_high_c6.csv` with different schemas. fig13 now writes its own `fig13_diff_{all,high}_c6.csv`; the orphaned `05_diff_us_vs_nonus_all_c6.csv` was deleted; the three similarly-named CSVs are documented in the §16 artifact map. No downstream reader breaks (grep-verified).
@@ -24,7 +24,7 @@ This document was hardened over one working session in response to two external 
 
 ### B. New empirical work — the shares-based ownership test (§7.6), the "make-or-break"
 
-The market-value portfolio weight `w = H(USD)/T(USD)` mixes trading flow with price moves and portfolio-denominator reallocation, so a null on `w` supports "US do not reduce their portfolio *weight*" but not "US do not *sell* / do not reduce their *stake*." To license the flow claim we built a **pure trading-flow** outcome (§7.6, F6): the change in group shares held over the *lagged* primary-EQ float — immune to price and to float changes (buybacks/issuance) — on the same C6 grid, three-way pairwise FE, and clustering as the main spec. **Result: β₃ = +0.00088 (SE 0.00115, p=0.44), null and if anything positive** — agrees with the w-based null (the earlier Δ(ownership_share) form, +0.000599, is retained only as a comparison column). Robust to dropping the extensive-margin zeros. Two required caveats: ADR exclusion (US holds 8.92% of European exposure off the primary class vs 3.32% for non-US) and limited power against small adjustments (80%-power MDE ≈ 4–12 bps of float). New files: `build_ownership_share_panel.py`, `build_ownership_share_c6_panel.py`, `run_ownership_share.do` (all in §14–§15).
+The market-value portfolio weight `w = H(USD)/T(USD)` mixes trading flow with price moves and portfolio-denominator reallocation, so a null on `w` supports "US do not reduce their portfolio *weight*" but not "US do not *sell* / do not reduce their *stake*." To license the flow claim we built a **pure trading-flow** outcome (§7.6, F6): the change in group shares held over the *lagged* primary-EQ float — immune to price and to float changes (buybacks/issuance) — on the same C6 grid, three-way pairwise FE, and clustering as the main spec. **Result (B7 rebuilt panel, 2026-08-03): β₃ = +0.00089 (3-pairwise), positive and opposite to disengagement.** The two-way CRVE is fat-tail-deflated on this outcome (kurtosis ≈ 5170), so inference is anchored by design-based randomization inference: **RI p = 0.37 (raw) / 0.38 (winsorized) — null** — agreeing with the w-based null (the earlier Δ(ownership_share) form, +0.000549, is retained only as a labelled comparison column). Robust to dropping the extensive-margin zeros. Two required caveats: ADR exclusion (US holds 8.92% of European exposure off the primary class vs 3.32% for non-US) and limited power against small adjustments (refreshed 80%-power MDE ≈ 0.8–2.3 bps of float on the B7 CRVE SE, itself fat-tail-deflated). New files: `build_ownership_share_panel.py`, `build_ownership_share_c6_panel.py`, `run_ownership_share.do` (all in §14–§15).
 
 ### C. Adversarial multi-agent reviews run this round (all findings resolved)
 
@@ -38,7 +38,7 @@ The market-value portfolio weight `w = H(USD)/T(USD)` mixes trading flow with pr
 
 ### D. Current conclusions (detail in §7, §8)
 
-The headline β₃ (US × China-exposure × tension shock on within-Europe reallocation) is a **robust statistical null** — across FE choices, shock definitions, sample constructions, the value-weighted portfolio weight, **and** the shares-based ownership stake. If anything, every quarterly-shock point estimate is *positive* — the opposite sign to the disengagement hypothesis (e.g. the shares-based flow β₃ = +0.00088); the one exception, the aggregated-shock robustness spec, is negative on a pre-rebuild panel (CRVE p=0.086) and awaits RI re-adjudication on the rebuilt panel before it is cited either way. The one historically borderline coefficient (country-pair β₁) is not reliably inferred once clustered at the honest country level (p 0.098→0.23) and is not cited as evidence. The earlier "significant" result was a retracted forward-window/few-cluster artifact. The project's contribution is currently a measurement/identification one (the paired firm×quarter / group×quarter panel), and the ownership-flow question is treated as answered-in-the-null, with the economic action (if any) to be sought in a firm-level price channel (H2.2).
+The headline β₃ (US × China-exposure × tension shock on within-Europe reallocation) is a **robust statistical null** — across FE choices, shock definitions, sample constructions, the value-weighted portfolio weight, **and** the shares-based ownership stake. On the main outcome the quarterly-shock (S_t) point estimates are *positive* — the opposite sign to the disengagement hypothesis (e.g. the shares-based flow β₃ = +0.00089). The two variants that carry a *negative* sign — the aggregated-shock robustness spec and the lagged-shock S_{t−1} spec — are both cleanly null (the aggregated-shock spec is now adjudicated: RI free-permutation p = 0.51, circular-shift p = 0.46; the pre-B7 near-marginal CRVE p = 0.086 did not survive the rebuild). We therefore do not resurrect a universal "all positive" claim; the honest statement is that the S_t specs are positive-null and the S_{t−1} / aggregated-shock variants are negative-null. The one historically borderline coefficient (country-pair β₁) is not reliably inferred once clustered at the honest country level (p 0.086→0.246 on the B7 rebuild) and is not cited as evidence. The earlier "significant" result was a retracted forward-window/few-cluster artifact. The project's contribution is currently a measurement/identification one (the paired firm×quarter / group×quarter panel), and the ownership-flow question is treated as answered-in-the-null, with the economic action (if any) to be sought in a firm-level price channel (H2.2).
 
 ### E. Next steps (detail in §10)
 
@@ -56,31 +56,31 @@ The headline is now the **fully-saturated three-way pairwise FE**: firm×quarter
 
 | specification | 3-pairwise (it+gt+ig) β₃ | it+gt β₃ | verdict |
 |---|---|---|---|
-| headline Δw ~ US·CN·S_t | +1.80×10⁻⁶ (p=0.35) | +1.28×10⁻⁶ (p=0.44) | **null** |
-| F1a lead-flow Δw_{t+1} ~ S_t | +1.9×10⁻⁷ (p=0.92) | −2.4×10⁻⁷ (p=0.90) | **null** |
-| F2 headline, in-span only | +2.5×10⁻⁶ (p=0.42) | +2.4×10⁻⁶ (p=0.43) | **null** |
-| F7 US·CN·GPR_t / GPR_{t−1} | −2.0×10⁻⁶ (0.34) / +7×10⁻⁷ (0.74) | −2.1×10⁻⁶ (0.28) / +9×10⁻⁷ (0.64) | **null** |
-| ownership FLOW (F6) | +8.8×10⁻⁴ (p=0.44) | +8.9×10⁻⁴ (p=0.44) | **null** |
-| F1b LP cum h1 (CRVE only) | +2.4×10⁻⁶ (p=0.03) | +1.4×10⁻⁶ (p=0.01) | **CRVE invalid here → not significant under RI (0.23/0.47), F1/F3** |
-| F1b LP cum h4 (CRVE only) | +6.6×10⁻⁶ (p=0.08) | +3.9×10⁻⁶ (p=0.04) | **CRVE invalid here → not significant under RI (0.07/0.23), F1/F3** |
+| headline Δw ~ US·CN·S_t | +2.746×10⁻⁶ (p=0.110, RI 0.31) | +2.081×10⁻⁶ (p=0.151, RI 0.41) | **null** |
+| F1a lead-flow Δw_{t+1} ~ S_t | +1.01×10⁻⁶ (p=0.576) | +4.85×10⁻⁷ (p=0.774, RI 0.85) | **null** |
+| F2 headline, in-span only | — (not rebuilt) | +3.33×10⁻⁶ (p=0.135, RI 0.39) | **null** |
+| F7 US·CN·GPR_t / GPR_{t−1} | — (not rebuilt) | −8.4×10⁻⁷ (0.63) / +2.6×10⁻⁷ (0.88) | **null** |
+| ownership FLOW (F6) | +8.9×10⁻⁴ (CRVE fat-tail-deflated, RI 0.37) | +8.4×10⁻⁴ (RI 0.38) | **null (RI arbiter)** |
+| F1b LP cum h1 (CRVE only) | +4.09×10⁻⁶ (CRVE p=0.009) | +2.85×10⁻⁶ (CRVE p=0.017) | **CRVE invalid here → not significant under RI (0.11/0.21), F1/F3** |
+| F1b LP cum h4 (CRVE only) | +8.83×10⁻⁶ (CRVE p=0.053) | +5.24×10⁻⁶ (CRVE p=0.035) | **CRVE invalid here → RI 0.039 (3-pairwise, *positive* sign) / 0.13 (it+gt); WCB robustness could not run (boottest OOM), F1/F3** |
 
-Every quarterly-shock point estimate is **positive** — the opposite sign to the disengagement prediction (β₃ < 0) — so even the CRVE-significant cumulative horizons, if believed, would *strengthen* the no-disengagement reading, not overturn it. (Carve-out: the aggregated-shock robustness spec is negative on a pre-rebuild panel and unadjudicated; it is excluded from this claim until re-run on the rebuilt panel.)
+Every quarterly-shock (S_t) point estimate is **positive** — the opposite sign to the disengagement prediction (β₃ < 0) — so even the CRVE-significant cumulative horizons, if believed, would *strengthen* the no-disengagement reading, not overturn it. The two negative-signed variants (the aggregated-shock robustness spec, §7.3c, and the advisor's lagged-shock S_{t−1} spec, §7.3b) are both cleanly null; the aggregated-shock spec is now adjudicated on the rebuilt B7 panel (RI free-permutation p = 0.51, circular-shift p = 0.46; its pre-B7 near-marginal CRVE p = 0.086 did not survive). So the honest statement is the split — S_t specs positive-null, S_{t−1} / aggregated-shock negative-null — not a universal "all positive."
 
 ### Headline change 2 — β₁ removed from directional evidence (F4)
 
-The country-pair β₁ (US·S_{c,t}, formerly "+17.7, p=0.098, opposite H2.1") is **removed from all directional-evidence sentences** (§0 index, §7.5, §13). S_{c,t} varies only across 3 listing countries × quarter, so the honest clustering level is the country: clustering by `sec_country` (3 clusters, df=2) moves β₁ from p=0.098 to **p=0.227** (β₁ unchanged at +1.77×10⁻⁵; the SE barely moves but the degrees of freedom collapse). It is not reliable evidence of anything.
+The country-pair β₁ (US·S_{c,t}, pre-B7 "+17.7, p=0.098, opposite H2.1"; B7 rebuild +22.2) is **removed from all directional-evidence sentences** (§0 index, §7.5, §13). S_{c,t} varies only across 3 listing countries × quarter, so the honest clustering level is the country: clustering by `sec_country` (3 clusters, df_r=2) moves β₁ from p=0.086 to **p=0.246** (β₁ unchanged at +2.22×10⁻⁵; the SE barely moves but the degrees of freedom collapse). It is not reliable evidence of anything.
 
 ### Finding-by-finding
 
-- **F1 (critical — timing / retraction logic).** The concern: S_t is the quarter-*end* AR(1) residual while backward Δw_t spans the whole quarter, so the preferred spec allows only ~1 month of reaction, and the natural t+1-quarter response window was never tested; the SE tripling in the centered→backward retraction is not the signature of "removing look-ahead noise." Resolution: (i) the **lead-flow** Δw_{i,g,t+1} ~ US·CN·S_t (pure lagged shock, no look-ahead) is **null** (p=0.92); (ii) a **local-projection IRF** of the cumulative response w_{t+h}−w_{t−1} on US·CN·S_t (h=0..4) has positive point estimates that reach CRVE p<0.05 at h=1 and h=4 — **but the CRVE is not valid there** (overlapping cumulative windows + few quarter-clusters; `reghdfe` flags a non-PSD VCV, and the p flips 0.013→0.111 under an equivalent FE parameterization). Under valid design-based **randomization inference** (which has exact size; permuting the 82 quarter shocks) these horizons are **not distinguishable from zero** — every horizon null (headline 0.62, lead 0.92, LP h1 **0.47**, h2 0.25, h3 0.32, h4 **0.23**). Under the saturated three-way pairwise FE the RI likewise rejects the CRVE significances (`run_ri_3pairwise.py`: headline 0.51, LP cum1 **0.23** [CRVE 0.03], LP cum4 **0.07** [CRVE 0.08]) — all null, all positive. So there is no US-differential response at t, at t+1, or cumulatively; the "reaction is in t+1" alternative is rejected. `run_audit_f1f2f7.do`, `run_randomization_inference.py`. (The RI is exact only if the quarter shocks are exchangeable; under residual serial correlation the p is approximate — a block-permutation / circular-shift variant is a ~5-line robustness, deferred (R2-N1). The sharp null it tests is slightly broader than β₃=0: were the shock to act through a firm-level channel other than CN, the test could reject for non-β₃ reasons — R3-C.)
-- **F2 (Cartesian grid vs firm existence span).** `06_cartesian_grid.jl` crosses the universe with ALL quarters 1999Q1–2023Q4 without intersecting each firm's own existence span, so pre-IPO / post-delisting structural Δw=0 rows enter the estimation panel. Measured: **25.03%** of the panel is out-of-span, ~96.6% of it exactly Δw=0. These attenuate β₃, inflate N, and understate SE. Re-running the headline on the in-span subset only: β₃ ≈ 1.86× larger (+1.28→+2.4×10⁻⁶) but still **null** (RI p=0.58). The conclusion is unchanged; the headline N / SE / §5.5 extensive-margin figures are affected. `build_audit_panel_f1f2f7.py` (`in_span`).
+- **F1 (critical — timing / retraction logic).** The concern: S_t is the quarter-*end* AR(1) residual while backward Δw_t spans the whole quarter, so the preferred spec allows only ~1 month of reaction, and the natural t+1-quarter response window was never tested; the SE tripling in the centered→backward retraction is not the signature of "removing look-ahead noise." Resolution: (i) the **lead-flow** Δw_{i,g,t+1} ~ US·CN·S_t (pure lagged shock, no look-ahead) is **null** (it+gt +4.85×10⁻⁷, p=0.774, RI 0.847; 3-pairwise +1.01×10⁻⁶, p=0.576); (ii) a **local-projection IRF** of the cumulative response w_{t+h}−w_{t−1} on US·CN·S_t (h=0..4) has **positive** point estimates that reach CRVE p<0.05 at several cumulative horizons — **but the CRVE is not valid there** (overlapping cumulative windows + few quarter-clusters; `reghdfe` flags a non-PSD VCV, and the horizon is CRVE-significant under one FE parameterization but fragile under an equivalent one). Under valid design-based **randomization inference** (exact size; permuting the 82 quarter shocks) the **single-quarter** horizons are all not distinguishable from zero — it+gt: headline 0.41, lead 0.85, LP h1 0.21, h2 **0.060**, h3 0.23, h4 0.13; 3-pairwise (`run_ri_3pairwise.py`): headline 0.31, LP cum1 **0.11** [CRVE 0.009]. **Language change (post-B7 rebuild):** the earlier "lowest RI p = 0.07, every horizon null" is no longer true. RI clears every point-estimate (h0) spec (all ≥ 0.23) and every it+gt cumulative LP horizon (lowest 0.060, at h2), but the **3-pairwise cum4 cumulative horizon is RI p = 0.039** [CRVE 0.053] — and its sign is **positive**, opposite to disengagement, so even taken at face value it points *against* H2.1, not toward it. That horizon carries the overlapping-cumulative-window caveat, and its wild-cluster-bootstrap robustness check **could not be completed** (`boottest` exhausted memory at 10k reps on the ~155–169k×10k allocation), so its inference rests on RI alone. Net: there is no US-differential *disengagement* response at t, at t+1, or cumulatively; the "reaction is in t+1" alternative is rejected, and the sole RI-significant cumulative horizon runs the wrong way for H2.1. `run_audit_f1f2f7.do`, `run_audit_f1b_robust.do`, `run_randomization_inference.py`, `run_ri_3pairwise.py`. (The RI is exact only if the quarter shocks are exchangeable; the circular-shift block variant is now run for the aggregated-shock spec, §7.3c. The sharp null it tests is slightly broader than β₃=0: were the shock to act through a firm-level channel other than CN, the test could reject for non-β₃ reasons — R3-C.)
+- **F2 (Cartesian grid vs firm existence span).** `06_cartesian_grid.jl` crosses the universe with ALL quarters 1999Q1–2023Q4 without intersecting each firm's own existence span, so pre-IPO / post-delisting structural Δw=0 rows enter the estimation panel. Measured: ~25% of the panel is out-of-span, most of it exactly Δw=0. These attenuate β₃, inflate N, and understate SE. Re-running the headline on the in-span subset only (N=269,998): β₃ = +3.33×10⁻⁶ (larger than the full-grid it+gt +2.081×10⁻⁶) but still **null** (p=0.135, RI p=0.389; the in-span cumulative LP horizons are also null under RI, cum1 0.192 / cum4 0.116). The conclusion is unchanged; the headline N / SE / §5.5 extensive-margin figures are affected. `build_audit_panel_f1f2f7.py` (`in_span`).
 - **F3 / F9 (inference — few clusters, overlapping windows).** The tail-dummy specs (§7.3, 6/4/2 treated quarters) and the overlapping-window LP have unreliable CRVE (MacKinnon–Webb; `reghdfe` flagged a non-positive-semi-definite VCV on the LP), and the previously-planned wild cluster bootstrap fails with few treated clusters. **Randomization inference** is the correct design-based test and is now the arbiter for these specs. Its exact algebra (US−NONUS pairwise difference + quarter FE reproduces the two-way-FE β₃; per-quarter sufficient statistics make a permutation an O(82) weighted sum) was independently verified to reproduce reghdfe's β₃ to 7 significant figures. `run_randomization_inference.py`. The tail-dummy k=2/3 specs (2 and 4 treated quarters) are **inference-invalid** and reported as such / dropped, not as "low power."
 - **F4 (country-pair β₁ clustering).** See Headline change 2 above. `run_audit_f4f8.do`.
-- **F5 (MDE units).** The §7.6 "25–35 bps" MDE conflated the per-unit-CN·S coefficient scale with the outcome scale. Corrected: with SE(β₃_flow)=1.15×10⁻³ and σ(S_t)=2.578 (see σ_S note, §7.3), the 80%-power MDE for a *representative* firm-quarter (CN∈[0.05,0.15], 1σ shock) is **≈ 4.1–12.4 bps of float** (0.7–2.2% of the outcome sd), not 25–35 bps; the quarter-end-only shock is classical measurement error that attenuates β₃ and enlarges the true MDE. §7.6 Caveat 2 corrected.
-- **F6 (ownership flow denominator).** The §7.6 dos = ownership_share_t − ownership_share_{t−1} was NOT denominator-immune: with each term over its own *current* float, a buyback/issuance moves it with zero trading, by a term ∝ the group's own lagged level (differs across US/NONUS, so not absorbed by firm×quarter FE). Fixed: the primary outcome is now the pure flow **(held_t − held_{t−1}) / out_{t−1}** (fixed lagged float). β₃ = +8.8×10⁻⁴ (p=0.44), **null** — same conclusion, but the "net buying/selling" language is now literally correct. The old dos is retained as a labelled comparison column. `build_ownership_share_c6_panel.py`.
-- **F7 (generated regressor / full-sample AR(1)).** The AR(1) shock is estimated once on the full ~1957–2023 monthly series (its (a,b) embed future data) and is a generated regressor. Robustness: replacing the composite shock with **US·CN·GPR_t + US·CN·GPR_{t−1}** (raw GPR level + previous-quarter lag) gives both interactions **null** (p=0.34 / 0.74). This nests the *quarterly* AR(1) family and removes the full-sample look-ahead, but note it does not exactly reproduce the monthly-fitted residual, whose autoregressive term is the quarter's second-to-last month gpr(M2), not the previous quarter's gpr — an exact-nesting variant adding a `US·CN·gpr(M2)` interaction is a one-column addition, deferred (Second review round, R2-F2). Disclosed in §9. `run_audit_f1f2f7.do`.
-- **F8 (risk-set lead membership).** The main risk set (§7.4) conditions membership on t+1 holdings (a post-treatment variable). A **lag-only** variant (held at t or t−1, no look-ahead) gives β₃ = +2.6×10⁻⁶ (p=0.44), **null** — insensitive to the membership rule. `build_riskset_lagonly.py`.
-- **F10 (multiple testing).** ≥19 coefficient tests were reported; the single p<0.10 (country-pair β₁) is the expected number of false positives at α=0.10 and was used asymmetrically as "direction opposite H2.1." That framing is removed; the narrative is a clean null. (See F4.)
+- **F5 (MDE units).** The §7.6 "25–35 bps" MDE conflated the per-unit-CN·S coefficient scale with the outcome scale. Corrected: with SE(β₃_flow)=2.14×10⁻⁴ (B7 3-pairwise CRVE, itself fat-tail-deflated) and σ(S_t)=2.578 (see σ_S note, §7.3), the 80%-power MDE for a *representative* firm-quarter (CN∈[0.05,0.15], 1σ shock) is **≈ 0.8–2.3 bps of float** (~1.5 bps at CN=0.10), not the ~6 bps that 2.8·SE implies at the non-existent CN·S=1 point; the quarter-end-only shock is classical measurement error that attenuates β₃ and enlarges the true MDE (and, since this CRVE SE is fat-tail-deflated, the figure is a *lower bound* on the true MDE). §7.6 Caveat 2 corrected.
+- **F6 (ownership flow denominator).** The §7.6 dos = ownership_share_t − ownership_share_{t−1} was NOT denominator-immune: with each term over its own *current* float, a buyback/issuance moves it with zero trading, by a term ∝ the group's own lagged level (differs across US/NONUS, so not absorbed by firm×quarter FE). Fixed: the primary outcome is now the pure flow **(held_t − held_{t−1}) / out_{t−1}** (fixed lagged float). On the B7 rebuilt panel β₃ = +8.9×10⁻⁴ (3-pairwise); the two-way CRVE is fat-tail-deflated (kurtosis ≈ 5170), so inference is anchored by RI: **RI p = 0.37, null** — same conclusion, but the "net buying/selling" language is now literally correct. The old dos is retained as a labelled comparison column. `build_ownership_share_c6_panel.py`.
+- **F7 (generated regressor / full-sample AR(1)).** The AR(1) shock is estimated once on the full ~1957–2023 monthly series (its (a,b) embed future data) and is a generated regressor. Robustness: replacing the composite shock with **US·CN·GPR_t + US·CN·GPR_{t−1}** (raw GPR level + previous-quarter lag) gives both interactions **null** (p=0.63 / 0.88). This nests the *quarterly* AR(1) family and removes the full-sample look-ahead, but note it does not exactly reproduce the monthly-fitted residual, whose autoregressive term is the quarter's second-to-last month gpr(M2), not the previous quarter's gpr — an exact-nesting variant adding a `US·CN·gpr(M2)` interaction is a one-column addition, deferred (Second review round, R2-F2). Disclosed in §9. `run_audit_f1f2f7.do`.
+- **F8 (risk-set lead membership).** The main risk set (§7.4) conditions membership on t+1 holdings (a post-treatment variable). A **lag-only** variant (held at t or t−1, no look-ahead) gives β₃ = +3.35×10⁻⁶ (SE 2.32×10⁻⁶, p=0.153, N=265,710 / 5,553 firms), **null** — insensitive to the membership rule. `build_riskset_lagonly.py`.
+- **F10 (multiple testing).** Across the ≥19 coefficient tests, the handful with a nominal CRVE p<0.10 (country-pair β₁, the cumulative-LP horizons, the fat-tail-deflated flow, the Russia control, the full-period four-group column) are each adjudicated **null under valid design-based RI** — none is a robust rejection, and the count is consistent with the expected false-positive rate at α=0.10. The earlier asymmetric use of β₁ as "direction opposite H2.1" is removed; the narrative is a clean null. (See F4.)
 - **F11 (ADR-share docstring).** `build_ownership_share_panel.py` reported 91.57%/96.99% on-primary (an EQ+AD calc); corrected to the EQ-primary measure this build uses, 91.08%/96.68% on-primary (US 8.92% / NONUS 3.32% off-primary), matching §7.6.
 - **F12 (edge as-of classification).** `02_china_exposure.jl` classifies a supply-chain edge's counterparty country **as of the edge start date**, not per quarter — better than a look-ahead, but the "point-in-time" wording is clarified to mean edge-start, not quarter-by-quarter re-classification.
 - **F13 (version control).** The `julia_descriptive/` pipeline was local-only (untracked, hard-coded absolute paths). The code is now committed and pushed to `github.com/fidio728/practice` so it is reviewable; a `.gitignore` keeps the 5 GB `output/` data out of version control.
@@ -94,7 +94,7 @@ The country-pair β₁ (US·S_{c,t}, formerly "+17.7, p=0.098, opposite H2.1") i
 
 1. The zero-fill (§5): does imputing "absence = zero weight" create or destroy the object of interest? We keep the full Cartesian grid as the main panel but a reviewer should press on whether the extensive-margin gap is causal or mechanical.
 2. The backward-vs-centered differencing (§4.1, §8): the entire significance of the headline flips on this. We argue the centered version had look-ahead contamination; a reviewer should verify that argument.
-3. Power (§7.3): the tail-shock design has 6/4/2 treated quarters at k = 1.645/2/3. This is thin. The continuous shock is also arguably underpowered given only 82 quarters.
+3. Power (§7.3): the shock-tercile dose menu (which replaces the inference-invalid tail-dummy design) shows no monotone dose-response; the continuous shock is arguably underpowered given only 82 quarters.
 4. The "US vs non-US" contrast requires both groups present within a firm-quarter (§7.4). Our first conditional-sample build violated this (per-group selection); it is documented as an error and corrected.
 5. Data coverage assumption (§5.5): after zero-fill, Δw = 0 cannot separate "truly held nothing" from "FactSet did not capture the institution."
 
@@ -124,7 +124,7 @@ The design ports the within-borrower / across-lender identification of the cross
 
 **Identifier merge (coverage cascade, real counts):** of 12,743 distinct European-listed securities in the holdings universe, CUSIP populated for all 12,743, ISIN for 1,177, SEDOL for 0; 10,171 match to Revere. A security that fails to match is treated as **no observed supply-chain coverage**, not zero Chinese exposure.
 
-The firm count then steps down further, and the three figures below measure **different objects** (do not read them as inconsistent): of the 12,743 securities, 2,572 fail the Revere match (see `05_unmatched_profile_by_country.csv`, which sums to 12,743 = 10,171 matched + 2,572 unmatched), leaving **10,171 Revere-matched**. Of those, **8,014** carry a non-null China share in at least one quarter — the rest are matched but have no *active* supply-chain link in any observed quarter, so `NULLIF(n_total_links, 0)` routes them to the MISSING bucket (§5.5, and the `NULLIF` at 02/06). Lagging the exposure one quarter (`china_share_lag1q`) leaves **7,928** securities carrying a non-null lagged China share, which is the distinct-firm count of the estimation panel. So 10,171 (identifier match) > 8,014 (non-null CN) > 7,928 (non-null lagged CN, in-panel); the gaps are the documented MISSING bucket and the one-quarter lag, not stale or contradictory counts.
+The firm count then steps down further, and the figures below measure **different objects** (do not read them as inconsistent): of the 12,743 securities, 2,572 fail the Revere match (see `05_unmatched_profile_by_country.csv`, which sums to 12,743 = 10,171 matched + 2,572 unmatched), leaving **10,171 Revere-matched**. Of those, **8,014** carry a non-null all-`rel_type` China share in at least one quarter — the rest are matched but have no *active* supply-chain link in any observed quarter, so `NULLIF(n_total_links, 0)` routes them to the MISSING bucket (§5.5, and the `NULLIF` at 02/06). Under the **B7 CUSTOMER+SUPPLIER restriction** (§4.2), firms whose only China links were competitor/partner ties also route to NULL; lagging the exposure one quarter (`china_share_lag1q`) then leaves **6,854** securities carrying a non-null lagged China share, which is the distinct-firm count of the estimation panel (the pre-B7 all-`rel_type` in-panel count was 7,928). So 10,171 (identifier match) > 8,014 (non-null all-`rel_type` CN) > 6,854 (non-null lagged CUSTOMER+SUPPLIER CN, in-panel); the gaps are the documented MISSING bucket, the CUSTOMER+SUPPLIER restriction, and the one-quarter lag, not stale or contradictory counts.
 
 ---
 
@@ -215,7 +215,7 @@ resid = y - (a_hat + b_hat*yL)      # S_m
 
 S_t > 0 = unexpected escalation. The pipeline's stored `shock_us_cn` was verified equal to this residual.
 
-**Tail-dummy variants (advisor-requested, §7.3).** ShockTail_t = 1[ (S_t − mean)/sd > k ], one-sided right (escalation), sd computed over the **82 distinct quarters** (not the 462k rows), for k ∈ {1.645, 2, 3}.
+**Tail-dummy variants (advisor-requested, §7.3).** ShockTail_t = 1[ (S_t − mean)/sd > k ], one-sided right (escalation), sd computed over the **82 distinct quarters** (not the 347,952 rows), for k ∈ {1.645, 2, 3}.
 
 ### 4.4 US indicator
 
@@ -244,7 +244,7 @@ Grid diagnostic (`06_cartesian_grid.jl`, backward diff): **2,510,371 non-null Δ
 | C1 | Ownership denominator restricted to European-listed equity (w = within-Europe share) |
 | C2 | Pre-2003 supply-chain exposure = NULL, not zero (Revere begins 2003) |
 | C3 | One-quarter lag via window function (genuine LAG, not row shift) |
-| C4 | Symmetric edge counting (bilateral union of firm-as-source and firm-as-target CN links) |
+| C4 | Symmetric edge counting (bilateral union of firm-as-source and firm-as-target CN links); **CUSTOMER+SUPPLIER only (B7)** |
 | C5 | Time-versioned (point-in-time) home-region classification → no look-ahead |
 | C6 | Cartesian grid + zero-fill → corrects selection on the outcome |
 
@@ -259,19 +259,22 @@ SELECT
     CAST(report_date AS TIMESTAMP)                  AS rdate,
     delta_w                                         AS dw,
     china_share_lag1q                               AS cn_lag,
+    -- B7 direction split (sell_lag + buy_lag = cn_lag row-wise; §7.7):
+    sell_share_lag1q                                AS sell_lag,   -- CUSTOMER-side China link share, lagged
+    buy_share_lag1q                                 AS buy_lag,    -- SUPPLIER-side China link share, lagged
     shock_us_cn                                     AS shock,
     CASE WHEN holder_group = 'US' THEN 1 ELSE 0 END AS us
 FROM read_parquet('merged_us_eu_zero_filled.parquet')
 WHERE delta_w IS NOT NULL AND china_share_lag1q IS NOT NULL AND shock_us_cn IS NOT NULL
 ```
 
-Result: **c6_panel.dta = 462,564 firm-group-quarter rows, 7,928 firms, 82 quarters (2003Q3–2023Q4), 50/50 US/NONUS.** Written with `to_stata(convert_dates={'rdate':'tc'}, version=118)`; pandas writes datetime as %tc so Stata must `dofc()` before `mofd()`.
+Result: **c6_panel.dta = 347,952 firm-group-quarter rows, 6,854 firms, 82 quarters (2003Q3–2023Q4), 50/50 US/NONUS** (post-B7; the pre-B7 all-`rel_type` panel had 462,564 rows / 7,928 firms). Written with `to_stata(convert_dates={'rdate':'tc'}, version=118)`; pandas writes datetime as %tc so Stata must `dofc()` before `mofd()`.
 
 ### 5.5 Honest data caveats
 
 - **Zero-fill ambiguity.** After the fill, Δw = 0 cannot distinguish "the group truly held nothing" from "FactSet did not capture an institution." US 13F reporting is mandatory above the $100M AUM threshold, so **material** US institutional ownership is largely observed; non-US coverage varies by jurisdiction. Absence is treated as zero **by assumption, not by observation**.
 - **MISSING bucket.** Firms with no Revere coverage at t get CN = NULL and are bucketed MISSING, reported separately from HIGH/LOW; "no data" is never silently read as "zero exposure." These rows drop out of the estimation panel via the cn_lag-non-null filter.
-- **Extensive-margin gap (descriptive only).** On HIGH-CN firm-quarters, US zero-fill rate = 5,733/17,027 = **33.67%**, NONUS = 3,815/17,027 = **22.41%**, gap **+11.26 pp** in the H2.1 direction. Pooled over the whole window; cannot separate a geopolitical channel from time-invariant US-vs-NONUS portfolio differences. Not causal.
+- **Extensive-margin gap (descriptive only; pre-B7 all-`rel_type` HIGH-CN definition).** On HIGH-CN firm-quarters, US zero-fill rate = 5,733/17,027 = **33.67%**, NONUS = 3,815/17,027 = **22.41%**, gap **+11.26 pp** in the H2.1 direction. Pooled over the whole window; cannot separate a geopolitical channel from time-invariant US-vs-NONUS portfolio differences. Not causal. (These counts are on the pre-B7 all-`rel_type` HIGH set; the B7 CUSTOMER+SUPPLIER restriction shifts which firm-quarters are HIGH and this descriptive gap has not been re-tabulated.)
 - **Adding-up artifact.** Because portfolio weights sum to 1 within a group each quarter, the mean Δw across ALL firms is mechanically ≈0 (this is why the "all-firms" descriptive scatter, Panel A of the pre-regression figure, sits at ~1e-20).
 
 ---
@@ -295,6 +298,8 @@ Because S_t has no host-country variation:
 
 Two-way cluster on **firm and quarter**. Quarter clustering matters because S_t is a single common series (effective independent shock draws = number of quarters, not rows). Backward differencing induces MA(1) in Δw, which the firm cluster absorbs.
 
+**VCE-validity convention (B7).** Every Stata spec writes a companion `*_vce_diag.csv` recording, per coefficient, whether the clustered VCV is positive-definite (`se_valid`). When it is not — few treated clusters, a fat-tailed outcome, or an overlapping-window LP — the **B9 guard** suppresses the SE rather than reporting a bogus non-PSD one (`se_valid=0`); such columns are flagged "VCE degenerate" in the tables and adjudicated by design-based randomization inference instead of the CRVE. Separately, where the wild-cluster bootstrap would normally cross-check a marginal CRVE p, `boottest` **ran out of memory** at 10k reps on the ~155–169k×10k allocation, so WCB p/CI are unavailable for the local-projection horizons; inference there is anchored by RI (§ Second review round, F1/F3).
+
 ### 6.4 firm × group FE option (μ_{i,g})
 
 The three pairwise FEs among {firm, group, quarter} are firm×quarter (have it), group×quarter (have it), and **firm×group (μ_{i,g})**. Adding μ_{i,g} absorbs any time-invariant US-vs-NONUS tilt toward each firm; β₂, β₃ then identify off within-(firm,group) time variation. Run as robustness (§7.2, §7.4). (A separate, heavier option — **holder × quarter** FE at the individual-institution level, the true Khwaja–Mian bank×time analog — is not yet built; it needs disaggregating from 2 groups to thousands of holders and conditioning on engagement.)
@@ -303,32 +308,44 @@ The three pairwise FEs among {firm, group, quarter} are firm×quarter (have it),
 
 ## 7. Estimation results — everything, honestly (coefficients ×10⁻⁶ of portfolio weight; two-way clustered SE in parentheses)
 
-### 7.1 Main panel — three FE specifications (`07d_three_spec_table.do`, N = 462,564)
+### 7.1 Main panel — three FE specifications (`07d_three_spec_table.do`, N = 347,952)
 
 | | (1) No FE | (2) it+gt (α_{i,t}+γ_{g,t}) | (3) Weak FE (firm+quarter) |
 |---|---|---|---|
-| β₂ (US·CN_{t−1}) | −2.76 (3.72) | +1.98 (5.29) | −0.67 (3.63) |
-| β₃ (US·CN·S_t) | −0.35 (0.60) | **+1.28 (1.66)** | −0.12 (0.71) |
-| p(β₃) | 0.565 | **0.443** | 0.865 |
-| R² | ~0.000 | 0.6215 | 0.0058 |
-| F(2,81) | 0.81 (p=0.449) | 0.41 (p=0.668) | 0.04 (p=0.960) |
+| β₂ (US·CN_{t−1}) | −2.59 (3.76) | +0.30 (5.21) | −2.49 (4.04) |
+| β₃ (US·CN·S_t) | +0.0006 (0.53) | **+2.08 (1.44)** | +0.54 (0.65) |
+| p(β₃) | 0.999 | **0.151** | 0.411 |
+| R² | ~0.000 | 0.6235 | 0.0073 |
+| F(2,81) | 0.38 (p=0.683) | 1.31 (p=0.276) | 0.40 (p=0.673) |
 
-**Every coefficient is null (p ≥ 0.44).** **The current headline FE is the three-way pairwise (it+gt+ig; §7.2 and the "Second external review round" section); column (2) here is the it+gt comparison, β₃ = +1.28.** The headline β₃ (3-pairwise) is +1.80 (p=0.35), positive (opposite the H2.1 prediction) but indistinguishable from zero; the null is from a large SE, not a tight zero. (Also run: "β₃-only" spec = +1.37 (1.63), p=0.405; "full triple" spec identical to Headline with lower-order terms auto-omitted — confirms the absorption logic.)
+**Every β₃ is null (smallest p = 0.15, at the it+gt headline).** **The current headline FE is the three-way pairwise (it+gt+ig; §7.2 and the "Second external review round" section); column (2) here is the it+gt comparison, β₃ = +2.08.** The headline β₃ (3-pairwise) is +2.746 (p=0.110), positive (opposite the H2.1 prediction) but indistinguishable from zero at conventional levels; the null is from a wide SE, not a tight zero. (The "β₃-only" and "full triple" specs reproduce the same point estimate with lower-order terms auto-omitted, confirming the absorption logic.)
 
-**Formal MDE (w-based headline).** With SE(β₃)=1.91×10⁻⁶ (3-pairwise) and σ_S=2.578, the 80%-power MDE for a representative firm-quarter (CN∈[0.05,0.15], 1σ shock) is ≈ 0.7–2.1×10⁻⁶ in Δw units = **0.09–0.27% of σ(Δw)=7.6×10⁻⁴**. The design rules out within-Europe reallocations larger than ~0.2% of a typical quarterly weight change; it cannot rule out smaller ones. (Both outcome families — w and shares-flow — now carry an explicit MDE.)
+**Formal MDE (w-based headline).** With SE(β₃)=1.697×10⁻⁶ (3-pairwise) and σ_S=2.578, the 80%-power MDE for a representative firm-quarter (CN∈[0.05,0.15], 1σ shock) is 2.8·SE·CN·σ_S ≈ **0.61–1.84×10⁻⁶** in Δw units (0.05·2.578·2.8·1.697e-6 to 0.15·2.578·2.8·1.697e-6) = **0.08–0.24% of σ(Δw)=7.6×10⁻⁴**. The design rules out within-Europe reallocations larger than ~0.24% of a typical quarterly weight change; it cannot rule out smaller ones. (Both outcome families — w and shares-flow — now carry an explicit MDE.)
 
 ### 7.2 + firm × group FE (`07e_firmgroup_tail.do`)
 
-| | Headline | + firm×group FE |
+| | Headline (it+gt) | + firm×group FE (3-pairwise) |
 |---|---|---|
-| β₃ | +1.28 (1.66), p=0.443 | +1.80 (1.91), p=0.350 |
-| N | 462,564 | 462,096 (468 singletons dropped; 15,388 firm-group cells) |
+| β₃ | +2.08 (1.44), p=0.151 | +2.746 (1.697), p=0.110 |
+| N | 347,952 | 347,490 (462 singletons dropped) |
 
 Still null. Interpretation: the null is **not** an artifact of structural US-vs-NONUS firm sorting.
 
-### 7.3 Tail-dummy shock menu (`07e_firmgroup_tail.do`) — with power diagnostic
+### 7.3 Shock-tercile dose menu (`run_tercile_3pairwise.do`, `run_ri_tercile.py`) — replaces the tail-dummy menu
 
-σ_S over 82 quarters = **2.578** (verified independently on both the estimation-sample panel and the audit panel; a second-review-round "correction" to 2.42 was itself in error — it was computed over a wider, non-estimation-sample quarter range — and is reverted here, R3 shock-lag work, 2026-07-02). One-sided right (escalation):
+σ_S over 82 quarters = **2.578** (verified independently on both the estimation-sample panel and the audit panel; a second-review-round "correction" to 2.42 was itself in error — it was computed over a wider, non-estimation-sample quarter range — and is reverted here, R3 shock-lag work, 2026-07-02).
+
+The tail-dummy design (6/4/2 treated quarters, below) is **inference-invalid** with so few treated clusters, so the preferred dose test is now a **shock-tercile menu**: cut S_t into terciles over the 82 distinct quarters (realized bins 28/27/27), interact each with US·CN_{t−1}, T2 (middle) as base. A genuine dose-response would show a monotone, significant T3 (highest-escalation) coefficient. It does not:
+
+| dose bin | 3-pairwise β₃ | fq+gq β₃ | RI p (3-pairwise) |
+|---|---|---|---|
+| T1 (lowest S_t) | +1.37×10⁻⁵ (p=0.535) | +1.32×10⁻⁵ (p=0.540) | — |
+| **T3 (highest S_t)** | **+2.05×10⁻⁵ (p=0.264)** | +1.74×10⁻⁵ (p=0.333) | **0.233** |
+| T3 − T1 gradient | +6.76×10⁻⁶ (CRVE p=0.623) | — | **0.670** |
+
+N = 347,490 (3-pairwise) / 347,952 (fq+gq). The highest-escalation tercile is **null** (RI 0.233) and the T3−T1 dose gradient is **null** (RI 0.670): no monotone dose-response, every point estimate positive (opposite H2.1). RI is the design-based arbiter (`run_ri_tercile.py` re-cuts terciles per permuted shock); CRVE validity per spec is in `tercile_vce_diag.csv`.
+
+**Superseded tail-dummy menu (retained for F3 provenance only, pre-B7 panel).** The earlier advisor-requested tail-dummy variants ShockTail_t = 1[(S_t−mean)/sd > k], one-sided right (escalation), on the pre-B7 all-`rel_type` panel:
 
 | k | **treated quarters** | β₃^tail | SE | p |
 |---|---|---|---|---|
@@ -336,7 +353,7 @@ Still null. Interpretation: the null is **not** an artifact of structural US-vs-
 | 2 | 4 / 82 | +14.0 | 18.0 | 0.439 |
 | 3 | 2 / 82 | +8.59 | 39.0 | 0.826 |
 
-All null; SE explodes as k rises. Empirical distribution is **fat-tailed** (k=1.645 gives 6 quarters = 7.3%, not the 5% of a normal). **With only 6 / 4 / 2 treated quarters the CRVE + t(81) inference here is not merely low-powered but statistically *invalid* (MacKinnon–Webb 2017): few treated clusters bias the CRVE and break the t(G−1) reference, and the standard wild bootstrap fails in the same regime.** These tail rows are reported as *descriptive* robustness only; the correct inference is design-based randomization (Second review round, F3). The dummy coefficient is on a different scale from the continuous one — do not compare point estimates.
+All null; SE explodes as k rises. Empirical distribution is **fat-tailed** (k=1.645 gives 6 quarters = 7.3%, not the 5% of a normal). **With only 6 / 4 / 2 treated quarters the CRVE + t(81) inference here is not merely low-powered but statistically *invalid* (MacKinnon–Webb 2017): few treated clusters bias the CRVE and break the t(G−1) reference, and the standard wild bootstrap fails in the same regime.** These rows are **superseded** by the tercile dose menu above and kept only as F3 provenance; the dummy coefficient is on a different scale from the continuous one — do not compare point estimates.
 
 ### 7.3b Shock timing and units (advisor request, 2026-06-28 meeting)
 
@@ -346,45 +363,55 @@ The advisor's meeting comment on the shock was three-part: (a) the shock should 
 
 | spec | FE | β₃ | SE | p (CRVE) | RI p |
 |---|---|---|---|---|---|
-| S_t (current headline) | it+gt | +1.28×10⁻⁶ | 1.66×10⁻⁶ | 0.443 | 0.617 |
-| S_t (current headline) | 3-pairwise | +1.80×10⁻⁶ | 1.91×10⁻⁶ | 0.350 | 0.508 |
-| **S_{t-1} (advisor spec)** | it+gt | **−8.65×10⁻⁷** | 2.08×10⁻⁶ | 0.679 | **0.735** |
-| S_{t-1} (advisor spec) | 3-pairwise | −6.51×10⁻⁷ | 2.03×10⁻⁶ | 0.749 | — |
+| S_t (current headline) | it+gt | +2.081×10⁻⁶ | 1.44×10⁻⁶ | 0.151 | 0.412 |
+| S_t (current headline) | 3-pairwise | +2.746×10⁻⁶ | 1.697×10⁻⁶ | 0.110 | 0.308 |
+| **S_{t-1} (advisor spec)** | it+gt | **−5.90×10⁻⁷** | 1.85×10⁻⁶ | 0.750 | **0.814** |
+| S_{t-1} (advisor spec) | 3-pairwise | −2.78×10⁻⁷ | 1.94×10⁻⁶ | 0.886 | — |
 
-Under the advisor's timing the point estimate **flips sign** (now negative, i.e. nominally in the disengagement direction) but remains solidly null — if anything *less* distinguishable from zero than the contemporaneous spec (RI p=0.735 vs 0.617). Given randomization inference (design-based, CRVE-independent) shows both signs are equally consistent with the sharp null, **the sign flip is noise, not a finding**: β₃ is not stably signed across reasonable timing conventions, which is itself informative about how weak any signal is, not evidence of disengagement under the "correct" timing. `build_shocklag_panel.py`, `run_shocklag.do`, `run_ri_shocklag.py`.
+(σ_S(S_t)=2.5779, σ(S_{t−1})=2.5770; N=347,952 it+gt / 347,490 3-pairwise.) Under the advisor's timing the point estimate **flips sign** (now negative, i.e. nominally in the disengagement direction) but remains solidly null — if anything *less* distinguishable from zero than the contemporaneous spec (RI p=0.814 vs 0.412). Given randomization inference (design-based, CRVE-independent) shows both signs are equally consistent with the sharp null, **the sign flip is noise, not a finding**: β₃ is not stably signed across reasonable timing conventions, which is itself informative about how weak any signal is, not evidence of disengagement under the "correct" timing. `build_shocklag_panel.py`, `run_shocklag.do`, `run_ri_shocklag.py`.
 
-**(b) SD-standardized reporting.** Since σ_S is a pure rescaling of the shock, standardizing changes only the coefficient's unit (interpretable as "effect per 1-SD tension shock"), not any t-statistic or p-value. At σ_S=2.578: the current headline β₃ (3-pairwise) is +4.64×10⁻⁶ per 1-SD shock; the advisor's S_{t-1} spec is −1.68×10⁻⁶ per 1-SD shock (3-pairwise). Both remain null under the same p-values reported above.
+**(b) SD-standardized reporting.** Since σ_S is a pure rescaling of the shock, standardizing changes only the coefficient's unit (interpretable as "effect per 1-SD tension shock"), not any t-statistic or p-value. At σ_S=2.578: the current headline β₃ (3-pairwise) is +7.08×10⁻⁶ per 1-SD shock; the advisor's S_{t-1} spec is −7.2×10⁻⁷ per 1-SD shock (3-pairwise). Both remain null under the same p-values reported above.
+
+### 7.3c Aggregated-shock robustness (`build_sagg_panel.py`, `run_sagg_distlag.do`, `run_ri_sagg.py`)
+
+The headline S_t is the quarter-*end* AR(1) residual. As a robustness against that single-month timing, `s_agg` aggregates the shock over the quarter (a distributed-lag / within-quarter sum). σ(s_agg)=4.0846; its correlation with the stamped quarter-end shock is 0.425, so it is a genuinely different aggregation, not a rescaling.
+
+| spec | FE | β₃ | SE | p (CRVE) | RI p |
+|---|---|---|---|---|---|
+| s_agg | it+gt (pairwise collapse) | −1.06×10⁻⁶ | 1.12×10⁻⁶ | 0.348 | free-perm 0.512 / circular-shift 0.463 |
+| s_agg | 3-pairwise | −1.12×10⁻⁶ | 1.35×10⁻⁶ | 0.411 | — |
+
+N=347,952 (it+gt) / 347,490 (3-pairwise); joint Wald p=0.633 (it+gt) / 0.694 (3-pairwise). **Adjudicated clean null.** All specs carry a **negative** sign (nominally the disengagement direction) but none is distinguishable from zero: design-based RI — both a free-permutation and a circular-shift block variant (the latter robust to residual serial correlation) — returns p=0.51 / 0.46. The pre-B7 near-marginal CRVE p=0.086 on this spec **did not survive** the rebuild. Honest sign statement: this negative-null aggregated-shock spec, together with the negative-null lagged-shock S_{t−1} spec (§7.3b), is why we do not claim a universal "all positive" — the positive point estimates hold for the contemporaneous S_t specs on the main outcome, not for these two variants.
 
 ### 7.4 Conditional "spell-boundary" sample (advisor request) — including an error we made and fixed
 
 **Design intent:** keep held quarters + one boundary zero at each entry/exit, conditional on firm-groups the group ever engaged; drop deep never-held zeros and never-held firms.
 
-**Error (first build, `build_spell_boundary.py` / `07f`, SUPERSEDED).** Selection was done **per (firm, group)**. That broke the US-vs-NONUS pairing: many firm-quarters retained only one group → 45,672 singletons dropped by α_{i,t} → the estimate degenerated to "US's own change in selected firms," not "US relative to non-US." Result was β₃ = +4.38 (5.66), p=0.441, N=250,918. **Do not use.**
+**Error (first build, `build_spell_boundary.py` / `07f`, SUPERSEDED).** Selection was done **per (firm, group)**. That broke the US-vs-NONUS pairing: many firm-quarters retained only one group → 45,672 singletons dropped by α_{i,t} → the estimate degenerated to "US's own change in selected firms," not "US relative to non-US." Result (pre-B7 panel) was β₃ = +4.38 (5.66), p=0.441, N=250,918. **Do not use.**
 
 **Correction (`build_spell_riskset.py` / `07g`).** Define the risk set at the **firm-quarter** level: (i,t) enters if EITHER group has a spell-boundary there (held at t, t−1, or t+1); then keep **both** group rows. This preserves pairing.
 
-Build output: 885,802 risk-set rows → **balanced 442,901 US / 442,901 NONUS**, 100% paired (0 unpaired). Estimation subset (drop missing dw/cn_lag/shock) = **342,262 rows, balanced 171,131 / 171,131, 6,355 firms, 0 group singletons.**
+Build output: 885,802 risk-set rows → **balanced 442,901 US / 442,901 NONUS**, 100% paired (0 unpaired) — the risk-set membership is holdings-based and so is unchanged by B7. Estimation subset (drop missing dw/cn_lag/shock) = **268,282 rows, 5,564 firms, 0 group singletons** (post-B7; the pre-B7 all-`rel_type` subset was 342,262 rows / 6,355 firms).
 
 | | R1 headline (fq gq) | R2 + firm×group |
 |---|---|---|
-| β₃ | +2.46 (3.15), p=0.436 | +2.46 (3.19), p=0.443 |
-| N | 342,262 (0 group singletons) | 341,858 (404 firm-group singletons) |
+| β₃ | +3.26 (2.24), p=0.151 | +3.51 (2.38), p=0.143 |
+| N | 268,282 (5,564 firms, 0 group singletons) | 267,898 (5,372 firms) |
 
 Still null, now cleanly identified within firm-quarter.
 
 **Trade-off to disclose:** conditioning on engagement is closer to "real reallocation behavior," but because US engages fewer firm-quarters, the paired risk set discards deep zeros and the identifying variation narrows; the estimand is "within engaged firms" rather than "across all holdings-observed European issuers."
 
-### 7.5 Country-pair subsample (`07b`, `07c`) — GB+DE+FR, replaces S_t with country-specific S_{c,t}
+### 7.5 Country-pair subsample (`run_audit_f4f8.do`, `07b`/`07c`) — GB+DE+FR, replaces S_t with country-specific S_{c,t}
 
-N = 227,310, 3,678 firms. Because S_{c,t} varies across listing country within (g,t), β₁ (US_g × S_{c,t}) becomes separately identified (3 coefficients instead of 2).
+N = 172,860, 3,208 firms (B7 rebuild). Because S_{c,t} varies across listing country within (g,t), β₁ (US_g × S_{c,t}) becomes separately identified (3 coefficients instead of 2).
 
 | coefficient | estimate |
 |---|---|
-| β₁ (US·S_{c,t}) — newly identified | **+17.7 (10.6)** — *not reliably inferred* (see below; not cited as evidence) |
-| β₂ (US·CN) | +5.64 (6.92), p=0.417 |
-| β₃ (US·CN·S_{c,t}) | +3.48 (30.2), p=0.909 |
+| β₁ (US·S_{c,t}) — newly identified | **+22.2** (=+2.22×10⁻⁵) — *not reliably inferred* (clustering-fragile; see below; not cited as evidence) |
+| β₃ (US·CN·S_{c,t}) | **−1.21** (p=0.93–0.97), wrong-sign null |
 
-The p=0.098 on β₁ under (firm, quarter) clustering is **an artifact of the wrong clustering level**: S_{c,t} varies only across 3 listing countries × quarter, so the honest cluster is the country. Clustering by `sec_country` (3 clusters, df=2) gives **p=0.227** (β₁ unchanged; SE barely moves but the degrees of freedom collapse), and with only 3 clusters no CRVE p is reliable here at all. β₁ is therefore **not evidence of anything** and is not cited as directional support (Second review round, F4).
+The nominal p=0.086 on β₁ under (firm, quarter) clustering is **an artifact of the wrong clustering level**: S_{c,t} varies only across 3 listing countries × quarter, so the honest cluster is the country. Clustering by `sec_country` (3 clusters, df_r=2) gives **p=0.246** (β₁ unchanged at +2.22×10⁻⁵; the SE barely moves but the degrees of freedom collapse), and a country + quarter (`rd_m`) cluster gives p=0.242; with only 3 clusters no CRVE p is reliable here at all. β₁ is therefore **not evidence of anything** and is not cited as directional support (Second review round, F4). β₃ is a wrong-sign null (−1.21×10⁻⁶, p=0.93–0.97). Conclusion unchanged: clustering-fragile, not citable as evidence.
 
 ---
 
@@ -396,28 +423,69 @@ The p=0.098 on β₁ under (firm, quarter) clustering is **an artifact of the wr
 
 It is immune to price (numerator and denominator are both in shares) and to portfolio-denominator reallocation (no T term). Shares are not additive across firms, so a shares-based *portfolio weight* is meaningless; the ownership share is the correct object. `adj_shares_out` is a per-security-class attribute, so we restrict both numerator and denominator to the **primary EQ class** (`fsym_id = fsym_primary_id`, matching the market-cap rule in `04_us_ownership_european.jl`); this makes shares_out constant within each security-quarter (verified: dispersion drops from 5.28% of cells to exactly 0). The **primary outcome is the pure trading FLOW** `(held_t − held_{t−1}) / out_{t−1}` (fixed lagged float; Second review round, F6), on the **same C6 grid, three-way pairwise FE, and clustering** as the main spec. (An earlier draft used Δ(ownership_share) = held_t/out_t − held_{t−1}/out_{t−1} with each term over its *own* current float; that is not float-immune — a buyback/issuance moves it with zero trading — so it is retained only as a labelled comparison column.)
 
-**Result (FLOW, raw fraction-of-float units — NOT ×10⁻⁶).** N = 300,866 (5,704 firms with a primary-EQ float, 82 quarters, balanced 150,433 / 150,433). Flow mean ≈ 0, sd ≈ 0.053; ownership level mean 6.3%, median 3.4%.
+**Result (FLOW, raw fraction-of-float units — NOT ×10⁻⁶; B7 panel rebuilt 2026-08-03).** N = 239,792 (5,061 firms with a primary-EQ float, 82 quarters; the full C6 flow panel is 240,246 rows). Flow mean ≈ 0; ownership level mean 6.3%, median 3.4%. The flow is heavy-tailed (kurtosis 5169.7; max +983% of float = 9.828, from tiny lagged denominators), which drives the CRVE fragility discussed below, so **inference is anchored by design-based randomization inference, not the CRVE p-values in the table.**
 
-| coefficient | FLOW, it+gt (comparison) | **FLOW, it+gt+ig (headline)** | old Δ(ownership_share) |
+| coefficient | FLOW, fq+gq (comparison) | **FLOW, 3-pairwise (headline)** | old Δ(ownership_share) dos |
 |---|---|---|---|
-| β₂ (US·CN_{t−1}) | −0.00048 (p=0.85) | −0.00139 (p=0.65) | −0.00108 (p=0.60) |
-| β₃ (US·CN_{t−1}·S_t) | +0.00089 (0.00113), p=0.44 | **+0.00088 (0.00115), p=0.44** | +0.00060 (p=0.61) |
+| β₃ (US·CN_{t−1}·S_t), CRVE | +0.000838 (p=0.0002) | **+0.000890 (p=0.0001)** | +0.000549 (VCE degenerate, se_valid=0) |
+| β₃ winsorized 1/99 (3-pairwise) | — | +0.000649 (p=0.056) | — |
+| **β₃ inference (RI — arbiter)** | — | **RI p = 0.37 raw / 0.38 winsor — null** | — |
 
-β₃ is null and, if anything, **positive** — opposite to the disengagement prediction (β₃<0). The shares-based test agrees with the w-based null: **US investors do not reduce their ownership stake in high-China-exposure European firms more than non-US investors when tension rises.**
+β₃ is, if anything, **positive** — opposite to the disengagement prediction (β₃<0) — and null under the design-based RI (the CRVE p-values are fat-tail-deflated, see below). The shares-based test agrees with the w-based null: **US investors do not reduce their ownership stake in high-China-exposure European firms more than non-US investors when tension rises.**
 
-**Inference note (B7 rebuild, 2026-07-22).** On the B7 (CUSTOMER+SUPPLIER) panel the flow β₃ point estimate is unchanged (+0.00089 raw / +0.00065 winsorized), but the two-way-cluster **CRVE is not reliable here**: it is degenerate on the primary fq×qtr / group×qtr spec (`reghdfe` returns a singular VCV, no SE) and spuriously small on the 3-pairwise spec (p=0.0001 raw, 0.056 winsorized), both driven by `flow`'s fat tails (kurtosis ≈5000, max +983% of float from tiny lagged denominators; un-winsorized). The decisive test is **design-based randomization inference** (permuting the 82 quarter shocks, CRVE-independent, immune to fat tails and few clusters): **RI p = 0.37 (raw) / 0.38 (winsorized) — null** (`run_ri_flow.py`). So the flow null holds under B7; the apparent CRVE significance is a fat-tail / few-cluster artifact, the same pattern flagged for the local-projection horizons (§ "Second review round", F1). The pre-B7 headline figures elsewhere in this section (+0.00088, p=0.44, N=300,866) are being refreshed to the B7 panel.
+**Inference note (B7 rebuild; flow panel re-run 2026-08-03).** On the B7 (CUSTOMER+SUPPLIER) panel the flow β₃ point estimate is +0.000890 raw / +0.000649 winsorized, but the two-way-cluster **CRVE is not reliable here**: it is spuriously small on both the fq×qtr / group×qtr spec (+0.000838, p=0.0002) and the 3-pairwise spec (p=0.0001 raw, 0.056 winsorized), driven by `flow`'s fat tails (kurtosis 5169.7, max +983% of float = 9.828 from tiny lagged denominators; un-winsorized). **Vintage-dependent degeneracy nuance:** in *this* rebuilt vintage the two `flow` specs are non-degenerate (they return finite SEs), and the spec that goes VCE-degenerate is the **old Δ(ownership_share) `dos` comparison column** (`se_valid=0`, the B9 VCE-guard fires and suppresses the SE rather than writing a bogus one); the ownership shock/`cn_lag` inputs are bit-identical across vintages (240,246 rows, max abs diff 0.0), so the degeneracy is a property of the outcome definition, not a data change. The decisive test is **design-based randomization inference** (permuting the 82 quarter shocks, CRVE-independent, immune to fat tails and few clusters): **RI p = 0.37 (raw) / 0.38 (winsorized) — null** (`run_ri_flow.py`). So the flow null holds under B7; the apparent CRVE significance is a fat-tail / few-cluster artifact, the same pattern flagged for the local-projection horizons (§ "Second review round", F1). The pre-B7 headline figures elsewhere in this section (+0.00088, p=0.44, N=300,866) have been refreshed to this B7 panel.
 
 **Estimand (accounting decomposition of observed institutional and residual ownership flows; 2026-08-03).** We interpret beta3 as the differential ownership flow of US institutions relative to non-US institutions, rather than the gross response of US investors in isolation. An accounting decomposition of observed institutional and residual ownership flows makes the object explicit: at the firm-quarter level, flow_US + flow_NONUS + flow_R equals the growth in float, so any US repositioning is measured net of the common institutional flow and of the offsetting flow of an unobserved residual sector (retail, insiders, non-reporting institutions, and strategic holders). In the high-exposure tercile the two reporting groups move together (corr(flow_US, flow_NONUS) is approximately +0.20), so a null on the differential is informative about relative US repositioning, not about whether any investor traded. Because these are quantity data, they cannot distinguish a world in which US demand does not change from one in which it changes but is absorbed by price; that distinction rests on the H2.2 price evidence, and we do not claim the finding holds under both.
 
 **Decomposition test (weak-FE, descriptive; `run_flow_decomposition.py` + `run_flow_decomp_step3.do`, 2026-08-03).** The identity flow_US + flow_NONUS + flow_R = float growth holds to machine precision on all 316,691 complete firm-quarters (max relative residual 2.2×10⁻¹⁶); the +0.20 co-movement anchor reproduces (corr = +0.22 winsorized, +0.20 stable-float). Because CN_{t−1}×S_t is a firm-quarter attribute, this step can only use firm + quarter FE (a firm×quarter FE would absorb the treatment), so it is a deliberately weaker, descriptive design; inference is anchored by the design-based RI (5,000 quarter-shock permutations, seed 20260702). All six cells are null: on the winsorized MAIN outcomes, β₃(flow_R) = +3.81×10⁻⁴ (RI p = 0.69), β₃(flow_common) = +3.31×10⁻⁵ (RI p = 0.97), β₃(flow_diff) = +6.65×10⁻⁴ (RI p = 0.41); raw companions p = 0.99 / 0.90 / 0.37. Neither the residual sector nor the common institutional flow responds to CN×S, and the US-minus-non-US differential remains null in flow form. The CRVE companion reproduces every point estimate to 5 significant figures (winsorized outcomes are shipped by the Python producer so both engines use bitwise-identical data); its nominally significant flow_diff p-value is a fat-tail/weak-FE artifact adjudicated null by RI, the same pattern as the §7.6 CRVE note above.
 
-**Not a zero-fill artifact.** Dropping the extensive-margin zeros (observed-held-only, re-paired) and re-running the triple difference **on the FLOW outcome** (`run_flow_heldonly.do`, B7 panel, N = 192,810) gives β₃ = **+0.00135** (3-pairwise) — *further* from the disengagement prediction, still positive, not toward it. The null is therefore not zero-fill attenuation. *(B8 fix, 2026-07-22: the earlier "+0.00122" held-only figure was run on the superseded `dos` comparison column via `test_obs_only.do`, whose panel has no `flow` variable; the check now uses the primary flow outcome.)*
+**Not a zero-fill artifact.** Dropping the extensive-margin zeros (observed-held-only, re-paired) and re-running the triple difference **on the FLOW outcome** (`run_flow_heldonly.do`, B7 panel, N = 192,810) gives β₃ = **+0.00135** (3-pairwise, CRVE p=0.0018) — *further* from the disengagement prediction, still positive, not toward it. The null is therefore not zero-fill attenuation. *(B8 fix, 2026-07-22: the earlier "+0.00122" held-only figure was run on the superseded `dos` comparison column via `test_obs_only.do`, whose panel has no `flow` variable; the check now uses the primary flow outcome.)*
 
-**Independently reproduced.** β₃ = +0.0005988 via a Python two-way within-transformation, matching the Stata `reghdfe` value to ~2×10⁻⁷; three independent adversarial re-derivations agree on the point estimate, the null, and the construction.
+**Independently reproduced (Δ(ownership_share) `dos` comparison column).** On the current B7 240,246-row panel the `dos` comparison-column β₃ = +0.000549 (`ownership_share_results.csv` dos_compare; `ownshare_vce_diag.csv` r3, `se_valid=0` — VCE degenerate this vintage). The earlier Python two-way within-transformation reproduction, β₃ = +0.0005988 matching the Stata `reghdfe` value to ~2×10⁻⁷ across three independent adversarial re-derivations, was run on the **pre-B7 300,866-row panel** and is retained only as that historical cross-check; the primary flow outcome on the B7 panel is +0.000890, adjudicated null by RI above.
 
 **Caveat 1 (ADR / non-primary exclusion).** The measure is primary-EQ only, so it does not observe stake adjustment through ADR/GDR or non-primary classes. US investors hold **8.92%** of their European exposure off the primary class versus **3.32%** for non-US (2.69× asymmetric). The shares-based null is therefore *complementary* to the USD portfolio-weight main spec, which does capture the ADR channel — not a substitute. An ADR-inclusive ownership measure needs the ADR conversion ratio and is deferred (§10).
 
-**Caveat 2 (power / MDE).** With 82 quarter-clusters the design rules out *large* stake reductions but has limited power against small ones. The 80%-power MDE for a *representative* firm-quarter (CN∈[0.05,0.15], 1σ shock, σ_S=2.578) is **≈ 4.1–12.4 bps of float** (≈8.3 bps at CN=0.10), i.e. 0.7–2.2% of the outcome sd — an order of magnitude below the ~25–35 bps that 2.8·SE(β₃) implies at the non-existent CN·S=1 point (Second review round, F5). The quarter-end-only shock is classical measurement error that attenuates β₃ and *enlarges* the true MDE. Read the estimate as bounding the effect near zero, not as proving an exact zero.
+**Caveat 2 (power / MDE).** With 82 quarter-clusters the design rules out *large* stake reductions but has limited power against small ones. The 80%-power MDE for a *representative* firm-quarter (CN∈[0.05,0.15], 1σ shock, σ_S=2.578) is **≈ 0.8–2.3 bps of float** (≈1.5 bps at CN=0.10), below the ~6 bps that 2.8·SE(β₃) implies at the non-existent CN·S=1 point (Second review round, F5). This uses the B7 3-pairwise CRVE SE (2.14×10⁻⁴), which is fat-tail-deflated, so the true MDE is *larger* than this figure. The quarter-end-only shock is additionally classical measurement error that attenuates β₃ and enlarges the true MDE. Read the estimate as bounding the effect near zero, not as proving an exact zero.
+
+---
+
+### 7.7 Direction split — buy-side vs sell-side China exposure (`run_direction_split.do`, `run_ri_direction.py`)
+
+The B7 exposure `cn_lag` sums two link types with opposite economic content: **sell-side** (the firm is a China customer's supplier, i.e. it *sells to* China — revenue exposure) and **buy-side** (the firm is a China supplier's customer, i.e. it *buys from* China — input dependence). They split additively (`sell_lag + buy_lag = cn_lag`, §5.4). If disengagement acts through only one channel, pooling them into a single `cn_lag` could dilute it. It does not:
+
+| channel | β₃ (link-share) | RI p | indicator β₃ |
+|---|---|---|---|
+| sell-side (US·sell_lag·S_t) | +2.53×10⁻⁷ (CRVE p=0.618) | **0.931** | +6.52×10⁻⁷ (p=0.609) |
+| buy-side (US·buy_lag·S_t) | +5.50×10⁻⁶ (CRVE p=0.147) | **0.136** | +2.41×10⁻⁶ (p=0.536) |
+| sell − buy (equality) | −5.25×10⁻⁶ | **0.205** | — |
+
+N = 347,490. Both channels are **null** under design-based RI; the buy-side point estimate is *positive* (anti-decoupling, not disengagement), the sell-side ≈ 0. The two are near-orthogonal (corr(sell, buy | exposure>0) = −0.135; carriers are 47% sell-only, 35% buy-only, 18% both), so pooling is not mechanically hiding an offset. A formal **pooling test endorses the single-`cn_lag` spec** (F p=0.424, cannot reject equal buy/sell coefficients), and the offset alternative — a negative sell channel cancelled by a positive buy channel — is **rejected**, because the sell channel is not negative. The `indicator` column (a 0/1 exposure flag, immune to reciprocal double-records) is null in both channels too. VCE validity in `direction_vce_diag.csv` (committed b503338).
+
+### 7.8 Four-group active/passive split — is the null a passive-fund dilution artifact? (`build_fourgroup_panel.py`, `run_fourgroup.do`, `run_ri_fourgroup.py`)
+
+A natural worry about the pooled null: index/passive funds mechanically do not reallocate on news, so pooling them with active managers could dilute a real active-manager disengagement toward zero. We split both US and NONUS into **ACTIVE** and **PASSIVE** managers (FactSet funds master) and re-run the triple difference. **The active/passive labels come from a ~2018-08 master snapshot and are predetermined only at/after 2018m8, so the post-2018 subsample is the PRIMARY report and the full-period columns carry a look-ahead caveat.**
+
+| contrast | full-period β₃ (RI p) | **post-2018 β₃ (PRIMARY, RI p)** |
+|---|---|---|
+| **US_ACTIVE vs NONUS_ACTIVE (MAIN)** | +2.79×10⁻⁶, CRVE p=0.069 → **RI 0.289 (null)** | **+1.16×10⁻⁶, CRVE p=0.376 → RI 0.561 (null)** |
+| US_PASSIVE vs NONUS_PASSIVE (inert benchmark) | +1.03×10⁻⁶ (p=0.760) | −0.14×10⁻⁶ (p=0.963) |
+| US-internal ACTIVE vs PASSIVE | +1.56×10⁻⁶ (p=0.135) | −0.19×10⁻⁶ (p=0.842) |
+
+N = 347,490 (full) / 183,718 (post-2018). The MAIN active-vs-active contrast is **null** in both windows; the full-period CRVE p=0.069 is killed by RI (0.289). Decisively, **active-only ≈ pooled** (+2.79 vs the pooled +2.75×10⁻⁶): restricting to active managers does *not* strengthen the estimate, so the **passive-dilution hypothesis is rejected** — the null is not an artifact of averaging in inert index funds. (Committed 4d134a2; VCE validity in `fourgroup_vce_diag.csv`.)
+
+### 7.9 Russia positive control (`build_russia_c6_panel.py`, `run_russia_headline.do`, `run_ri_russia*.py`, `run_russia_lp_test.py`)
+
+To make the China null informative we reran the *identical* pipeline (02→06→estimation→RI) on **Russia** exposure with a `USA|Russia` GPR shock; post-2022 is a known large divestment. A working positive control would detect that divestment and license reading the China null as "truly absent" rather than "undetectable."
+
+| spec | β₃ (US·RU·S_t) | CRVE p | **RI p (headline inference)** |
+|---|---|---|---|
+| it+gt | −4.21×10⁻⁶ (SE 1.97×10⁻⁶) | 0.035 | **0.243** |
+| 3-pairwise | −4.28×10⁻⁶ (SE 2.01×10⁻⁶) | 0.036 | **0.246** |
+| 2022Q1–Q2 event dummy | −3.44×10⁻⁵ | VCE degenerate (se_valid=0) | — |
+
+N = 347,952 (it+gt) / 347,490 (3-pairwise). **RI is the headline inference here**, not the CRVE: the shock is a single concentrated event, so the few-cluster CRVE overstates significance. The sign is **negative** (the divestment direction, as hoped), but under valid RI **no spec clears 0.05** (0.243 / 0.246). The cumulative event-study confirms it: all 8 horizons are negative but every firm-level permutation p is ≥ 0.22 (h0=0.289, h1=0.218, the rest 0.27–0.41; n=4,289/horizon), and the rolling-window placebo share is 0.457.
+
+**So the Russia control shows the right *sign* but does not reach significance under valid design-based inference — it cannot be cited as passing design validation.** This *reinforces* the known power limitation (limitation 1 / B12): with 82 quarters and a triple difference, even a large, concentrated, correctly-signed divestment is not detectable at conventional levels. **Superseded:** an earlier pre-B7-fix run (all-relationship-type denominator) reported LP h=0 perm_p=0.040 / h=1 perm_p=0.052; those are **dead** — they came from the wrong denominator and do not survive the B7 fix, and must not be cited as validation.
 
 ---
 
@@ -425,10 +493,10 @@ It is immune to price (numerator and denominator are both in shares) and to port
 
 | Δw definition | β₃ | SE | p |
 |---|---|---|---|
-| Centered (w_{t+1} − w_{t−1}), prior build | +1.38 | 0.54 | **0.013 (significant, opposite H2.1)** |
-| Backward (w_t − w_{t−1}), current | +1.28 | 1.66 | 0.443 (null) |
+| Centered (w_{t+1} − w_{t−1}), prior build (pre-B7) | +1.38 | 0.54 | **0.013 (significant, opposite H2.1)** |
+| Backward (w_t − w_{t−1}), pre-B7 comparison | +1.28 | 1.66 | 0.443 (null) |
 
-Point estimate barely moves (+1.38 → +1.28); **SE roughly triples (0.54 → 1.66)**. We read the earlier significance as a **look-ahead / post-treatment window contamination**: the centered LHS includes post-t holdings (w_{t+1}), so the outcome mixes contemporaneous with future adjustment and is not aligned with the estimand's timing. We deliberately do **not** claim a proven "mechanical correlation of shocks" (S_t is an AR(1) residual, so S_t and S_{t+1} need not be strongly correlated), and we do **not** claim to have decomposed *why* the SE tripled. Three forces move together between the two builds — look-ahead removal, a small right-edge sample expansion, and entry/exit reweighting — and they are not separately identified here; a sample-matched centered-window comparison on a common sample (deferred, §10) is needed to attribute the SE change. Identification rests on the within-firm-quarter β₃, which is null. **The retraction is now on firmer ground:** the clean lead-flow test (Δw_{t+1} ~ S_t) and the local-projection IRF are both null under design-based randomization inference (Second review round, F1), so the null is not an artifact of the centered window's timing — no US-differential response exists at t, at t+1, or cumulatively.
+Both rows are on the **pre-B7 all-`rel_type` panel**, held on a common sample so the SE change is not confounded by the B7 rebuild; the current B7 backward headline is +2.081×10⁻⁶ (it+gt) / +2.746×10⁻⁶ (3-pairwise), §7.1, still null. Point estimate barely moves (+1.38 → +1.28); **SE roughly triples (0.54 → 1.66)**. We read the earlier significance as a **look-ahead / post-treatment window contamination**: the centered LHS includes post-t holdings (w_{t+1}), so the outcome mixes contemporaneous with future adjustment and is not aligned with the estimand's timing. We deliberately do **not** claim a proven "mechanical correlation of shocks" (S_t is an AR(1) residual, so S_t and S_{t+1} need not be strongly correlated), and we do **not** claim to have decomposed *why* the SE tripled. Three forces move together between the two builds — look-ahead removal, a small right-edge sample expansion, and entry/exit reweighting — and they are not separately identified here; a sample-matched centered-window comparison on a common sample (deferred, §10) is needed to attribute the SE change. Identification rests on the within-firm-quarter β₃, which is null. **The retraction is now on firmer ground:** the clean lead-flow test (Δw_{t+1} ~ S_t) and the local-projection IRF are both null under design-based randomization inference (Second review round, F1), so the null is not an artifact of the centered window's timing — no US-differential response exists at t, at t+1, or cumulatively.
 
 ---
 
@@ -441,12 +509,12 @@ Point estimate barely moves (+1.38 → +1.28); **SE roughly triples (0.54 → 1.
 5. **Entry/exit mechanical asymmetry** under backward diff (exit = −w_{t−1}, entry = +w_t) mechanically favors the H2.1 direction, yet β₃ is null — arguably reassuring, but it complicates magnitude interpretation.
 6. **Estimand shifts** across samples (full grid = all holdings-observed European issuers; risk-set = engaged firms only).
 7. **"European" includes GB/CH/NO** (non-EU); GB dominates the country-pair subsample.
-8. **HIGH cutoff is ~4%**, so "high exposure" is not extreme.
+8. **HIGH cutoff is ~6%** (B7 CUSTOMER+SUPPLIER median of positive CN; pre-B7 all-`rel_type` was ~4%), so "high exposure" is not extreme.
 9. **Group-level (2 groups), not holder-level.** The true Khwaja–Mian holder×time control is not yet in.
 10. **Convention-match not verified componentwise** against De Haas (do their diff and shock-timing both match ours?).
 11. **Universe is holdings-observed, not full listing** (§3, Caveat 2). The C6 zero-fill corrects selection on the outcome *within* the holdings-observed universe (a firm held by anyone gets a full grid, so US exits are captured), but not securities never held by any institution. Adding those from full Security Coverage would, for firms with non-missing CN, contribute zero within-firm-quarter outcome variation against nonzero regressor variation, whose **mechanical expectation is to attenuate β₃ toward zero**. On that reasoning the current holdings-observed universe is, if anything, the *higher-powered* universe for detecting β₃, and the full-universe rebuild is an optional robustness. But this is the expected direction under a simplified argument, not a proven one — in the full FE model the added rows also shift the group×quarter effects, so the net movement of β₃ should be **verified by actually running the rebuild, not asserted**. (This corrects an earlier claim that never-held firms "do not affect β₃" — they do, and the leading-order effect is attenuation.)
 12. **Revere match has country structure.** Of the holdings-observed European securities, ~20% do not match to Revere overall, but the miss rate is uneven by listing country (`05_unmatched_profile_by_country.csv`). **GB is the worst among large countries: 32.78% unmatched (1,307 of 3,987)**, versus FR 17.9%, DE 11.6%. Because GB is 60.85% of the GB+DE+FR country-pair subsample, the Revere-matched sample systematically drops about one-third of GB issuers — a selection concern for both the main and country-pair specifications that should be characterized (is the unmatched set systematically smaller / different-sector?), not just reported.
-13. **Shares-based test excludes ADRs** (§7.6, Caveat 1). The ownership-share robustness is primary-EQ only, so it cannot see stake adjustment through ADR/GDR or non-primary classes. US holds 8.92% of its European exposure off the primary class versus 3.32% for non-US (2.69× asymmetric), so the shares-based null is complementary to — not a substitute for — the USD portfolio-weight main spec that does capture the ADR channel. Its power is limited against small adjustments; the 80%-power MDE for a representative firm-quarter is ≈ 4–12 bps of float (Second review round, F5), so it bounds the stake effect near zero rather than proving an exact zero.
+13. **Shares-based test excludes ADRs** (§7.6, Caveat 1). The ownership-share robustness is primary-EQ only, so it cannot see stake adjustment through ADR/GDR or non-primary classes. US holds 8.92% of its European exposure off the primary class versus 3.32% for non-US (2.69× asymmetric), so the shares-based null is complementary to — not a substitute for — the USD portfolio-weight main spec that does capture the ADR channel. Its power is limited against small adjustments; the 80%-power MDE for a representative firm-quarter is ≈ 0.8–2.3 bps of float (Second review round, F5), so it bounds the stake effect near zero rather than proving an exact zero.
 14. **Group is FactSet registration domicile, not decision nationality** (third review round). A US manager's Luxembourg / Ireland UCITS shell is grouped into NONUS, though the allocation decision and any political-pressure channel are US — treatment-group misclassification that mechanically **compresses β₃ toward zero**. Not yet corrected; the root fix is to regroup by the management company's **ultimate-parent nationality** (deferred, §10). The EU-domiciled-only control treats the symptom, not the cause.
 15. **NONUS is not an untreated control.** European institutions have their own domestic de-risking pressure (from ~2019), so the triple difference identifies only *differential* US disengagement and is **blind to common de-risking**: a zero β₃ is consistent with both groups reallocating identically. Consistent with this, the weak-FE column (which would pick up any *common* reaction) is also null — at the quarterly frequency no group reallocates within Europe on the shock.
 16. **The continuous AR(1) shock averages over opposite-signed episodes.** 2018 tariffs (bad for exposed firms) vs the 2022 export controls (partly *good* for EU semicap substitutes) may push allocations opposite ways; one continuous shock aggregates them toward zero. A named-event study (H2.2) is the cleaner test.
@@ -459,12 +527,12 @@ Point estimate barely moves (+1.38 → +1.28); **SE roughly triples (0.54 → 1.
 - Winsorize Δw at 1/99%.
 - Leave-one-quarter-out (which escalation episodes carry any result).
 - PPML via `ppmlhdfe` for the zero-heavy weights (Silva–Tenreyro 2006; Correia et al. 2020).
-- ~~Local projections (Jordà 2005) for dynamics~~ — **DONE** (Second review round, F1; all horizons null under randomization inference).
+- ~~Local projections (Jordà 2005) for dynamics~~ — **DONE** (Second review round, F1; single-quarter horizons null under RI, one cumulative horizon (cum4) at RI p=0.039 but *positive*-signed, opposite disengagement; wild-cluster-bootstrap robustness could not run, boottest OOM).
 - **Holder-level fixed effects** (holder × quarter), the true bank×time analog.
 - **ADR-inclusive ownership share** (§7.6): map ADR/GDR holdings to underlying-share equivalents via the ADR conversion ratio so the shares-based test captures the ADR channel (US 8.92% of exposure off-primary); needs the ratio data.
 - Sample-matched centered-window comparison (quantify the §8 disclosure on a common sample).
 - OFAC SDN / Entity-List exclusion; size, industry, listing-country × shock controls.
-- **Positive controls** (make the null informative): (i) **Russia exposure** post-Ukraine (2022) — isomorphic reuse of 02→06→RI with `'RU'` and a `USA|Russia` GPR shock; (ii) the same investors' **direct China holdings** (ADR/HK, HFCAA-era divestment) as an in-pipeline benchmark. If the design detects those known divestments, the China null becomes "truly absent," not "undetectable."
+- **Positive controls** (make the null informative): (i) **Russia exposure** post-Ukraine (2022) — **DONE (§7.9)**: the isomorphic 02→06→RI pipeline with `'RU'` and a `USA|Russia` shock returns the correct (divestment) *sign* but no spec is significant under valid RI, so it validates *direction only* and reinforces the power limitation; (ii) the same investors' **direct China holdings** (ADR/HK, HFCAA-era divestment) as an in-pipeline benchmark — still planned. If the design detects those known divestments, the China null becomes "truly absent," not "undetectable."
 - **Ultimate-parent regrouping** (limitation 14): reclassify holders by management-company ultimate-parent nationality; EU-domiciled-only as one column.
 - **H2.2 price channel**: acquire European stock returns (Datastream / Compustat Global Security / FactSet Prices); abnormal returns from a factor model; Tobin's q from Compustat Global; named-event studies (2018 tariffs, 2019 Huawei, 2022-08, 2022-10) at daily/monthly frequency to bypass the 82-quarter power ceiling.
 
@@ -485,9 +553,9 @@ Point estimate barely moves (+1.38 → +1.28); **SE roughly triples (0.54 → 1.
 | `00_setup.jl` | EU country list, paths, DB helper | — |
 | `02_china_exposure.jl` | CN exposure (symmetric, bilateral, time-versioned; C2/C4/C5) | `firm_quarter_china_exposure.parquet` |
 | `06_cartesian_grid.jl` | Cartesian grid + zero-fill + **backward Δw** + lagged CN (C1/C6) | `merged_us_eu_zero_filled.parquet` |
-| `build_c6_panel.py` | → main estimation panel | `c6_panel.dta` (462,564) |
+| `build_c6_panel.py` | → main estimation panel (adds `sell_lag`/`buy_lag` for §7.7) | `c6_panel.dta` (347,952) |
 | `build_country_pair_shock.py` | AR(1) per country-pair (UK/DE/FR) + subsample | `c6_panel_country_pair.dta` |
-| `build_spell_riskset.py` | **correct** firm-quarter risk-set conditional sample | `c6_panel_riskset.dta` (342,262) |
+| `build_spell_riskset.py` | **correct** firm-quarter risk-set conditional sample | `c6_panel_riskset.dta` (268,282) |
 | ~~`build_spell_boundary.py`~~ | **SUPERSEDED — per-group selection, broke pairing** | ~~`c6_panel_spell.dta`~~ |
 | `07_regression.do` | 4 specs (β₂+β₃ / β₃-only / full triple / weak FE) | `07_reghdfe_results.txt` |
 | `07b_country_pair_robustness.do` | country-pair S_{c,t}, recovers β₁ | `07b_country_pair_results.*` |
@@ -496,13 +564,18 @@ Point estimate barely moves (+1.38 → +1.28); **SE roughly triples (0.54 → 1.
 | `07e_firmgroup_tail.do` | firm×group FE + tail-dummy menu (k=1.645/2/3) | `07e_firmgroup_tail.*` |
 | `07g_spell_riskset.do` | risk-set conditional sample regression | `07g_spell_riskset.*` |
 | ~~`07f_spell_boundary.do`~~ | **SUPERSEDED (ran the biased per-group sample)** | — |
-| `run_headline_3pairwise.do` | **headline** = three-way pairwise FE, all main specs | `audit_c6_panel.dta` |
+| `run_headline_3pairwise.do` | **headline** = three-way pairwise FE, all main specs | `audit_c6_panel.dta`, `headline_3pairwise_canonical.csv` |
 | `run_audit_f1f2f7.do` / `run_audit_f4f8.do` | second-round tests (F1/F2/F7, F4/F8) | audit CSVs |
 | `run_randomization_inference.py` / `run_ri_3pairwise.py` | design-based RI (F1/F3) | RI CSVs |
 | `build_shocklag_panel.py` / `run_shocklag.do` / `run_ri_shocklag.py` | advisor shock-timing revision (§7.3b): S_{t-1} spec + RI | `shocklag_panel.dta`, `shocklag_ri_results.csv` |
 | `02_russia_exposure.jl` / `06_russia_grid.jl` / `build_russia_shock.py` / `build_russia_c6_panel.py` | Russia positive control (isomorphic pipeline) | `c6_panel_russia.dta` |
-| `run_russia_headline.do` / `run_ri_russia*.py` / `build_russia_lp_panel.py` / `run_russia_lp_test.py` | Russia positive-control regressions + inference (mixed evidence, pending re-review) | Russia result CSVs |
+| `run_russia_headline.do` / `run_ri_russia*.py` / `build_russia_lp_panel.py` / `run_russia_lp_test.py` | Russia positive-control regressions + inference (§7.9: correct divestment sign, not significant under RI — validates direction only) | Russia result CSVs |
 | `build_audit_panel_f1f2f7.py` / `build_riskset_lagonly.py` | second-round panels | audit / lag-only dta |
+| `run_tercile_3pairwise.do` / `run_ri_tercile.py` | §7.3 shock-tercile dose menu + RI | `tercile_results.csv`, `ri_tercile_results.csv`, `tercile_vce_diag.csv` |
+| `build_sagg_panel.py` / `run_sagg_distlag.do` / `run_ri_sagg.py` | §7.3c aggregated-shock robustness + RI (free-perm + circular-shift) | `sagg_panel.dta`, `sagg_ri_check.csv` |
+| `run_direction_split.do` / `run_ri_direction.py` | §7.7 buy-side vs sell-side split + RI | `direction_results.csv`, `ri_direction_results.csv`, `direction_vce_diag.csv` |
+| `build_fourgroup_panel.py` / `run_fourgroup.do` / `run_ri_fourgroup.py` | §7.8 active/passive four-group split + RI (post-2018 primary) | `fourgroup_panel.dta`, `fourgroup_results.csv`, `ri_fourgroup_results.csv`, `fourgroup_vce_diag.csv` |
+| `run_flow_decomposition.py` / `run_flow_decomp_step3.do` | §7.6 flow-identity decomposition (six cells) | `flow_decomposition_panel.dta`, `ri_flow_decomposition.csv` |
 
 Stata specification pattern (headline; all reghdfe calls share it):
 
@@ -539,29 +612,34 @@ MAX(CASE WHEN held=1 OR held_lag=1 OR held_lead=1 THEN 1 ELSE 0 END)
 
 | Spec | Sample / shock | β₃ | SE | p | N |
 |---|---|---|---|---|---|
-| Headline | full grid, continuous S_t | +1.28 | 1.66 | 0.443 | 462,564 |
-| No FE | full grid | −0.35 | 0.60 | 0.565 | 462,564 |
-| Weak FE (firm+quarter) | full grid | −0.12 | 0.71 | 0.865 | 462,564 |
-| + firm×group FE (= 3-pairwise headline; see row below) | full grid | +1.80 | 1.91 | 0.350 | 462,096 |
-| Tail k=1.645 (6 qtrs) | full grid, dummy | +1.07 | 15.7 | 0.946 | 462,564 |
-| Tail k=2 (4 qtrs) | full grid, dummy | +14.0 | 18.0 | 0.439 | 462,564 |
-| Tail k=3 (2 qtrs) | full grid, dummy | +8.59 | 39.0 | 0.826 | 462,564 |
-| Conditional risk-set | paired, continuous S_t | +2.46 | 3.15 | 0.436 | 342,262 |
-| Conditional + firm×group | paired | +2.46 | 3.19 | 0.443 | 341,858 |
-| Country-pair (GB+DE+FR) | S_{c,t} | +3.48 | 30.2 | 0.909 | 227,310 |
-| **Headline (3-pairwise it+gt+ig)** | full grid, S_t | +1.80 | 1.91 | 0.350 (RI 0.51) | 462,096 |
-| Lead-flow Δw_{t+1} ~ S_t | full grid | −0.24 | 1.98 | 0.905 (RI 0.92) | 449,938 |
-| Local projection cum h1 | full grid | +1.38 | 0.54 | CRVE 0.013 / **RI 0.47** | 449,938 |
-| Local projection cum h4 | full grid | +3.88 | 1.89 | CRVE 0.044 / **RI 0.23** | 414,198 |
-| In-span (drop ~25% phantom) | in-span, S_t | +2.38 | 3.01 | 0.430 (RI 0.58) | 346,764 |
-| Ownership FLOW (F6)† | flow, S_t | +0.00088 | 0.00115 | 0.44 | 300,866 |
-| GPR two-interaction (F7) | GPR_t / GPR_{t−1} | −2.07 / +0.89 | — | 0.28 / 0.64 | 462,564 |
-| **[retracted] centered diff** | full grid | +1.38 | 0.54 | 0.013 | ~450k |
-| **[retracted, biased] per-group spell** | broke pairing | +4.38 | 5.66 | 0.441 | 250,918 |
+| **Headline (3-pairwise it+gt+ig)** | full grid, S_t | +2.746 | 1.697 | 0.110 (RI 0.31) | 347,490 |
+| Headline (it+gt) | full grid, S_t | +2.081 | 1.44 | 0.151 (RI 0.41) | 347,952 |
+| No FE | full grid | +0.0006 | 0.53 | 0.999 | 347,952 |
+| Weak FE (firm+quarter) | full grid | +0.54 | 0.65 | 0.411 | 347,952 |
+| Conditional risk-set (fq gq) | paired, S_t | +3.26 | 2.24 | 0.151 | 268,282 |
+| Conditional + firm×group | paired | +3.51 | 2.38 | 0.143 | 267,898 |
+| Risk-set lag-only (F8) | paired, S_t | +3.35 | 2.32 | 0.153 | 265,710 |
+| Country-pair (GB+DE+FR) | S_{c,t} | −1.21 | — | 0.93–0.97 | 172,860 |
+| Lead-flow Δw_{t+1} ~ S_t (it+gt) | full grid | +0.49 | 1.68 | 0.774 (RI 0.85) | 337,890 |
+| In-span (drop ~25% phantom, it+gt) | in-span, S_t | +3.33 | 2.21 | 0.135 (RI 0.39) | 269,998 |
+| Local projection cum h1 (3-pairwise) | full grid | +4.09 | — | CRVE 0.009 / **RI 0.11** | 337,890 |
+| Local projection cum h4 (3-pairwise) | full grid | +8.83 | — | CRVE 0.053 / **RI 0.039 (positive)** | 309,358 |
+| Advisor lagged shock S_{t−1} (§7.3b) | full grid, S_{t−1} | −0.59 | 1.85 | 0.750 (RI 0.81) | 347,952 |
+| Aggregated shock s_agg (§7.3c) | full grid, s_agg | −1.06 | 1.12 | 0.348 (RI 0.51/0.46) | 347,952 |
+| Shock-tercile T3 (§7.3) | full grid, tercile | +20.5 | — | 0.264 (RI 0.23) | 347,490 |
+| Direction buy-side (§7.7) | full grid, buy_lag | +5.50 | 3.76 | 0.147 (RI 0.14) | 347,490 |
+| Direction sell-side (§7.7) | full grid, sell_lag | +0.25 | 0.51 | 0.618 (RI 0.93) | 347,490 |
+| Four-group active-vs-active, post-2018 (§7.8, PRIMARY) | active, S_t | +1.16 | 1.28 | 0.376 (RI 0.56) | 183,718 |
+| Ownership FLOW (F6)† | flow, S_t | +0.00089 | 0.000214 | CRVE 0.0001 (fat-tail-deflated) / **RI 0.37** | 239,792 |
+| GPR two-interaction (F7) | GPR_t / GPR_{t−1} | −0.84 / +0.26 | — | 0.63 / 0.88 | 347,952 |
+| Russia positive control it+gt (§7.9) | full grid, S^{RU}_t | −4.21 | 1.97 | CRVE 0.035 / **RI 0.24** | 347,952 |
+| Tail k=1.645/2/3 (superseded, pre-B7) | full grid, dummy | +1.07 / +14.0 / +8.59 | 15.7 / 18.0 / 39.0 | 0.95 / 0.44 / 0.83 | 462,564 |
+| **[retracted] centered diff (pre-B7)** | full grid | +1.38 | 0.54 | 0.013 | ~450k |
+| **[retracted, biased] per-group spell (pre-B7)** | broke pairing | +4.38 | 5.66 | 0.441 | 250,918 |
 
-†Ownership FLOW β₃ is in raw fraction-of-float units, not ×10⁻⁶. RI = design-based randomization-inference p (Second review round, F1/F3).
+†Ownership FLOW β₃ is in raw fraction-of-float units, not ×10⁻⁶ (its CRVE is fat-tail-deflated, so RI is the arbiter). RI = design-based randomization-inference p (Second review round, F1/F3). β₃ values are ×10⁻⁶ of portfolio weight unless noted.
 
-**Bottom line for the reviewer:** every valid specification returns a null β₃, including under the three-way pairwise FE headline and under design-based randomization inference (which shows the CRVE-significant local-projection horizons to be few-cluster/overlapping-window artifacts; every RI p ≥ 0.07, every single-quarter spec ≥ 0.23, every quarterly-shock point estimate *positive*; the aggregated-shock robustness spec is negative on a pre-rebuild panel and pending re-adjudication, and is carved out of this claim). The historically significant result is a retracted forward-window/few-cluster artifact; the one borderline coefficient (country-pair β₁) is not reliably inferred once clustered at the country level (p 0.098→0.23). The honest reading is that the ownership-flow channel shows no detectable differential US disengagement, and the project should be judged on (a) the panel/identification construction and (b) the planned firm-level price channel (H2.2), not on a confirmed behavioral effect.
+**Bottom line for the reviewer:** every valid specification returns a null β₃, including under the three-way pairwise FE headline (p=0.110, RI 0.31) and under design-based randomization inference. RI clears every single-quarter spec (all ≥ 0.23) and every S_t point estimate on the main outcome is *positive* (opposite disengagement). The one horizon that reaches RI significance is a single cumulative local-projection step (3-pairwise cum4, RI 0.039) — and its sign is *positive*, so it runs against disengagement, not toward it; its wild-cluster-bootstrap robustness could not be completed (boottest OOM), so it rests on RI alone. The aggregated-shock robustness spec is now an adjudicated clean null (negative sign, RI free-permutation 0.51 / circular-shift 0.46; the pre-B7 near-marginal CRVE p=0.086 did not survive). The historically significant result is a retracted forward-window/few-cluster artifact; the one borderline coefficient (country-pair β₁) is not reliably inferred once clustered at the country level (p 0.086→0.246). The Russia positive control returns the correct divestment *sign* but is not significant under valid RI (0.24), validating direction only and reinforcing the power limitation. The honest reading is that the ownership-flow channel shows no detectable differential US disengagement, and the project should be judged on (a) the panel/identification construction and (b) the planned firm-level price channel (H2.2), not on a confirmed behavioral effect.
 
 ---
 
@@ -574,7 +652,7 @@ The full source is in `github.com/fidio728/practice`, branch `essay2-code-review
 |---|---|
 | `00_setup.jl` | config: the 28 `EU_COUNTRIES`, data paths, helpers |
 | `01_master_files.jl` | master-file assembly |
-| `02_china_exposure.jl` | Chinese supply-chain exposure from Revere edges; edge counterparty country **as of edge-start** (F12); `china_share` = CN edges / total edges |
+| `02_china_exposure.jl` | Chinese supply-chain exposure from Revere edges; edge counterparty country **as of edge-start** (F12); `china_share` = CN CUSTOMER+SUPPLIER edges / total CUSTOMER+SUPPLIER edges (**B7**; competitor/partner excluded, `china_share_alltypes` kept for diagnostics); also emits `sell_share`/`buy_share` for §7.7 |
 | `03_eom_etl.jl` (+ `03a_decompress_to_parquet.jl`, `03b_phase_c_diagnostics.jl`) | FactSet Ownership EOM ETL → `holdings_eom.parquet` (186,800,295 rows); duplicate-key **hard-fail** (F13/dup-key) |
 | `04_us_ownership_european.jl` | `I_ict` (group USD holdings) + market cap; US/NONUS split; **primary-EQ float** (`fsym_id = fsym_primary_id`) |
 | `05_combine_visualize.jl` | AR(1) GPR shock (quarter-end residual); combine; diagnostics |
@@ -592,6 +670,8 @@ The full source is in `github.com/fidio728/practice`, branch `essay2-code-review
 | `build_audit_panel_f1f2f7.py` | F1/F2/F7 audit panel `audit_c6_panel.dta` (leads, cumulative, `in_span`, raw GPR) |
 | `build_riskset_lagonly.py` | F8 lag-only risk set `c6_panel_riskset_lagonly.dta` |
 | `build_shocklag_panel.py` | §7.3b: shock lagged to S_{t-1}, paired with the existing CN_{t-1} → `shocklag_panel.dta` |
+| `build_sagg_panel.py` | §7.3c: within-quarter aggregated shock `s_agg` → `sagg_panel.dta` |
+| `build_fourgroup_panel.py` | §7.8: active/passive four-group panel (funds master ~2018-08 snapshot) → `fourgroup_panel.dta` |
 | `02_russia_exposure.jl` (isomorphic copy of `02_china_exposure.jl`) | Russia positive-control exposure panel `firm_quarter_russia_exposure.parquet` |
 | `06_russia_grid.jl` (isomorphic copy of `06_cartesian_grid.jl`) | Russia positive-control zero-filled grid `merged_us_ru_zero_filled.parquet` |
 | `build_russia_shock.py` | US-Russia AR(1) GPR shock (isomorphic to `build_country_pair_shock.py`) → `russia_shock_monthly.csv` |
@@ -608,21 +688,32 @@ The full source is in `github.com/fidio728/practice`, branch `essay2-code-review
 | `run_audit_f1b_robust.do` | F1b CRVE-vs-alternate-FE sensitivity (see also RI) |
 | `07g_spell_riskset.do` | risk-set regression; `07_regression.do`/`07b`/`07c`/`07d`/`07e` legacy main/robustness (`07f` superseded) |
 | `run_shocklag.do` | §7.3b advisor shock-timing spec (S_{t-1}) — CRVE + SD-standardized reporting |
+| `run_tercile_3pairwise.do` | §7.3 shock-tercile dose menu (T2 base; replaces tail-dummy menu) |
+| `run_sagg_distlag.do` | §7.3c aggregated-shock (`s_agg`) spec |
+| `run_direction_split.do` | §7.7 buy-side vs sell-side split (link-share + indicator columns) |
+| `run_fourgroup.do` | §7.8 active/passive four-group split (post-2018 = primary) |
+| `run_flow_decomp_step3.do` | §7.6 flow-identity decomposition regressions (six cells) |
 | `run_russia_headline.do` | Russia positive control: continuous-shock (it+gt, 3-pairwise) + 2022Q1-Q2 event dummy |
 
 ### Design-based inference — Russia extension
 | file | does |
 |---|---|
-| `run_ri_shocklag.py` | RI for the S_{t-1} spec (§7.3b) — confirms sign flip is noise (RI p=0.735) |
+| `run_ri_shocklag.py` | RI for the S_{t-1} spec (§7.3b) — confirms sign flip is noise (RI p=0.814) |
 | `run_ri_russia.py` | Russia continuous-shock RI (it+gt) + 2022Q1-Q2 vs all rolling 2-quarter windows placebo |
 | `run_ri_russia_3pairwise.py` | Russia 3-pairwise RI |
-| `run_russia_lp_test.py` | Russia cumulative event-study, firm-level permutation test per horizon (h=0..7) — **mixed evidence, pending adversarial re-review (workflow wy0r0wgv2 failed on a session-limit error, not yet re-run)** |
+| `run_russia_lp_test.py` | Russia cumulative event-study, firm-level permutation test per horizon (h=0..7) — §7.9: all 8 horizons negative, **none below 0.05 under RI** (h0 perm_p=0.289, n=4,289/horizon); validates divestment *sign* only |
 
 ### Design-based inference (Python)
 | file | does |
 |---|---|
 | `run_randomization_inference.py` | exact RI: US−NONUS pairwise-difference collapse reproduces the two-way-FE β₃; permutes the 82 quarter shocks → `audit_randomization_inference.csv` |
-| `run_ri_3pairwise.py` | two-way-FE (firm+quarter) RI for the 3-pairwise LP horizons → `audit_ri_3pairwise.csv` |
+| `run_ri_3pairwise.py` | two-way-FE (firm+quarter) RI for the 3-pairwise headline + LP horizons → `audit_ri_3pairwise.csv` |
+| `run_ri_tercile.py` | §7.3 tercile RI (re-cuts terciles per permuted shock) → `ri_tercile_results.csv` |
+| `run_ri_sagg.py` | §7.3c aggregated-shock RI (free-permutation + circular-shift) → `sagg_ri_check.csv` |
+| `run_ri_direction.py` | §7.7 direction-split RI (sell / buy / sell−buy) → `ri_direction_results.csv` |
+| `run_ri_fourgroup.py` | §7.8 four-group RI (full + post-2018) → `ri_fourgroup_results.csv` |
+| `run_ri_flow.py` | §7.6 flow RI (raw + winsorized) → `ri_flow_results.csv` |
+| `run_flow_decomposition.py` | §7.6 flow-identity decomposition builder + RI → `flow_decomposition_panel.dta`, `ri_flow_decomposition.csv` |
 
 ### Plots
 `plots/fig13_two_panel.py`, `plots/plot_all.jl`, `plots/plots_python.py`.
@@ -633,18 +724,23 @@ The full source is in `github.com/fidio728/practice`, branch `essay2-code-review
 
 | result | value | produced by | reads / writes |
 |---|---|---|---|
-| Headline β₃ (w-based, it+gt+ig) | +1.80×10⁻⁶ (p=0.35) | `run_headline_3pairwise.do` | `audit_c6_panel.dta` |
-| Headline β₃ (w-based, it+gt) | +1.28×10⁻⁶ (p=0.44) | `run_headline_3pairwise.do` / `build_c6_panel.py` | `audit_c6_panel.dta` / `c6_panel.dta` |
-| Ownership FLOW β₃ (F6) | +8.8×10⁻⁴ (p=0.44) | `run_ownership_share.do` | `ownership_c6_panel.dta` → `ownership_share_results.csv` |
-| F1 lead-flow / local projection | all null | `run_audit_f1f2f7.do` | `audit_c6_panel.dta` → `audit_f1f2f7_results.csv`, `audit_f1_lp_irf.dta` |
-| F1/F3 randomization-inference p (it+gt) | headline 0.62, lead 0.92, LP h1 0.47, h4 0.23 | `run_randomization_inference.py` | `audit_c6_panel.parquet` → `audit_randomization_inference.csv` |
-| randomization-inference p (3-pairwise) | headline 0.51, LP cum1 0.23, cum4 0.07 | `run_ri_3pairwise.py` | `audit_c6_panel.parquet` → `audit_ri_3pairwise.csv` |
-| F2 in-span headline | +2.4×10⁻⁶ (p=0.42) | `run_audit_f1f2f7.do` (`in_span==1`) | `audit_c6_panel.dta` |
-| F4 country-pair β₁ clustering | p 0.098 → 0.23 | `run_audit_f4f8.do` | `c6_panel_country_pair.dta` |
-| F7 GPR two-interaction | both null | `run_audit_f1f2f7.do` | `audit_c6_panel.dta` |
-| F8 risk-set lag-only β₃ | +2.6×10⁻⁶ (p=0.44) | `run_audit_f4f8.do` | `c6_panel_riskset_lagonly.dta` |
+| Headline β₃ (w-based, it+gt+ig) | +2.746×10⁻⁶ (p=0.110, RI 0.31) | `run_headline_3pairwise.do` | `audit_c6_panel.dta` → `headline_3pairwise_canonical.csv` |
+| Headline β₃ (w-based, it+gt) | +2.081×10⁻⁶ (p=0.151, RI 0.41) | `run_headline_3pairwise.do` / `build_c6_panel.py` | `audit_c6_panel.dta` / `c6_panel.dta` |
+| Ownership FLOW β₃ (F6) | +8.9×10⁻⁴ (CRVE fat-tail-deflated; **RI 0.37**) | `run_ownership_share.do` / `run_ri_flow.py` | `ownership_c6_panel.dta` → `ri_flow_results.csv` |
+| F1 lead-flow / local projection | single-quarter null; 3pw cum4 RI 0.039 (positive) | `run_audit_f1f2f7.do` / `run_audit_f1b_robust.do` | `audit_c6_panel.dta` → `audit_f1f2f7_results.csv`, `audit_f1_lp_irf.dta` |
+| F1/F3 randomization-inference p (it+gt) | headline 0.41, lead 0.85, LP h1 0.21, h4 0.13 | `run_randomization_inference.py` | `audit_c6_panel.parquet` → `audit_randomization_inference.csv` |
+| randomization-inference p (3-pairwise) | headline 0.31, LP cum1 0.11, **cum4 0.039** | `run_ri_3pairwise.py` | `audit_c6_panel.parquet` → `audit_ri_3pairwise.csv` |
+| F2 in-span headline | +3.33×10⁻⁶ (p=0.135, RI 0.39) | `run_audit_f1f2f7.do` (`in_span==1`) | `audit_c6_panel.dta` |
+| F4 country-pair β₁ clustering | β₁=+2.22×10⁻⁵, p 0.086 → 0.246 | `run_audit_f4f8.do` | `c6_panel_country_pair.dta` |
+| F7 GPR two-interaction | −0.84×10⁻⁶ (0.63) / +0.26×10⁻⁶ (0.88) | `run_audit_f1f2f7.do` | `audit_c6_panel.dta` |
+| F8 risk-set lag-only β₃ | +3.35×10⁻⁶ (p=0.153) | `run_audit_f4f8.do` | `c6_panel_riskset_lagonly.dta` |
 | ADR off-primary share | US 8.92% / NONUS 3.32% | `build_ownership_share_panel.py` | `ownership_share_diagnostics.csv` |
-| Revere match cascade | 12,743→10,171→8,014→7,928 | `05_combine_visualize.jl` / `build_c6_panel.py` | `05_unmatched_profile_by_country.csv` |
-| §7.3b shock-timing S_{t-1} | −8.65×10⁻⁷ (CRVE p=0.68, RI p=0.735) | `run_shocklag.do` / `run_ri_shocklag.py` | `shocklag_panel.dta` |
+| Revere match cascade | 12,743→10,171→8,014→**6,854** (B7; pre-B7 7,928) | `05_combine_visualize.jl` / `build_c6_panel.py` | `05_unmatched_profile_by_country.csv` |
+| §7.3b shock-timing S_{t-1} | −5.90×10⁻⁷ (CRVE p=0.750, RI p=0.814) | `run_shocklag.do` / `run_ri_shocklag.py` | `shocklag_panel.dta` → `shocklag_results.csv` |
+| §7.3c aggregated shock s_agg | −1.06×10⁻⁶ (RI free-perm 0.51 / circ 0.46) | `run_sagg_distlag.do` / `run_ri_sagg.py` | `sagg_panel.dta` → `sagg_ri_check.csv` |
+| §7.3 shock-tercile T3 | +2.05×10⁻⁵ (p=0.264, RI 0.23) | `run_tercile_3pairwise.do` / `run_ri_tercile.py` | `tercile_results.csv` / `ri_tercile_results.csv` |
+| §7.7 direction split | sell +2.5×10⁻⁷ (RI 0.93) / buy +5.5×10⁻⁶ (RI 0.14) | `run_direction_split.do` / `run_ri_direction.py` | `direction_results.csv` / `ri_direction_results.csv` |
+| §7.8 four-group active, post-2018 (PRIMARY) | +1.16×10⁻⁶ (p=0.376, RI 0.56) | `build_fourgroup_panel.py` / `run_fourgroup.do` / `run_ri_fourgroup.py` | `fourgroup_results.csv` / `ri_fourgroup_results.csv` |
+| §7.6 flow decomposition (flow_diff, winsor) | +6.65×10⁻⁴ (RI 0.41) | `run_flow_decomposition.py` / `run_flow_decomp_step3.do` | `flow_decomposition_panel.dta` / `ri_flow_decomposition.csv` |
 | σ_S (corrected) | 2.578 over 82 estimation quarters | `run_shocklag.do` | `shocklag_panel.dta` |
-| Russia positive control | mixed/fragile; **pending adversarial re-review** | `run_russia_headline.do` / `run_ri_russia*.py` | `c6_panel_russia.dta` |
+| Russia positive control | −4.21×10⁻⁶ (CRVE 0.035, **RI 0.24**); sign-only | `run_russia_headline.do` / `run_ri_russia*.py` / `run_russia_lp_test.py` | `c6_panel_russia.dta` → `russia_headline_results.csv`, `russia_lp_test_results.csv` |
