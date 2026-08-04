@@ -77,8 +77,13 @@ if SMOKE:
     B_WCB = 200
 
 # published anchors (drift-protection cross-checks)
-B3_GATES = {"h0": 2.745538e-06, "cum1": 4.093621e-06, "cum4": 8.825974e-06}
-P_FREE_ANCHORS = {"h0": 0.3083, "cum1": 0.1052, "cum4": 0.0388}
+# P0 REFRESH 2026-08-04: the as-of W=10 holdings rebuild changed the holdings side,
+# so the pre-P0 gates (h0 +2.745538e-06, cum1 +4.093621e-06, cum4 +8.825974e-06 with
+# free-perm p 0.3083/0.1052/0.0388) are superseded. Values below are read verbatim
+# from the fresh output/audit_ri_3pairwise.csv (run_ri_3pairwise.py on the P0 panel,
+# N_PERM=5000, seed 20260702). Estimation logic unchanged.
+B3_GATES = {"h0": -5.2799161e-07, "cum1": -1.5346165e-07, "cum4": 6.6006275e-06}
+P_FREE_ANCHORS = {"h0": 0.8014, "cum1": 0.9368, "cum4": 0.0636}
 SAGG_CORR_DISCLOSED = 0.357   # existing s_agg lag-1 autocorr disclosure (run_ri_sagg.py)
 
 HORIZONS = [("h0", "d_dw"), ("cum1", "d_c1"), ("cum2", "d_c2"),
@@ -496,8 +501,11 @@ def main():
     # ---------------- anchor drift-protection cross-check ----------------
     print("\n[cross-check] published anchors vs this run (b3 gated; free-perm p = "
           "MC cross-check under the newly-frozen order)")
-    print("    b3 anchors:  h0 +2.745538e-06  cum1 +4.093621e-06  cum4 +8.825974e-06")
-    print("    free-perm p anchors: h0 0.3083  cum1 0.1052  cum4 0.0388")
+    print("    b3 anchors (P0 refresh 2026-08-04):  h0 -5.2799161e-07  "
+          "cum1 -1.5346165e-07  cum4 +6.6006275e-06")
+    print("    free-perm p anchors (P0 refresh): h0 0.8014  cum1 0.9368  cum4 0.0636")
+    print("    (pre-P0, superseded: b3 +2.745538e-06 / +4.093621e-06 / +8.825974e-06; "
+          "p_free 0.3083 / 0.1052 / 0.0388)")
     for lbl in ["h0", "cum1", "cum4"]:
         got = p_free_marg[lbl]
         anc = P_FREE_ANCHORS[lbl]

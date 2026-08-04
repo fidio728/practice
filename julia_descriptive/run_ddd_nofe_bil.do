@@ -1,7 +1,9 @@
 * run_ddd_nofe_bil.do — Step-3 slide add-ons, gate-locked.
-* STAGE A  gate: reproduce the locked 3-pairwise headline (B7 rebuild 2026-08-03):
-*          beta3 = +2.746e-06 (se 1.70e-06), N = 347,490.
-*          Canonical artifact: output/headline_3pairwise_canonical.csv (2026-08-03),
+* STAGE A  gate: reproduce the locked 3-pairwise headline.
+*          P0 REFRESH 2026-08-04 (as-of W=10 holdings rebuild):
+*          beta3 = -5.279916e-07 (se 1.743166e-06, p 0.762748), N = 347,690.
+*          Pre-P0 (superseded): beta3 = +2.746e-06 (se 1.70e-06), N = 347,490.
+*          Canonical artifact: output/headline_3pairwise_canonical.csv (2026-08-04),
 *          produced by run_headline_3pairwise.do from the stored estimates.
 * STAGE B  PROPER no-FE column: full factorial with ALL lower-order terms
 *          (us, cn_lag, shock, us_x_shock, cn_x_shock) + interactions.
@@ -40,8 +42,8 @@ gen us_cn_shock = us * cn_lag * shock
 display _newline "===== STAGE A GATE: 3-pairwise headline ====="
 reghdfe dw us_cn us_cn_shock, absorb(fq gq ig) vce(cluster firm_n rd_m)
 local b3 = _b[us_cn_shock]
-display "gate beta3 = " %12.4e `b3' "   target 2.746e-06   N=" e(N)
-if abs(`b3' - 2.746e-06) > 0.05e-06 | e(N) != 347490 {
+display "gate beta3 = " %12.4e `b3' "   target -5.279916e-07   N=" e(N)
+if abs(`b3' - (-5.279916e-07)) > 0.05e-06 | e(N) != 347690 {
     display as error "GATE FAILED — stopping."
     exit 459
 }
