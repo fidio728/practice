@@ -90,6 +90,11 @@ function dbcon(; memory_gb::Int=6, threads::Int=4)
     DBInterface.execute(con, "SET memory_limit='$(memory_gb)GB'")
     DBInterface.execute(con, "SET threads=$threads")
     DBInterface.execute(con, "SET temp_directory='$(replace(spill, "\\" => "/"))'")
+    # P0 rebuild (2026-08-04): the panel grew 4.66 -> 6.93 GB and big sorts/joins
+    # now spill past duckdb's ~4.3GB default temp cap (04 hung at exactly that
+    # ceiling). Point TMP/TEMP at a roomy drive (E:) when launching; the cap
+    # itself must be raised explicitly or the offload deadlocks rather than errors.
+    DBInterface.execute(con, "SET max_temp_directory_size='300GB'")
     # Critical for large GROUP BY / COPY operations on tight RAM:
     # lets DuckDB pipeline through without buffering full input order.
     DBInterface.execute(con, "SET preserve_insertion_order=false")

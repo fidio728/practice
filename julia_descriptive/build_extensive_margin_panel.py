@@ -1,3 +1,12 @@
+# ============================================================================
+# PRE-P0 VINTAGE WARNING (P0 holdings-snapshot rebuild, 2026-08-04)
+# This script's output is PRE-P0: it was built from the exact-EOM
+# holdings_eom.parquet (or from merged_us_eu_zero_filled.parquet built from
+# it). The as-of quarter-end selection rule in 03_eom_etl.jl CHANGED the
+# panel's fund universe on EVERY quarter. PRE-P0, pending re-run, do not mix
+# with post-P0 results. Register: julia_descriptive/VINTAGE_P0.md
+# ============================================================================
+
 """
 build_extensive_margin_panel.py
 
