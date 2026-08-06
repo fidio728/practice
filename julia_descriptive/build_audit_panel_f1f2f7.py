@@ -20,12 +20,18 @@ is attached — so span-boundary leads are not corrupted.
 Output: output/audit_c6_panel.dta
 """
 
+import os
 from pathlib import Path
 import duckdb
 import pandas as pd
 
 PROJ = Path(r"c:/Users/xl/OneDrive - Universitat Ramón Llull/git/practice/julia_descriptive")
-OUT = PROJ / "output"
+# (EM-FIX-5/7, 2026-08-06) same DPN_OUT_DIR override as 00_setup.jl / build_c6_panel.py.
+_env_out = os.environ.get("DPN_OUT_DIR", "").strip()
+OUT = Path(_env_out).resolve() if _env_out else PROJ / "output"
+OUT.mkdir(parents=True, exist_ok=True)
+if _env_out:
+    print(f"[DPN_OUT_DIR] reading/writing {OUT} (override in force)")
 GRID = (OUT / "merged_us_eu_zero_filled.parquet").as_posix()
 DTA = OUT / "audit_c6_panel.dta"
 
@@ -56,6 +62,14 @@ WITH g AS (
         m.shock_us_cn                                           AS shock,
         m.gpr_us_cn                                             AS gpr,
         CASE WHEN m.holder_group = 'US' THEN 1 ELSE 0 END       AS us,
+        -- (EM-FIX-6, 2026-08-06) attribution columns — see build_c6_panel.py.
+        -- zr_lag == 0 is the pre-change codable set, so run A of the snapshot-vs-
+        -- sample-expansion attribution is `if zr_lag==0` on THIS panel too
+        -- (07d_three_spec_table.do / run_headline_3pairwise.do / run_ri_3pairwise.py
+        -- all read audit_c6_panel). NULL -> sentinel -1.
+        COALESCE(m.zero_recode_flag_lag1q,   -1)                AS zr_lag,
+        COALESCE(m.n_supplychain_links_lag1q, -1)               AS nsc_lag,
+        COALESCE(CAST(m.revere_pit_present_lag1q AS INTEGER), -1) AS pit_lag,
         s.first_active, s.last_active,
         LEAD(m.delta_w, 1)            OVER w                     AS dw_lead1,
         LEAD(m.portfolio_weight_eu,1) OVER w                     AS w_l1,
@@ -68,6 +82,7 @@ WITH g AS (
     WINDOW w AS (PARTITION BY m.sec_entity_id, m.holder_group ORDER BY m.report_date)
 )
 SELECT firm_str, hgroup, rdate, us, dw, cn_lag, shock, gpr, gpr_lag,
+       zr_lag, nsc_lag, pit_lag,
        dw_lead1,
        (w      - w_prev) AS cum0,   -- = dw
        (w_l1   - w_prev) AS cum1,
@@ -88,6 +103,10 @@ for c in ["dw", "cn_lag", "shock", "gpr", "gpr_lag", "dw_lead1",
     df[c] = pd.to_numeric(df[c], errors="coerce").astype("float64")
 df["us"] = df["us"].astype("int8")
 df["in_span"] = df["in_span"].astype("int8")
+# (EM-FIX-6) attribution columns: int8 flags, int32 link count, -1 = NULL upstream.
+df["zr_lag"] = pd.to_numeric(df["zr_lag"], errors="raise").astype("int8")
+df["pit_lag"] = pd.to_numeric(df["pit_lag"], errors="raise").astype("int8")
+df["nsc_lag"] = pd.to_numeric(df["nsc_lag"], errors="raise").astype("int32")
 
 # sanity: cum0 must equal dw where both present
 _chk = df.dropna(subset=["dw", "cum0"])
@@ -100,5 +119,14 @@ print(f"  in_span share: {df['in_span'].mean():.4f}  (phantom/out-of-span = {1-d
 print(f"  dw non-null: {df['dw'].notna().mean():.4f}   dw_lead1 non-null: {df['dw_lead1'].notna().mean():.4f}")
 print(f"  cum4 non-null: {df['cum4'].notna().mean():.4f}")
 print(f"  gpr non-null: {df['gpr'].notna().mean():.4f}  gpr_lag non-null: {df['gpr_lag'].notna().mean():.4f}")
+print("  EM-FIX-6 attribution census (zr_lag):")
+for _k, _v in df["zr_lag"].value_counts().sort_index().items():
+    _lbl = {0: "old-rule codable (pre-change arm)",
+            1: "recoded zero: competitor/partner only",
+            2: "recoded zero: no active links",
+            -1: "NULL upstream (INVESTIGATE)"}.get(int(_k), "unexpected")
+    print(f"    zr_lag={int(_k):>3}  n={_v:>12,}  firms={df.loc[df['zr_lag'] == _k, 'firm_str'].nunique():>7,}  {_lbl}")
+print(f"  run A (`if zr_lag==0`): N={int((df['zr_lag'] == 0).sum()):,}   "
+      f"run B (full): N={len(df):,}")
 df.to_stata(DTA, write_index=False, convert_dates={"rdate": "tc"}, version=118)
 print(f"  wrote {DTA.name} ({n:,} rows)")

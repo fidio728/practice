@@ -7,6 +7,29 @@
 # with post-P0 results. Register: julia_descriptive/VINTAGE_P0.md
 # ============================================================================
 
+# ============================================================================
+# !! MISSING-RULE ASYMMETRY vs THE CHINA GRID — EM-CHANGE-2 NOT MIRRORED !!
+# (EM-FIX-4, 2026-08-06. This file is NO LONGER isomorphic to 06_cartesian_grid.jl.)
+#
+# 06_cartesian_grid.jl:281-294 now computes china_share with an explicit
+#     CASE WHEN n_supplychain_links > 0 THEN ... ELSE 0.0 END
+# on a point-in-time Revere presence spine, and carries zero_recode_flag /
+# revere_pit_present (+ their LAG twins) into merged_us_eu_zero_filled.parquet.
+# This file still computes russia_share with NULLIF(n_supplychain_links, 0) at
+# ~line 258 below and carries NO provenance columns, so the zero-link firm-quarters
+# the China grid now keeps as genuine zeros are DROPPED here.
+#
+# CONSEQUENCE: merged_us_ru_zero_filled.parquet has a smaller, differently
+# selected estimation universe than merged_us_eu_zero_filled.parquet. A
+# China-vs-Russia contrast across the two is confounded by the missing rule, and
+# NOTHING in either .dta reveals it.
+#
+# BLOCKED UNTIL DECIDED: do not emit a China-vs-Russia comparison table while
+# output/RUSSIA_MISSING_RULE_ASYMMETRY.txt exists (written by
+# 02_russia_exposure.jl). Either mirror EM-CHANGE-2 here and in 02, or record the
+# advisor decision to keep Russia on the old rule in VINTAGE_P0.md.
+# ============================================================================
+
 # 06_russia_grid.jl
 # ISOMORPHIC copy of 06_cartesian_grid.jl for the Russia positive control
 # (Third external review round, R3-A #1 / P0 #3). Reuses the IDENTICAL EU
@@ -251,9 +274,16 @@ DBInterface.execute(con, """
            e.n_total_links,
            e.n_supplychain_links,
            -- (B7 FIX, 2026-08-03) supply-chain russia_share = RU CUSTOMER+SUPPLIER
-           -- / total CUSTOMER+SUPPLIER (matches 02_russia_exposure.jl and the
-           -- China 06 fix). Crosswalk is unique on sec_entity_id here (asserted
-           -- above), so a direct ratio is exact.
+           -- / total CUSTOMER+SUPPLIER (matches 02_russia_exposure.jl).
+           -- Crosswalk is unique on sec_entity_id here (asserted above), so a
+           -- direct ratio is exact.
+           --
+           -- !! (EM-FIX-4, 2026-08-06) OLD MISSING RULE — DIVERGES FROM CHINA !!
+           -- 06_cartesian_grid.jl now uses CASE ... ELSE 0.0 here (EM-CHANGE-2).
+           -- This NULLIF is the last remaining old-convention link denominator
+           -- together with 02_russia_exposure.jl. Deliberately not mirrored yet;
+           -- see the banner at the top of this file. Comparison tables are
+           -- BLOCKED while output/RUSSIA_MISSING_RULE_ASYMMETRY.txt exists.
            (e.n_ru_customer + e.n_ru_supplier)::DOUBLE
                / NULLIF(e.n_supplychain_links, 0) AS russia_share,
            -- legacy all-relationship-type share, retained for diagnostics only

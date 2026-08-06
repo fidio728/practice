@@ -1,3 +1,42 @@
+# ============================================================================
+# !! MISSING-RULE ASYMMETRY vs THE CHINA CHAIN — EM-CHANGE-2 NOT MIRRORED !!
+# (EM-FIX-4, 2026-08-06. This file is NO LONGER isomorphic to 02_china_exposure.jl.)
+#
+# WHAT DIVERGED. On 2026-08-06 the China chain adopted the advisor-directed
+# zero/missing recode (Emanuele, email 2026-08-05):
+#     a firm PRESENT in the Revere universe with zero active customer+supplier
+#     links in quarter t gets china_share = 0 (a GENUINE ZERO that enters the
+#     low-exposure arm), point-in-time from the start of Revere coverage of that
+#     firm; a firm ABSENT from Revere stays NULL and drops.
+# 02_china_exposure.jl therefore emits a row for every PIT-present EU firm-quarter
+# with china_share NEVER NULL, carrying zero_recode_flag / revere_pit_present /
+# revere_coverage_start provenance.
+#
+# THIS FILE STILL USES THE OLD RULE: russia_share = NULLIF(n_supplychain_links, 0)
+# at line ~616 below, i.e. competitor/partner-only and no-link firm-quarters are
+# NULL and drop out. 06_russia_grid.jl:~258 carries the identical old NULLIF.
+#
+# WHY THIS IS NOT COSMETIC. The Russia panel is the FALSIFICATION COUNTERPART to
+# the China result. Under the asymmetry the two chains classify the SAME zero-link
+# firms differently, so the Russia arm runs on a materially smaller and
+# differently-selected estimation universe. Any China-vs-Russia contrast is then
+# confounded by the MISSING RULE rather than identified by the shock, and the
+# confound is invisible in every downstream .dta (no flag column exists here).
+#
+# STATUS: DECISION NOT YET RECORDED. The parent instruction scoped the recode to
+# the China chain and did not authorise porting the point-in-time Revere spine
+# (revere_pit_present / revere_coverage_start / zero_recode_flag) to Russia, so
+# option (a) "mirror EM-CHANGE-2" is DEFERRED, not rejected. Until an advisor
+# decision is recorded:
+#   * DO NOT emit or publish any China-vs-Russia comparison table. The guard
+#     below writes output/RUSSIA_MISSING_RULE_ASYMMETRY.txt; any comparison
+#     builder must check for that marker and refuse while it exists.
+#   * DO NOT describe the Russia arm as "the same construction with RU instead
+#     of CN". It is not, as of 2026-08-06.
+# Record the decision in VINTAGE_P0.md and delete the marker only when the two
+# chains agree or the divergence is deliberately and publicly documented.
+# ============================================================================
+
 # 02_russia_exposure.jl
 # ISOMORPHIC copy of 02_china_exposure.jl for the Russia positive control
 # (Second/Third external review round, R3-A #1 / P0 #3). ONLY the
@@ -45,6 +84,70 @@
 #   - Atomic writes via atomic_copy_to from 00_setup.
 
 include("00_setup.jl")
+
+# ============================================================
+# (EM-FIX-4, 2026-08-06) RUNTIME BANNER + REFUSAL MARKER for the missing-rule
+# asymmetry documented at the top of this file. The banner makes the divergence
+# visible in the run log; the marker file makes it detectable by any downstream
+# builder, because the asymmetry is otherwise INVISIBLE in every emitted .dta
+# (this chain has no zero_recode_flag column to carry it).
+#
+# CONTRACT: any script that produces a China-vs-Russia comparison must call
+#   assert_no_russia_asymmetry()  (defined below)
+# and refuse while the marker exists.
+# ============================================================
+const RU_ASYM_MARKER = joinpath(OUT_DIR, "RUSSIA_MISSING_RULE_ASYMMETRY.txt")
+
+println("\n" * "!"^74)
+println("!! EM-FIX-4: RUSSIA CHAIN IS ON THE **OLD** MISSING RULE                !!")
+println("!! China (02_china_exposure.jl) recodes zero-supply-chain-link firm-    !!")
+println("!! quarters to china_share = 0 on a point-in-time Revere spine          !!")
+println("!! (EM-CHANGE-2, advisor email 2026-08-05). This file still emits NULL  !!")
+println("!! for the identical cells (NULLIF(n_supplychain_links, 0)).            !!")
+println("!! => the two arms run on differently-selected universes.               !!")
+println("!! => NO China-vs-Russia comparison table may be emitted until an       !!")
+println("!!    advisor decision is recorded in VINTAGE_P0.md.                    !!")
+println("!"^74 * "\n")
+
+open(RU_ASYM_MARKER, "w") do io
+    write(io, """
+    RUSSIA / CHINA MISSING-RULE ASYMMETRY — comparison BLOCKED
+    written by 02_russia_exposure.jl (EM-FIX-4) at $(now())
+
+    China chain  : EM-CHANGE-2 zero recode ACTIVE.
+                   china_share = 0 for PIT-present firms with
+                   n_supplychain_links = 0; NULL only if Revere-absent.
+                   Provenance columns: zero_recode_flag, revere_pit_present,
+                   revere_coverage_start.
+    Russia chain : OLD RULE. russia_share = NULLIF(n_supplychain_links, 0)
+                   at 02_russia_exposure.jl and 06_russia_grid.jl.
+                   No provenance columns. Zero-link firm-quarters DROP.
+
+    Consequence  : the Russia falsification arm has a smaller and differently
+                   selected estimation universe than the China arm. A
+                   China-vs-Russia contrast computed across these two panels is
+                   confounded by the MISSING RULE, not identified by the shock.
+
+    To clear     : either mirror EM-CHANGE-2 into 02_russia_exposure.jl and
+                   06_russia_grid.jl (same PIT spine, same CASE-instead-of-NULLIF,
+                   same zero_recode_flag provenance), or record an explicit
+                   advisor decision to keep Russia on the old rule in
+                   VINTAGE_P0.md — then delete this file.
+    """)
+end
+println("  wrote refusal marker -> $(basename(RU_ASYM_MARKER))")
+
+# assert_no_russia_asymmetry()
+#
+# Hard-fail while the China and Russia chains disagree on the zero/missing rule.
+# Call this from ANY builder that emits a China-vs-Russia comparison.
+function assert_no_russia_asymmetry()
+    isfile(RU_ASYM_MARKER) && error(
+        "REFUSING to emit a China-vs-Russia comparison: the two chains use " *
+        "different zero/missing rules (see $(RU_ASYM_MARKER)). Mirror EM-CHANGE-2 " *
+        "into the Russia chain, or record the advisor decision and delete the marker.")
+    return nothing
+end
 
 # Source paths feeding this step (recorded in manifest)
 const STEP_INPUTS = [REVERE_CO_PATH, REVERE_REL_PATH]
@@ -608,10 +711,18 @@ DBInterface.execute(con, """
         t.n_supplychain_links,
         -- (B7 FIX, 2026-08-03) russia_share = RU supply-chain links / total
         -- supply-chain links (CUSTOMER + SUPPLIER, both endpoints). Excludes
-        -- COMPETITOR and PARTNER-*. Mirrors the China script's B7 fix exactly.
+        -- COMPETITOR and PARTNER-*.
+        --
+        -- !! (EM-FIX-4, 2026-08-06) OLD MISSING RULE — DIVERGES FROM CHINA !!
         -- Firms with supply-chain links but none to Russia get 0; firms with
-        -- only competitor/partner links get NULL (undefined supply-chain
-        -- exposure), correctly dropped downstream.
+        -- only competitor/partner links get NULL and are dropped downstream.
+        -- The China chain now recodes those identical cells to 0 (EM-CHANGE-2,
+        -- advisor email 2026-08-05) on a point-in-time Revere presence spine.
+        -- This site is deliberately NOT mirrored yet — see the banner at the top
+        -- of this file. Do not "fix" it in isolation: the recode also needs the
+        -- PIT spine and the zero_recode_flag / revere_pit_present provenance,
+        -- otherwise the zeros are not point-in-time and pre-coverage firms get
+        -- counted as genuine zeros.
         CAST(COALESCE(c.n_ru_customer, 0) + COALESCE(c.n_ru_supplier, 0) AS DOUBLE)
             / NULLIF(t.n_supplychain_links, 0) AS russia_share,
         -- legacy all-relationship-type share, retained for diagnostics only

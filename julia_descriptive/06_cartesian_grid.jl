@@ -25,6 +25,18 @@
 #  10. Diagnostic counts: n_delta_w_null_at_boundary vs n_delta_w_null_interior,
 #      held-vs-zero-filled composition table.
 #
+# EM-CHANGE-2 (zero/missing recode, Emanuele email 2026-08-05) — applied here
+# at the china_share site in (6) and propagated through (7)/(8):
+#   * a firm POINT-IN-TIME present in the Revere universe at q with zero active
+#     customer+supplier links gets china_share = 0 (genuine zero, joins the
+#     low-exposure arm) — this includes firms whose only active links are
+#     competitor/partner types;
+#   * a firm absent from Revere at q (never matched, or before its Revere
+#     coverage start, or after a coverage exit) keeps NULL and drops.
+# The coverage-start rule itself lives in 02_china_exposure.jl (4b); this file
+# inherits it through row existence in firm_quarter_china_exposure.parquet and
+# hard-fails if that parquet predates the change.
+#
 # Why this exists. The 05 panel keeps only (sec_entity_id, holder_country,
 # quarter) cells with a positive holding. That is selection-on-outcome for
 # a regression whose outcome is institutional holdings: an extensive-margin
@@ -223,6 +235,67 @@ cw_u = qdf(con, "SELECT COUNT(DISTINCT sec_entity_id) AS u FROM matched_eu_sec_l
 @assert cw_n == cw_u "matched_eu_sec_links is not unique on sec_entity_id ($cw_n rows, $cw_u unique)"
 println("  Crosswalk: $cw_n unique (sec_entity_id → eu_company_id) pairs ✓")
 
+# ============================================================
+# (EM-FIX-9, 2026-08-06) PERSIST THE CROSSWALK.
+#
+# matched_eu_sec_links was a DuckDB table that died with the process. It was
+# never written to disk, and neither merged_us_eu_zero_filled.parquet nor
+# merged_us_eu_matched.parquet carries eu_company_id — so the ONLY bridge
+# between the FactSet grain (sec_entity_id: holdings, market cap) and the Revere
+# grain (eu_company_id: China link counts) evaporated at the end of every run.
+#
+# Two NAMED advisor deliverables need it:
+#   M2 (market-cap-weighted country exposure ratio) joins firm-level CN at Revere
+#      grain to market_cap at FactSet grain (marketcap_it.parquet is keyed on
+#      sec_entity_id);
+#   FIGURE B joins China link COUNTS (only in firm_quarter_china_exposure.parquet,
+#      Revere grain) to US-investor status (only in the holdings panels, FactSet
+#      grain).
+# Without this file the next phase re-implements the CUSIP > ISIN > SEDOL
+# priority join for the FOURTH time — the exact B7 failure mode that already
+# produced three divergent china_share definitions in this codebase.
+#
+# Written AFTER the uniqueness assert above, so the persisted file is guaranteed
+# to be 1:1 on sec_entity_id.
+# ============================================================
+crosswalk_path = test_suffix_path(joinpath(OUT_DIR, "crosswalk_sec_entity_revere.parquet"))
+atomic_copy_to(con, "SELECT sec_entity_id, eu_company_id FROM matched_eu_sec_links",
+               crosswalk_path)
+write_manifest("06_crosswalk_sec_entity_revere", crosswalk_path;
+               row_count=cw_n, input_paths=STEP_INPUTS)
+println("  Crosswalk persisted -> $(basename(crosswalk_path)) " *
+        "(1:1 on sec_entity_id; join key for M2 and Figure B)")
+
+# (EM-CHANGE-2, 2026-08-06) The exposure parquet emitted by 02 now contains a
+# row for EVERY point-in-time-present EU Revere firm-quarter, including firms
+# whose only active links are competitor/partner (n_supplychain_links = 0) and
+# firms with no active link at all (n_total_links = 0). Those are GENUINE
+# ZEROS, not missings. So the NULLIF(n_supplychain_links, 0) guard that used
+# to manufacture a NULL is replaced by an explicit CASE that returns 0.
+#
+# The B7 lesson applies literally here: china_share is computed at THREE
+# sites (02 firm_quarter_exposure, 05 exposure_by_sec_entity, 06
+# exposure_by_sec_entity). All three carry the same CASE. This site is the one
+# the REGRESSION path uses (02 parquet -> 06 -> build_c6_panel.py -> Stata).
+#
+# After this change the ONLY way a grid cell gets china_share = NULL is:
+#   (a) sec_entity_id never matched into Revere at all (no crosswalk row), or
+#   (b) the matched Revere company is not PIT-present at that quarter, so 02
+#       emitted no row and the LEFT JOIN in (7) yields NULL, or
+#   (c) the quarter is pre-2003 (explicit NULL in (7)).
+#
+# Backward compatibility: a 02 parquet built BEFORE this change has no
+# zero_recode_flag column. Detected here and hard-failed rather than silently
+# producing a half-recoded panel.
+exp_cols = Set(qdf(con, "DESCRIBE SELECT * FROM read_parquet('$EXP_PATH')").column_name)
+for req in ("zero_recode_flag", "revere_pit_present", "revere_coverage_start")
+    req in exp_cols || error(
+        "EM-CHANGE-2: $(basename(EXP_PATH)) is missing column '$req'. " *
+        "It was built by a pre-EM-CHANGE-2 version of 02_china_exposure.jl. " *
+        "Re-run 02 before 06 — otherwise the zero-recode would be applied at " *
+        "06 only and the panel would disagree with the parquet.")
+end
+
 DBInterface.execute(con, """
     CREATE OR REPLACE TABLE exposure_by_sec_entity AS
     SELECT m.sec_entity_id,
@@ -230,18 +303,35 @@ DBInterface.execute(con, """
            e.n_cn_total,
            e.n_total_links,
            e.n_supplychain_links,
+           e.zero_recode_flag,
+           e.revere_pit_present,
+           -- (EM-FIX-9, 2026-08-06) RAW China supply-chain link COUNTS carried
+           -- through to the merged panel. FIGURE B's outcome is the GROWTH in the
+           -- count of China customer+supplier links; without these columns it
+           -- would have to be back-derived as round(china_share *
+           -- n_supplychain_links) from a float ratio, which is exactly the kind
+           -- of reconstruction that silently disagrees with the source.
+           e.n_cn_customer,
+           e.n_cn_supplier,
+           (e.n_cn_customer + e.n_cn_supplier) AS n_cn_supplychain,
            -- (B7 FIX, 2026-07-22) supply-chain china_share = CN CUSTOMER+SUPPLIER
            -- / total CUSTOMER+SUPPLIER (matches 02 and 05). Crosswalk is unique
            -- on sec_entity_id here (asserted above), so a direct ratio is exact.
-           (e.n_cn_customer + e.n_cn_supplier)::DOUBLE
-               / NULLIF(e.n_supplychain_links, 0) AS china_share,
+           -- (EM-CHANGE-2) zero denominator on a PIT-present firm -> 0, not NULL.
+           CASE WHEN e.n_supplychain_links > 0
+                THEN (e.n_cn_customer + e.n_cn_supplier)::DOUBLE / e.n_supplychain_links
+                ELSE 0.0 END AS china_share,
            -- (DIRECTION FIX, 2026-08-02) directional link-count shares, same
            -- denominator: sell + buy = china_share row-wise (see 02).
-           e.n_cn_sell::DOUBLE / NULLIF(e.n_supplychain_links, 0)
-               AS china_sell_link_share,
-           e.n_cn_buy::DOUBLE / NULLIF(e.n_supplychain_links, 0)
-               AS china_buy_link_share,
-           e.n_cn_total::DOUBLE / NULLIF(e.n_total_links, 0) AS china_share_alltypes
+           CASE WHEN e.n_supplychain_links > 0
+                THEN e.n_cn_sell::DOUBLE / e.n_supplychain_links
+                ELSE 0.0 END AS china_sell_link_share,
+           CASE WHEN e.n_supplychain_links > 0
+                THEN e.n_cn_buy::DOUBLE / e.n_supplychain_links
+                ELSE 0.0 END AS china_buy_link_share,
+           CASE WHEN e.n_total_links > 0
+                THEN e.n_cn_total::DOUBLE / e.n_total_links
+                ELSE 0.0 END AS china_share_alltypes
     FROM matched_eu_sec_links m
     JOIN read_parquet('$EXP_PATH') e ON m.eu_company_id = e.eu_company_id
 """)
@@ -252,6 +342,26 @@ oob = qdf(con, """
 """)
 @assert oob.n[1] == 0 "exposure_by_sec_entity has $(oob.n[1]) rows with china_share ∉ [0,1]"
 println("  exposure_by_sec_entity: china_share ∈ [0,1] ✓")
+
+# (EM-CHANGE-2) invariant: every row that survives the crosswalk join is
+# PIT-present by construction in 02, so china_share must be non-NULL here.
+# NULL may only be introduced later, by the LEFT JOIN onto the grid.
+n_null_exp = qdf(con, "SELECT COUNT(*) AS n FROM exposure_by_sec_entity WHERE china_share IS NULL").n[1]
+@assert n_null_exp == 0 "EM-CHANGE-2: $n_null_exp exposure_by_sec_entity rows carry NULL china_share; NULL must come only from grid non-match"
+
+exp_census = qdf(con, """
+    SELECT zero_recode_flag,
+           CASE zero_recode_flag
+                WHEN 0 THEN 'ratio_from_positive_denominator'
+                WHEN 1 THEN 'recoded_zero__competitor_or_partner_only'
+                ELSE        'recoded_zero__no_active_link_of_any_type' END AS label,
+           COUNT(*) AS n_sec_entity_quarters,
+           COUNT(DISTINCT sec_entity_id) AS n_sec_entities
+    FROM exposure_by_sec_entity GROUP BY 1,2 ORDER BY 1
+""")
+println("  EM-CHANGE-2 recode census at sec_entity × quarter:")
+println(exp_census)
+CSV.write(joinpath(OUT_DIR, "06_em_zero_recode_census.csv"), exp_census)
 
 # ============================================================
 # (7) Stitch everything onto the grid + zero-fill.
@@ -273,6 +383,25 @@ DBInterface.execute(con, """
                 ELSE e.china_sell_link_share END AS china_sell_link_share,
            CASE WHEN g.quarter_end < DATE '2003-03-31' THEN NULL
                 ELSE e.china_buy_link_share END AS china_buy_link_share,
+           -- (EM-CHANGE-2) provenance carried to the regression panel so the
+           -- zero arm stays auditable in Stata:
+           --   n_supplychain_links  0 vs >0 (kept distinguishable, per spec)
+           --   zero_recode_flag     0 ratio / 1 competitor-partner-only zero
+           --                        / 2 no-link zero / NULL = not codable
+           --   revere_pit_present   1 = firm was in Revere at q; NULL = absent
+           CASE WHEN g.quarter_end < DATE '2003-03-31' THEN NULL
+                ELSE e.n_supplychain_links END AS n_supplychain_links,
+           CASE WHEN g.quarter_end < DATE '2003-03-31' THEN NULL
+                ELSE e.zero_recode_flag END AS zero_recode_flag,
+           CASE WHEN g.quarter_end < DATE '2003-03-31' THEN NULL
+                ELSE e.revere_pit_present END AS revere_pit_present,
+           -- (EM-FIX-9) raw China supply-chain link counts for Figure B.
+           CASE WHEN g.quarter_end < DATE '2003-03-31' THEN NULL
+                ELSE e.n_cn_customer END AS n_cn_customer,
+           CASE WHEN g.quarter_end < DATE '2003-03-31' THEN NULL
+                ELSE e.n_cn_supplier END AS n_cn_supplier,
+           CASE WHEN g.quarter_end < DATE '2003-03-31' THEN NULL
+                ELSE e.n_cn_supplychain END AS n_cn_supplychain,
            gpr.gpr_us_cn,
            gpr.shock_us_cn
     FROM cartesian_grid g
@@ -308,6 +437,27 @@ atomic_copy_to(con, """
         china_buy_link_share,
         LAG(china_sell_link_share, 1) OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end) AS sell_share_lag1q,
         LAG(china_buy_link_share, 1)  OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end) AS buy_share_lag1q,
+        -- (EM-CHANGE-2) provenance, both contemporaneous and lagged. The
+        -- REGRESSOR is china_share_lag1q, so the flag that describes it is the
+        -- LAGGED one — use zero_recode_flag_lag1q to split the estimation
+        -- sample into "computed ratio" vs "recoded zero" arms.
+        n_supplychain_links,
+        zero_recode_flag,
+        revere_pit_present,
+        LAG(n_supplychain_links, 1) OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end) AS n_supplychain_links_lag1q,
+        LAG(zero_recode_flag, 1)    OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end) AS zero_recode_flag_lag1q,
+        LAG(revere_pit_present, 1)  OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end) AS revere_pit_present_lag1q,
+        -- (EM-FIX-9) raw China supply-chain link counts + t-1 twins. FIGURE B
+        -- classifies on ties at t-1 and measures link growth at t (Emanuele
+        -- 35:49), and this panel IS a contiguous quarterly grid (verified: every
+        -- predecessor pair is exactly 3 months apart), so these LAGs are TRUE
+        -- t-1 — unlike the *_lag1q columns of merged_us_eu_matched.parquet.
+        n_cn_customer,
+        n_cn_supplier,
+        n_cn_supplychain,
+        LAG(n_cn_supplychain, 1) OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end) AS n_cn_supplychain_lag1q,
+        LAG(n_cn_customer, 1)    OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end) AS n_cn_customer_lag1q,
+        LAG(n_cn_supplier, 1)    OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end) AS n_cn_supplier_lag1q,
         gpr_us_cn,
         shock_us_cn
     FROM grid_zfilled
@@ -316,6 +466,44 @@ merged_path_fwd = replace(merged_path, "\\" => "/")
 n_merged = qdf(con, "SELECT COUNT(*) AS n FROM read_parquet('$merged_path_fwd')").n[1]
 println("  Zero-filled panel rows: $n_merged")
 write_manifest("06_merged_us_eu_zero_filled", merged_path; row_count=n_merged, input_paths=STEP_INPUTS)
+
+# ============================================================
+# (8b) EM-CHANGE-2 attribution census on the emitted panel.
+# The estimation sample for the headline is
+#     delta_w NOT NULL AND china_share_lag1q NOT NULL AND shock NOT NULL
+# (build_c6_panel.py). This table decomposes that sample into the cells that
+# existed before the recode (zero_recode_flag_lag1q = 0) and the cells the
+# recode adds (= 1 or 2), so the sample-expansion effect is separable from the
+# snapshot effect in the written update. Prior P0 headline N was 347,690.
+# ============================================================
+em_attr = qdf(con, """
+    SELECT COALESCE(CAST(zero_recode_flag_lag1q AS VARCHAR), 'NULL_not_codable') AS lag_flag,
+           COUNT(*) AS n_panel_rows,
+           COUNT(*) FILTER (WHERE china_share_lag1q IS NOT NULL) AS n_cn_lag_nonnull,
+           COUNT(*) FILTER (WHERE delta_w IS NOT NULL
+                              AND china_share_lag1q IS NOT NULL
+                              AND shock_us_cn IS NOT NULL) AS n_estimation_sample,
+           COUNT(DISTINCT sec_entity_id) AS n_firms
+    FROM read_parquet('$merged_path_fwd')
+    GROUP BY 1 ORDER BY 1
+""")
+println("\nEM-CHANGE-2 attribution census on merged_us_eu_zero_filled:")
+println(em_attr)
+CSV.write(joinpath(OUT_DIR, "06_em_attribution_census.csv"), em_attr)
+
+em_tot = qdf(con, """
+    SELECT COUNT(*) FILTER (WHERE delta_w IS NOT NULL
+                              AND china_share_lag1q IS NOT NULL
+                              AND shock_us_cn IS NOT NULL) AS n_est_total,
+           COUNT(*) FILTER (WHERE delta_w IS NOT NULL
+                              AND china_share_lag1q IS NOT NULL
+                              AND shock_us_cn IS NOT NULL
+                              AND zero_recode_flag_lag1q = 0) AS n_est_prechange_cells,
+           COUNT(DISTINCT CASE WHEN china_share_lag1q IS NOT NULL THEN sec_entity_id END) AS n_firms_codable
+    FROM read_parquet('$merged_path_fwd')
+""")
+println("  estimation-sample rows total / of which pre-change cells / codable firms:")
+println(em_tot)
 
 # ============================================================
 # (9) Patch 8: compute the HIGH-vs-LOW cutoff ONCE on firm-quarter distinct

@@ -41,8 +41,46 @@ const GRAVITY_PATH  = joinpath(DATA_ROOT, "gravity_vars_2021.csv")
 const CONFLICT_PATH = joinpath(DATA_ROOT, "conflict_monthly.csv")
 
 const SCRIPT_DIR = @__DIR__
-const OUT_DIR    = joinpath(SCRIPT_DIR, "output")
+
+# OUT_DIR — DEFAULTS to <script dir>/output, overridable with DPN_OUT_DIR.
+#
+# (EM-FIX-5, 2026-08-06) The default sits on the OneDrive-synced C: volume, which
+# is effectively full (measured 2026-08-06: 200 GB size, 599 MB free) while the
+# canonical holdings_eom.parquet alone is 7.44 GB and the advisor quarter rule
+# produces a strictly LARGER panel (it admits every intra-quarter reporter).
+# atomic_copy_to writes `<target>.tmp.<pid>` on the SAME volume before renaming,
+# so peak requirement is the full size of the new panel ON TOP of the archived
+# vintages. Without an override the rebuild dies mid-COPY after hours of work.
+#
+# TWO WAYS TO RELOCATE, and they are NOT equivalent:
+#   (1) NTFS junction  — `mklink /J "<script dir>\\output" "E:\\somewhere"`.
+#       PREFERRED when the whole downstream chain must keep working: 40+ files
+#       (07*.do, build_*.py, run_*.py, plots/fig13_two_panel.py) hard-code the
+#       absolute C: output path and a junction keeps every one of them resolving.
+#   (2) DPN_OUT_DIR    — relocates ONLY the scripts that read OUT_DIR from this
+#       file (the Julia chain 01-06). The hard-coded consumers listed above will
+#       still read the OLD directory. Using this alone SPLITS THE VINTAGE: Julia
+#       writes the new panel to E: while Stata reads a stale panel from C:. That
+#       is exactly the stale-artifact failure this project has already been bitten
+#       by, so if you use DPN_OUT_DIR you MUST also point the Python/Stata
+#       consumers at the same directory (build_c6_panel.py and
+#       build_audit_panel_f1f2f7.py honour DPN_OUT_DIR; the .do files do not).
+# The banner below prints loudly whenever the override is in force so a split
+# vintage cannot happen silently.
+const OUT_DIR = let o = get(ENV, "DPN_OUT_DIR", "")
+    isempty(o) ? joinpath(SCRIPT_DIR, "output") : abspath(o)
+end
 isdir(OUT_DIR) || mkpath(OUT_DIR)
+if OUT_DIR != joinpath(SCRIPT_DIR, "output")
+    println("\n" * "!"^74)
+    println("!! DPN_OUT_DIR OVERRIDE IN FORCE                                        !!")
+    println("!!   writing to : $OUT_DIR")
+    println("!!   default was: $(joinpath(SCRIPT_DIR, "output"))")
+    println("!! Hard-coded consumers (07*.do, build_*.py without the override,       !!")
+    println("!! plots/*) still read the DEFAULT path. Point them here too or you     !!")
+    println("!! will mix vintages.                                                   !!")
+    println("!"^74 * "\n")
+end
 
 # Raw-parquet cache lives OFF the OneDrive-synced path. ~30 GB total.
 # 03a writes here; 03 reads from here.
@@ -84,7 +122,15 @@ const EU_SQL_TUPLE = "(" * join(["'" * c * "'" for c in EU_COUNTRIES], ",") * ")
 # RAM budget: 6GB out of 8-10GB usable (leave headroom for Julia + OS).
 # Spill to disk when RAM exceeded.
 function dbcon(; memory_gb::Int=6, threads::Int=4)
-    spill = joinpath(tempdir(), "duckdb_spill")
+    # (EM-FIX-7, 2026-08-06) DPN_DUCKDB_TEMP_DIR is now honoured HERE, so 04, 05
+    # and 06 get the roomy spill volume too. Previously only 03_eom_etl.jl read
+    # that variable and re-SET temp_directory after calling dbcon(); every other
+    # step silently spilled into tempdir() on C:, which has 599 MB free — the
+    # 04 run would either die with "IO Error: ... 磁盘空间不足" or, per the
+    # max_temp_directory_size note below, deadlock at the cap.
+    # NOTE: this does NOT make setting TMP/TEMP unnecessary. Julia's tempdir()
+    # reads TMP/TEMP, and other libraries spill there independently of DuckDB.
+    spill = get(ENV, "DPN_DUCKDB_TEMP_DIR", joinpath(tempdir(), "duckdb_spill"))
     isdir(spill) || mkpath(spill)
     con = DBInterface.connect(DuckDB.DB, ":memory:")
     DBInterface.execute(con, "SET memory_limit='$(memory_gb)GB'")
@@ -161,7 +207,25 @@ end
 # input file fingerprints, build timestamp. Downstream scripts can read and
 # assert against expected fingerprints.
 # ============================================================
+# (EM-RUN-FIX, 2026-08-06) DPN_GIT_SHA override.
+#
+# WHY. On the 2026-08-06 quarter-rule rebuild, `git rev-parse --short HEAD`
+# spawned by write_manifest() HUNG INDEFINITELY: the child process (pid 23168)
+# burned ZERO CPU for 35+ minutes with both threads in Wait, no index.lock
+# present, and the identical command run from another shell returned instantly.
+# Julia's read(cmd, String) blocks on the child, so the whole ETL deadlocked at
+# 06:17:37 — AFTER the 9.59 GB panel had been written but BEFORE Phase C, i.e.
+# it silently converted a finished 3-hour build into a hang. The repo lives on a
+# OneDrive-synced path with cloud placeholders, which is the likely trigger.
+#
+# There is no portable way to time out an external command in base Julia, so the
+# fix is to make the git call SKIPPABLE rather than to bound it: export
+# DPN_GIT_SHA=$(git rev-parse --short HEAD) before launching and no child process
+# is spawned at all. Provenance is preserved (the real sha is still recorded);
+# only the subprocess disappears.
 function _git_sha()
+    env_sha = strip(get(ENV, "DPN_GIT_SHA", ""))
+    isempty(env_sha) || return env_sha
     try
         return strip(read(`git -C $SCRIPT_DIR rev-parse --short HEAD`, String))
     catch

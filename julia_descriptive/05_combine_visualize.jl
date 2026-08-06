@@ -1,6 +1,40 @@
 # 05_combine_visualize.jl
 # Sections 6-7 PRE-REGRESSION descriptive checks (audited revision).
 #
+# ============================================================================
+# !! READ FIRST — THE LAG COLUMNS IN THIS PANEL ARE **NOT** t-1 !!
+# (EM-FIX-10, 2026-08-06. Columns renamed from *_lag1q to *_lagobs.)
+#
+# merged_us_eu_matched.parquet is NOT a contiguous quarterly grid. It is built
+# from ownership_matched, which carries a row ONLY where the firm was actually
+# held. Measured on the 2026-08-04 vintage of the file: of 1,809,326 rows that
+# have a predecessor, 246,495 (13.62%) are MORE THAN ONE QUARTER away from their
+# LAG() row. So every LAG() window in this script returns the PREVIOUS OBSERVED
+# QUARTER, not t-1, for roughly one row in seven.
+#
+# The columns are therefore named
+#     china_share_lagobs, n_cn_total_lagobs, n_supplychain_links_lagobs,
+#     zero_recode_flag_lagobs, revere_pit_present_lagobs
+# ("lag OBSERVED"), not *_lag1q. The old *_lag1q names asserted something false.
+# No number changed with the rename — only the claim the name makes.
+#
+# WHERE FIGURE INPUTS MUST COME FROM. Emanuele's timing rule (2026-08-04 meeting,
+# 35:49) is explicit: CLASSIFY ON TIES AT t-1, PLOT HOLDINGS AT t. Any builder
+# that needs a true t-1 classification MUST read
+#     merged_us_eu_zero_filled.parquet          (06_cartesian_grid.jl)
+# whose lags ARE true t-1 — that panel is a verified contiguous Cartesian grid
+# (0 of 2,532,618 predecessor pairs are anything other than exactly 3 months
+# apart) — joined to
+#     marketcap_it.parquet   ON (sec_entity_id, report_date)
+# for market_cap / ownership_share, and to
+#     crosswalk_sec_entity_revere.parquet       (06, EM-FIX-9)
+# for the Revere eu_company_id.
+# DO NOT build Figure A or Figure B off merged_us_eu_matched's *_lagobs columns.
+# The only reason to reach for this panel is that it is the one place market_cap
+# and china_share sit side by side — and that convenience is exactly the trap:
+# use the zero-filled grid plus the marketcap join instead.
+# ============================================================================
+#
 # !!! IMPORTANT !!!
 # This script produces merged_us_eu_matched.parquet, but per the 2026-06-01
 # audit (AUDIT_2026_06_01_julia_descriptive.md) the EU firm universe is still
@@ -24,7 +58,7 @@
 #     excluded from the exposure bucket CTE rather than populating ZERO.
 #
 # C3 (lag): adds LAG(china_share) OVER (PARTITION BY sec_entity_id ORDER BY
-#     report_date) as china_share_lag1q to the merged panel. The bucket CTE
+#     report_date) as china_share_lagobs to the merged panel. The bucket CTE
 #     and any regression interaction MUST use the lagged column.
 #
 # C5 propagation: switched the merged-panel firm filter from the static
@@ -46,6 +80,20 @@
 #     firm_quarter_china_exposure.parquet directly); replace hard ±1% trim
 #     with winsorization in the descriptive scatter; emit gap_months
 #     diagnostic.
+#
+# EM-CHANGE-2 (zero/missing recode, Emanuele email 2026-08-05): china_share is
+#     computed at THREE sites in this pipeline — 02 (firm_quarter_exposure),
+#     05 (exposure_by_sec_entity, §1a below) and 06 (its own
+#     exposure_by_sec_entity). The B7 post-mortem happened because only some
+#     sites were patched, so all three now carry the same rule:
+#       point-in-time PRESENT in the Revere universe at q + zero active
+#       customer/supplier links  ->  china_share = 0 (genuine zero);
+#       absent from Revere at q (unmatched, pre-coverage-start, or after a
+#       coverage exit)           ->  NULL (drops).
+#     The coverage-start rule itself is defined once, in 02 (4b); 05 inherits
+#     it through row existence in firm_quarter_china_exposure.parquet.
+#     Consequence for this script: `in_revere_coverage` now means true
+#     point-in-time Revere presence rather than "had >= 1 active link".
 
 include("00_setup.jl")
 
@@ -276,7 +324,22 @@ CSV.write(joinpath(OUT_DIR, "05_multi_match_per_sec_entity.csv"), multi_match)
 # Previous version used MAX which (1) is the upper bound, not "conservative",
 # and (2) takes numerator and denominator from potentially different sub-entities.
 # DISTINCT applied to crosswalk subquery (mirrors exposure_by_sec_entity).
+#
+# (EM-CHANGE-2, 2026-08-06) china_share zero-recode applied here too — this is
+# the THIRD site the measure is computed at (02 firm_quarter_exposure, 05 here,
+# 06 exposure_by_sec_entity), and the B7 post-mortem was caused by patching
+# only some of them. 05 feeds the DESCRIPTIVE panel merged_us_eu_matched.parquet;
+# the regression path is 02 -> 06 -> build_c6_panel.py.
 # ============================================================
+# Hard-fail on a pre-EM-CHANGE-2 exposure parquet BEFORE referencing its new
+# columns, so the failure message is actionable rather than a duckdb binder error.
+exp_cols_05 = Set(qdf(con, "DESCRIBE SELECT * FROM read_parquet('$EXP_PATH')").column_name)
+for req in ("zero_recode_flag", "revere_pit_present", "revere_coverage_start")
+    req in exp_cols_05 || error(
+        "EM-CHANGE-2: $(basename(EXP_PATH)) is missing column '$req'. It was built by a " *
+        "pre-EM-CHANGE-2 version of 02_china_exposure.jl — re-run 02 before 05.")
+end
+
 DBInterface.execute(con, """
     CREATE OR REPLACE TABLE exposure_by_sec_entity AS
     WITH crosswalk AS (
@@ -292,27 +355,52 @@ DBInterface.execute(con, """
            SUM(e.n_cn_jv)            AS n_cn_jv,
            SUM(e.n_total_links)      AS n_total_links,
            SUM(e.n_supplychain_links) AS n_supplychain_links,
+           -- (EM-CHANGE-2, 2026-08-06) sec_entity-level recode flag. A
+           -- sec_entity can be multi-matched to several Revere companies; it
+           -- counts as a computed ratio if ANY matched company contributes a
+           -- supply-chain link, otherwise it is a recoded zero, split by
+           -- whether any other-type link exists.
+           CASE WHEN SUM(e.n_supplychain_links) > 0 THEN 0
+                WHEN SUM(e.n_total_links)       > 0 THEN 1
+                ELSE 2 END           AS zero_recode_flag,
+           MAX(e.revere_pit_present) AS revere_pit_present,
            -- (B7 FIX, 2026-07-22) supply-chain china_share: CN CUSTOMER+SUPPLIER
            -- links / total CUSTOMER+SUPPLIER links, SUM-aggregated across
            -- multi-matched Revere companies (self-consistent ratio, matches 02).
            -- The old all-rel-type ratio is kept as china_share_alltypes.
-           (SUM(e.n_cn_customer) + SUM(e.n_cn_supplier))::DOUBLE
-               / NULLIF(SUM(e.n_supplychain_links), 0) AS china_share,
+           -- (EM-CHANGE-2) Every row reaching this GROUP BY comes from a
+           -- PIT-present firm-quarter (02 emits nothing else), so a zero
+           -- denominator here is a genuine zero, not a missing: NULLIF is
+           -- replaced by an explicit CASE returning 0. This is the THIRD
+           -- china_share site (02, 05, 06) — the B7 lesson.
+           CASE WHEN SUM(e.n_supplychain_links) > 0
+                THEN (SUM(e.n_cn_customer) + SUM(e.n_cn_supplier))::DOUBLE
+                     / SUM(e.n_supplychain_links)
+                ELSE 0.0 END AS china_share,
            -- (DIRECTION FIX, 2026-08-02) directional link-count shares over the
            -- same denominator; sell + buy = china_share row-wise (see 02).
            -- NOTE: descriptive-parity only in 05 — the REGRESSION path for the
            -- direction split is 02(parquet) -> 06 -> build_c6; 06 rebuilds its
            -- own exposure_by_sec_entity and does not read this table.
-           SUM(e.n_cn_sell)::DOUBLE / NULLIF(SUM(e.n_supplychain_links), 0)
-               AS china_sell_link_share,
-           SUM(e.n_cn_buy)::DOUBLE / NULLIF(SUM(e.n_supplychain_links), 0)
-               AS china_buy_link_share,
-           SUM(e.n_cn_total)::DOUBLE / NULLIF(SUM(e.n_total_links), 0)
-               AS china_share_alltypes
+           CASE WHEN SUM(e.n_supplychain_links) > 0
+                THEN SUM(e.n_cn_sell)::DOUBLE / SUM(e.n_supplychain_links)
+                ELSE 0.0 END AS china_sell_link_share,
+           CASE WHEN SUM(e.n_supplychain_links) > 0
+                THEN SUM(e.n_cn_buy)::DOUBLE / SUM(e.n_supplychain_links)
+                ELSE 0.0 END AS china_buy_link_share,
+           CASE WHEN SUM(e.n_total_links) > 0
+                THEN SUM(e.n_cn_total)::DOUBLE / SUM(e.n_total_links)
+                ELSE 0.0 END AS china_share_alltypes
     FROM crosswalk m
     JOIN read_parquet('$EXP_PATH') e ON m.eu_company_id = e.eu_company_id
     GROUP BY m.sec_entity_id, e.quarter_end
 """)
+
+# (EM-CHANGE-2) invariant: every row here descends from a PIT-present
+# firm-quarter, so china_share must be non-NULL. NULL may only be introduced
+# downstream by the LEFT JOIN onto ownership_matched.
+n_null_05 = qdf(con, "SELECT COUNT(*) AS n FROM exposure_by_sec_entity WHERE china_share IS NULL").n[1]
+@assert n_null_05 == 0 "EM-CHANGE-2: $n_null_05 rows of 05's exposure_by_sec_entity carry NULL china_share"
 n_exp_se = qdf(con, "SELECT COUNT(*) AS n FROM exposure_by_sec_entity").n[1]
 println("  Pre-aggregated exposure rows (sec_entity_id × quarter, SUM-based): $n_exp_se")
 
@@ -351,7 +439,7 @@ CSV.write(joinpath(OUT_DIR, "05_coverage_cascade.csv"), coverage)
 # Time-versioned EU membership filter (matched_eu_sec_qend) closes C5 from 02.
 # Exposure joined via the SUM-aggregated table.
 # C2 fix: pre-2003 quarters carry NULL china_share / n_cn_* (NOT zero).
-# C3 fix: LAG(china_share) over (sec_entity_id, report_date) → china_share_lag1q.
+# C3 fix: LAG(china_share) over (sec_entity_id, report_date) → china_share_lagobs.
 # C1 fix: regression weight is portfolio_weight_eu (from 04), not _global.
 # ============================================================
 println("\nBuilding merged panel (US-investor × matched-EU-AS-OF-q × quarter)...")
@@ -394,6 +482,19 @@ atomic_copy_to(con, """
                  ELSE e.n_total_links END      AS n_total_links_raw,
             CASE WHEN om.report_date < DATE '2003-03-31' THEN NULL
                  ELSE e.china_share END        AS china_share_raw,
+            -- (EM-CHANGE-2) provenance for the zero arm; NULL = not codable.
+            CASE WHEN om.report_date < DATE '2003-03-31' THEN NULL
+                 ELSE e.n_supplychain_links END AS n_supplychain_links_raw,
+            CASE WHEN om.report_date < DATE '2003-03-31' THEN NULL
+                 ELSE e.zero_recode_flag END   AS zero_recode_flag_raw,
+            CASE WHEN om.report_date < DATE '2003-03-31' THEN NULL
+                 ELSE e.revere_pit_present END AS revere_pit_present_raw,
+            -- (EM-CHANGE-2) e.quarter_end IS NOT NULL now means exactly
+            -- "point-in-time present in the Revere universe at q" — 02 emits a
+            -- row for every PIT-present firm-quarter and for nothing else. It
+            -- previously meant the strictly narrower "had at least one active
+            -- link of any type at q", which is why zero-link firms were being
+            -- read as out-of-coverage.
             (om.report_date >= DATE '2003-03-31'
              AND e.quarter_end IS NOT NULL)    AS in_revere_coverage,
             g.gpr_us_cn,
@@ -421,11 +522,32 @@ atomic_copy_to(con, """
         n_cn_jv_raw        AS n_cn_jv,
         n_total_links_raw  AS n_total_links,
         china_share_raw    AS china_share,
+        -- (EM-CHANGE-2) contemporaneous + lagged provenance. The regressor is
+        -- the LAGGED share, so zero_recode_flag_lagobs is the flag that
+        -- describes it.
+        n_supplychain_links_raw AS n_supplychain_links,
+        zero_recode_flag_raw    AS zero_recode_flag,
+        revere_pit_present_raw  AS revere_pit_present,
+        LAG(n_supplychain_links_raw) OVER (PARTITION BY sec_entity_id, investor_country
+                                      ORDER BY report_date) AS n_supplychain_links_lagobs,
+        LAG(zero_recode_flag_raw)    OVER (PARTITION BY sec_entity_id, investor_country
+                                      ORDER BY report_date) AS zero_recode_flag_lagobs,
+        LAG(revere_pit_present_raw)  OVER (PARTITION BY sec_entity_id, investor_country
+                                      ORDER BY report_date) AS revere_pit_present_lagobs,
         -- C3 FIX: regression-spec ChinaExposure_{i,t-1} as a lagged column.
         LAG(china_share_raw)   OVER (PARTITION BY sec_entity_id, investor_country
-                                      ORDER BY report_date) AS china_share_lag1q,
+                                      ORDER BY report_date) AS china_share_lagobs,
         LAG(n_cn_total_raw)    OVER (PARTITION BY sec_entity_id, investor_country
-                                      ORDER BY report_date) AS n_cn_total_lag1q,
+                                      ORDER BY report_date) AS n_cn_total_lagobs,
+        -- (EM-FIX-10) DISTANCE to the row the *_lagobs columns actually came
+        -- from, in quarters. 1 = a genuine t-1; >1 = the panel skipped quarters
+        -- because the firm was unheld, so the "lag" is stale by that many
+        -- quarters; NULL = no predecessor. A consumer that insists on t-1 must
+        -- filter lag_gap_quarters = 1 — or, better, use
+        -- merged_us_eu_zero_filled.parquet, where the question does not arise.
+        DATEDIFF('month', LAG(report_date) OVER (PARTITION BY sec_entity_id, investor_country
+                                                 ORDER BY report_date), report_date) / 3
+            AS lag_gap_quarters,
         (n_cn_total_raw > 0)   AS has_cn_exposure,
         in_revere_coverage,
         gpr_us_cn,
@@ -438,6 +560,24 @@ merged_path_fwd = replace(merged_path, "\\" => "/")
 n_merged = qdf(con, "SELECT COUNT(*) AS n FROM read_parquet('$merged_path_fwd')").n[1]
 println("  merged panel rows (matched, EU-AS-OF-q): $n_merged")
 write_manifest("05_merged_us_eu_matched", merged_path; row_count=n_merged, input_paths=STEP_INPUTS)
+
+# (EM-FIX-10) Quantify the non-contiguity that makes *_lagobs not-t-1, so the
+# 13.62% figure quoted in the header is re-measured on THIS build rather than
+# carried as folklore.
+lagobs_diag = qdf(con, """
+    SELECT COUNT(*) FILTER (WHERE lag_gap_quarters IS NOT NULL)      AS n_with_predecessor,
+           COUNT(*) FILTER (WHERE lag_gap_quarters = 1)              AS n_true_t_minus_1,
+           COUNT(*) FILTER (WHERE lag_gap_quarters > 1)              AS n_stale_lag,
+           AVG(CASE WHEN lag_gap_quarters > 1 THEN 1.0 ELSE 0.0 END)
+               FILTER (WHERE lag_gap_quarters IS NOT NULL)           AS share_stale_lag,
+           MAX(lag_gap_quarters)                                     AS max_gap_quarters
+    FROM read_parquet('$merged_path_fwd')
+""")
+println("\n  EM-FIX-10 *_lagobs contiguity diagnostic (merged_us_eu_matched):")
+println(lagobs_diag)
+println("  -> a *_lagobs value is a TRUE t-1 only where lag_gap_quarters = 1.")
+println("     Figure A/B inputs must use merged_us_eu_zero_filled.parquet instead.")
+CSV.write(joinpath(OUT_DIR, "05_lagobs_contiguity_diag.csv"), lagobs_diag)
 
 # Composition diagnostics
 comp = qdf(con, """
@@ -535,10 +675,10 @@ end
 println("  using snapshot date: $snap_date")
 
 scatter_df = qdf(con, """
-    SELECT us_ownership_share, n_cn_total, china_share, china_share_lag1q, has_cn_exposure
+    SELECT us_ownership_share, n_cn_total, china_share, china_share_lagobs, has_cn_exposure
     FROM (
         SELECT investor_country, sec_entity_id,
-               n_cn_total, china_share, china_share_lag1q, has_cn_exposure,
+               n_cn_total, china_share, china_share_lagobs, has_cn_exposure,
                ownership_share AS us_ownership_share, market_cap
         FROM read_parquet('$merged_path_fwd')
         WHERE investor_country = 'US'
@@ -550,12 +690,12 @@ scatter_df = qdf(con, """
 """)
 println("  cells: $(nrow(scatter_df))")
 if nrow(scatter_df) > 10
-    if hasproperty(scatter_df, :china_share_lag1q)
-        keep = .!ismissing.(scatter_df.china_share_lag1q)
+    if hasproperty(scatter_df, :china_share_lagobs)
+        keep = .!ismissing.(scatter_df.china_share_lagobs)
         if sum(keep) > 10
-            println("  Correlation(US ownership, china_share_lag1q): ",
+            println("  Correlation(US ownership, china_share_lagobs): ",
                     round(cor(scatter_df.us_ownership_share[keep],
-                              identity.(scatter_df.china_share_lag1q[keep])), digits=4))
+                              identity.(scatter_df.china_share_lagobs[keep])), digits=4))
         end
     end
 end
@@ -563,28 +703,28 @@ CSV.write(joinpath(OUT_DIR, "05_scatter_own_vs_cn_data.csv"), scatter_df)
 
 # ============================================================
 # (B) TIME SERIES — US vs NONUS allocation by exposure group (lagged).
-# Bucket built from china_share_lag1q (NOT contemporaneous) — descriptive
+# Bucket built from china_share_lagobs (NOT contemporaneous) — descriptive
 # analogue of ChinaExposure_{i,t-1} in the regression.
-# Pre-2003 quarters drop out automatically because china_share_lag1q is NULL.
+# Pre-2003 quarters drop out automatically because china_share_lagobs is NULL.
 # Bucket is a firm-quarter attribute (not investor-conditional).
 # ============================================================
-println("\n(B) Within-Europe US allocation by exposure group (china_share_lag1q)")
+println("\n(B) Within-Europe US allocation by exposure group (china_share_lagobs)")
 
 ts_alloc = qdf(con, """
     WITH median_cutoff AS (
-        -- Median of china_share_lag1q across firm-quarter cells WITH positive
+        -- Median of china_share_lagobs across firm-quarter cells WITH positive
         -- exposure. Data-driven cutoff replaces the earlier arbitrary 0.20
         -- threshold. Cells with zero or NULL exposure are excluded from the
         -- median computation but classified separately below.
-        SELECT QUANTILE_CONT(china_share_lag1q, 0.5) AS med
+        SELECT QUANTILE_CONT(china_share_lagobs, 0.5) AS med
         FROM read_parquet('$merged_path_fwd')
-        WHERE china_share_lag1q > 0
+        WHERE china_share_lagobs > 0
     ),
     bucket AS (
-        SELECT DISTINCT sec_entity_id, report_date, china_share_lag1q,
+        SELECT DISTINCT sec_entity_id, report_date, china_share_lagobs,
                CASE
-                   WHEN china_share_lag1q IS NULL                                           THEN 'MISSING'
-                   WHEN china_share_lag1q > (SELECT med FROM median_cutoff)                 THEN 'HIGH'
+                   WHEN china_share_lagobs IS NULL                                           THEN 'MISSING'
+                   WHEN china_share_lagobs > (SELECT med FROM median_cutoff)                 THEN 'HIGH'
                    ELSE                                                                          'LOW'
                END AS exp_grp
         FROM read_parquet('$merged_path_fwd')
@@ -657,11 +797,11 @@ diff_panel_path = test_suffix_path(joinpath(OUT_DIR, "us_vs_nonus_diff.parquet")
 
 atomic_copy_to(con, """
     WITH us_w_t AS (
-        SELECT sec_entity_id, report_date, china_share_lag1q,
+        SELECT sec_entity_id, report_date, china_share_lagobs,
                SUM(portfolio_weight_eu) AS us_w
         FROM read_parquet('$merged_path_fwd')
         WHERE investor_country = 'US' AND portfolio_weight_eu IS NOT NULL
-        GROUP BY sec_entity_id, report_date, china_share_lag1q
+        GROUP BY sec_entity_id, report_date, china_share_lagobs
     ),
     nonus_w_t AS (
         SELECT sec_entity_id, report_date,
@@ -669,7 +809,7 @@ atomic_copy_to(con, """
         FROM nonus_aggregate_eu
     ),
     firm_q AS (
-        SELECT u.sec_entity_id, u.report_date, u.china_share_lag1q, u.us_w,
+        SELECT u.sec_entity_id, u.report_date, u.china_share_lagobs, u.us_w,
                COALESCE(n.nonus_w, 0) AS nonus_w
         FROM us_w_t u
         LEFT JOIN nonus_w_t n
@@ -677,7 +817,7 @@ atomic_copy_to(con, """
               AND u.report_date   = n.report_date
     ),
     windowed AS (
-        SELECT sec_entity_id, report_date, china_share_lag1q,
+        SELECT sec_entity_id, report_date, china_share_lagobs,
                LAG(us_w,    1) OVER (PARTITION BY sec_entity_id ORDER BY report_date) AS us_w_prev,
                LEAD(us_w,   1) OVER (PARTITION BY sec_entity_id ORDER BY report_date) AS us_w_next,
                LAG(nonus_w, 1) OVER (PARTITION BY sec_entity_id ORDER BY report_date) AS nonus_w_prev,
@@ -687,7 +827,7 @@ atomic_copy_to(con, """
                         LEAD(report_date, 1) OVER (PARTITION BY sec_entity_id ORDER BY report_date)) AS gap_months
         FROM firm_q
     )
-    SELECT sec_entity_id, report_date, china_share_lag1q, gap_months,
+    SELECT sec_entity_id, report_date, china_share_lagobs, gap_months,
            (us_w_next    - us_w_prev)    AS d_us_w,
            (nonus_w_next - nonus_w_prev) AS d_nonus_w
     FROM windowed
@@ -720,17 +860,17 @@ println("Δw gap_months diagnostic (firm-quarters dropped by reason):")
 println(gap_diag)
 CSV.write(joinpath(OUT_DIR, "05_gap_months_diagnostic.csv"), gap_diag)
 
-# HIGH-exposure threshold: median of china_share_lag1q across firm-quarter
+# HIGH-exposure threshold: median of china_share_lagobs across firm-quarter
 # cells with positive exposure. Data-driven; replaces the earlier arbitrary
 # 0.20 cutoff. We compute the median from the differential panel itself so
 # the cutoff is consistent with the panel used for Δw.
 med_pos_q = qdf(con, """
-    SELECT QUANTILE_CONT(china_share_lag1q, 0.5) AS med
+    SELECT QUANTILE_CONT(china_share_lagobs, 0.5) AS med
     FROM read_parquet('$diff_panel_path_fwd')
-    WHERE china_share_lag1q > 0
+    WHERE china_share_lagobs > 0
 """)
 high_cutoff = (nrow(med_pos_q) > 0 && !ismissing(med_pos_q.med[1])) ? med_pos_q.med[1] : 0.0
-println("HIGH-exposure cutoff (median of positive china_share_lag1q): $(round(high_cutoff, digits=4))")
+println("HIGH-exposure cutoff (median of positive china_share_lagobs): $(round(high_cutoff, digits=4))")
 
 # Winsorize at p1/p99 instead of hard ±1% trim.
 ws_bounds_q = qdf(con, """
@@ -740,7 +880,7 @@ ws_bounds_q = qdf(con, """
         QUANTILE_CONT(d_nonus_w, 0.01) AS d_nonus_p1,
         QUANTILE_CONT(d_nonus_w, 0.99) AS d_nonus_p99
     FROM read_parquet('$diff_panel_path_fwd')
-    WHERE china_share_lag1q > $high_cutoff
+    WHERE china_share_lagobs > $high_cutoff
 """)
 d_us_p1    = ws_bounds_q.d_us_p1[1];    d_us_p99    = ws_bounds_q.d_us_p99[1]
 d_nonus_p1 = ws_bounds_q.d_nonus_p1[1]; d_nonus_p99 = ws_bounds_q.d_nonus_p99[1]
@@ -759,7 +899,7 @@ ts_diff = qdf(con, """
            ANY_VALUE(g.shock_us_cn)    AS shock_us_cn
     FROM read_parquet('$diff_panel_path_fwd') d
     LEFT JOIN gpr_ts g ON d.report_date = g.quarter_end
-    WHERE china_share_lag1q > $high_cutoff
+    WHERE china_share_lagobs > $high_cutoff
       AND g.gpr_us_cn IS NOT NULL
     GROUP BY report_date ORDER BY report_date
 """)

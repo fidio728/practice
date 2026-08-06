@@ -24,14 +24,21 @@ Stata gotcha: pandas.to_stata writes datetime64 as %tc (milliseconds since
 1960-01-01); 07_regression.do already does `gen rd_day = dofc(rdate)`.
 """
 
+import os
 from pathlib import Path
 
 import duckdb
 import pandas as pd
 
 PROJ_DIR = Path(r"c:/Users/xl/OneDrive - Universitat Ramón Llull/git/practice/julia_descriptive")
-OUT_DIR  = PROJ_DIR / "output"
+# (EM-FIX-5/7, 2026-08-06) honour the same DPN_OUT_DIR override 00_setup.jl uses,
+# so this builder cannot read a stale panel from C: while the Julia chain writes
+# the rebuilt one to E:. The .do consumers do NOT honour it — see 00_setup.jl.
+_env_out = os.environ.get("DPN_OUT_DIR", "").strip()
+OUT_DIR  = Path(_env_out).resolve() if _env_out else PROJ_DIR / "output"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
+if _env_out:
+    print(f"[DPN_OUT_DIR] reading/writing {OUT_DIR} (override in force)")
 
 PANEL_PARQUET = OUT_DIR / "merged_us_eu_zero_filled.parquet"
 PANEL_DTA     = OUT_DIR / "c6_panel.dta"
@@ -57,7 +64,22 @@ df = con.execute(f"""
         sell_share_lag1q                                AS sell_lag,
         buy_share_lag1q                                 AS buy_lag,
         shock_us_cn                                     AS shock,
-        CASE WHEN holder_group = 'US' THEN 1 ELSE 0 END AS us
+        CASE WHEN holder_group = 'US' THEN 1 ELSE 0 END AS us,
+        -- (EM-FIX-6, 2026-08-06) ATTRIBUTION COLUMNS. The written update has to
+        -- separate the SNAPSHOT effect (03's quarter rule) from the SAMPLE-
+        -- EXPANSION effect (02's zero recode). 06_cartesian_grid.jl:401 carries
+        -- zero_recode_flag_lag1q into the parquet, and flag = 0 is EXACTLY the
+        -- pre-change codable set (old rule NULLIF(n_supplychain_links, 0); new
+        -- flag = 0 means n_supplychain_links > 0). Projecting it here makes the
+        -- attribution a two-line split of ONE build instead of a full 02-06
+        -- re-run under two different rules:
+        --     run A (new snapshot + OLD missing rule) :  if zr_lag == 0
+        --     run B (new snapshot + zero recode)      :  full sample
+        -- NULL is mapped to the sentinel -1 in pandas below, because to_stata
+        -- would otherwise widen the column to float and write NaN.
+        COALESCE(zero_recode_flag_lag1q,   -1)          AS zr_lag,
+        COALESCE(n_supplychain_links_lag1q, -1)         AS nsc_lag,
+        COALESCE(CAST(revere_pit_present_lag1q AS INTEGER), -1) AS pit_lag
     FROM read_parquet('{panel_uri}')
     WHERE delta_w           IS NOT NULL
       AND china_share_lag1q IS NOT NULL
@@ -107,9 +129,37 @@ df["sell_lag"] = pd.to_numeric(df["sell_lag"], errors="raise").astype("float64")
 df["buy_lag"]  = pd.to_numeric(df["buy_lag"],  errors="raise").astype("float64")
 df["shock"]    = pd.to_numeric(df["shock"],  errors="raise").astype("float64")
 df["us"]       = df["us"].astype("int8")
+# (EM-FIX-6) attribution columns. int8 for the two flags; nsc_lag is a link count
+# that can exceed 127, so int32. Sentinel -1 == "not codable / NULL upstream".
+df["zr_lag"]   = pd.to_numeric(df["zr_lag"],  errors="raise").astype("int8")
+df["pit_lag"]  = pd.to_numeric(df["pit_lag"], errors="raise").astype("int8")
+df["nsc_lag"]  = pd.to_numeric(df["nsc_lag"], errors="raise").astype("int32")
 
 n = len(df)
 print(f"[2/3] Filtered panel rows: {n:,}")
+# (EM-FIX-6) attribution census on the estimation sample actually written.
+# zr_lag == 0  -> cell was codable under the OLD missing rule (pre-change arm)
+# zr_lag == 1  -> recoded zero, competitor/partner-only links
+# zr_lag == 2  -> recoded zero, no active links at all
+# zr_lag == -1 -> flag was NULL upstream while cn_lag was not (should be 0 rows;
+#                 if not, 06's lag propagation and 02's flag disagree)
+print("       EM-FIX-6 attribution census (zr_lag on the estimation sample):")
+_zr = df["zr_lag"].value_counts().sort_index()
+for _k, _v in _zr.items():
+    _lbl = {0: "old-rule codable (pre-change arm)",
+            1: "recoded zero: competitor/partner only",
+            2: "recoded zero: no active links",
+            -1: "NULL upstream (INVESTIGATE)"}.get(int(_k), "unexpected")
+    print(f"         zr_lag={int(_k):>3}  n={_v:>12,}  firms={df.loc[df['zr_lag'] == _k, 'firm_str'].nunique():>7,}  {_lbl}")
+_n_old = int((df["zr_lag"] == 0).sum())
+_f_old = df.loc[df["zr_lag"] == 0, "firm_str"].nunique()
+print(f"       run A (new snapshot + OLD missing rule, `if zr_lag==0`): "
+      f"N={_n_old:,}  firms={_f_old:,}")
+print(f"       run B (new snapshot + zero recode, full sample):        "
+      f"N={n:,}  firms={df['firm_str'].nunique():,}")
+if int((df["zr_lag"] == -1).sum()) > 0:
+    print(f"       !! WARNING: {int((df['zr_lag'] == -1).sum()):,} rows have a non-null cn_lag "
+          f"but a NULL zero_recode_flag_lag1q — 02/06 provenance disagreement.")
 print("       Breakdown by hgroup:")
 print(df["hgroup"].value_counts().to_string())
 print("       us flag tab:")

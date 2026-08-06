@@ -56,21 +56,72 @@ from datetime import datetime
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parent
-OUT = BASE / "output"
+# (EM-FIX-5/7, 2026-08-06) honour DPN_OUT_DIR so the archive step operates on the
+# SAME directory the Julia chain writes to. Archiving C: while rebuilding E: would
+# leave the live vintage un-archived, which is the one thing this script exists
+# to prevent.
+_env_out = os.environ.get("DPN_OUT_DIR", "").strip()
+OUT = Path(_env_out).resolve() if _env_out else BASE / "output"
 PLOTS = BASE / "plots"
-LOG_CSV = OUT / "_preP0_archive_log.csv"
 
-# Durable vintage bookkeeping. VINTAGE_DOC deliberately lives at the
-# julia_descriptive ROOT, not under output/: .gitignore excludes `output/`,
-# `*.csv`, `*.parquet` and `*.dta`, so an output-only marker would never be
-# committed and the vintage status would die with the terminal scrollback.
-# The CSV twin is machine-readable and is allowed to be gitignored.
-VINTAGE_DOC = BASE / "VINTAGE_P0.md"
-STALE_MANIFEST_CSV = OUT / "_preP0_stale_manifest.csv"
+# ---------------------------------------------------------------------------
+# ARCHIVE SUFFIX — parameterised (EM-FIX-8, 2026-08-06).
+#
+# This script originally hard-coded "_preP0". The 2026-08-06 advisor package
+# (quarter snapshot rule + zero/missing recode) overwrites the SAME artifacts a
+# second time, so the P0 vintage now needs a second, differently-named archive
+# generation: "_preEM". With the suffix hard-coded there was no tool that could
+# produce _preEM archives at all, and build_plan() hard-ABORTED on every Tier-1
+# artifact because a _preP0 twin AND a live file both exist — which is the normal
+# post-P0 state.
+#
+# Set with --suffix preEM. Because archived_path() derives every target name from
+# SUFFIX, a run with --suffix preEM can never name, read, or overwrite a _preP0
+# file: the refuse-check compares the live file against the _preEM twin only.
+# ---------------------------------------------------------------------------
+SUFFIX = "preP0"
+
+
+def _suffixed(name: str) -> str:
+    return name
+
+
+def log_csv_path() -> Path:
+    return OUT / f"_{SUFFIX}_archive_log.csv"
+
+
+def stale_manifest_path() -> Path:
+    return OUT / f"_{SUFFIX}_stale_manifest.csv"
+
+
+def vintage_doc_path() -> Path:
+    # Durable vintage bookkeeping. Deliberately lives at the julia_descriptive
+    # ROOT, not under output/: .gitignore excludes `output/`, `*.csv`, `*.parquet`
+    # and `*.dta`, so an output-only marker would never be committed and the
+    # vintage status would die with the terminal scrollback. The CSV twin is
+    # machine-readable and is allowed to be gitignored.
+    return BASE / ("VINTAGE_P0.md" if SUFFIX == "preP0" else f"VINTAGE_{SUFFIX.upper()}.md")
+
 
 # W actually used by the rebuild, so the doc records the real value rather than
 # a hard-coded one that can drift from 03_eom_etl.jl.
-ASOF_W = os.environ.get("DPN_ASOF_WINDOW_DAYS", "10")
+#
+# (EM-FIX-8) The default is NO LONGER "10". 03_eom_etl.jl now treats an UNSET
+# DPN_ASOF_WINDOW_DAYS as the advisor-directed QUARTER RULE, and a numeric value
+# as the legacy window override. Defaulting to "10" here made the vintage doc
+# record a quarter-rule panel as "W = 10 days" — a fabricated provenance record
+# produced precisely when the operator did the right thing and left the variable
+# unset. Mirror 03's logic instead.
+_asof_env = os.environ.get("DPN_ASOF_WINDOW_DAYS", "").strip()
+ASOF_IS_QUARTER_RULE = (_asof_env == "")
+ASOF_W = _asof_env if _asof_env else "n/a (quarter rule)"
+ASOF_RULE_DESC = (
+    "QUARTER rule — per (fund_id, fsym_id), the LATEST REPORT_DATE inside "
+    "[quarter_start, qend] (advisor-directed, Emanuele 2026-08-04 24:17)"
+    if ASOF_IS_QUARTER_RULE else
+    f"WINDOW rule — per (fund_id, fsym_id), the LATEST REPORT_DATE in "
+    f"[max(quarter_start, qend - {ASOF_W}), qend] (DPN_ASOF_WINDOW_DAYS override)"
+)
 
 # The rebuilt chain, in execution order (spec item 4).
 REBUILD_CHAIN = [
@@ -175,6 +226,31 @@ TARGETS: list[tuple[str, str, str]] = [
     ("output/desc_trend_china_link_fraction.csv",     "3", "build_desc_trend_china_links.py:447"),
     ("plots/fig_china_link_fraction.png",             "3", "build_desc_trend_china_links.py:547"),
     ("plots/fig_china_link_fraction.pdf",             "3", "build_desc_trend_china_links.py:548"),
+
+    # ===================== EM-CHANGE-2 additions (2026-08-06) ===============
+    # The original TARGETS list predates EM-CHANGE-2 and enumerated only what
+    # the P0 holdings rebuild overwrote. The 2026-08-06 package ALSO re-runs
+    # 02_china_exposure.jl, which overwrites everything below. Two of these are
+    # load-bearing, not bookkeeping:
+    #
+    #   firm_quarter_china_exposure.parquet — 02_china_exposure.jl reads
+    #       firm_quarter_china_exposure_preEM.parquet for the EM-CHANGE-2 P0
+    #       bit-identity gate ("exposure changes ONLY where the recode applies").
+    #       If it is missing the gate is SKIPPED, so a missed archive silently
+    #       disables the only automated proof that positive-denominator cells
+    #       survived the recode unchanged.
+    #   eu_revere_universe_qend.parquet — the time-versioned EU universe 05 and
+    #       06 join on; the PIT presence spine is rebuilt with it.
+    ("output/firm_quarter_china_exposure.parquet",    "1",  "02_china_exposure.jl:1113"),
+    ("output/eu_revere_universe.parquet",             "1",  "02_china_exposure.jl (latest snapshot, doc only)"),
+    ("output/eu_revere_universe_qend.parquet",        "1",  "02_china_exposure.jl (time-versioned; required by 05/06)"),
+    ("output/02_china_exposure_timeseries.csv",       "2",  "02_china_exposure.jl:~1200"),
+    ("output/02_china_exposure_percentiles_snapshot.csv", "2", "02_china_exposure.jl:~1177"),
+    ("output/02_dist_cn_total_2018.csv",              "2",  "02_china_exposure.jl:~1141"),
+    ("output/02_china_edge_path_summary.csv",         "2",  "02_china_exposure.jl"),
+    ("output/02_rev_co_asof_drift_diag.csv",          "2",  "02_china_exposure.jl"),
+    ("output/02_revere_co_variation_diag.csv",        "2",  "02_china_exposure.jl"),
+    ("output/02_revere_company_country_top25.csv",    "2",  "02_china_exposure.jl"),
 ]
 
 # Deliberately NOT archived:
@@ -182,9 +258,12 @@ TARGETS: list[tuple[str, str, str]] = [
 #       by build_desc_trend_us_holdings.py. Holdings-independent; archiving it
 #       only risks a needless FRED re-download.
 
-# Special archive names (spec-mandated).
-SPECIAL_NAME = {
-    "output/holdings_eom.parquet": "holdings_eom_exactEOM_preP0.parquet",
+# Special archive names (spec-mandated). ONLY valid for the preP0 generation:
+# "exactEOM" names the RULE the pre-P0 panel was built under. The preEM
+# generation archives the P0 as-of panel, whose name must be the plain
+# holdings_eom_preEM.parquet that 03_eom_etl.jl's PHASE B0 guard looks for.
+SPECIAL_NAME_BY_SUFFIX = {
+    "preP0": {"output/holdings_eom.parquet": "holdings_eom_exactEOM_preP0.parquet"},
 }
 
 # Artifacts that consume holdings_eom / merged_us_eu_zero_filled but are NOT
@@ -219,19 +298,32 @@ STALE_VINTAGE = [
 ]
 
 
+def live_path(rel: str) -> Path:
+    """Resolve a TARGETS-relative path, honouring DPN_OUT_DIR for output/*."""
+    if rel.startswith("output/"):
+        return OUT / rel[len("output/"):]
+    return BASE / rel
+
+
 def archived_path(rel: str) -> Path:
-    """Map a live artifact path to its _preP0 archive path."""
-    live = BASE / rel
-    if rel in SPECIAL_NAME:
-        return live.parent / SPECIAL_NAME[rel]
+    """Map a live artifact path to its archive path under the ACTIVE SUFFIX.
+
+    Every archive name is derived from the module-level SUFFIX, so a run with
+    --suffix preEM can never name (and therefore never overwrite or refuse on)
+    an existing _preP0 file.
+    """
+    live = live_path(rel)
+    special = SPECIAL_NAME_BY_SUFFIX.get(SUFFIX, {})
+    if rel in special:
+        return live.parent / special[rel]
     name = live.name
     if name.endswith(".parquet.meta.json"):
         stem = name[: -len(".parquet.meta.json")]
-        return live.parent / f"{stem}_preP0.parquet.meta.json"
+        return live.parent / f"{stem}_{SUFFIX}.parquet.meta.json"
     stem, dot, ext = name.rpartition(".")
     if not dot:
-        return live.parent / f"{name}_preP0"
-    return live.parent / f"{stem}_preP0.{ext}"
+        return live.parent / f"{name}_{SUFFIX}"
+    return live.parent / f"{stem}_{SUFFIX}.{ext}"
 
 
 def sidecar_of(rel: str) -> str | None:
@@ -269,7 +361,7 @@ def build_plan(rels: list[tuple[str, str, str]]):
             pairs.append((sc, sidecar_archive_path(rel), "sidecar"))
 
         for r, dst, kind in pairs:
-            src = BASE / r
+            src = live_path(r)
             s_ex, d_ex = src.is_file(), dst.is_file()
             if s_ex and not d_ex:
                 action, note = "RENAME", ""
@@ -282,15 +374,16 @@ def build_plan(rels: list[tuple[str, str, str]]):
             else:  # both exist -> ambiguous, refuse
                 action = "REFUSE"
                 if src.stat().st_mtime > dst.stat().st_mtime:
-                    note = ("CLOBBER RISK: live file is NEWER than the _preP0 "
+                    note = (f"CLOBBER RISK: live file is NEWER than the _{SUFFIX} "
                             "twin — renaming would destroy the archive")
                 else:
-                    note = ("AMBIGUOUS: _preP0 twin exists and is newer than "
+                    note = (f"AMBIGUOUS: _{SUFFIX} twin exists and is newer than "
                             "the live file — unexplained state")
                 n_refuse += 1
             plan.append({
                 "tier": tier, "kind": kind, "writer": writer, "action": action,
-                "src": r, "dst": str(dst.relative_to(BASE)).replace("\\", "/"),
+                "src": r, "src_abs": str(src),
+                "dst": dst.name, "dst_abs": str(dst),
                 "size": src.stat().st_size if s_ex else 0,
                 "src_mtime": fmt_mtime(src) if s_ex else "",
                 "dst_mtime": fmt_mtime(dst) if d_ex else "",
@@ -333,9 +426,13 @@ def write_vintage_doc(plan: list[dict]) -> None:
     A("| OLD rule (`03_eom_etl.jl`) | `REPORT_DATE = LAST_DAY(REPORT_DATE)` AND "
       "`MONTH(REPORT_DATE) IN (3,6,9,12)` — an EXACT calendar quarter-end match |")
     A("| NEW rule | per `(fund_id, fsym_id, quarter)`, the LATEST `REPORT_DATE` "
-      "in `[qend - W, qend]`, stamped with `report_date = qend`; true date kept "
-      "in `report_date_actual`, `asof_gap_days = qend - actual` |")
-    A(f"| **W (`DPN_ASOF_WINDOW_DAYS`)** | **{ASOF_W} days** |")
+      "inside the selection window, stamped with `report_date = qend`; true date "
+      "kept in `report_date_actual`, `asof_gap_days = qend - actual` |")
+    A(f"| **Selection window in force at archive time** | {ASOF_RULE_DESC} |")
+    A(f"| **`DPN_ASOF_WINDOW_DAYS`** | **{ASOF_W}** "
+      + ("(UNSET at archive time -> 03_eom_etl.jl uses the advisor quarter rule; "
+         "this is NOT W = 10)" if ASOF_IS_QUARTER_RULE else "days") + " |")
+    A(f"| Archive generation | `_{SUFFIX}` |")
     A("| Why | on weekend quarter-ends a large part of the fund universe stamps "
       "the prior business day and was dropped wholesale; the loss is NOT "
       "US/NONUS symmetric, so group x quarter FE cannot absorb it |")
@@ -350,7 +447,7 @@ def write_vintage_doc(plan: list[dict]) -> None:
     A("| tier | live artifact | archived as | written by |")
     A("|---|---|---|---|")
     for r in archived:
-        A(f"| {r['tier']} | `{r['src']}` | `{Path(r['dst']).name}` | {r['writer']} |")
+        A(f"| {r['tier']} | `{r['src']}` | `{r['dst']}` | {r['writer']} |")
     A("")
     A("Tier key: **1** holdings-derived binary panel (content WILL change); "
       "**1i** rebuilt by 05 but holdings-INDEPENDENT, so post-rebuild it must be "
@@ -382,37 +479,48 @@ def write_vintage_doc(plan: list[dict]) -> None:
     A("| status | artifact | built by |")
     A("|---|---|---|")
     for rel, writer in STALE_VINTAGE:
-        p = BASE / rel
+        p = live_path(rel)
         A(f"| {'present' if p.is_file() else 'absent'} | `{rel}` | `{writer}` |")
     A("")
     A("Affected result families: fourgroup, direction, tercile, flow decomposition, "
       "extensive margin, russia, riskset/spell, sagg, shocklag, ownership-share, "
       "country panel, firm ladder.")
     A("")
-    VINTAGE_DOC.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    vintage_doc_path().write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-    with STALE_MANIFEST_CSV.open("w", newline="", encoding="utf-8") as fh:
+    with stale_manifest_path().open("w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(["generated_at", "vintage", "status", "artifact", "built_by",
                     "asof_window_days", "note"])
         for rel, writer in STALE_VINTAGE:
-            p = BASE / rel
+            p = live_path(rel)
             w.writerow([stamp, "PRE-P0", "present" if p.is_file() else "absent",
                         rel, writer, ASOF_W,
                         "PRE-P0, pending re-run, do not mix with post-P0 results"])
 
-    print(f"\nvintage register written:\n  {VINTAGE_DOC}\n  {STALE_MANIFEST_CSV}")
+    print(f"\nvintage register written:\n  {vintage_doc_path()}\n  {stale_manifest_path()}")
     print("  (VINTAGE_P0.md is OUTSIDE output/ on purpose — output/ and *.csv are "
           "gitignored, so only the .md gets committed.)")
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Archive pre-P0 artifacts by rename.")
+    global SUFFIX
+    ap = argparse.ArgumentParser(
+        description="Archive a superseded artifact vintage by rename.")
     ap.add_argument("--apply", action="store_true",
                     help="actually rename (default is a dry-run plan)")
     ap.add_argument("--tier1-only", action="store_true",
                     help="restrict to tier 1 / 1i binary panels")
+    ap.add_argument("--suffix", default="preP0",
+                    help="archive generation suffix (default preP0; use preEM "
+                         "for the 2026-08-06 advisor package). Archive names are "
+                         "derived from it, so a preEM run never touches a preP0 twin.")
     args = ap.parse_args()
+
+    SUFFIX = args.suffix.strip().lstrip("_")
+    if not SUFFIX or not SUFFIX.replace("_", "").isalnum():
+        print(f"FATAL: --suffix must be alphanumeric, got {args.suffix!r}")
+        return 2
 
     if not OUT.is_dir():
         print(f"FATAL: output dir not found: {OUT}")
@@ -427,7 +535,10 @@ def main() -> int:
     width = max(len(r["src"]) for r in plan) + 2
     print("=" * 100)
     print(f"archive_preP0.py — {'APPLY' if args.apply else 'DRY RUN (nothing will move)'}")
-    print(f"base: {BASE}")
+    print(f"base       : {BASE}")
+    print(f"output dir : {OUT}" + ("  [DPN_OUT_DIR override]" if _env_out else ""))
+    print(f"suffix     : _{SUFFIX}")
+    print(f"snapshot   : {ASOF_RULE_DESC}")
     print("=" * 100)
     cur_tier = None
     for r in plan:
@@ -439,7 +550,7 @@ def main() -> int:
                      "3": "TIER 3  advisor figures + figure data"}[cur_tier]
             print(f"\n--- {label} " + "-" * max(0, 60 - len(label)))
         size = f"{fmt_size(r['size']):>10}" if r["size"] else " " * 10
-        print(f"  {r['action']:<8} {r['src']:<{width}} -> {Path(r['dst']).name:<46}"
+        print(f"  {r['action']:<8} {r['src']:<{width}} -> {r['dst']:<46}"
               f" {size}  {r['note']}")
 
     counts = {}
@@ -462,14 +573,14 @@ def main() -> int:
 
     print("\nPRE-P0-VINTAGE (NOT renamed — not overwritten by this package, but stale):")
     for rel, writer in STALE_VINTAGE:
-        p = BASE / rel
+        p = live_path(rel)
         mark = "present" if p.is_file() else "absent "
         print(f"  [{mark}] {rel:<48} ({writer})")
     print("  These consume holdings_eom / merged_us_eu_zero_filled. After the")
     print("  rebuild they describe the OLD snapshot. Do NOT mix them with post-P0")
     print("  results and do NOT re-run them in this package.")
-    print(f"  --apply persists this list to {VINTAGE_DOC.name} (committed) and")
-    print(f"  {STALE_MANIFEST_CSV.name} (machine-readable), so it survives the session.")
+    print(f"  --apply persists this list to {vintage_doc_path().name} (committed) and")
+    print(f"  {stale_manifest_path().name} (machine-readable), so it survives the session.")
 
     if n_refuse:
         print("\n" + "!" * 100)
@@ -487,15 +598,16 @@ def main() -> int:
     for r in plan:
         if r["action"] != "RENAME":
             continue
-        src, dst = BASE / r["src"], BASE / r["dst"]
+        src, dst = Path(r["src_abs"]), Path(r["dst_abs"])
         dst.parent.mkdir(parents=True, exist_ok=True)
         src.rename(dst)          # same-volume rename; O(1), no data copy
         moved.append(r)
         print(f"  renamed {r['src']} -> {r['dst']}")
 
     stamp = datetime.now().isoformat(timespec="seconds")
-    new_log = not LOG_CSV.is_file()
-    with LOG_CSV.open("a", newline="", encoding="utf-8") as fh:
+    _log = log_csv_path()
+    new_log = not _log.is_file()
+    with _log.open("a", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         if new_log:
             w.writerow(["archived_at", "tier", "kind", "writer", "src", "dst",
@@ -504,7 +616,7 @@ def main() -> int:
             w.writerow([stamp, r["tier"], r["kind"], r["writer"], r["src"],
                         r["dst"], r["size"], r["src_mtime"]])
 
-    print(f"\nAPPLY complete: {len(moved)} file(s) renamed. Log: {LOG_CSV}")
+    print(f"\nAPPLY complete: {len(moved)} file(s) renamed. Log: {_log}")
 
     write_vintage_doc(plan)
 

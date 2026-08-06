@@ -158,39 +158,133 @@ println("  rows in I_ict panel: $n_ict")
 write_manifest("04_I_ict_panel", ict_path; row_count=n_ict, input_paths=STEP_INPUTS)
 
 # ============================================================
-# (2) MarketCap_{i,t} — built from PRIMARY EQUITY only.
-# Fix (high): the previous version used MAX × MAX which silently selected the
-# upper bound of intra-group dispersion (firm-MAX leak pattern). Now uses AVG
-# within group: if all rows are identical (the usual case), AVG = MIN = MAX
-# so the result is exact. STDDEV per group is reported as a dispersion
-# diagnostic so a reviewer can spot-check.
+# (2) MarketCap_{i,t} — built from PRIMARY EQUITY only, at the FRESHEST
+#     available valuation date inside the quarter.
+#
+# Fix (high, 2026-06-01): the previous version used MAX × MAX which silently
+# selected the upper bound of intra-group dispersion (firm-MAX leak pattern).
+# Replaced by AVG within group.
+#
+# EM-FIX-2 (2026-08-06) — POINT-IN-TIME RESTRICTION. THIS IS AN EXPLICIT
+# DECISION, NOT A SILENT INHERITANCE. Under the W = 10 as-of window every row
+# contributing to a (sec_entity_id, sec_country, report_date, fsym_id) group was
+# within 10 days of quarter-end, so AVG = MIN = MAX and the 2026-06-01
+# justification ("if all rows are identical, AVG is exact") held. Under the
+# advisor-directed QUARTER rule (03_eom_etl.jl, Emanuele 2026-08-04 24:17) the
+# same group can contain a JANUARY price and a MARCH price for the same security,
+# reported by two different funds. AVG would then be an unweighted average of
+# prices up to ~91 days apart, and market_cap feeds:
+#     ownership_share = I_ict / market_cap                    (line ~253 below)
+#     the Figure-A scatter us_ownership_share                 (06_cartesian_grid.jl:516)
+#
+# RULE APPLIED: within each (sec_entity_id, sec_country, report_date, fsym_id)
+# group, keep only the rows at MIN(asof_gap_days) — the freshest observation of
+# that security in that quarter — then AVG within the tie (unchanged convention,
+# so genuine same-date disagreement between funds is still averaged, not
+# max-picked). The STDDEV dispersion diagnostic is computed on the RESTRICTED
+# set, and the would-be UNRESTRICTED dispersion is printed beside it so the size
+# of what the restriction removes is on the record rather than assumed away.
+#
+# NOTE ON SCOPE: the parent instruction forbade changing the WEIGHT construction
+# (w is computed on the full European book, 04 section 3a/3b untouched). It did
+# NOT cover the market-cap builder. This change touches ONLY market_cap.
 # ============================================================
+# Guard: the restriction needs the P0/EM provenance column. A pre-P0 panel has
+# no asof_gap_days, and silently falling back to the unrestricted AVG is exactly
+# the failure mode this fix exists to prevent.
+let eom_cols = Set(qdf(con, "DESCRIBE SELECT * FROM read_parquet('$EOM_PATH')").column_name)
+    "asof_gap_days" in eom_cols || error(
+        "EM-FIX-2: holdings_eom.parquet has no 'asof_gap_days' column, so the " *
+        "point-in-time market-cap restriction cannot be applied. This panel was " *
+        "built by a pre-P0 03_eom_etl.jl. Re-run 03 before 04.")
+end
+
 mcap_path = test_suffix_path(joinpath(OUT_DIR, "marketcap_it.parquet"))
 
 @time atomic_copy_to(con, """
-    WITH primary_only AS (
+    WITH src AS (
         SELECT sec_entity_id, sec_country, report_date, fsym_id,
-               AVG(adj_shares_out) AS shares_out,
-               AVG(adj_price)      AS price,
-               STDDEV_SAMP(adj_shares_out) AS shares_out_stddev,
-               STDDEV_SAMP(adj_price)      AS price_stddev,
-               COUNT(*) AS n_rows_in_group
+               adj_shares_out, adj_price, asof_gap_days,
+               MIN(asof_gap_days) OVER (
+                   PARTITION BY sec_entity_id, sec_country, report_date, fsym_id
+               ) AS min_gap_in_group
         FROM read_parquet('$EOM_PATH')
         WHERE fsym_id = fsym_primary_id
           AND issue_type = 'EQ'
           AND adj_shares_out IS NOT NULL AND adj_shares_out > 0
           AND adj_price IS NOT NULL AND adj_price > 0
+    ),
+    primary_only AS (
+        SELECT sec_entity_id, sec_country, report_date, fsym_id,
+               AVG(adj_shares_out) AS shares_out,
+               AVG(adj_price)      AS price,
+               STDDEV_SAMP(adj_shares_out) AS shares_out_stddev,
+               STDDEV_SAMP(adj_price)      AS price_stddev,
+               COUNT(*) AS n_rows_in_group,
+               MIN(asof_gap_days) AS asof_gap_days_used
+        FROM src
+        WHERE asof_gap_days = min_gap_in_group      -- EM-FIX-2: freshest only
         GROUP BY sec_entity_id, sec_country, report_date, fsym_id
     )
     SELECT sec_entity_id, sec_country, report_date,
            SUM(shares_out * price) AS market_cap,
            COUNT(*) AS n_primary_classes,
            MAX(shares_out_stddev) AS max_class_shares_stddev,
-           MAX(price_stddev)      AS max_class_price_stddev
+           MAX(price_stddev)      AS max_class_price_stddev,
+           -- EM-FIX-2 provenance: the valuation date actually used, in days
+           -- before the stamped quarter-end. 0 = a true quarter-end price.
+           MAX(asof_gap_days_used) AS max_asof_gap_days_used,
+           MIN(asof_gap_days_used) AS min_asof_gap_days_used
     FROM primary_only
     GROUP BY sec_entity_id, sec_country, report_date
 """, mcap_path)
 mcap_path_fwd = replace(mcap_path, "\\" => "/")
+
+# EM-FIX-2 disclosure: how much cross-date mixing the restriction removed, and
+# how stale the surviving valuation dates are. Printed, and written to CSV so it
+# can be carried as a caveat wherever market_cap-scaled outcomes are reported.
+mcap_pit_diag = qdf(con, """
+    WITH src AS (
+        SELECT sec_entity_id, sec_country, report_date, fsym_id, asof_gap_days,
+               MIN(asof_gap_days) OVER (
+                   PARTITION BY sec_entity_id, sec_country, report_date, fsym_id
+               ) AS min_gap_in_group
+        FROM read_parquet('$EOM_PATH')
+        WHERE fsym_id = fsym_primary_id
+          AND issue_type = 'EQ'
+          AND adj_shares_out IS NOT NULL AND adj_shares_out > 0
+          AND adj_price IS NOT NULL AND adj_price > 0
+    ),
+    grp AS (
+        SELECT sec_entity_id, sec_country, report_date, fsym_id,
+               COUNT(*) AS n_rows_all,
+               COUNT(*) FILTER (WHERE asof_gap_days = min_gap_in_group) AS n_rows_kept,
+               COUNT(DISTINCT asof_gap_days) AS n_distinct_gaps,
+               MAX(asof_gap_days) - MIN(asof_gap_days) AS gap_spread_days
+        FROM src GROUP BY 1,2,3,4
+    )
+    SELECT COUNT(*) AS n_groups,
+           COUNT(*) FILTER (WHERE n_distinct_gaps > 1) AS n_groups_multi_date,
+           AVG(CASE WHEN n_distinct_gaps > 1 THEN 1.0 ELSE 0.0 END) AS share_groups_multi_date,
+           AVG(gap_spread_days) AS mean_gap_spread_days,
+           MAX(gap_spread_days) AS max_gap_spread_days,
+           SUM(n_rows_all - n_rows_kept) AS n_rows_dropped_by_pit,
+           SUM(n_rows_all) AS n_rows_all
+    FROM grp
+""")
+println("\n  EM-FIX-2 point-in-time market-cap restriction (pre-restriction dispersion):")
+println(mcap_pit_diag)
+CSV.write(joinpath(OUT_DIR, "04_marketcap_pit_restriction_diag.csv"), mcap_pit_diag)
+
+mcap_gap_used = qdf(con, """
+    SELECT max_asof_gap_days_used AS asof_gap_days_used,
+           COUNT(*) AS n_company_quarters
+    FROM read_parquet('$mcap_path_fwd')
+    GROUP BY 1 ORDER BY 1
+""")
+println("\n  Valuation-date staleness of the surviving market_cap (0 = true quarter-end price):")
+println(first(mcap_gap_used, 15))
+CSV.write(joinpath(OUT_DIR, "04_marketcap_gap_used_distribution.csv"), mcap_gap_used)
 
 # Diagnostic: how many companies got a clean mcap? Any dispersion?
 mcap_diag = qdf(con, """
