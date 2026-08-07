@@ -25,9 +25,11 @@
 # Two universes for the EU/European lines:
 #   all_revere  = every Revere company (main).
 #   regression  = Revere companies matched (CUSIP > ISIN > SEDOL priority, as
-#                 in 06_cartesian_grid.jl) to a sec_entity_id present in
-#                 merged_us_eu_zero_filled.parquet (i.e. ever held by >=1
-#                 institution with EU sec_country; selection-on-outcome caveat).
+#                 in 06_cartesian_grid.jl; MM-FIX 2026-08-06: ALL candidates
+#                 tied at the winning priority are kept, union semantics) to a
+#                 sec_entity_id present in merged_us_eu_zero_filled.parquet
+#                 (i.e. ever held by >=1 institution with EU sec_country;
+#                 selection-on-outcome caveat).
 # US line: all_revere only (the regression panel is EU-centric by design).
 #
 # Window: quarter-ends 2003-06-30 .. 2025-03-31. Revere edges start
@@ -332,13 +334,30 @@ con.execute(f"""
         WHERE s.sedol IS NOT NULL
     ),
     cw AS (
-        SELECT sec_entity_id, eu_company_id
-        FROM (
-            SELECT *, ROW_NUMBER() OVER (PARTITION BY sec_entity_id
-                                         ORDER BY prio ASC, eu_company_id ASC) AS rn
-            FROM all_matches
-        )
-        WHERE rn = 1
+        -- MM-FIX (2026-08-06): keep ALL candidates tied at the entity's
+        -- winning priority (CUSIP > ISIN > SEDOL) instead of the old
+        -- ROW_NUMBER ... rn=1 min-eu_company_id pick. Verified 2026-08-05
+        -- (workflow wf_0973468e-885): 216 entities remain ambiguous AT the
+        -- winning priority, ALL CUSIP ties = near-certain duplicate Revere
+        -- records of the same firm; the min-ID pick discarded the other
+        -- records' coverage (3,135 firm-quarters, 17 entities entirely).
+        -- [A1, 2026-08-08: magnitudes are VINTAGE-2026-08-05 — inputs were
+        --  rebuilt 2026-08-06; the tie counts on current inputs differ.]
+        -- Here the crosswalk feeds a firm-ID UNIVERSE (reg_firms), so the
+        -- aggregation semantics reduce to the UNION of the tied
+        -- eu_company_ids: a matched firm is present at a quarter iff ANY
+        -- tied record's validity interval covers it, and both the
+        -- numerator and the denominator keep counting at the Revere
+        -- company grain (consistent with how unmatched duplicate records
+        -- are counted in the all_revere universe). Candidates NOT at the
+        -- winning priority stay dropped. Unique-winner entities are
+        -- unchanged: their min-prio set is exactly the old rn=1 pick.
+        -- Deterministic: MIN over prio only, no ORDER-BY value pick.
+        SELECT DISTINCT a.sec_entity_id, a.eu_company_id
+        FROM all_matches a
+        JOIN (SELECT sec_entity_id, MIN(prio) AS win_prio
+              FROM all_matches GROUP BY sec_entity_id) w
+          ON a.sec_entity_id = w.sec_entity_id AND a.prio = w.win_prio
     )
     SELECT DISTINCT cw.eu_company_id AS firm_id
     FROM cw

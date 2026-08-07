@@ -48,7 +48,14 @@ Holdings panel: 263,570,485 rows / 9.6 GB (was 208.4M under W=10, 186.8M exact-E
 - 1 of 10 attribution regressions aborted once (Stata batch); fallback route A2 completed; every
   reported cell reconciled verbatim against located Stata logs.
 
-**Conclusion: headline null is robust to both advisor-directed construction changes and gains ~40% precision.**
+**Conclusion (scoped): under the current per-security in-quarter snapshot, the EU-book denominator
+(portfolio_weight_eu), and the record_interval presence rule, β₃ remains insignificant after both
+construction changes, with CRVE SEs ~40% smaller than the prior vintage.** NOT yet canonical/final:
+pending (i) fund-snapshot grain decision (per-security last-obs stitches multi-date portfolios — see
+03 header lines 103-129 and C2d diagnostic: 26.5% of fund-quarters multi-date, 15.3% of MV from
+non-last-report rows; completeness diagnostic running 2026-08-08), (ii) global full-portfolio
+denominator promotion, (iii) S_{t-1} primary-spec switch, (iv) multi-match aggregation + presence
+sensitivity closure (workflow in flight).
 
 ## 4. M1/M2/M3 country-quarter measures + Figures A/B (v1)
 
@@ -75,10 +82,7 @@ Holdings panel: 263,570,485 rows / 9.6 GB (was 208.4M under W=10, 186.8M exact-E
 
 ## 6. Status / pending before "final"
 
-- **Figures are v1, NOT final** (user constraint C4): pending (i) multi-match fix — aggregate across
-  tied-at-winning-priority candidates (216 CUSIP-tie entities; min-ID pick loses 3,135 firm-quarters)
-  harmonized in 06 + build_desc_trend_china_links.py, then rerun 06→c6→figure data = v2 final;
-  (ii) presence sensitivity: figure-A zero arm under first_link vs record_interval.
+- ~~Figures are v1, NOT final~~ **DONE 2026-08-08 — see §7: MM-FIX v2 applied, chain rerun, verified.**
 - After figures: denominator switch (global = main per research_plan.tex, EU = "within-Europe
   reallocation" diagnostic), S_{t-1} promotion to primary, zero_recode_flag column, full battery rerun.
 - Multimatch/presence verification workflow (wf_0973468e-885) results: 249/10,212 multi-candidate
@@ -86,3 +90,39 @@ Holdings panel: 263,570,485 rows / 9.6 GB (was 208.4M under W=10, 186.8M exact-E
   regression divergence" claim misattributed (06 and build_desc_trend identical rn=1) — real second
   definition lives only in 05 (documented DESCRIPTIVE ONLY); presence: 0/11.1M containment violations,
   88.5% first-link=start_, SCD-2 signature 96.34%, batch pileups (2018-02-05: 18,480 firms).
+
+## 7. MM-FIX v2 + presence sensitivity (2026-08-08, wf_83d53a2f-b04; verify = 6/6 CONFIRMED, 0 discrepancies)
+
+**Multi-match aggregation** (06_cartesian_grid.jl, 06_russia_grid.jl, build_desc_trend_china_links.py,
+presence_sens_buckets.py): candidates tied at winning priority (current inputs: **217 entities / 448
+pairs, all CUSIP**; crosswalk now 10,575 pairs / 10,344 entities) are SUM-aggregated (numerators and
+denominators separately, ratio from sums; presence = union; coverage_start = MIN; recode flags off the
+summed counts). Single-winner branch verbatim-identical to HEAD.
+
+| Gate | Result |
+|---|---|
+| B off-tied bit-identity | grid 2,577,200 cells + c6 7,997,166 cells compared, **0 mismatches** |
+| C tied-set recovery | covered fq 8,311 → 12,301 (**+3,990, 0 lost**; grid/c6 window ≤2023Q4: +3,107); NULL→zero 2,659, NULL→pos 448, zero→pos 20 (4 entities), pos→zero 0 |
+| D figure deltas | zero-arm share_of_book 2018Q4 .3408→**.3727**, 2020Q1 .3589→**.3916**, 2022Q4 .2791→**.2976**; pos arm 2022Q4 .5817→**.6116** (mass moved from NULL bucket — v1 share panels were materially understated) |
+| E headline drift | 3pw −6.92e-7 p=.512 → **−6.74e-7 p=.543**; itgt p=.399→.424; c6 904,384→910,358 rows, firms 10,302 unchanged. Null unchanged |
+
+Verification: crosswalk re-derived with independent SQL (0 set diff); 3 tied entities × 2 quarters
+hand-computed from raw Revere CSVs to full precision; all 18,228 tied grid cells recomputed (0 mismatch);
+β₃ reproduced outside Stata (rel diff 4.9e-8); falsification — old min-ID path reproduces old artifacts
+exactly, lost fq reappear ONLY via aggregation.
+
+**Presence sensitivity (refreshed post-MUST-FIX numbers — use these, not p2's report text):** positive
+arm invariant under first_link (24,817 identical fq); zero→NULL flips 168,702 fq / 7,763 firms; zero-arm
+book-share moves >1pp ONLY 2007Q3–2011Q4, peak −7.67pp (first_link) / −6.71pp (covered) at 2011Q1;
+**post-2012 max 0.58pp; all spot quarters stable**. Verdict: figures' 2018+ narrative rule-insensitive;
+caption caveat for pre-2012 zero arm; WRDS confirmation blocking only for early-sample zero-arm claims.
+
+**Stale-artifact rotation (2026-08-08):** headline_3pairwise_canonical.csv and audit_c6_panel.{dta,parquet}
+still carried the premm vintage (chain didn't include build_audit_panel_f1f2f7.py / run_headline_3pairwise.do)
+→ rotated to *_premm so downstream .do files (run_ddd_nofe_bil, run_fourgroup, run_direction_split,
+run_tercile_3pairwise) fail loudly instead of reading stale numbers. Regenerate in the v3 bundled rebuild;
+verify_attribution_em.py hardcoded Stata targets also premm-vintage — update there. New-vintage headline
+lives in gate_e_headline_mmfix.csv.
+
+**Figures v2 status: mm-fix + presence closed (constraint C4 satisfied at current construction). Still
+gated on the v3 bundled rebuild (snapshot grain + global denominator + S_{t-1}) before advisor-final.**

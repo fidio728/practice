@@ -49,6 +49,8 @@
 #      so fig10 in plots_python.py doesn't crash on DPN_USE_C6=true.
 #   2. Crosswalk picks ONE eu_company_id per sec_entity_id with priority
 #      CUSIP > ISIN > SEDOL (was: SUM across multi-match → bias).
+#      [amended by MM-FIX 2026-08-06: priority kept, but ties AT the
+#       winning priority are now aggregated — see section (6) below]
 #   3. ict_grouped keys off eu_entity_universe instead of duplicating the
 #      sec_country EU filter (which could disagree with holdings_eom).
 #   4. Merged parquet carries BOTH holder_group AND investor_country (alias)
@@ -65,6 +67,9 @@
 #      constant — no drift across the three subqueries.
 #   9. Asserts: sec_entity_id unique in canonical universe, unique in
 #      crosswalk, russia_share ∈ [0,1].
+#      [amended by MM-FIX 2026-08-06: crosswalk uniqueness is now on the
+#       (sec_entity_id, eu_company_id) PAIR; one-row-per-(entity, quarter)
+#       is asserted on exposure_by_sec_entity_ru instead]
 #  10. Diagnostic counts: n_delta_w_null_at_boundary vs n_delta_w_null_interior,
 #      held-vs-zero-filled composition table.
 #
@@ -102,6 +107,8 @@ con = dbcon()
 # ============================================================
 # (1) EU entity universe — every sec_entity_id ever appearing with an EU
 #     sec_country in the holdings panel.
+#     (This ROW_NUMBER is NOT the Ownership->Revere crosswalk pattern — it
+#     picks a primary listing country; untouched by MM-FIX.)
 # ============================================================
 println("Building EU entity universe from holdings_eom...")
 DBInterface.execute(con, """
@@ -214,10 +221,30 @@ ct_check = qdf(con, """
 println("  country_total_grouped: $(ct_check.n_rows[1]) rows; $(ct_check.n_zero_or_null[1]) zero/NULL")
 
 # ============================================================
-# (6) ChinaExposure crosswalk — Patch 2: priority CUSIP > ISIN > SEDOL,
-#     ONE eu_company_id per sec_entity_id.
+# (6) Ownership->Revere crosswalk — Patch 2 priority CUSIP > ISIN > SEDOL,
+#     + MM-FIX (2026-08-06): keep ALL candidates tied at the winning
+#     priority, aggregate their exposure rows (mirrors 06_cartesian_grid.jl).
+#
+# MM-FIX RULE (verification 2026-08-05, wf_0973468e-885, run on the China
+# grid's identical crosswalk SQL: 216 winning-priority ties, all CUSIP,
+# = duplicate Revere records for the same firm; SEDOL never wins)
+# [A1, 2026-08-08: those magnitudes are VINTAGE-2026-08-05 — inputs were
+#  rebuilt 2026-08-06; trust the runtime tie census printed at run time]:
+#   1. Priority resolution UNCHANGED — candidates not at the winning
+#      (minimum) priority stay dropped.
+#   2. Ties at the winning priority keep ALL tied eu_company_ids; their
+#      exposure rows are aggregated per quarter below: SUM numerators and
+#      denominators separately, ratio formed from the SUMS (never an
+#      average of ratios); presence = UNION of the tied records' validity.
+#   3. Unique winners (n_tied = 1) take a verbatim pass-through branch —
+#      bit-identical to the pre-MM-FIX rn=1 output.
+#   4. Deterministic: MIN/SUM only, no ORDER-BY-dependent value pick.
+# NOTE (EM-FIX-4 banner still applies): this file stays on the OLD
+# NULLIF missing rule; the MM-FIX aggregation preserves that rule on the
+# SUMMED denominator (NULL iff the summed denominator is 0) and does NOT
+# import the China grid's EM-CHANGE-2 zero recode.
 # ============================================================
-println("\nBuilding ChinaExposure crosswalk (CUSIP > ISIN > SEDOL priority)...")
+println("\nBuilding Ownership->Revere crosswalk (CUSIP > ISIN > SEDOL priority, MM-FIX tie aggregation)...")
 DBInterface.execute(con, """
     CREATE OR REPLACE TABLE eu_sec_ids AS
     SELECT DISTINCT
@@ -251,23 +278,58 @@ DBInterface.execute(con, """
         SELECT 3 AS prio, s.sec_entity_id, u.eu_company_id
         FROM eu_sec_ids s JOIN univ u ON s.sedol = u.eu_sedol
         WHERE s.sedol IS NOT NULL AND u.eu_sedol IS NOT NULL
-    )
-    SELECT sec_entity_id, eu_company_id
-    FROM (
-        SELECT *,
-               ROW_NUMBER() OVER (PARTITION BY sec_entity_id
-                                  ORDER BY prio ASC, eu_company_id ASC) AS rn
+    ),
+    win AS (
+        SELECT sec_entity_id, MIN(prio) AS win_prio
         FROM all_matches
+        GROUP BY sec_entity_id
+    ),
+    winners AS (
+        -- DISTINCT: one (entity, company) pair can match through several
+        -- securities at the same priority; it must enter the SUMs ONCE.
+        SELECT DISTINCT a.sec_entity_id, a.eu_company_id, w.win_prio
+        FROM all_matches a
+        JOIN win w ON a.sec_entity_id = w.sec_entity_id AND a.prio = w.win_prio
     )
-    WHERE rn = 1
+    SELECT sec_entity_id, eu_company_id, win_prio,
+           COUNT(*) OVER (PARTITION BY sec_entity_id) AS n_tied
+    FROM winners
 """)
-cw_n = qdf(con, "SELECT COUNT(*) AS n, COUNT(DISTINCT sec_entity_id) AS u FROM matched_eu_sec_links").n[1]
-cw_u = qdf(con, "SELECT COUNT(DISTINCT sec_entity_id) AS u FROM matched_eu_sec_links").u[1]
-@assert cw_n == cw_u "matched_eu_sec_links is not unique on sec_entity_id ($cw_n rows, $cw_u unique)"
-println("  Crosswalk: $cw_n unique (sec_entity_id → eu_company_id) pairs ✓")
+cw = qdf(con, """
+    SELECT COUNT(*) AS n_pairs,
+           COUNT(DISTINCT sec_entity_id) AS n_entities,
+           COUNT(DISTINCT CASE WHEN n_tied >= 2 THEN sec_entity_id END) AS n_multi_entities,
+           COUNT(*) FILTER (WHERE n_tied >= 2) AS n_multi_pairs
+    FROM matched_eu_sec_links
+""")
+cw_pairs = cw.n_pairs[1]
+dup_pairs = qdf(con, """
+    SELECT COUNT(*) AS n FROM (
+        SELECT sec_entity_id, eu_company_id FROM matched_eu_sec_links
+        GROUP BY 1, 2 HAVING COUNT(*) > 1)
+""").n[1]
+@assert dup_pairs == 0 "matched_eu_sec_links has $dup_pairs duplicate (sec_entity_id, eu_company_id) pairs — the SUM aggregation would double-count links"
+tie_prio = qdf(con, """
+    SELECT win_prio, COUNT(DISTINCT sec_entity_id) AS n_entities
+    FROM matched_eu_sec_links WHERE n_tied >= 2 GROUP BY 1 ORDER BY 1
+""")
+println("  Crosswalk: $(cw_pairs) (sec_entity_id → eu_company_id) pairs over $(cw.n_entities[1]) entities ✓")
+println("  MM ties at winning priority: $(cw.n_multi_entities[1]) entities / $(cw.n_multi_pairs[1]) pairs " *
+        "(vintage-2026-08-05 China-grid verification on since-rebuilt inputs: 216 entities, all CUSIP — trust the census above)")
+println("  Tie census by winning priority (1=CUSIP, 2=ISIN, 3=SEDOL):")
+println(tie_prio)
 
+# (MM-FIX two-branch build) Branch A (n_tied = 1) is the VERBATIM pre-MM-FIX
+# select — bit-identical values and column types for unique-winner entities.
+# Branch B (n_tied >= 2) SUMs numerators and denominators across the tied
+# duplicate Revere records per (sec_entity_id, quarter_end) and forms the
+# ratio from the SUMS, keeping the OLD NULLIF missing rule on the summed
+# denominator (EM-FIX-4: EM-CHANGE-2 deliberately NOT imported here).
+# CASTs pin branch-B count types to the parquet's BIGINT so the UNION ALL
+# cannot widen branch A's column types.
 DBInterface.execute(con, """
     CREATE OR REPLACE TABLE exposure_by_sec_entity_ru AS
+    -- ---- branch A: unique winner (verbatim pre-MM-FIX path) ----
     SELECT m.sec_entity_id,
            e.quarter_end,
            e.n_ru_total,
@@ -275,7 +337,7 @@ DBInterface.execute(con, """
            e.n_supplychain_links,
            -- (B7 FIX, 2026-08-03) supply-chain russia_share = RU CUSTOMER+SUPPLIER
            -- / total CUSTOMER+SUPPLIER (matches 02_russia_exposure.jl).
-           -- Crosswalk is unique on sec_entity_id here (asserted above), so a
+           -- This branch's crosswalk row is a unique winner (n_tied = 1), so a
            -- direct ratio is exact.
            --
            -- !! (EM-FIX-4, 2026-08-06) OLD MISSING RULE — DIVERGES FROM CHINA !!
@@ -290,7 +352,34 @@ DBInterface.execute(con, """
            e.n_ru_total::DOUBLE / NULLIF(e.n_total_links, 0) AS russia_share_alltypes
     FROM matched_eu_sec_links m
     JOIN read_parquet('$EXP_PATH_RU') e ON m.eu_company_id = e.eu_company_id
+    WHERE m.n_tied = 1
+    UNION ALL
+    -- ---- branch B: winning-priority ties, MM-FIX aggregation ----
+    -- Presence = UNION of tied records (JOIN + GROUP BY emits a row iff ANY
+    -- tied candidate has an exposure row that quarter). Same OLD missing rule
+    -- as branch A, applied to the SUMMED denominator.
+    SELECT m.sec_entity_id,
+           e.quarter_end,
+           CAST(SUM(e.n_ru_total)          AS BIGINT) AS n_ru_total,
+           CAST(SUM(e.n_total_links)       AS BIGINT) AS n_total_links,
+           CAST(SUM(e.n_supplychain_links) AS BIGINT) AS n_supplychain_links,
+           (SUM(e.n_ru_customer) + SUM(e.n_ru_supplier))::DOUBLE
+               / NULLIF(SUM(e.n_supplychain_links), 0) AS russia_share,
+           SUM(e.n_ru_total)::DOUBLE / NULLIF(SUM(e.n_total_links), 0) AS russia_share_alltypes
+    FROM matched_eu_sec_links m
+    JOIN read_parquet('$EXP_PATH_RU') e ON m.eu_company_id = e.eu_company_id
+    WHERE m.n_tied >= 2
+    GROUP BY m.sec_entity_id, e.quarter_end
 """)
+# MM-FIX gate: one row per (sec_entity_id, quarter_end) — branch B by
+# construction; branch A relies on the 02 parquet being unique per
+# (eu_company_id, quarter_end). A duplicate would fan out the (7) LEFT JOIN.
+dup_eq = qdf(con, """
+    SELECT COUNT(*) AS n FROM (
+        SELECT sec_entity_id, quarter_end FROM exposure_by_sec_entity_ru
+        GROUP BY 1, 2 HAVING COUNT(*) > 1)
+""").n[1]
+@assert dup_eq == 0 "exposure_by_sec_entity_ru has $dup_eq duplicate (sec_entity_id, quarter_end) keys — 02 parquet not unique per company-quarter, or crosswalk branches overlap"
 # Patch 4 assertion: russia_share ∈ [0,1]
 oob = qdf(con, """
     SELECT COUNT(*) AS n FROM exposure_by_sec_entity_ru
