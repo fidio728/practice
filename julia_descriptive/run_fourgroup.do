@@ -29,9 +29,15 @@
 *
 * MAIN test: US_ACTIVE vs NONUS_ACTIVE, 3-pairwise DDD under the saturated FE
 *   (firm x quarter, grp x quarter, firm x grp), two-way cluster (firm, month):
-*       dw = b2 * (us_act x cn_lag) + b3 * (us_act x cn_lag x S) + fq + gq + ig
-*   us_act = 1{grp=='US_ACTIVE'}. cn_lag (firm x quarter constant) and cn_lag x S
-*   are absorbed by fq; us_act and us_act x S by gq/ig. b3 is the estimand.
+*       dw = b2 * (us_act x cn_lag) + b3 * (us_act x cn_lag x S_{t-1}) + fq + gq + ig
+*   us_act = 1{grp=='US_ACTIVE'}. cn_lag (firm x quarter constant) and
+*   cn_lag x S_{t-1} are absorbed by fq; us_act and us_act x S_{t-1} by gq/ig.
+*   b3 is the estimand.
+*   GLOBAL-MAIN + S_{t-1} PRIMARY (2026-08-08): dw in fourgroup_panel.dta is
+*   built by build_fourgroup_panel.py from the panel's own group books; the
+*   PRIMARY timing here follows the headline switch to the LAGGED shock
+*   S_{t-1}, derived in-file from the quarter-level shock series below
+*   (the builder ships S_t only).
 * MENU (isomorphic FE logic, each restricted to two of the four groups):
 *   (1) PASSIVE vs PASSIVE  — treat = 1{US_PASSIVE}; expected near-zero/inert.
 *   (2) US-internal ACTIVE vs PASSIVE — treat = 1{US_ACTIVE} within {US_*};
@@ -39,7 +45,8 @@
 *   pooled headline is the two-group US/NONUS c6 spec (separate panel,
 *   c6_panel.dta) and is the DILUTION BENCHMARK cited in the addnote below.
 *   Pooled headline b3 living source (canonical artifact):
-*   output/headline_3pairwise_canonical.csv (2026-08-03) — b3=+2.746e-06 (3-pairwise).
+*   output/headline_3pairwise_canonical.csv — read the row spec=="primary"
+*   (global denominator x S_{t-1}); numbers are never hardcoded here.
 * Every column reports N, #firms, #(firm clusters)=#firms, #(month clusters).
 * B9 convention: degenerate two-way-cluster VCE detection + output diag CSV.
 
@@ -75,6 +82,25 @@ gen byte is_activ = (grp == "US_ACTIVE" | grp == "NONUS_ACTIVE")
 * cn_lag sanity + shock constant within quarter (belt after the builder)
 assert cn_lag >= 0 & cn_lag <= 1 if !missing(cn_lag)
 bysort rd_m (shock): assert shock == shock[1] if !missing(shock)
+
+* S_{t-1} PRIMARY (2026-08-08): the builder ships shock = S_t only; derive
+* s_lag from the quarter-level series. shock is quarter-constant (asserted
+* above) and the quarter sequence must be contiguous (asserted: 3-month gaps),
+* so [_n-1] on the deduped quarter list IS the true previous quarter. The
+* first panel quarter gets s_lag missing and drops from S_{t-1} specs — a
+* disclosed one-quarter sample edge, not a silent change.
+preserve
+keep rd_m shock
+duplicates drop
+sort rd_m
+by rd_m: assert _N == 1
+assert rd_m - rd_m[_n-1] == 3 if _n > 1
+gen double s_lag = shock[_n-1]
+keep rd_m s_lag
+tempfile slagmap
+qui save `slagmap', replace
+restore
+qui merge m:1 rd_m using `slagmap', assert(match) nogen
 * load-bearing FE-absorption precondition: cn_lag must be GROUP-INVARIANT
 * within firm x quarter (fq absorbs the bare cn_lag only if so)
 bysort firm_str rd_day (cn_lag): assert cn_lag == cn_lag[1] if !missing(cn_lag)
@@ -153,10 +179,11 @@ program define run_spec
     capture drop t_cn t_cn_s _touse
     gen byte   _touse  = inlist(grp, "`g0'", "`g1'") & `svar' == 1
     gen double t_cn    = (grp == "`g1'") * cn_lag
-    gen double t_cn_s  = (grp == "`g1'") * cn_lag * shock
+    * PRIMARY timing S_{t-1} (2026-08-08, matches the headline switch)
+    gen double t_cn_s  = (grp == "`g1'") * cn_lag * s_lag
     label var t_cn   "treat x CN(t-1)"
-    label var t_cn_s "treat x CN(t-1) x S_t"
-    display _newline "=== `ename' [`g1' vs `g0', `slab'] : dw ~ t_cn + t_cn_s, absorb(fq gq ig) ==="
+    label var t_cn_s "treat x CN(t-1) x S_{t-1}"
+    display _newline "=== `ename' [`g1' vs `g0', `slab'] : dw ~ t_cn + t_cn_s (S_{t-1}), absorb(fq gq ig) ==="
     reghdfe dw t_cn t_cn_s if _touse, absorb(fq gq ig) vce(cluster firm_n rd_m)
     estimates store `ename'
     * distinct firms / quarters actually used
@@ -241,7 +268,7 @@ if _rc == 0 {
         keep(t_cn t_cn_s) ///
         mtitles("ACT_full" "ACT_post" "PAS_full" "PAS_post" "USint_full" "USint_post") ///
         nonumbers plain ///
-        addnote("t_cn_s is the DDD triple (treat x CN(t-1) x S_t). ACT = US_ACTIVE vs NONUS_ACTIVE (MAIN); PAS = US_PASSIVE vs NONUS_PASSIVE (inert benchmark); USint = US-internal ACTIVE vs PASSIVE. Funds master snapshot ~2018-08: labels are PREDETERMINED at/after 2018m8, so *_post columns are the PRIMARY report and *_full carry a look-ahead caveat. UNKNOWN-style funds are excluded from both books; each group book self-normalizes. Dilution hypothesis: pooled beta3 ~ value-share-weighted average of ACT/PAS/UNKNOWN betas, so the multiplier on the active response is the ACTIVE VALUE SHARE (UNKNOWN mass dilutes too); ACT beta3 more negative than pooled is CONSISTENT with dilution, not proof, and PAS beta3 is expected weak, not exactly zero. VCE validity per spec in fourgroup_vce_diag.csv; degenerate columns -> design-based RI in run_ri_fourgroup.py.")
+        addnote("t_cn_s is the DDD triple (treat x CN(t-1) x S_{t-1}; PRIMARY lagged-shock timing per the 2026-08-08 headline switch, s_lag derived from the quarter-level shock series). ACT = US_ACTIVE vs NONUS_ACTIVE (MAIN); PAS = US_PASSIVE vs NONUS_PASSIVE (inert benchmark); USint = US-internal ACTIVE vs PASSIVE. Funds master snapshot ~2018-08: labels are PREDETERMINED at/after 2018m8, so *_post columns are the PRIMARY report and *_full carry a look-ahead caveat. UNKNOWN-style funds are excluded from both books; each group book self-normalizes. Dilution hypothesis: pooled beta3 ~ value-share-weighted average of ACT/PAS/UNKNOWN betas, so the multiplier on the active response is the ACTIVE VALUE SHARE (UNKNOWN mass dilutes too); ACT beta3 more negative than pooled is CONSISTENT with dilution, not proof, and PAS beta3 is expected weak, not exactly zero. VCE validity per spec in fourgroup_vce_diag.csv; degenerate columns -> design-based RI in run_ri_fourgroup.py. OUTCOME-FAMILY CAVEAT (2026-08-08): dw here is the four-group OWN-BOOK (EU-universe) weight family, NOT the GLOBAL full-portfolio family of the pooled headline — never report these b3 side-by-side with the global headline without this label.")
     di "Wrote `OUT'/fourgroup_results.csv"
 }
 

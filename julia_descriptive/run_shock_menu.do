@@ -65,15 +65,19 @@
 * Where the B9 guard flags a degenerate VCE, the CRVE p in shockmenu_results.csv
 * is NOT valid inference — read the RI p instead.
 *
-* DRIFT ANCHOR. Before the battery this file READS the canonical P0 headline from
-* `OUT'/headline_3pairwise_canonical.csv (the LIVING SOURCE, same artifact cited by
-* run_fourgroup.do) and hard-asserts the baseline_panel_shock_raw b3 against it to
-* 6 significant figures for BOTH FE sets. c6_panel_preP0.dta sits in the same
-* directory as c6_panel.dta, so a silent panel-vintage swap would otherwise produce
-* a full menu of plausible-looking numbers with nothing to catch it. b3 is
-* order-invariant, so an exact gate is legitimate; p and N are printed beside the
-* anchors (0.762748 / 347690 for 3pw, 0.557028 / 348156 for it+gt) rather than
-* gated, because reghdfe's singleton drop can legitimately move df_r.
+* DRIFT ANCHOR (LOCKED 2026-08-08 layout; fail-closed since REBUILD v3). Before
+* the battery this file READS the canonical S_t diagnostic cells
+* (spec=="diag" & denom=="global" & timing=="st", fe fq_gq_ig / fq_gq) from
+* `OUT'/headline_3pairwise_canonical.csv (the LIVING SOURCE, same artifact cited
+* by run_fourgroup.do) and hard-asserts the baseline_panel_shock_raw b3 against
+* them to 6 significant figures for BOTH FE sets — those cells ARE this battery's
+* baseline regressions (dw global x S_t). A missing file, stale layout, or absent
+* anchor rows ABORT with exit 459: the menu must never run vintage-unprotected.
+* Stale panel vintages sit in the same directory as c6_panel.dta, so a silent
+* panel-vintage swap would otherwise produce a full menu of plausible-looking
+* numbers with nothing to catch it. b3 is order-invariant, so an exact gate is
+* legitimate; p and N are printed beside the anchors rather than gated, because
+* reghdfe's singleton drop can legitimately move df_r.
 *
 * HONESTY. Every number verbatim from the run. Specs that fail reghdfe are
 * written to the CSV with status=FAILED and reported as failures, never dropped
@@ -188,13 +192,21 @@ if "`PREFERRED'" != "" & "`PREF_FILE'" != "" & "`PREFERRED'" != "`PREF_FILE'" {
 display "PREFERRED variant (menu column) in force: `PREFERRED'"
 
 *==============================================================================
-* 0. DRIFT ANCHOR — read the canonical P0 headline from its LIVING SOURCE.
-*    output/headline_3pairwise_canonical.csv is the same artifact run_fourgroup.do
-*    cites by name. Read FIRST (it needs `clear'), held in locals, asserted after
-*    the baseline_panel_shock_raw run in section 4.
+* 0. DRIFT ANCHOR — read the canonical S_t diagnostic cells from the LIVING
+*    SOURCE output/headline_3pairwise_canonical.csv (LOCKED 2026-08-08 layout:
+*    spec,denom,timing,fe,b3,se,p,N). The battery below runs dw x S_t, so its
+*    anchors are the TWO diag/global/st cells:
+*      fe=="fq_gq_ig" -> baseline_panel_shock_raw at fq gq ig (3pw)
+*      fe=="fq_gq"    -> baseline_panel_shock_raw at fq gq    (itgt)
+*    (the canonical writers run the identical regressions on audit_c6_panel;
+*    reghdfe's estimation sample coincides with the c6_panel run, so a
+*    6-sig-fig b3 gate is legitimate).
+*    FAIL-CLOSED (REBUILD v3, 2026-08-08): a missing file, a stale layout, or
+*    absent anchor rows ABORT with exit 459. The old behaviour — HAVE_ANCHOR=0
+*    and a self-DISABLED gate — was exactly the stale-vintage failure mode the
+*    layout guard exists to kill; a full menu must never run unprotected.
 *==============================================================================
 local ANCHORCSV "`OUT'/headline_3pairwise_canonical.csv"
-local HAVE_ANCHOR 0
 local A3_B3 .
 local A3_P  .
 local A3_N  .
@@ -204,43 +216,49 @@ local AI_N  .
 * (nothing is in memory yet — `clear all' above — so no preserve/restore needed;
 *  section 1 loads the menu into a fresh dataset immediately after.)
 capture confirm file "`ANCHORCSV'"
-if _rc == 0 {
-    quietly import delimited "`ANCHORCSV'", clear varnames(1) case(preserve) stringcols(1)
-    quietly count if spec == "3pairwise_fq_gq_ig"
-    local _n3 = r(N)
-    quietly count if spec == "itgt_fq_gq"
-    local _ni = r(N)
-    if `_n3' == 1 & `_ni' == 1 {
-        quietly summarize b3 if spec == "3pairwise_fq_gq_ig", meanonly
-        local A3_B3 = r(mean)
-        quietly summarize p  if spec == "3pairwise_fq_gq_ig", meanonly
-        local A3_P  = r(mean)
-        quietly summarize N  if spec == "3pairwise_fq_gq_ig", meanonly
-        local A3_N  = r(mean)
-        quietly summarize b3 if spec == "itgt_fq_gq", meanonly
-        local AI_B3 = r(mean)
-        quietly summarize p  if spec == "itgt_fq_gq", meanonly
-        local AI_P  = r(mean)
-        quietly summarize N  if spec == "itgt_fq_gq", meanonly
-        local AI_N  = r(mean)
-        local HAVE_ANCHOR 1
-    }
-    else {
-        display as error "anchor CSV found but spec rows are not the expected pair " ///
-                         "(3pairwise_fq_gq_ig=`_n3', itgt_fq_gq=`_ni') — drift gate DISABLED."
-    }
-    clear
+if _rc != 0 {
+    display as error "CANONICAL ANCHOR FILE NOT FOUND: `ANCHORCSV'"
+    display as error "  Run run_headline_3pairwise.do (or run_attribution_em.do) first."
+    display as error "  Refusing to run the menu without vintage protection (fail-closed)."
+    exit 459
 }
-if `HAVE_ANCHOR' == 1 {
-    display _newline "=== CANONICAL P0 DRIFT ANCHOR (living source: headline_3pairwise_canonical.csv) ==="
-    display "  3pw_fq_gq_ig : b3=" %14.6e `A3_B3' "  p=" %8.6f `A3_P' "  N=" %12.0fc `A3_N'
-    display "  itgt_fq_gq   : b3=" %14.6e `AI_B3' "  p=" %8.6f `AI_P' "  N=" %12.0fc `AI_N'
-    display "  -> baseline_panel_shock_raw b3 will be HARD-ASSERTED to 6 significant figures."
+quietly import delimited "`ANCHORCSV'", clear varnames(1) case(preserve) stringcols(1)
+capture confirm variable spec denom timing fe b3 se p N
+if _rc != 0 {
+    display as error "STALE ANCHOR LAYOUT in `ANCHORCSV' — expected the LOCKED 2026-08-08"
+    display as error "columns spec,denom,timing,fe,b3,se,p,N. Re-run run_headline_3pairwise.do."
+    exit 459
 }
-else {
-    display as error _newline "CANONICAL ANCHOR NOT READ from `ANCHORCSV' — drift gate DISABLED."
-    display as error "  a panel-vintage swap (c6_panel_preP0.dta) would NOT be caught this run."
+quietly count if spec == "diag" & denom == "global" & timing == "st" & fe == "fq_gq_ig"
+local _n3 = r(N)
+quietly count if spec == "diag" & denom == "global" & timing == "st" & fe == "fq_gq"
+local _ni = r(N)
+if `_n3' != 1 | `_ni' != 1 {
+    display as error "ANCHOR ROWS MISSING/AMBIGUOUS in `ANCHORCSV':"
+    display as error "  diag/global/st/fq_gq_ig rows: `_n3'   diag/global/st/fq_gq rows: `_ni'  (each must be 1)"
+    display as error "  The diag itgt-st row was added to all three writers on 2026-08-08"
+    display as error "  (REBUILD v3); a CSV without it is a stale vintage. Re-run"
+    display as error "  run_headline_3pairwise.do. Refusing to run unprotected (fail-closed)."
+    exit 459
 }
+quietly summarize b3 if spec == "diag" & denom == "global" & timing == "st" & fe == "fq_gq_ig", meanonly
+local A3_B3 = r(mean)
+quietly summarize p  if spec == "diag" & denom == "global" & timing == "st" & fe == "fq_gq_ig", meanonly
+local A3_P  = r(mean)
+quietly summarize N  if spec == "diag" & denom == "global" & timing == "st" & fe == "fq_gq_ig", meanonly
+local A3_N  = r(mean)
+quietly summarize b3 if spec == "diag" & denom == "global" & timing == "st" & fe == "fq_gq", meanonly
+local AI_B3 = r(mean)
+quietly summarize p  if spec == "diag" & denom == "global" & timing == "st" & fe == "fq_gq", meanonly
+local AI_P  = r(mean)
+quietly summarize N  if spec == "diag" & denom == "global" & timing == "st" & fe == "fq_gq", meanonly
+local AI_N  = r(mean)
+local HAVE_ANCHOR 1
+clear
+display _newline "=== CANONICAL S_t DRIFT ANCHOR (living source: headline_3pairwise_canonical.csv, diag/global/st) ==="
+display "  3pw_fq_gq_ig : b3=" %14.6e `A3_B3' "  p=" %8.6f `A3_P' "  N=" %12.0fc `A3_N'
+display "  itgt_fq_gq   : b3=" %14.6e `AI_B3' "  p=" %8.6f `AI_P' "  N=" %12.0fc `AI_N'
+display "  -> baseline_panel_shock_raw b3 will be HARD-ASSERTED to 6 significant figures."
 
 *==============================================================================
 * 1. LOAD THE MENU + RESOLVE THE VARIANT COLUMN LIST GENERICALLY
@@ -775,12 +793,9 @@ display "rule on shock_menu_diagnostics.csv. Nothing in shockmenu_results.csv ma
 display "used to choose the preferred construction. The baseline column stays the"
 display "headline-continuity anchor regardless of what the menu shows."
 display "PREFERRED variant in force this run: `PREFERRED'  (from shock_menu_preferred.txt)"
-if `HAVE_ANCHOR' == 1 {
-    display "DRIFT GATE: baseline b3 matched headline_3pairwise_canonical.csv to 6 sig figs."
-}
-else {
-    display as error "DRIFT GATE: NOT RUN (canonical anchor CSV unreadable) — vintage unverified."
-}
+* HAVE_ANCHOR is always 1 here: section 0 exits 459 (fail-closed) when the
+* canonical anchor cannot be read, so an unprotected run cannot reach this line.
+display "DRIFT GATE: baseline b3 matched headline_3pairwise_canonical.csv (diag/global/st) to 6 sig figs."
 if `SMOKE' == 1 {
     display as error "SMOKE=1 (`NFIRMS' firms): outputs carry the _SMOKE suffix and smoke=1 rows."
     display as error "  These numbers are a SYNTAX PASS. They are NOT valid inference and must"

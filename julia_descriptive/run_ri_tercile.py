@@ -16,8 +16,9 @@ two-way-FE regression of Δy on cn, cn·D_T1, cn·D_T3 (ig → firm intercept; g
 intercept; fq absorbed by the pairwise difference itself). cn_lag is constant within a
 (firm,quarter) cell (verified: same on US and NONUS rows), so cn = cn_lag survives.
 
-TERCILE CUT (critical gotcha): terciles are cut on the 82 DISTINCT quarter shock
-values (quarter layer), never on the 347,952 rows / 173,976 firm-quarters — cutting on
+TERCILE CUT (critical gotcha): terciles are cut on the 82 DISTINCT quarterly
+S_{t-1} values (s_lag, PRIMARY lagged-shock timing 2026-08-08, exactly the
+variable run_tercile_3pairwise.do:89 cuts), never on the full rows — cutting on
 rows would let uneven cell counts bias the quantiles. Bottom third → D_T1, top third →
 D_T3, middle third → T2 (base). Realized bins: 28 / 27 / 27 (the boundary quarter
 falls in T1 because D_T1 uses <=), matching run_tercile_3pairwise.do exactly
@@ -66,12 +67,21 @@ if not {0, 1}.issubset(piv.columns):
     raise SystemExit("panel is not US/NONUS paired: us column must take 0 and 1")
 dy = (piv[1] - piv[0]).rename("dy")
 
-# cn_lag and shock are constant within a (firm, quarter) cell -> take first
+# cn_lag and s_lag are constant within a (firm, quarter) cell -> take first.
+# S_{t-1} PRIMARY (2026-08-08): run_tercile_3pairwise.do cuts its terciles on
+# the DISTINCT quarterly s_lag values; this RI twin MUST cut on the same
+# variable or it tests a different design.
 meta = (df.groupby(["firm_str", "rdate"])
-          .agg(cn=("cn_lag", "first"), s=("shock", "first")))
+          .agg(cn=("cn_lag", "first"), s=("s_lag", "first")))
 
 d = pd.concat([dy, meta], axis=1).reset_index()
+_nq_all = d["rdate"].nunique()
 d = d.dropna(subset=["dy", "cn", "s"]).reset_index(drop=True)
+if d["rdate"].nunique() != _nq_all:
+    raise SystemExit(
+        f"s_lag missing on {_nq_all - d['rdate'].nunique()} whole quarter(s) — "
+        "the .do requires S_{t-1} on EVERY panel quarter (exit 459 there); "
+        "lag-propagation bug upstream, refusing to cut terciles.")
 
 # integer codes for firm / quarter (the two FE dimensions of the diff panel)
 d["firm_c"] = pd.factorize(d["firm_str"])[0]
@@ -81,12 +91,12 @@ qcode = d["q_c"].to_numpy()
 nq = int(qcode.max()) + 1
 n_fq = d.shape[0]
 
-# per-quarter shock vector (shock is constant within quarter -> 82 distinct values)
+# per-quarter S_{t-1} vector (s_lag is constant within quarter -> 82 distinct values)
 Svec = np.zeros(nq)
 Svec[qcode] = d["s"].to_numpy(float)
-# sanity: shock must be constant within quarter
+# sanity: s_lag must be constant within quarter
 if d.groupby("q_c")["s"].nunique().max() != 1:
-    raise SystemExit("shock is not constant within quarter — tercile cut would be ill-defined")
+    raise SystemExit("s_lag is not constant within quarter — tercile cut would be ill-defined")
 print(f"panel: {n_fq:,d} firm-quarters, {nq} distinct quarters, {d['firm_c'].nunique():,d} firms")
 
 # ----------------------------------------------------------------------------
@@ -160,10 +170,33 @@ def stats_from_shock(Sq):
 b_T3_obs, b_diff_obs = stats_from_shock(Svec)
 print(f"observed b3(T3)        = {b_T3_obs:.6e}")
 print(f"observed b3(T3)-b3(T1) = {b_diff_obs:.6e}")
-# cross-check against run_tercile_3pairwise.do MAIN (reghdfe absorb(fq gq ig)):
-#   us_cn_t3 = +2.0465e-5 ; lincom us_cn_t3 - us_cn_t1 = +6.7563e-6 (B7 panel,
-#   2026-08-02). A material mismatch => stale panel or broken collapse.
-print("expected (Stata MAIN)  = +2.0465e-05 and +6.7563e-06 — investigate if far off")
+
+# ---- living Stata anchors (never hardcoded): tercile_vce_diag.csv -----------
+_diag_path = OUT / "tercile_vce_diag.csv"
+if _diag_path.exists():
+    _dg = pd.read_csv(_diag_path)
+    if not {"spec", "coef", "b"} <= set(_dg.columns):
+        raise SystemExit(f"{_diag_path.name} lacks spec/coef/b — stale layout; "
+                         "re-run run_tercile_3pairwise.do.")
+    _r3 = _dg[(_dg["spec"] == "m_main") & (_dg["coef"] == "us_cn_t3")]
+    _r1 = _dg[(_dg["spec"] == "m_main") & (_dg["coef"] == "us_cn_t1")]
+    if len(_r3) != 1 or len(_r1) != 1:
+        raise SystemExit(f"{_diag_path.name}: no unique m_main us_cn_t3/us_cn_t1 "
+                         "rows — re-run run_tercile_3pairwise.do.")
+    _st3 = float(_r3["b"].iloc[0])
+    _stdiff = _st3 - float(_r1["b"].iloc[0])
+    print(f"expected (Stata MAIN, living {_diag_path.name}): b3(T3) {_st3:+.6e}, "
+          f"T3-T1 {_stdiff:+.6e}")
+    for _lbl, _py, _st in [("T3", b_T3_obs, _st3), ("T3-T1", b_diff_obs, _stdiff)]:
+        _rel = abs(_py - _st) / max(abs(_st), 1e-300)
+        if _rel > 1e-3:
+            print(f"    *** ANCHOR MISMATCH on {_lbl}: python {_py:.6e} vs stata "
+                  f"{_st:.6e} (rel {_rel:.2e} > 1e-3). Expected gap is "
+                  "singleton-drop-sized only — stale panel or broken collapse; "
+                  "do NOT cite this RI run.")
+else:
+    print(f"NOTE: {_diag_path.name} not found — Stata cross-check UNAVAILABLE. "
+          "Run run_tercile_3pairwise.do on the current panel before citing.")
 
 # ----------------------------------------------------------------------------
 # 5. Permutation loop — two-sided p for each statistic.

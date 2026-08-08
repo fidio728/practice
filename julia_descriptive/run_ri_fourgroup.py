@@ -13,7 +13,21 @@ gq -> quarter intercept, fq absorbed by the pairwise difference itself). cn_lag 
 constant within a (firm,quarter) cell (same on the US and NONUS active rows,
 checked) so cn survives the collapse; S is constant within quarter.
 
-    dy_it = b2 * cn_it + b3 * (cn_it * S_t) + firm + quarter + e_it
+    dy_it = b2 * cn_it + b3 * (cn_it * S_{t-1}) + firm + quarter + e_it
+
+S_{t-1} PRIMARY (2026-08-08): run_fourgroup.do switched its triple t_cn_s to
+the LAGGED shock, derived in-file from the quarter-level shock series because
+fourgroup_panel.dta ships shock = S_t only. This file mirrors that derivation
+EXACTLY (sorted distinct quarters, contiguity asserted, s_lag = shock[previous
+quarter]; the map is built on the FULL panel before any sample split, so the
+post-2018 subsample keeps its true S_{t-1}); firm-quarters with missing
+S_{t-1} (the first panel quarter) are dropped before demeaning, matching
+reghdfe.
+
+DRIFT ANCHORS (never hardcoded): the Stata MAIN b3 values are read at runtime
+from the living output/fourgroup_vce_diag.csv (spec in {m_act_full,
+m_act_post}, coef=="t_cn_s"), written by run_fourgroup.do on the same panel
+vintage.
 
 Reported statistic:
     b3 — the US_ACTIVE-vs-NONUS_ACTIVE differential exposure response to the shock.
@@ -61,6 +75,24 @@ if act.empty:
 act["us"] = (act["grp"] == "US_ACTIVE").astype(int)
 act["rdate"] = pd.to_datetime(act["rdate"])
 
+# ---- derive S_{t-1} from the quarter-level shock series (mirrors the .do) ----
+# fourgroup_panel.dta ships shock = S_t only; run_fourgroup.do derives s_lag on
+# the deduped sorted quarter list with a contiguity assert. Same here, on the
+# FULL panel BEFORE any sample split, so post-2018's first quarter keeps its
+# true S_{t-1}.
+_q = df.copy()
+_q["rdate"] = pd.to_datetime(_q["rdate"])
+_qs = _q.groupby("rdate")["shock"].agg(["nunique", "first"]).sort_index()
+if (_qs["nunique"] > 1).any():
+    raise SystemExit("shock varies within a quarter — cannot derive S_{t-1}")
+_per = pd.PeriodIndex(_qs.index, freq="Q")
+_exp = pd.period_range(_per[0], _per[-1], freq="Q")
+if len(_per) != len(_exp) or not (_per == _exp).all():
+    raise SystemExit("panel quarter sequence not contiguous — S_{t-1} via shift "
+                     "would misalign (mirrors the .do's rd_m diff==3 assert)")
+_slag_map = pd.Series(_qs["first"].shift(1).to_numpy(), index=_qs.index)
+act["s_lag"] = act["rdate"].map(_slag_map)
+
 
 def collapse(frame):
     """Collapse to the US-minus-NONUS firm-quarter difference panel with cn / S."""
@@ -74,12 +106,12 @@ def collapse(frame):
         raise SystemExit("active panel is not US/NONUS paired: us must take 0 and 1")
     dy = (piv[1] - piv[0]).rename("dy")
 
-    # cn_lag and shock must be constant within a (firm, quarter) cell -> take first
-    for _c in ["cn_lag", "shock"]:
+    # cn_lag and s_lag must be constant within a (firm, quarter) cell -> take first
+    for _c in ["cn_lag", "s_lag"]:
         if frame.groupby(["firm_str", "rdate"])[_c].nunique(dropna=False).max() > 1:
             raise SystemExit(f"{_c} varies within a firm-quarter — collapse by 'first' unsafe")
     meta = (frame.groupby(["firm_str", "rdate"])
-                 .agg(cn=("cn_lag", "first"), s=("shock", "first")))
+                 .agg(cn=("cn_lag", "first"), s=("s_lag", "first")))  # S_{t-1}
     d = pd.concat([dy, meta], axis=1).reset_index()
     d = d.dropna(subset=["dy", "cn", "s"]).reset_index(drop=True)
     return d
@@ -184,13 +216,35 @@ print(f"{'sample':10s} {'b3_obs':>14s} {'ri_p_2side':>12s} {'n_fq':>10s} {'firms
 for r in rows:
     print(f"{r['sample']:10s} {r['b_obs']:14.6e} {r['ri_p']:12.4f} "
           f"{r['n_fq']:10,d} {r['n_firms']:8,d} {r['n_quarters']:9d}")
-# hardcoded Stata anchors for drift protection (run_fourgroup.do MAIN t_cn_s,
-# reghdfe absorb(fq gq ig); 2026-08-02): full +2.789446e-06, post2018 +1.159757e-06
-print("\nexpected (Stata MAIN)  = full +2.789446e-06, post2018 +1.159757e-06 "
-      "— investigate if far off")
-print("cross-check each b3_obs against run_fourgroup.do MAIN t_cn_s "
-      "(reghdfe absorb(fq gq ig)): full column m_act_full, post column m_act_post. "
-      "A material mismatch means a stale panel or broken collapse.")
+# ---- living Stata anchors (never hardcoded): fourgroup_vce_diag.csv ---------
+_diag_path = OUT / "fourgroup_vce_diag.csv"
+if _diag_path.exists():
+    _dg = pd.read_csv(_diag_path)
+    if not {"spec", "coef", "b"} <= set(_dg.columns):
+        raise SystemExit(f"{_diag_path.name} lacks spec/coef/b — stale layout; "
+                         "re-run run_fourgroup.do.")
+    _anch = {}
+    for _sp, _lbl in [("m_act_full", "full"), ("m_act_post", "post2018")]:
+        _r = _dg[(_dg["spec"] == _sp) & (_dg["coef"] == "t_cn_s")]
+        if len(_r) != 1:
+            raise SystemExit(f"{_diag_path.name}: no unique {_sp}/t_cn_s row — "
+                             "re-run run_fourgroup.do.")
+        _anch[_lbl] = float(_r["b"].iloc[0])
+    print(f"\nexpected (Stata MAIN, living {_diag_path.name}): "
+          + "  ".join(f"{k} {v:+.6e}" for k, v in _anch.items()))
+    for r in rows:
+        _st = _anch.get(r["sample"])
+        if _st is None:
+            continue
+        _rel = abs(r["b_obs"] - _st) / max(abs(_st), 1e-300)
+        if _rel > 1e-3:
+            print(f"    *** ANCHOR MISMATCH [{r['sample']}]: python "
+                  f"{r['b_obs']:.6e} vs stata {_st:.6e} (rel {_rel:.2e} > 1e-3). "
+                  "Expected gap is singleton-drop-sized only — stale panel or "
+                  "broken collapse; do NOT cite this RI run.")
+else:
+    print(f"\nNOTE: {_diag_path.name} not found — Stata cross-check UNAVAILABLE. "
+          "Run run_fourgroup.do on the current panel before citing.")
 print("post-2018 is the PRIMARY report (predetermined labels); full is disclosed "
       "with the ~2018-08 snapshot look-ahead caveat.")
 print(f"wrote {(OUT / 'ri_fourgroup_results.csv').as_posix()}")

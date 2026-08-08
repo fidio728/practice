@@ -13,11 +13,16 @@
 * mechanisms differ by direction: retaliation/demand risk (sell) vs supply
 * disruption/tariff risk (buy).
 *
-* SPEC. dw = b2s us*sell + b2b us*buy + b3s us*sell*S + b3b us*buy*S
-*            + fq + gq + ig, two-way cluster (firm, month). All lower-order
-* terms absorbed exactly as in the headline (same argument, two regressor
-* blocks instead of one). Pooled headline b3 living source (canonical artifact):
-* output/headline_3pairwise_canonical.csv (2026-08-03).
+* SPEC (GLOBAL-MAIN + S_{t-1} PRIMARY, 2026-08-08).
+*   dw = b2s us*sell + b2b us*buy + b3s us*sell*S_{t-1} + b3b us*buy*S_{t-1}
+*        + fq + gq + ig, two-way cluster (firm, month).
+* dw is the GLOBAL full-portfolio-denominator Δw (c6_panel.dta MAIN outcome);
+* the triples use the LAGGED shock s_lag (carried by the panel), matching the
+* headline's primary timing. All lower-order terms absorbed exactly as in the
+* headline (same argument, two regressor blocks instead of one). Pooled
+* headline b3 living source (canonical artifact):
+* output/headline_3pairwise_canonical.csv — row spec=="primary" (global x
+* S_{t-1}); numbers never hardcoded here.
 *
 * INFERENCE MENU (per external review): equality test b3s=b3b; joint b3s=b3b=0;
 * pooling validity b2s=b2b & b3s=b3b; corr(sell_lag, buy_lag); firm-quarter
@@ -46,14 +51,17 @@ assert r(N) == 0
 * additive identity survives to Stata (belt after the python suspenders)
 assert abs(sell_lag + buy_lag - cn_lag) < 1e-9
 
-gen us_sell       = us * sell_lag
-gen us_buy        = us * buy_lag
-gen us_sell_shock = us * sell_lag * shock
-gen us_buy_shock  = us * buy_lag  * shock
-label var us_sell       "US x SellLink(t-1)"
-label var us_buy        "US x BuyLink(t-1)"
-label var us_sell_shock "US x SellLink(t-1) x S_t"
-label var us_buy_shock  "US x BuyLink(t-1) x S_t"
+* PRIMARY timing = S_{t-1} (s_lag column shipped by build_c6_panel.py).
+* Variable names keep the *_shock suffix pattern replaced by *_slag so the
+* results CSV is self-describing about the timing switch.
+gen us_sell      = us * sell_lag
+gen us_buy       = us * buy_lag
+gen us_sell_slag = us * sell_lag * s_lag
+gen us_buy_slag  = us * buy_lag  * s_lag
+label var us_sell      "US x SellLink(t-1)"
+label var us_buy       "US x BuyLink(t-1)"
+label var us_sell_slag "US x SellLink(t-1) x S_{t-1}"
+label var us_buy_slag  "US x BuyLink(t-1) x S_{t-1}"
 
 *==============================================================
 * Descriptives the equality tests need for interpretation.
@@ -77,16 +85,16 @@ restore
 *==============================================================
 * MAIN: direction split under 3-pairwise FE.
 *==============================================================
-display _newline _newline "=== MAIN: dw ~ us_sell + us_buy + us_sell_shock + us_buy_shock, fq gq ig ==="
-reghdfe dw us_sell us_buy us_sell_shock us_buy_shock, absorb(fq gq ig) vce(cluster firm_n rd_m)
+display _newline _newline "=== MAIN: dw ~ us_sell + us_buy + us_sell_slag + us_buy_slag (S_{t-1}), fq gq ig ==="
+reghdfe dw us_sell us_buy us_sell_slag us_buy_slag, absorb(fq gq ig) vce(cluster firm_n rd_m)
 estimates store d_main
 
 display _newline "--- equality of triple terms: b3(sell) = b3(buy) ---"
-lincom us_sell_shock - us_buy_shock
+lincom us_sell_slag - us_buy_slag
 display _newline "--- joint zero: b3(sell) = b3(buy) = 0 ---"
-test us_sell_shock us_buy_shock
+test us_sell_slag us_buy_slag
 display _newline "--- pooling validity: b2(sell)=b2(buy) AND b3(sell)=b3(buy) ---"
-test (us_sell = us_buy) (us_sell_shock = us_buy_shock)
+test (us_sell = us_buy) (us_sell_slag = us_buy_slag)
 
 *==============================================================
 * INDICATOR robustness: any-sell / any-buy dummies (immune to reciprocal
@@ -94,16 +102,16 @@ test (us_sell = us_buy) (us_sell_shock = us_buy_shock)
 *==============================================================
 gen byte d_sell = sell_lag > 0 if !missing(sell_lag)
 gen byte d_buy  = buy_lag  > 0 if !missing(buy_lag)
-gen us_dsell       = us * d_sell
-gen us_dbuy        = us * d_buy
-gen us_dsell_shock = us * d_sell * shock
-gen us_dbuy_shock  = us * d_buy  * shock
+gen us_dsell      = us * d_sell
+gen us_dbuy       = us * d_buy
+gen us_dsell_slag = us * d_sell * s_lag
+gen us_dbuy_slag  = us * d_buy  * s_lag
 
-display _newline _newline "=== INDICATOR robustness: any-sell / any-buy dummies, fq gq ig ==="
-reghdfe dw us_dsell us_dbuy us_dsell_shock us_dbuy_shock, absorb(fq gq ig) vce(cluster firm_n rd_m)
+display _newline _newline "=== INDICATOR robustness: any-sell / any-buy dummies (S_{t-1}), fq gq ig ==="
+reghdfe dw us_dsell us_dbuy us_dsell_slag us_dbuy_slag, absorb(fq gq ig) vce(cluster firm_n rd_m)
 estimates store d_ind
 display _newline "--- indicator equality: b3(any-sell) = b3(any-buy) ---"
-lincom us_dsell_shock - us_dbuy_shock
+lincom us_dsell_slag - us_dbuy_slag
 
 *==============================================================
 * B9: degenerate-VCE detection + diag CSV.
@@ -114,9 +122,9 @@ file write `fh' "spec,coef,b,se,se_valid" _n
 local any_degen 0
 foreach m in d_main d_ind {
     estimates restore `m'
-    local coefs "us_sell_shock us_buy_shock"
+    local coefs "us_sell_slag us_buy_slag"
     if "`m'" == "d_ind" {
-        local coefs "us_dsell_shock us_dbuy_shock"
+        local coefs "us_dsell_slag us_dbuy_slag"
     }
     foreach cf of local coefs {
         local bb = _b[`cf']
@@ -140,18 +148,18 @@ if _rc == 0 {
     esttab d_main d_ind using "`OUT'/direction_results.csv", replace ///
         cells("b(fmt(%9.3e)) se(fmt(%9.3e)) p(fmt(4))") ///
         stats(N r2, fmt(%9.0gc %6.4f)) ///
-        keep(us_sell us_buy us_sell_shock us_buy_shock us_dsell us_dbuy us_dsell_shock us_dbuy_shock) ///
+        keep(us_sell us_buy us_sell_slag us_buy_slag us_dsell us_dbuy us_dsell_slag us_dbuy_slag) ///
         mtitles("link_share" "indicator") nonumbers plain ///
-        addnote("sell/buy are LINK-COUNT proxies with a common supply-chain denominator; sell_lag+buy_lag=cn_lag. Indicator column is immune to reciprocal double-records. VCE validity in direction_vce_diag.csv; design-based RI in run_ri_direction.py.")
+        addnote("sell/buy are LINK-COUNT proxies with a common supply-chain denominator; sell_lag+buy_lag=cn_lag. Triples use S_{t-1} (PRIMARY lagged-shock timing, 2026-08-08) and dw is the GLOBAL full-portfolio-denominator outcome. Indicator column is immune to reciprocal double-records. VCE validity in direction_vce_diag.csv; design-based RI in run_ri_direction.py.")
     di "Wrote `OUT'/direction_results.csv"
 }
 
 display _newline "=== b / se / p ==="
 foreach m in d_main d_ind {
     estimates restore `m'
-    local klist "us_sell us_buy us_sell_shock us_buy_shock"
+    local klist "us_sell us_buy us_sell_slag us_buy_slag"
     if "`m'" == "d_ind" {
-        local klist "us_dsell us_dbuy us_dsell_shock us_dbuy_shock"
+        local klist "us_dsell us_dbuy us_dsell_slag us_dbuy_slag"
     }
     display _newline "--- `m' ---"
     estimates table, b(%12.4e) se(%12.4e) p(%6.4f) keep(`klist')

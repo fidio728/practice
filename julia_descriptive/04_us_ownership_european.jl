@@ -2,8 +2,11 @@
 # Sections 2-4 descriptive analysis using the EOM panel from script 03.
 # Builds:
 #   - I_{i,c,t}                   (country-firm aggregation)
-#   - w_{i,c,t}    [portfolio_weight_eu]  (EU-restricted; this is the REGRESSION input)
-#   - w_{i,c,t}    [portfolio_weight_global]  (global; kept for diagnostic only)
+#   - w_{i,c,t}    [portfolio_weight_global]  (FULL-portfolio denominator; MAIN
+#                    regression input per research_plan.tex "Country portfolio
+#                    weight" — promoted 2026-08-08, see amended C1 note below)
+#   - w_{i,c,t}    [portfolio_weight_eu]  (EU-restricted; within-Europe
+#                    reallocation DIAGNOSTIC — the C1-era regression input)
 #   - Ownership_{i,US,t}          (US ownership share of European firms)
 # And computes distributions, percentiles, top firms.
 #
@@ -17,6 +20,19 @@
 #     and emit portfolio_weight_eu alongside portfolio_weight_global. The
 #     EU-restricted one is what 05 must use; the global one is kept for the
 #     fig2 "US-EU engagement" descriptive only.
+#
+#     [AMENDED 2026-08-08 — MAIN/diagnostic roles SWAPPED, C1 history kept]
+#     The C1-era reading treated the EU-restricted weight as "the regression
+#     spec". research_plan.tex ("Country portfolio weight", ~line 37) in fact
+#     defines w = I_{i,c,t} / sum_j I_{j,c,t} over the FULL portfolio, and the
+#     raw pull confirms funds report their complete global equity book
+#     (US 44.9% MV / EU+UK+CH+NO 41.2% / other 13.9%). Decision 2026-08-08:
+#     portfolio_weight_global is the MAIN regression input (plan-faithful);
+#     portfolio_weight_eu remains emitted as the labeled WITHIN-EUROPE
+#     REALLOCATION diagnostic. The C1 finding itself (US weights deflated ~6-7x
+#     when the two scopes are mixed) stays true and documented; what changed is
+#     which scope the spec wants. 06_cartesian_grid.jl now propagates BOTH
+#     families (delta_w_global = MAIN dw; delta_w = EU diagnostic dw_eu).
 #
 # Market-cap MAX×MAX (high): The previous MAX(adj_shares_out) × MAX(adj_price)
 #     silently selected the upper bound of intra-group dispersion (same firm-MAX
@@ -308,11 +324,18 @@ write_manifest("04_marketcap_it", mcap_path; row_count=mcap_diag.n_company_quart
 # (3a) Country totals — TWO versions.
 #
 # country_total_holdings_GLOBAL  = sum_j I_{j,c,t} across ALL sec_country
-# country_total_holdings_EU      = sum_{j in EU} I_{j,c,t}  (regression input)
+#                                  (MAIN denominator per research_plan.tex;
+#                                   promoted 2026-08-08)
+# country_total_holdings_EU      = sum_{j in EU} I_{j,c,t}
+#                                  (within-Europe reallocation DIAGNOSTIC;
+#                                   the C1-era regression denominator)
 #
-# C1 FIX: the regression spec requires the EU-restricted denominator so US and
-# NONUS series use the same scope. The global version is preserved for the
-# fig2 descriptive ONLY.
+# C1 FIX (2026-06-01, historical): the then-current spec reading required the
+# EU-restricted denominator so US and NONUS series use the same scope; the
+# global version was kept for the fig2 descriptive. AMENDED 2026-08-08: the
+# plan-faithful denominator is the GLOBAL one (w = I/T over the FULL
+# portfolio); roles swapped, both columns still emitted. 06_cartesian_grid.jl
+# consumes BOTH.
 # ============================================================
 country_total_path = test_suffix_path(joinpath(OUT_DIR, "country_total_ct.parquet"))
 
@@ -330,8 +353,16 @@ write_manifest("04_country_total_ct", country_total_path; input_paths=STEP_INPUT
 
 # ============================================================
 # (3b) Ownership_{i,c,t} AND portfolio weight w_{i,c,t}
-# Emit BOTH portfolio_weight_eu (regression input) and portfolio_weight_global
-# (diagnostic). Downstream / 05 must use portfolio_weight_eu.
+# Emit BOTH portfolio_weight_global (MAIN per research_plan.tex; promoted
+# 2026-08-08) and portfolio_weight_eu (within-Europe reallocation diagnostic).
+# NULL semantics differ by construction:
+#   portfolio_weight_global : NULL iff country_total_holdings_global is 0/NULL
+#                             (holder country's entire global book empty at t);
+#   portfolio_weight_eu     : NULL for non-EU sec_country rows (explicit ELSE
+#                             NULL) and when country_total_holdings_eu is
+#                             0/NULL (holder's EU book empty at t).
+# Since the global book contains the EU book, T_global >= T_eu; every cell with
+# a defined EU weight has a defined global weight, never the reverse.
 # ============================================================
 println("\nBuilding Ownership_{i,c,t} and portfolio weight w_{i,c,t} (EU + global)...")
 
@@ -345,11 +376,13 @@ own_path = test_suffix_path(joinpath(OUT_DIR, "ownership_ict.parquet"))
            i.I_ict,
            m.market_cap,
            i.I_ict / NULLIF(m.market_cap, 0) AS ownership_share,
-           -- C1-FIX regression input: denominator restricted to EU sec_country
+           -- Within-Europe reallocation DIAGNOSTIC (C1-era regression input;
+           -- demoted 2026-08-08): denominator restricted to EU sec_country
            CASE WHEN i.sec_country IN $EU_str
                 THEN i.I_ict / NULLIF(ct.country_total_holdings_eu, 0)
                 ELSE NULL END AS portfolio_weight_eu,
-           -- Diagnostic only: global denominator (do NOT use in regression)
+           -- MAIN per research_plan.tex "Country portfolio weight" (2026-08-08
+           -- decision): FULL-portfolio (global) denominator
            i.I_ict / NULLIF(ct.country_total_holdings_global, 0) AS portfolio_weight_global
     FROM read_parquet('$ict_path_fwd') i
     LEFT JOIN read_parquet('$mcap_path_fwd') m
@@ -512,7 +545,8 @@ end
 println("\n========== DONE ==========")
 println("Key outputs:")
 println("  I_ict_panel.parquet")
-println("  ownership_ict.parquet     (portfolio_weight_eu = regression input; portfolio_weight_global = diagnostic)")
+println("  ownership_ict.parquet     (portfolio_weight_global = MAIN regression input per research_plan.tex;")
+println("                             portfolio_weight_eu = within-Europe reallocation diagnostic)")
 println("  marketcap_it.parquet      (AVG-not-MAX; dispersion stddev columns)")
 println("  country_total_ct.parquet  (both global and EU-restricted totals)")
 println("  04_us_ownership_eu_*.csv")

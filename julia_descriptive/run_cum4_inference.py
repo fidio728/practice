@@ -18,11 +18,17 @@ Three validated gaps in that claim, addressed here:
        few-cluster inference is governed by the SMALLER count -- hence quarter
        clustering with Webb (6-point) weights, not Rademacher.
 
+S_{t-1} PRIMARY (REBUILD v3, 2026-08-08): the Stata cells this file arbitrates
+(headline + LP cum1/cum4) switched to the LAGGED shock us_cn_slag, so the
+collapse reads s_lag and firm-quarters with missing S_{t-1} drop per horizon.
+Anchors are READ FROM LIVING ARTIFACTS at runtime (see load_anchors), never
+hardcoded.
+
 MACHINERY (mirrors run_ri_3pairwise.py exactly; the b3 gates below reproduce it).
 On the balanced 2-per-(firm,quarter) panel the three pairwise FE collapse, on the
 US-minus-NONUS within-firm-quarter difference dy, to a FIRM + QUARTER two-way FE
-model:  dy_it = b2*cn_it + b3*(cn_it*S_t) + phi_i + delta_t + e.  Under the sharp
-null b3=0 we permute/shift the 82 quarter shocks S_t. The two-way-demeaned
+model:  dy_it = b2*cn_it + b3*(cn_it*S_{t-1}) + phi_i + delta_t + e.  Under the
+sharp null b3=0 we permute/shift the 82 quarter S_{t-1} values. The two-way-demeaned
 interaction cn*S has NO closed-form sufficient statistic, so run_ri_3pairwise.py
 re-demeans each draw with a 30-iter alternating-projection (bincount) demeaner.
 
@@ -76,14 +82,74 @@ if SMOKE:
     N_PERM = 20
     B_WCB = 200
 
-# published anchors (drift-protection cross-checks)
-# P0 REFRESH 2026-08-04: the as-of W=10 holdings rebuild changed the holdings side,
-# so the pre-P0 gates (h0 +2.745538e-06, cum1 +4.093621e-06, cum4 +8.825974e-06 with
-# free-perm p 0.3083/0.1052/0.0388) are superseded. Values below are read verbatim
-# from the fresh output/audit_ri_3pairwise.csv (run_ri_3pairwise.py on the P0 panel,
-# N_PERM=5000, seed 20260702). Estimation logic unchanged.
-B3_GATES = {"h0": -5.2799161e-07, "cum1": -1.5346165e-07, "cum4": 6.6006275e-06}
-P_FREE_ANCHORS = {"h0": 0.8014, "cum1": 0.9368, "cum4": 0.0636}
+# ---------------------------------------------------------------------------
+# DRIFT ANCHORS — read from LIVING artifacts at runtime, NEVER hardcoded
+# (REBUILD v3, 2026-08-08: the retired hardcoded dicts were the stale-vintage
+# failure mode; every prior anchor generation — pre-P0, P0, EU x S_t — is
+# superseded by the S_{t-1} switch and the fund-grain panel).
+#   b3 gates : output/audit_ri_3pairwise.csv rows "headline dw"/"LP cum1"/
+#              "LP cum4" (same collapse machinery -> 1e-6 gate legitimate);
+#              its timing column must read "slag" (S_{t-1} vintage guard).
+#   h0 also cross-checked against output/headline_3pairwise_canonical.csv
+#              row spec=="primary" fe=="fq_gq_ig" at 1e-4 (reghdfe drops
+#              singletons; coefficient unaffected, tolerance per
+#              verify_attribution_em.py).
+#   p anchors: audit_ri_3pairwise.csv ri_p_2sided — MC CROSS-CHECK only (this
+#              script sorts before factorize, run_ri_3pairwise.py does not, so
+#              the permutation stream is not draw-for-draw identical).
+# ---------------------------------------------------------------------------
+def load_anchors():
+    ri_path = OUT / "audit_ri_3pairwise.csv"
+    if not ri_path.exists():
+        raise SystemExit(
+            f"{ri_path.name} not found — run run_ri_3pairwise.py (S_{{t-1}} "
+            "vintage) on the CURRENT panel first; refusing to run without "
+            "living b3 gates.")
+    ri = pd.read_csv(ri_path)
+    need = {"spec", "b3", "ri_p_2sided"}
+    if not need.issubset(ri.columns):
+        raise SystemExit(f"{ri_path.name} lacks {sorted(need - set(ri.columns))} "
+                         "— stale layout; re-run run_ri_3pairwise.py.")
+    if "timing" not in ri.columns or not (ri["timing"] == "slag").all():
+        raise SystemExit(
+            f"{ri_path.name} is not the S_{{t-1}} vintage (timing column "
+            "missing or != 'slag') — it predates the 2026-08-08 lagged-shock "
+            "switch; re-run run_ri_3pairwise.py.")
+    spec_map = {"headline dw": "h0", "LP cum1": "cum1", "LP cum4": "cum4"}
+    b3g, pfa = {}, {}
+    for spec, lbl in spec_map.items():
+        r = ri[ri["spec"] == spec]
+        if len(r) != 1:
+            raise SystemExit(f"{ri_path.name}: expected exactly one '{spec}' row, "
+                             f"found {len(r)} — re-run run_ri_3pairwise.py.")
+        b3g[lbl] = float(r["b3"].iloc[0])
+        pfa[lbl] = float(r["ri_p_2sided"].iloc[0])
+
+    can_path = OUT / "headline_3pairwise_canonical.csv"
+    if not can_path.exists():
+        raise SystemExit(f"{can_path.name} not found — run run_headline_3pairwise.do "
+                         "first; refusing to run without the Stata-leg anchor.")
+    can = pd.read_csv(can_path)
+    if not {"spec", "fe", "b3"} <= set(can.columns):
+        raise SystemExit(f"{can_path.name} lacks spec/fe/b3 — stale pre-2026-08-08 "
+                         "layout; re-run run_headline_3pairwise.do.")
+    prim = can[(can["spec"] == "primary") & (can["fe"] == "fq_gq_ig")]
+    if len(prim) != 1:
+        raise SystemExit(f"{can_path.name}: no unique primary/fq_gq_ig row — stale "
+                         "layout; re-run run_headline_3pairwise.do.")
+    b3_stata = float(prim["b3"].iloc[0])
+    rel = abs(b3g["h0"] - b3_stata) / max(abs(b3_stata), 1e-300)
+    if not rel < 1e-4:
+        raise SystemExit(
+            f"VINTAGE DRIFT between living artifacts: audit_ri h0 b3 {b3g['h0']:.6e} "
+            f"!= canonical primary {b3_stata:.6e} (rel {rel:.2e}) — the two files "
+            "were not refreshed from the same panel build.")
+    print(f"[anchors] living sources: {ri_path.name} (b3 gates + p cross-checks), "
+          f"{can_path.name} primary b3={b3_stata:+.6e} (h0 rel {rel:.2e})")
+    return b3g, pfa
+
+
+B3_GATES, P_FREE_ANCHORS = load_anchors()
 SAGG_CORR_DISCLOSED = 0.357   # existing s_agg lag-1 autocorr disclosure (run_ri_sagg.py)
 
 HORIZONS = [("h0", "d_dw"), ("cum1", "d_c1"), ("cum2", "d_c2"),
@@ -103,7 +169,8 @@ def load_panel():
     con = duckdb.connect()
     d = con.execute(f"""
     SELECT firm_str, rdate,
-           any_value(cn_lag) AS cn, any_value(shock) AS s,
+           any_value(cn_lag) AS cn,
+           any_value(s_lag)  AS s,    -- S_{{t-1}}, PRIMARY timing (2026-08-08)
            MAX(CASE WHEN us=1 THEN dw   END) - MAX(CASE WHEN us=0 THEN dw   END) AS d_dw,
            MAX(CASE WHEN us=1 THEN cum1 END) - MAX(CASE WHEN us=0 THEN cum1 END) AS d_c1,
            MAX(CASE WHEN us=1 THEN cum2 END) - MAX(CASE WHEN us=0 THEN cum2 END) AS d_c2,
@@ -351,16 +418,21 @@ def main():
 
     d = load_panel()
 
-    # 82-quarter chronological shock vector (shock constant within quarter)
+    # 82-quarter chronological S_{t-1} vector (s_lag constant within quarter;
+    # the GPR series starts before the estimation window, so s_lag is defined
+    # on EVERY panel quarter — a NaN here is a lag-propagation bug, fail loud)
     sfull = d.groupby("rdate")["s"].first().sort_index()
     full_chrono = sfull.index.values                 # sorted datetime64 (82,)
-    S_full = sfull.to_numpy(float)                    # chronological shocks (82,)
+    S_full = sfull.to_numpy(float)                    # chronological S_{t-1} (82,)
     nqf = len(S_full)
     assert nqf == 82, f"expected 82 quarters, got {nqf}"
+    assert np.isfinite(S_full).all(), (
+        "s_lag missing on some panel quarter(s) — cannot permute the S_{t-1} "
+        "vector; check build_audit_panel_f1f2f7.py lag propagation.")
 
     # ---------------- [1] SHOCK SERIAL DIAGNOSTICS ----------------
     diag = shock_serial_diagnostics(S_full)
-    print("\n[1] SHOCK SERIAL DIAGNOSTICS (stamped shock S_t, 82 quarters, "
+    print("\n[1] SHOCK SERIAL DIAGNOSTICS (S_{t-1} vector as regressed, 82 quarters, "
           "re-derived; LB hand-rolled w/ scipy.chi2)")
     print(f"    existing convention (run_ri_sagg.py): corr(s_agg_t,s_agg_t-1) "
           f"= {SAGG_CORR_DISCLOSED:.3f} (disclosed)")
@@ -499,13 +571,12 @@ def main():
     print(f"\nwrote {out_csv}")
 
     # ---------------- anchor drift-protection cross-check ----------------
-    print("\n[cross-check] published anchors vs this run (b3 gated; free-perm p = "
+    print("\n[cross-check] living anchors vs this run (b3 gated above; free-perm p = "
           "MC cross-check under the newly-frozen order)")
-    print("    b3 anchors (P0 refresh 2026-08-04):  h0 -5.2799161e-07  "
-          "cum1 -1.5346165e-07  cum4 +6.6006275e-06")
-    print("    free-perm p anchors (P0 refresh): h0 0.8014  cum1 0.9368  cum4 0.0636")
-    print("    (pre-P0, superseded: b3 +2.745538e-06 / +4.093621e-06 / +8.825974e-06; "
-          "p_free 0.3083 / 0.1052 / 0.0388)")
+    print("    b3 gates (living, audit_ri_3pairwise.csv): " +
+          "  ".join(f"{k} {v:+.7e}" for k, v in B3_GATES.items()))
+    print("    free-perm p anchors (living, same file): " +
+          "  ".join(f"{k} {v:.4f}" for k, v in P_FREE_ANCHORS.items()))
     for lbl in ["h0", "cum1", "cum4"]:
         got = p_free_marg[lbl]
         anc = P_FREE_ANCHORS[lbl]

@@ -24,6 +24,17 @@
 *   (b) refresh headline_3pairwise_canonical.csv on the post-EM canonical
 *       panel. The pre-change twin was archived by hand to
 *       headline_3pairwise_canonical_preEM.csv BEFORE this run.
+*
+* [AMENDED 2026-08-08 — GLOBAL-MAIN + S_{t-1} PRIMARY] This tail is an
+* INCIDENT patch kept for the record; the parent run_attribution_em.do now
+* completes on its own (Z arm included) and owns the canonical refresh. If
+* this tail IS re-run, section (b) must — and now does — write the LOCKED
+* 2026-08-08 layout spec,denom,timing,fe,b3,se,p,N with the PRIMARY spec
+* dw(global) x us_cn_slag (S_{t-1}); the retired two-row S_t layout would
+* clobber the living artifact and trip the layout guard in
+* run_ddd_nofe_bil.do. The degeneracy evidence in (a) is timing-invariant:
+* zr_lag>=1 -> cn_lag==0 -> us_cn, us_cn_shock AND us_cn_slag are all
+* identically zero on the recoded-zero rows.
 *=======================================================================
 
 clear all
@@ -40,10 +51,12 @@ egen fq = group(firm_str rd_day)
 egen gq = group(hgroup rd_day)
 egen ig = group(firm_str hgroup)
 gen us_cn       = us*cn_lag
+* PRIMARY triple = S_{t-1} (2026-08-08); S_t kept as the timing diagnostic.
+gen us_cn_slag  = us*cn_lag*s_lag
 gen us_cn_shock = us*cn_lag*shock
 
 display _newline "===== (a) regressor variation by zr_lag arm ====="
-tabstat cn_lag us_cn us_cn_shock, by(zr_lag) stat(n mean sd min max) format(%12.6g) columns(statistics)
+tabstat cn_lag us_cn us_cn_slag us_cn_shock, by(zr_lag) stat(n mean sd min max) format(%12.6g) columns(statistics)
 
 qui count if zr_lag >= 1 & cn_lag != 0
 display "recoded-zero rows (zr_lag>=1) with cn_lag != 0: " %12.0gc r(N) "   (must be 0)"
@@ -55,26 +68,34 @@ qui count if zr_lag == 0 & cn_lag == 0
 display "old-rule rows with cn_lag exactly 0:             " %12.0gc r(N)
 
 display _newline "===== (b) refresh the LIVING canonical artifact ====="
+* Layout is byte-for-byte the one run_headline_3pairwise.do writes
+* (LOCKED 2026-08-08): spec,denom,timing,fe,b3,se,p,N — PRIMARY (global x
+* S_{t-1}) + itgt variant + the three remaining 2x2 diagnostic cells.
+capture program drop _canrow
+program define _canrow
+    args cf spec denom timing felab y x3 FE
+    qui reghdfe `y' us_cn `x3', absorb(`FE') vce(cluster firm_n rd_m)
+    display %-13s "`spec'" %-7s "`denom'" %-5s "`timing'" %-9s "`felab'" ///
+        "  b3=" %13.6e _b[`x3'] "  se=" %13.6e _se[`x3'] ///
+        "  p=" %8.4f 2*ttail(e(df_r), abs(_b[`x3']/_se[`x3'])) "  N=" %11.0gc e(N)
+    file write `cf' "`spec',`denom',`timing',`felab'," ///
+        (strtrim(strofreal(_b[`x3'], "%14.6e"))) "," ///
+        (strtrim(strofreal(_se[`x3'], "%14.6e"))) "," ///
+        (strtrim(strofreal(2*ttail(e(df_r), abs(_b[`x3']/_se[`x3'])), "%9.6f"))) "," ///
+        (strtrim(strofreal(e(N), "%15.0f"))) _n
+end
 tempname hf
 file open `hf' using "`OUT'/headline_3pairwise_canonical.csv", write replace
-file write `hf' "spec,b3,se,p,N" _n
-qui reghdfe dw us_cn us_cn_shock, absorb(fq gq ig) vce(cluster firm_n rd_m)
-display "3pairwise_fq_gq_ig  b3=" %13.6e _b[us_cn_shock] "  se=" %13.6e _se[us_cn_shock] ///
-        "  p=" %8.4f 2*ttail(e(df_r), abs(_b[us_cn_shock]/_se[us_cn_shock])) "  N=" %11.0gc e(N)
-file write `hf' "3pairwise_fq_gq_ig," ///
-    (strtrim(strofreal(_b[us_cn_shock], "%14.6e"))) "," ///
-    (strtrim(strofreal(_se[us_cn_shock], "%14.6e"))) "," ///
-    (strtrim(strofreal(2*ttail(e(df_r), abs(_b[us_cn_shock]/_se[us_cn_shock])), "%9.6f"))) "," ///
-    (strtrim(strofreal(e(N), "%15.0f"))) _n
-qui reghdfe dw us_cn us_cn_shock, absorb(fq gq) vce(cluster firm_n rd_m)
-display "itgt_fq_gq          b3=" %13.6e _b[us_cn_shock] "  se=" %13.6e _se[us_cn_shock] ///
-        "  p=" %8.4f 2*ttail(e(df_r), abs(_b[us_cn_shock]/_se[us_cn_shock])) "  N=" %11.0gc e(N)
-file write `hf' "itgt_fq_gq," ///
-    (strtrim(strofreal(_b[us_cn_shock], "%14.6e"))) "," ///
-    (strtrim(strofreal(_se[us_cn_shock], "%14.6e"))) "," ///
-    (strtrim(strofreal(2*ttail(e(df_r), abs(_b[us_cn_shock]/_se[us_cn_shock])), "%9.6f"))) "," ///
-    (strtrim(strofreal(e(N), "%15.0f"))) _n
+file write `hf' "spec,denom,timing,fe,b3,se,p,N" _n
+_canrow `hf' "primary"      "global" "slag" "fq_gq_ig" dw    us_cn_slag  "fq gq ig"
+_canrow `hf' "primary_itgt" "global" "slag" "fq_gq"    dw    us_cn_slag  "fq gq"
+_canrow `hf' "diag"         "global" "st"   "fq_gq_ig" dw    us_cn_shock "fq gq ig"
+* diag global-st at fq gq (itgt): S_t continuity-anchor cell for the
+* run_shock_menu.do drift gate (byte-for-byte with run_headline_3pairwise.do).
+_canrow `hf' "diag"         "global" "st"   "fq_gq"    dw    us_cn_shock "fq gq"
+_canrow `hf' "diag"         "eu"     "slag" "fq_gq_ig" dw_eu us_cn_slag  "fq gq ig"
+_canrow `hf' "diag"         "eu"     "st"   "fq_gq_ig" dw_eu us_cn_shock "fq gq ig"
 file close `hf'
-display "Refreshed `OUT'/headline_3pairwise_canonical.csv (post-EM vintage)"
+display "Refreshed `OUT'/headline_3pairwise_canonical.csv (GLOBAL-MAIN 2x2 + itgt-st anchor vintage)"
 
 display _newline "Done."

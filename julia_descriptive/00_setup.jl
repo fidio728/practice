@@ -240,6 +240,18 @@ function _file_sha256(path::AbstractString)
     end
 end
 
+# true if the working tree differs from HEAD (uncommitted changes anywhere).
+# DPN_GIT_DIRTY override mirrors DPN_GIT_SHA for subprocess-free environments.
+function _git_dirty()
+    env_d = strip(get(ENV, "DPN_GIT_DIRTY", ""))
+    isempty(env_d) || return env_d == "true"
+    try
+        return !isempty(strip(read(`git -C $SCRIPT_DIR status --porcelain`, String)))
+    catch
+        return true   # unknown -> assume dirty; never falsely claim clean
+    end
+end
+
 """
     write_manifest(step_name, out_path; row_count=missing, input_paths=String[])
 
@@ -254,10 +266,18 @@ function write_manifest(step_name::AbstractString, out_path::AbstractString;
     input_fp = [Dict("path"=>p, "size_bytes"=>(isfile(p) ? filesize(p) : 0),
                      "mtime"=>(isfile(p) ? string(Dates.unix2datetime(mtime(p))) : ""))
                 for p in input_paths]
+    # PROVENANCE (2026-08-09, external-review fix): git_sha alone is NOT a
+    # reproducibility claim when the tree is dirty — record dirtiness plus the
+    # SHA256 of the entry script actually executed, so "which code built this"
+    # is answerable even for uncommitted-runs.
+    entry_script = abspath(PROGRAM_FILE)
     meta = Dict(
         "step"             => step_name,
         "out_path"         => out_native,
         "git_sha"          => _git_sha(),
+        "git_dirty"        => _git_dirty(),
+        "entry_script"     => entry_script,
+        "entry_script_sha256" => (isfile(entry_script) ? _file_sha256(entry_script) : ""),
         "julia_version"    => string(VERSION),
         "duckdb_version"   => (try qdf(dbcon(), "SELECT version() AS v").v[1] catch; "unknown" end),
         "test_mode"        => TEST_MODE,
@@ -271,6 +291,9 @@ function write_manifest(step_name::AbstractString, out_path::AbstractString;
         "\"step\":\"$(meta["step"])\"",
         "\"out_path\":\"$(replace(meta["out_path"], "\\" => "\\\\"))\"",
         "\"git_sha\":\"$(meta["git_sha"])\"",
+        "\"git_dirty\":$(meta["git_dirty"])",
+        "\"entry_script\":\"$(replace(meta["entry_script"], "\\" => "\\\\"))\"",
+        "\"entry_script_sha256\":\"$(meta["entry_script_sha256"])\"",
         "\"julia_version\":\"$(meta["julia_version"])\"",
         "\"duckdb_version\":\"$(meta["duckdb_version"])\"",
         "\"test_mode\":$(meta["test_mode"])",

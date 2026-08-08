@@ -1,8 +1,14 @@
 * run_tercile_3pairwise.do — shock-TERCILE triple-difference (bottom/middle/top
-* thirds of the 82 distinct quarterly US-NONUS shocks S_t), under the 3-pairwise
-* FE (fq gq ig), consistent with the new headline FE and with the retired tail menu
-* (run_tail_3pairwise.do). Headline b3 living source (canonical artifact):
-* output/headline_3pairwise_canonical.csv (2026-08-03).
+* thirds of the 82 distinct quarterly US-NONUS LAGGED shocks S_{t-1}), under the
+* 3-pairwise FE (fq gq ig), consistent with the new headline FE and with the
+* retired tail menu (run_tail_3pairwise.do).
+* GLOBAL-MAIN + S_{t-1} PRIMARY (2026-08-08): dw in c6_panel.dta is now the
+* GLOBAL full-portfolio-denominator Δw, and the dose variable is the LAGGED
+* shock s_lag (carried by the panel), matching the headline's primary timing —
+* terciles are cut on the DISTINCT quarterly s_lag values.
+* Headline b3 living source (canonical artifact):
+* output/headline_3pairwise_canonical.csv — row spec=="primary" (global x
+* S_{t-1}); numbers never hardcoded here.
 *
 * DESIGN PROVENANCE. Advisor request: replace the 2-sigma tail dummy (few-treated-
 * cluster inference problem) with shock TERCILES (bottom/middle/top ~33% each; 82
@@ -16,20 +22,21 @@
 * few dose bins; MacKinnon-Webb motivates moving off a sparse-treated dummy toward a
 * design where every bin is well-populated for cluster-robust inference.
 *
-* PANEL. c6_panel.dta — B7-fixed rebuild (2026-07-22): 347,952 rows, 6,854 firms,
-* 82 quarters (2003Q3-2023Q4), fully-paired US/NONUS. Columns: firm_str,
-* hgroup('US'/'NONUS'), rdate(%tc), dw(backward dW), cn_lag(china_share_lag1q,
-* CUST+SUPP), shock(S_t, constant within quarter), us(0/1).
+* PANEL. c6_panel.dta — GLOBAL-MAIN rebuild (2026-08-08) on the B7-fixed grid:
+* fully-paired US/NONUS. Columns used here: firm_str, hgroup('US'/'NONUS'),
+* rdate(%tc), dw(backward dW, GLOBAL denominator = MAIN), cn_lag
+* (china_share_lag1q, CUST+SUPP), s_lag(S_{t-1}, constant within quarter,
+* PRIMARY timing), shock(S_t, timing diagnostic), us(0/1).
 *
 * SPEC LOGIC (isomorphic to the retired tail menu, run_tail_3pairwise.do). Tercile dummies D_T1(bottom)
-* and D_T3(top); T2(middle) is the omitted base. Under the saturated FE
+* and D_T3(top) cut on s_lag; T2(middle) is the omitted base. Under the saturated FE
 * (fq=firm x quarter, gq=group x quarter, ig=firm x group) every lower-order term
 * (cn_lag, D_T1, D_T3, us, and their firm/quarter/group interactions) is absorbed;
 * the surviving estimands are us_cn (=us*cn_lag) and the two triple interactions
 * us_cn_t1 (=us*cn_lag*D_T1) and us_cn_t3 (=us*cn_lag*D_T3). Two-way cluster
-* (firm_n rd_m). CRITICAL GOTCHA: the terciles MUST be cut on the 82 DISTINCT
-* quarterly shock values (quarter level, tag(rd_m)); cutting via xtile on the
-* 347,952 rows would let unequal firm counts per quarter bias the percentiles.
+* (firm_n rd_m). CRITICAL GOTCHA: the terciles MUST be cut on the DISTINCT
+* quarterly s_lag values (quarter level, tag(rd_m)); cutting via xtile on the
+* full row set would let unequal firm counts per quarter bias the percentiles.
 *
 * B9 CONVENTION (see run_russia_headline.do B9 FIX): after every spec, detect a
 * missing/zero SE on the triple interactions, warn loudly, and record VCE validity
@@ -60,25 +67,33 @@ gen us_cn = us * cn_lag
 label var us_cn "US x CN(t-1)"
 
 *==============================================================
-* TERCILE CONSTRUCTION — cut on the 82 DISTINCT quarters, NOT the 347,952 rows.
-* shock is constant within quarter, so one tagged row per quarter carries S_t.
-* Compute the 33.33/66.67 percentiles over the 82 tagged values, then apply the
-* two scalar cutpoints back at row level (equivalent to a merge, since S_t is
-* quarter-constant). D_T1 = bottom third (S <= c1), D_T3 = top third (S > c2),
-* T2 = middle third = omitted base.
+* TERCILE CONSTRUCTION — cut on the 82 DISTINCT quarters, NOT the full rows.
+* s_lag (S_{t-1}, PRIMARY timing 2026-08-08) is constant within quarter, so one
+* tagged row per quarter carries it. Compute the 33.33/66.67 percentiles over
+* the 82 tagged values, then apply the two scalar cutpoints back at row level
+* (equivalent to a merge, since S_{t-1} is quarter-constant). D_T1 = bottom
+* third (S_{t-1} <= c1), D_T3 = top third (S_{t-1} > c2), T2 = middle = base.
 *==============================================================
 egen qtag = tag(rd_m)
 quietly count if qtag==1
 display _newline "Distinct quarters (should be 82): " r(N)
+* s_lag must be defined on EVERY panel quarter or the terciles fail to
+* partition (the GPR shock series starts well before the estimation window,
+* so a missing s_lag here means a lag-propagation bug, not a data edge).
+quietly count if qtag==1 & missing(s_lag)
+if r(N) > 0 {
+    display as error ">>> " r(N) " quarter(s) with missing s_lag — cannot cut S_{t-1} terciles. <<<"
+    exit 459
+}
 
-_pctile shock if qtag==1, percentiles(33.33333 66.66667)
+_pctile s_lag if qtag==1, percentiles(33.33333 66.66667)
 local c1 = r(r1)
 local c2 = r(r2)
 
-gen byte D_T1 = (shock <= `c1') if !missing(shock)
-gen byte D_T3 = (shock >  `c2') if !missing(shock)
-label var D_T1 "shock bottom tercile"
-label var D_T3 "shock top tercile"
+gen byte D_T1 = (s_lag <= `c1') if !missing(s_lag)
+gen byte D_T3 = (s_lag >  `c2') if !missing(s_lag)
+label var D_T1 "S_{t-1} bottom tercile"
+label var D_T3 "S_{t-1} top tercile"
 
 * report quarter counts per tercile (realized 28/27/27) and the cutpoints
 quietly count if qtag==1 & D_T1==1

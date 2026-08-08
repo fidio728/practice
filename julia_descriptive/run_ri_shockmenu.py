@@ -2,6 +2,15 @@
 run_ri_shockmenu.py — randomization inference for the SHOCK MENU (P1a/P1b/P1c),
 the design-based ARBITER for run_shock_menu.do.
 
+TIMING NOTE (2026-08-09): this family INTENTIONALLY stays on S_t and anchors the
+canonical diag/global/st cell. The menu's question is "does the CONSTRUCTION of
+the contemporaneous shock matter", asked at the timing the menu was pre-registered
+on; it is NOT part of the primary-spec inference set. The primary (S_{t-1}) RI
+arbiters are run_ri_3pairwise.py / run_cum4_inference.py / run_ri_direction.py /
+run_ri_fourgroup.py / run_ri_tercile.py, all of which permute the S_{t-1} vector
+and read living S_{t-1} anchors. Do not describe the RI migration as "all RI
+switched to S_{t-1}" — this file is the deliberate exception.
+
 WHAT THIS IS. The headline shock S_t is the monthly level-AR(1) residual of the
 Iacoviello-Tong bilateral USA|China GPR sampled at the quarter-end month. Three
 documented defects motivate a menu of alternative constructions: (P1a) the
@@ -52,13 +61,19 @@ anchor. Its p-values must match the menu's standardized baseline_repro column,
 because a positive affine rescaling of S changes b3 by a constant factor and
 leaves every permutation comparison invariant.
 
-DRIFT ANCHORS (module constants below, each tagged with its living source). The
+DRIFT ANCHORS (read from the LIVING canonical artifact at runtime, NEVER
+hardcoded — REBUILD v3, 2026-08-08; the retired module constants cited the
+retired "3pairwise_fq_gq_ig" row and were the stale-vintage failure mode). The
 b3_stata_anchor column only compares THIS run's Stata leg to THIS run's Python
 leg, which cannot detect a panel-vintage swap — both legs would move together,
-and c6_panel_preP0.dta sits in the same directory as c6_panel.dta. So the
-baseline_panel_shock_raw row is additionally hard-gated against the canonical P0
-artifacts (b3 and n_firmquarters), and its free-permutation p is printed with the
-same "<-- DRIFT > 0.02" flag run_cum4_inference.py uses.
+and stale panel vintages sit in the same directory as c6_panel.dta. So the
+baseline_panel_shock_raw row is additionally hard-gated against
+output/headline_3pairwise_canonical.csv (LOCKED 2026-08-08 layout
+spec,denom,timing,fe,b3,se,p,N), row spec=="diag" & denom=="global" &
+timing=="st" & fe=="fq_gq_ig" — that cell IS this file's baseline regression
+(dw global x S_t at the 3-pairwise FE). Python-vs-canonical gate at 1e-3
+(singleton-drop-sized only); Stata-leg-vs-canonical gate at 1e-5 (identical
+regression). Missing file / stale layout => abort (fail-closed).
 
 ANCHOR HYGIENE. shockmenu_results.csv is ingested as b3_stata_anchor. It now
 carries a `smoke' column and the .do suffixes smoke output filenames with
@@ -121,23 +136,47 @@ RESULT_CSV = OUT / "ri_shockmenu.csv"
 BASELINE_LBL = "baseline_panel_shock_raw"
 
 # -----------------------------------------------------------------------------
-# DRIFT ANCHORS -- canonical P0 headline, each tagged with its LIVING SOURCE.
-# The baseline_panel_shock_raw row of this script IS the canonical headline (same
-# panel, same collapse, same raw shock), so these are cross-run gates, not
-# aspirations. They catch a panel-vintage swap (c6_panel_preP0.dta is a sibling
-# of c6_panel.dta) that the per-run b3_stata_anchor comparison structurally
-# cannot: that column compares this run's Stata leg to this run's Python leg, and
-# a vintage swap moves both together.
+# DRIFT ANCHOR -- read at runtime from the LIVING canonical artifact, never
+# hardcoded (REBUILD v3, 2026-08-08). The baseline_panel_shock_raw row of this
+# script IS the canonical diag/global/st cell (same panel, same collapse, same
+# raw S_t shock), so this is a cross-artifact gate, not an aspiration. It
+# catches a panel-vintage swap that the per-run b3_stata_anchor comparison
+# structurally cannot: that column compares this run's Stata leg to this run's
+# Python leg, and a vintage swap moves both together.
 # -----------------------------------------------------------------------------
-# source: output/audit_ri_3pairwise.csv, row "headline dw"
-B3_ANCHOR = -5.279916082656558e-07
-N_FQ_ANCHOR = 174078
-RI_P_FREE_ANCHOR = 0.8014397
-# source: output/headline_3pairwise_canonical.csv, row "3pairwise_fq_gq_ig"
-B3_ANCHOR_STATA = -5.279916e-07
+CANONICAL_CSV = OUT / "headline_3pairwise_canonical.csv"
 
-B3_ANCHOR_RELTOL = 1e-6      # b3 is order-invariant -> a 6-sig-fig gate is legitimate
-P_DRIFT_TOL = 0.02           # same flag threshold as run_cum4_inference.py L504
+
+def load_canonical_anchor():
+    """(b3, N) of the diag/global/st/fq_gq_ig cell from the LOCKED 2026-08-08
+    layout. Fail-closed: missing file or stale layout aborts."""
+    if not CANONICAL_CSV.exists():
+        raise SystemExit(
+            f"{CANONICAL_CSV.name} not found — run run_headline_3pairwise.do "
+            "(or run_attribution_em.do) first; refusing to run the RI menu "
+            "without vintage protection.")
+    can = pd.read_csv(CANONICAL_CSV)
+    need = {"spec", "denom", "timing", "fe", "b3", "N"}
+    if not need.issubset(can.columns):
+        raise SystemExit(
+            f"{CANONICAL_CSV.name} lacks {sorted(need - set(can.columns))} — "
+            "stale pre-2026-08-08 layout; re-run run_headline_3pairwise.do.")
+    r = can[(can["spec"] == "diag") & (can["denom"] == "global")
+            & (can["timing"] == "st") & (can["fe"] == "fq_gq_ig")]
+    if len(r) != 1:
+        raise SystemExit(
+            f"{CANONICAL_CSV.name}: no unique diag/global/st/fq_gq_ig row "
+            f"(found {len(r)}) — stale vintage; re-run run_headline_3pairwise.do.")
+    return float(r["b3"].iloc[0]), int(r["N"].iloc[0])
+
+
+B3_ANCHOR_STATA, N_ANCHOR_STATA = load_canonical_anchor()
+
+# Python-vs-canonical tolerance: reghdfe drops singleton firm-quarters while
+# this collapse keeps them (coefficient moves at ~1e-4 order at most), so the
+# cross-artifact gate on the PYTHON leg uses the singleton-sized tolerance.
+B3_ANCHOR_RELTOL = 1e-3
+STATA_LEG_RELTOL = 1e-5      # Stata leg vs canonical = identical regression
 # b3 tolerance for the WITHIN-RUN Stata-vs-Python cross-check. Generous, because
 # reghdfe drops singleton firm-quarters while this collapse keeps them, so a small
 # gap is expected and legitimate; anything larger is a real disagreement.
@@ -488,48 +527,49 @@ def main():
                          "n_perm": N_PERM, "seed": SEED, "arbiter_p": p_circ,
                          "ri_degenerate": False, "n_quarters_dropped": len(drop_q)})
 
-            # ---------------- canonical P0 drift gate (baseline row only) -----
+            # ------- canonical drift gate (baseline row only; living source) --
             if lbl == BASELINE_LBL:
-                print("\n[drift gate] canonical P0 headline vs this run "
-                      "(b3 + n_firmquarters HARD-GATED; free-perm p = MC cross-check)")
-                print(f"    b3 anchor       = {B3_ANCHOR:.12e}   "
-                      f"(source: audit_ri_3pairwise.csv, row 'headline dw')")
-                print(f"    b3 observed     = {b_obs:.12e}")
-                print(f"    n_fq anchor     = {N_FQ_ANCHOR:,d}   observed = {col.n:,d}")
+                print("\n[drift gate] canonical diag/global/st cell vs this run "
+                      "(b3 HARD-GATED on both legs; anchors read at runtime, "
+                      "never hardcoded)")
+                print(f"    b3 anchor       = {B3_ANCHOR_STATA:.12e}   "
+                      f"(living source: {CANONICAL_CSV.name}, "
+                      f"diag/global/st/fq_gq_ig, N={N_ANCHOR_STATA:,d})")
+                print(f"    b3 observed     = {b_obs:.12e}   "
+                      f"(n_fq={col.n:,d}; reghdfe N differs by singleton drops)")
+                fails = []
                 if np.isfinite(b_st):
                     st_rel = abs(b_st / B3_ANCHOR_STATA - 1.0)
-                    st_flag = "OK" if st_rel <= 1e-5 else "<-- STATA LEG DRIFTED"
+                    st_ok = st_rel <= STATA_LEG_RELTOL
                     print(f"    stata-leg b3    = {b_st:.6e} vs canonical "
-                          f"{B3_ANCHOR_STATA:.6e}  relerr={st_rel:.2e}  {st_flag}   "
-                          f"(source: headline_3pairwise_canonical.csv)")
-                b_rel = (abs(b_obs / B3_ANCHOR - 1.0)
-                         if np.isfinite(b_obs) and B3_ANCHOR != 0 else np.inf)
-                fails = []
+                          f"{B3_ANCHOR_STATA:.6e}  relerr={st_rel:.2e}  "
+                          f"{'OK' if st_ok else '<-- STATA LEG DRIFTED'}")
+                    if not st_ok:
+                        fails.append(f"stata-leg relerr={st_rel:.3e} > "
+                                     f"{STATA_LEG_RELTOL:.0e} (identical regression "
+                                     "-- shockmenu_results.csv is a stale/foreign "
+                                     "vintage)")
+                b_rel = (abs(b_obs / B3_ANCHOR_STATA - 1.0)
+                         if np.isfinite(b_obs) and B3_ANCHOR_STATA != 0 else np.inf)
                 if not (np.isfinite(b_rel) and b_rel <= B3_ANCHOR_RELTOL):
-                    fails.append(f"b3 relerr={b_rel:.3e} > {B3_ANCHOR_RELTOL:.0e}")
-                if col.n != N_FQ_ANCHOR:
-                    fails.append(f"n_firmquarters {col.n} != {N_FQ_ANCHOR}")
+                    fails.append(f"python-leg relerr={b_rel:.3e} > "
+                                 f"{B3_ANCHOR_RELTOL:.0e} (singleton-drop-sized "
+                                 "gap only is legitimate)")
                 if fails:
                     raise SystemExit(
                         "DRIFT GATE FAILED on " + BASELINE_LBL + ": " + "; ".join(fails) +
-                        ".\nThis row IS the canonical P0 headline, so a mismatch means a "
-                        "STALE PANEL OR WRONG VINTAGE (c6_panel_preP0.dta is a sibling of "
-                        "c6_panel.dta). Refusing to report a menu built on the wrong data."
+                        ".\nThis row IS the canonical diag/global/st cell, so a mismatch "
+                        "means a STALE PANEL OR WRONG VINTAGE (stale panel vintages are "
+                        "siblings of c6_panel.dta). Refusing to report a menu built on "
+                        "the wrong data."
                     )
-                print(f"    b3 relerr       = {b_rel:.3e}  -> PASS (6 sig figs)")
-                # p is an MC CROSS-CHECK ONLY, never a gate: this script sorts the
-                # collapse canonically BEFORE pd.factorize while run_ri_3pairwise.py
-                # (which produced the 0.8014 anchor) did not, so the permutation
-                # reference distribution is not draw-for-draw identical. The observed
-                # ~0.8154 vs 0.8014 gap is that documented ordering effect, not drift.
-                d_p = p_free - RI_P_FREE_ANCHOR
-                pflag = ("" if abs(d_p) <= P_DRIFT_TOL or SMOKE
-                         else "  <-- DRIFT > 0.02 (investigate)")
-                print(f"    p_free anchor={RI_P_FREE_ANCHOR:.4f}  got={p_free:.4f}  "
-                      f"d={d_p:+.4f}{pflag}")
+                print(f"    python-leg rel  = {b_rel:.3e}  -> PASS")
+                print(f"    p_free          = {p_free:.4f}   p_circ = {p_circ:.4f}   "
+                      "(no living RI-p anchor for the S_t cell; p_circ is the "
+                      "serial-robust arbiter)")
                 if SMOKE:
-                    print("    (SMOKE run: N_PERM tiny -> p not comparable to the anchor; "
-                          "the b3 / n_fq gates are what this proves.)")
+                    print("    (SMOKE run: N_PERM tiny -> p not comparable across runs; "
+                          "the b3 gates are what this proves.)")
                 print()
 
     res = pd.DataFrame(rows)

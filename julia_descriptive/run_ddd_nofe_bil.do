@@ -1,12 +1,17 @@
 * run_ddd_nofe_bil.do — Step-3 slide add-ons, gate-locked.
 * STAGE A  gate: reproduce the locked 3-pairwise headline.
-*          P0 REFRESH 2026-08-04 (as-of W=10 holdings rebuild):
-*          beta3 = -5.279916e-07 (se 1.743166e-06, p 0.762748), N = 347,690.
-*          Pre-P0 (superseded): beta3 = +2.746e-06 (se 1.70e-06), N = 347,490.
-*          Canonical artifact: output/headline_3pairwise_canonical.csv (2026-08-04),
-*          produced by run_headline_3pairwise.do from the stored estimates.
+*          GLOBAL-MAIN + S_{t-1} PRIMARY (2026-08-08): the headline is
+*          dw(global full-portfolio denominator) on us_cn + us_cn_slag
+*          (us×cn_lag×S_{t-1}), absorb(fq gq ig), two-way cluster.
+*          The gate target is NO LONGER HARDCODED: it is read at runtime from
+*          the LIVING canonical artifact output/headline_3pairwise_canonical.csv
+*          (row spec=="primary", fe=="fq_gq_ig"), produced by
+*          run_headline_3pairwise.do / run_attribution_em.do from stored
+*          estimates. Historical hardcoded gates (P0 -5.279916e-07 N=347,690;
+*          pre-P0 +2.746e-06 N=347,490) are retired — vintage drift between a
+*          comment and the artifact was exactly the failure mode.
 * STAGE B  PROPER no-FE column: full factorial with ALL lower-order terms
-*          (us, cn_lag, shock, us_x_shock, cn_x_shock) + interactions.
+*          (us, cn_lag, s_lag, us_x_slag, cn_x_slag) + interactions.
 *          The old 07d "No FE" cell omitted every main effect -> unusable.
 * STAGE C  BIL footnote numbers: on the bilateral-covered subsample,
 *          3-pairwise beta3 without vs with the US x BIL control.
@@ -17,6 +22,18 @@ clear all
 set more off
 local OUT "c:/Users/xl/OneDrive - Universitat Ramón Llull/git/practice/julia_descriptive/output"
 
+* ---- Gate target from the living canonical artifact (never hardcode) ----
+import delimited using "`OUT'/headline_3pairwise_canonical.csv", ///
+    clear varnames(1) case(lower)
+keep if spec == "primary" & fe == "fq_gq_ig"
+if _N != 1 {
+    display as error "canonical CSV has no unique primary/fq_gq_ig row — stale pre-2026-08-08 layout? Re-run run_headline_3pairwise.do."
+    exit 459
+}
+local tgt_b3 = b3[1]
+local tgt_N  = n[1]
+display "gate target from canonical CSV: b3=" %12.4e `tgt_b3' "  N=" %12.0gc `tgt_N'
+
 * ---- BIL lookup from the (audited) firm ladder panel ----
 use "`OUT'/firm_ladder_panel.dta", clear
 keep firm_str rdate bil_us_c
@@ -25,6 +42,7 @@ tempfile bil
 save `bil', replace
 
 * ---- C6 zero-filled backward-diff panel (same build as 07d/07e) ----
+* dw = GLOBAL-denominator Δw (MAIN); dw_eu = EU diagnostic; s_lag = S_{t-1}.
 use "`OUT'/c6_panel.dta", clear
 gen rd_day = dofc(rdate)
 egen firm_n = group(firm_str)
@@ -34,24 +52,24 @@ egen gq     = group(hgroup rd_day)
 egen ig     = group(firm_str hgroup)
 
 gen us_cn       = us * cn_lag
-gen us_shock    = us * shock
-gen cn_shock    = cn_lag * shock
-gen us_cn_shock = us * cn_lag * shock
+gen us_slag     = us * s_lag
+gen cn_slag     = cn_lag * s_lag
+gen us_cn_slag  = us * cn_lag * s_lag
 
 * ============ STAGE A: gate (3-pairwise headline must reproduce) ============
-display _newline "===== STAGE A GATE: 3-pairwise headline ====="
-reghdfe dw us_cn us_cn_shock, absorb(fq gq ig) vce(cluster firm_n rd_m)
-local b3 = _b[us_cn_shock]
-display "gate beta3 = " %12.4e `b3' "   target -5.279916e-07   N=" e(N)
-if abs(`b3' - (-5.279916e-07)) > 0.05e-06 | e(N) != 347690 {
+display _newline "===== STAGE A GATE: 3-pairwise headline (global dw x S_{t-1}) ====="
+reghdfe dw us_cn us_cn_slag, absorb(fq gq ig) vce(cluster firm_n rd_m)
+local b3 = _b[us_cn_slag]
+display "gate beta3 = " %12.4e `b3' "   target " %12.4e `tgt_b3' "   N=" e(N) " (target " %12.0gc `tgt_N' ")"
+if abs(`b3' - `tgt_b3') > 0.05e-06 | e(N) != `tgt_N' {
     display as error "GATE FAILED — stopping."
     exit 459
 }
 display "GATE PASS"
 
 * ============ STAGE B: PROPER no-FE column (full factorial) ============
-display _newline "===== STAGE B: no-FE, ALL lower-order terms in ====="
-reghdfe dw us cn_lag shock us_cn us_shock cn_shock us_cn_shock, ///
+display _newline "===== STAGE B: no-FE, ALL lower-order terms in (S_{t-1} timing) ====="
+reghdfe dw us cn_lag s_lag us_cn us_slag cn_slag us_cn_slag, ///
     noabsorb vce(cluster firm_n rd_m)
 
 * ============ STAGE C: bilateral subsample, w/o and w/ US x BIL ============
@@ -59,11 +77,11 @@ merge m:1 firm_str rdate using `bil', keep(master match) gen(_mb)
 gen us_bil = us * bil_us_c
 
 display _newline "===== STAGE C1: 3-pairwise on bilateral subsample (no BIL ctrl) ====="
-reghdfe dw us_cn us_cn_shock if !missing(bil_us_c), ///
+reghdfe dw us_cn us_cn_slag if !missing(bil_us_c), ///
     absorb(fq gq ig) vce(cluster firm_n rd_m)
 
 display _newline "===== STAGE C2: + US x BIL control ====="
-reghdfe dw us_cn us_cn_shock us_bil if !missing(bil_us_c), ///
+reghdfe dw us_cn us_cn_slag us_bil if !missing(bil_us_c), ///
     absorb(fq gq ig) vce(cluster firm_n rd_m)
 
 display _newline "Done — run_ddd_nofe_bil.do"

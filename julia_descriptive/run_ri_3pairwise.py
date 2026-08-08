@@ -5,16 +5,30 @@ run_ri_3pairwise.py — randomization inference for the 3-PAIRWISE headline
 On the balanced 2-per-(firm,quarter) panel the three pairwise FE collapse, on the
 US−NONUS within-firm-quarter difference Δy, to
 
-    Δy_it = β₂·cn_it + β₃·(cn_it·S_t) + φ_i (firm FE) + δ_t (quarter FE) + error
+    Δy_it = β₂·cn_it + β₃·(cn_it·S_{t-1}) + φ_i (firm FE) + δ_t (quarter FE) + error
 
 i.e. FIRM + QUARTER two-way FE on the difference panel (ig → the firm intercept φ_i;
 gt → the quarter intercept δ_t; it absorbed by the pairwise difference itself).
 
-RI (sharp null β₃=0): permute the 82 quarter shocks S_t. Unlike the quarter-FE-only
-case there is no closed-form sufficient statistic (firm-demeaning of cn·S mixes S
-across a firm's quarters), so we two-way-demean cn·S each permutation via fast
-bincount alternating projections. β₃ via FWL against the (once-)demeaned Δy and cn.
-Reported for the headline (h0) and the LP horizons that looked significant under CRVE.
+S_{t-1} PRIMARY (2026-08-08): the Stata specs this file arbitrates
+(run_headline_3pairwise.do PRIMARY row) switched to the LAGGED shock s_lag,
+so the collapse reads s_lag (shipped by build_audit_panel_f1f2f7.py) and
+firm-quarters with missing S_{t-1} are dropped before demeaning (matches
+reghdfe; verify_attribution_em.py does the same).
+
+RI (sharp null β₃=0): permute the quarter S_{t-1} values. Unlike the
+quarter-FE-only case there is no closed-form sufficient statistic
+(firm-demeaning of cn·S mixes S across a firm's quarters), so we two-way-demean
+cn·S each permutation via fast bincount alternating projections. β₃ via FWL
+against the (once-)demeaned Δy and cn. Reported for the headline (h0) and the
+LP horizons.
+
+DRIFT ANCHOR (never hardcoded): the headline b3 is gated against the LIVING
+canonical artifact output/headline_3pairwise_canonical.csv (LOCKED 2026-08-08
+layout spec,denom,timing,fe,b3,se,p,N; row spec=="primary" fe=="fq_gq_ig"),
+mirroring verify_attribution_em.py. cum1/cum4 have no machine-readable Stata
+source (they are printed in the run_headline log only) and are reported
+without a gate.
 """
 from pathlib import Path
 import duckdb
@@ -34,7 +48,8 @@ _df, _ = pyreadstat.read_dta((OUT / "audit_c6_panel.dta").as_posix())
 _df.to_parquet(OUT / "audit_c6_panel.parquet", index=False)
 d = con.execute(f"""
 SELECT firm_str, rdate,
-       any_value(cn_lag) AS cn, any_value(shock) AS s,
+       any_value(cn_lag) AS cn,
+       any_value(s_lag)  AS s,    -- S_{{t-1}}, PRIMARY timing (2026-08-08)
        MAX(CASE WHEN us=1 THEN dw   END) - MAX(CASE WHEN us=0 THEN dw   END) AS d_dw,
        MAX(CASE WHEN us=1 THEN cum1 END) - MAX(CASE WHEN us=0 THEN cum1 END) AS d_c1,
        MAX(CASE WHEN us=1 THEN cum2 END) - MAX(CASE WHEN us=0 THEN cum2 END) AS d_c2,
@@ -43,6 +58,26 @@ FROM read_parquet('{(OUT/'audit_c6_panel.parquet').as_posix()}')
 GROUP BY firm_str, rdate
 """).df()
 con.close()
+_n_noslag = int(d["s"].isna().sum())
+if _n_noslag:
+    print(f"firm-quarters without S_(t-1) (dropped in ri_twoway, matches reghdfe): {_n_noslag:,}")
+
+# ---- living Stata anchor (never hardcoded): canonical PRIMARY row -----------
+_can_path = OUT / "headline_3pairwise_canonical.csv"
+if not _can_path.exists():
+    raise SystemExit(f"{_can_path.name} not found — run run_headline_3pairwise.do "
+                     "(or run_attribution_em.do) first; refusing to run without a "
+                     "living drift anchor.")
+_can = pd.read_csv(_can_path)
+if not {"spec", "denom", "timing", "fe", "b3"} <= set(_can.columns):
+    raise SystemExit(f"{_can_path.name} lacks the LOCKED 2026-08-08 columns "
+                     "spec/denom/timing/fe/b3 — stale layout; re-run "
+                     "run_headline_3pairwise.do.")
+_prim = _can[(_can["spec"] == "primary") & (_can["fe"] == "fq_gq_ig")]
+if len(_prim) != 1:
+    raise SystemExit(f"{_can_path.name}: no unique spec=='primary' & fe=='fq_gq_ig' "
+                     "row — stale layout; re-run run_headline_3pairwise.do.")
+B3_STATA_PRIMARY = float(_prim["b3"].iloc[0])
 
 d["firm_c"] = pd.factorize(d["firm_str"])[0]
 d["q_c"] = pd.factorize(d["rdate"])[0]
@@ -97,11 +132,23 @@ def ri_twoway(df, ycol, n_perm=N_PERM, seed=SEED):
     return b_obs, (cnt + 1) / (n_perm + 1), sub.shape[0]
 
 print(f"{'spec':16s} {'b3(chk vs Stata)':>18s} {'RI_p_2side':>12s} {'n_fq':>9s}   (N_PERM={N_PERM}, iters={DEMEAN_ITERS})")
-print("  Stata 3-pairwise b3: headline +2.746e-6, cum1 +4.094e-6, cum4 +8.826e-6")
+print(f"  Stata 3-pairwise PRIMARY b3 (living source {_can_path.name}, "
+      f"spec=primary/global/slag/fq_gq_ig): {B3_STATA_PRIMARY:+.6e}")
+print("  cum1/cum4 have no machine-readable Stata artifact (log-only in "
+      "run_headline_3pairwise.do) — reported ungated.")
 rows = []
 for lbl, y in [("headline dw", "d_dw"), ("LP cum1", "d_c1"), ("LP cum4", "d_c4")]:
     b, p, n = ri_twoway(d, y)
     print(f"{lbl:16s} {b:12.3e} {p:12.4f} {n:9,d}")
-    rows.append({"spec": lbl, "fe": "it+gt+ig (3-pairwise)", "b3": b, "ri_p_2sided": p, "n_firmquarters": n})
+    if lbl == "headline dw":
+        _rel = abs(b - B3_STATA_PRIMARY) / max(abs(B3_STATA_PRIMARY), 1e-300)
+        print(f"  [drift gate] headline b3 vs canonical primary: rel diff {_rel:.2e}")
+        if not _rel < 1e-4:
+            raise SystemExit(
+                f"DRIFT GATE FAILED: RI headline b3 {b:.6e} != canonical primary "
+                f"{B3_STATA_PRIMARY:.6e} (rel {_rel:.2e} >= 1e-4). Stale panel, stale "
+                "canonical CSV, or broken collapse — refusing to write RI output.")
+    rows.append({"spec": lbl, "fe": "it+gt+ig (3-pairwise)", "timing": "slag",
+                 "b3": b, "ri_p_2sided": p, "n_firmquarters": n})
 pd.DataFrame(rows).to_csv(OUT / "audit_ri_3pairwise.csv", index=False)
 print(f"\nwrote audit_ri_3pairwise.csv")

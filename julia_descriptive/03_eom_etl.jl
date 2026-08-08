@@ -9,17 +9,63 @@
 #   holdings_eom.parquet  -- slim quarter-end panel (see column list below)
 #
 # ============================================================================
+# SNAPSHOT GRAIN — PER-FUND (DEFAULT since 2026-08-08) vs PER-SECURITY (LEGACY)
+# ============================================================================
+#
+# DPN_SNAPSHOT_GRAIN = fund      (DEFAULT) "last observation inside the
+#     quarter" is the ADVISOR'S rule; applying it at FUND grain (last complete
+#     report, rather than each security's own last positive row) is a
+#     RESEARCHER DECISION, adjudicated by the reappearance diagnostic cited
+#     below — the advisor directive did not specify the grain. Rule: per
+#     (fund_id, quarter), d_use =
+#     MAX(report_date_actual) among the fund's in-window ADJ_MV > 0 reports;
+#     keep ALL rows of that single report. A security absent from the d_use
+#     report was sold / is no longer held and contributes NOTHING to the
+#     quarter — which is correct (see the RESOLUTION note in the chimera block
+#     below). report_date stays stamped to the quarter-end; on every kept row
+#     report_date_actual = d_use (uniform within the fund-quarter) and
+#     asof_gap_days = qend - d_use.
+# DPN_SNAPSHOT_GRAIN = security  legacy rule (P0 / EM vintages): per
+#     (fund_id, fsym_id, quarter) keep the pair's own last in-window row. This
+#     path is BIT-IDENTICAL to the pre-2026-08-08 code (same SQL text, same
+#     part filenames, so existing security-grain parts still reuse) and is
+#     retained for sensitivity / attribution runs only.
+#
+# WHY FUND GRAIN IS THE DEFAULT (diag_snapshot_reappearance.py, 2026-08-08,
+# raw 2018-2023, 104.8M security-quarters):
+#   * each (fund, report_date) IS a complete portfolio snapshot: 92.8% of
+#     multi-date fund-quarters have a last report >= 90% of the quarter-max
+#     report size, median ratio 1.0, only 0.56% below 50%;
+#   * securities present earlier in the quarter but absent from the fund's
+#     LAST in-quarter report reappear next quarter only 10.76% (count) /
+#     12.34% (MV-weighted), vs a 95.23% / 82.70% baseline -> carried positions
+#     are GENUINE EXITS, not reporting gaps;
+#   * carried MV = 0.41% of 2018-2023 MV (full-sample C2d: 15.3%, concentrated
+#     pre-2012).
+#
+# The grain is ORTHOGONAL to the window mode documented below:
+# DPN_ASOF_WINDOW_DAYS still selects the CANDIDATE window ([quarter_start,
+# qend] by default), the grain selects WHAT is kept from it (the fund's last
+# report vs each pair's last row). Part filenames carry the grain in the rule
+# tag (asofQTRFg / asofW10Fg vs asofQTR / asofW10), so a part built under one
+# grain can never be reused under the other.
+#
+# ============================================================================
 # SNAPSHOT SELECTION — "LAST REPORT INSIDE THE CALENDAR QUARTER"
 # ADVISOR-DIRECTED, 2026-08-06 (supersedes the W = 10 as-of window of the
 # 2026-08-04 P0 rebuild; the W window survives as a numeric override only)
 # ============================================================================
 #
-# DIRECTIVE (Emanuele, 2026-08-04 advisor meeting, 24:17). Per (fund_id,
-# fsym_id), take the LAST observation whose report_date falls INSIDE the
-# calendar quarter [quarter_start_Q, qend_Q]; stamp report_date to the
-# quarter-end; keep report_date_actual + asof_gap_days as provenance. No
-# discretion is exercised here: the rule is the advisor's, the code only
-# implements it.
+# DIRECTIVE (Emanuele, 2026-08-04 advisor meeting, 24:17): take the LAST
+# observation whose report_date falls INSIDE the calendar quarter
+# [quarter_start_Q, qend_Q]; stamp report_date to the quarter-end; keep
+# report_date_actual + asof_gap_days as provenance. The directive did NOT
+# specify the grain. The 2026-08-06 implementation applied it per (fund_id,
+# fsym_id) — a researcher choice inherited from the W=10 as-of design, later
+# shown to stitch multi-date portfolios; since 2026-08-08 the default applies
+# it per fund_id (last complete report), a researcher decision adjudicated by
+# diag_snapshot_reappearance.py (see SNAPSHOT GRAIN block above). What is the
+# advisor's: last-in-quarter + quarter-end stamping. What is ours: the grain.
 #
 # WHAT THIS CHANGES vs the W = 10 window shipped on 2026-08-04:
 #   * the lower bound of the selection window is the QUARTER START, not
@@ -47,6 +93,14 @@
 # or, under the numeric override, its most recent reported position within
 # W = ASOF_WINDOW_DAYS calendar days BEFORE the quarter-end. It is NOT "the
 # position on the quarter-end date".
+#
+# GRAIN NOTE (2026-08-08, DPN_SNAPSHOT_GRAIN=fund is the default): the cell is
+# the fund's position in that security ON THE FUND'S d_use REPORT (the fund's
+# last in-window snapshot). All cells of a fund-quarter then share ONE
+# valuation date, and a security not on the d_use report has NO cell that
+# quarter. Under DPN_SNAPSHOT_GRAIN=security the per-pair text above applies
+# unchanged (each pair's own last report; valuation dates can differ within a
+# fund-quarter — the chimera problem documented further down).
 #
 # WHAT THE UNIVERSE IS. The panel's fund universe for quarter Q is
 #     "funds with a valid ADJ_MV > 0 report inside [quarter_start_Q, qend_Q]"
@@ -132,6 +186,33 @@
 #   will now commonly be 2 or 3 for monthly reporters (it was ~1 almost
 #   everywhere at W = 10). It does NOT measure the fund-level dispersion above —
 #   C2d does.
+#
+#   ------------------------------------------------------------------------
+#   RESOLUTION (2026-08-08) — THE STITCHED FUND-PORTFOLIO ("CHIMERA") IS
+#   RETIRED AS THE DEFAULT. The block above is kept as history; it now
+#   describes DPN_SNAPSHOT_GRAIN=security only. The stitching problem it
+#   documents was tested directly by diag_snapshot_reappearance.py
+#   (2026-08-08, raw 2018-2023, 104.8M security-quarters):
+#     * each (fund, report_date) IS a complete portfolio snapshot — 92.8% of
+#       multi-date fund-quarters have a last report >= 90% of the quarter-max
+#       report size, median ratio 1.0, only 0.56% below 50%;
+#     * securities present earlier but absent from the fund's LAST in-quarter
+#       report reappear next quarter only 10.76% count / 12.34% MV-weighted,
+#       vs baseline 95.23% / 82.70% -> the positions the stitch "rescued" are
+#       GENUINE EXITS, and the stitched book is wrong to include them;
+#     * carried MV = 0.41% of 2018-2023 MV (full-sample C2d: 15.3%,
+#       concentrated pre-2012).
+#   The DEFAULT grain is therefore FUND (see the grain section at the top):
+#   the fund's quarter book is its d_use report alone, no cross-date union, so
+#   each FUND's contribution to every cross-security SUM in 04 (I_ict,
+#   country_total_holdings_eu, market_cap) is single-valuation-date by
+#   construction. CROSS-FUND date mixing REMAINS: those sums still aggregate
+#   across funds whose d_use dates differ within the quarter (which is why
+#   EM-FIX-2 exists — 04's market_cap restricts to MIN(asof_gap_days) rows;
+#   I_ict / country totals carry the cross-fund dispersion, measured by C2d).
+#   C2d must show ZERO multi-date fund-quarters WITHIN a fund (asserted there
+#   under the fund grain).
+#   ------------------------------------------------------------------------
 #   Trend-free calendar artifact (local deviation vs neighbouring quarters):
 #   11.11pp at W = 0 -> 1.06pp at W = 10; W = 3/14 give 1.07/1.08pp, so the choice
 #   inside the plateau is not load-bearing.
@@ -198,6 +279,10 @@
 #   max(quarter_start, qend - W); W = 0 reproduces the pre-P0 exact-EOM rule and
 #   W = 10 reproduces the 2026-08-04 P0 vintage. See diag_p0_asof_window.py for
 #   the coverage-vs-W curve behind the W = 10 vintage.
+#   DPN_SNAPSHOT_GRAIN (2026-08-08) selects the KEEP grain ON TOP of the window
+#   mode: fund (default) keeps the fund's whole d_use report; security keeps
+#   each pair's own last row (legacy, bit-identical to the pre-2026-08-08
+#   code). See the grain section at the top of this file.
 #
 #   IMPLEMENTATION: per-chunk loop, NOT one global window function. A global
 #   PARTITION BY (fund, fsym) over ~187M rows can OOM/spill under the 6 GB
@@ -269,14 +354,49 @@ if ASOF_MODE == :window && (ASOF_WINDOW_DAYS < 0 || ASOF_WINDOW_DAYS > 89)
     """)
 end
 
+# ============================================================
+# SNAPSHOT GRAIN  (2026-08-08; see the grain section in the file header)
+# ============================================================
+# DPN_SNAPSHOT_GRAIN = fund     -> per (fund, quarter) keep ALL rows of the
+#                                  fund's LAST in-window report d_use (DEFAULT;
+#                                  justified by diag_snapshot_reappearance.py)
+# DPN_SNAPSHOT_GRAIN = security -> per (fund, fsym, quarter) keep the pair's
+#                                  own last in-window row (legacy P0/EM
+#                                  behaviour, bit-identical to the
+#                                  pre-2026-08-08 code)
+const SNAPSHOT_GRAIN = let g = lowercase(strip(get(ENV, "DPN_SNAPSHOT_GRAIN", "fund")))
+    if !(g in ("fund", "security"))
+        error("""
+        DPN_SNAPSHOT_GRAIN = "$g" is not a supported snapshot grain.
+        Use "fund" (DEFAULT: per (fund, quarter) keep ALL rows of the fund's
+        last in-window report) or "security" (legacy: per (fund, fsym, quarter)
+        keep the pair's own last row).
+        """)
+    end
+    Symbol(g)
+end
+
 # Tag that identifies the rule in per-chunk part filenames and globs. A part
 # built under one rule can therefore never be silently reused under another.
 # NOTE the exact spelling: "W10" keeps the P0-vintage part names byte-identical
-# so an existing W=10 parts directory still reuses.
-const ASOF_TAG = ASOF_MODE == :quarter ? "QTR" : "W$(ASOF_WINDOW_DAYS)"
+# so an existing W=10 parts directory still reuses. The FUND grain appends "Fg"
+# (asofQTRFg / asofW10Fg): fund-grain parts live in their own namespace, the
+# SECURITY-grain names stay byte-identical to the pre-2026-08-08 vintage (so
+# existing security-grain parts still reuse), and a part built under one grain
+# can never be merged under the other. (No glob overlap: "*_asofQTR.parquet"
+# cannot match "..._asofQTRFg.parquet" and vice versa.)
+const ASOF_TAG = (ASOF_MODE == :quarter ? "QTR" : "W$(ASOF_WINDOW_DAYS)") *
+                 (SNAPSHOT_GRAIN == :fund ? "Fg" : "")
 const ASOF_RULE_DESC = ASOF_MODE == :quarter ?
     "QUARTER rule (last report inside [quarter_start, qend]) — advisor default, 2026-08-06" :
     "WINDOW rule W = $ASOF_WINDOW_DAYS d (last report inside [max(quarter_start, qend-$ASOF_WINDOW_DAYS), qend]) — DPN_ASOF_WINDOW_DAYS override"
+const GRAIN_DESC = SNAPSHOT_GRAIN == :fund ?
+    "FUND grain (per (fund, quarter): keep ALL rows of the fund's last in-window report d_use) — DEFAULT, 2026-08-08" :
+    "SECURITY grain (per (fund, fsym, quarter): keep the pair's own last in-window row) — legacy P0/EM behaviour"
+# Fund-grain pathology diagnostic (PHASE B-DIAG below) rescans the raw chunks;
+# DPN_SKIP_GRAIN_DIAG=true skips it on a re-run whose numbers are already on
+# disk. Default: run it.
+const SKIP_GRAIN_DIAG = parse(Bool, lowercase(get(ENV, "DPN_SKIP_GRAIN_DIAG", "false")))
 
 # Force a rebuild of the per-chunk parts even if they already exist.
 const ASOF_FORCE_REBUILD = parse(Bool, lowercase(get(ENV, "DPN_ASOF_FORCE_REBUILD", "false")))
@@ -354,6 +474,7 @@ else
 end
 println("Holdings pattern: $holdings_pattern")
 println("Snapshot rule   : $ASOF_RULE_DESC")
+println("Snapshot grain  : $GRAIN_DESC")
 println("Parts tag       : asof$ASOF_TAG")
 
 eom_path = test_suffix_path(joinpath(OUT_DIR, "holdings_eom.parquet"))
@@ -445,7 +566,8 @@ end
 #                               which the advisor-directed quarter rule now
 #                               overwrites. Same archive-by-RENAME discipline.
 let archive_p0  = replace(eom_path, ".parquet" => "_exactEOM_preP0.parquet"),
-    archive_em  = replace(eom_path, ".parquet" => "_preEM.parquet")
+    archive_em  = replace(eom_path, ".parquet" => "_preEM.parquet"),
+    archive_mm  = replace(eom_path, ".parquet" => "_mmv2.parquet")
 
     if TEST_MODE
         println("\n[PHASE B0] archive guard SKIPPED: TEST_MODE (output is $(basename(eom_path)), " *
@@ -455,6 +577,13 @@ let archive_p0  = replace(eom_path, ".parquet" => "_exactEOM_preP0.parquet"),
     if !TEST_MODE && isfile(eom_path) && !SKIP_ARCHIVE_GUARD
         isfile(archive_p0) || push!(missing_archives, archive_p0)
         isfile(archive_em) || push!(missing_archives, archive_em)
+        # (2026-08-08) The FUND-grain default overwrites the MM-FIX-v2
+        # SECURITY-grain quarter panel: that vintage must be archived as *_mmv2
+        # first (same archive-by-RENAME discipline). A security-grain rerun does
+        # not require it, keeping the legacy path's behaviour unchanged.
+        if SNAPSHOT_GRAIN == :fund
+            isfile(archive_mm) || push!(missing_archives, archive_mm)
+        end
     end
     if !isempty(missing_archives)
         error("""
@@ -468,6 +597,7 @@ let archive_p0  = replace(eom_path, ".parquet" => "_exactEOM_preP0.parquet"),
 
           $(isfile(archive_p0) ? "[have]" : "[need]") $(basename(archive_p0))   pre-P0 exact-EOM panel
           $(isfile(archive_em) ? "[have]" : "[need]") $(basename(archive_em))   P0 as-of W=10 panel (overwritten by the quarter rule)
+          $(SNAPSHOT_GRAIN != :fund ? "[n/a ]" : (isfile(archive_mm) ? "[have]" : "[need]")) $(basename(archive_mm))   MM-FIX-v2 security-grain quarter panel (overwritten by the FUND grain)
 
         Rename the panel currently on disk to the archive name that matches ITS
         OWN vintage — check the rule it was built under before you type this:
@@ -478,10 +608,14 @@ let archive_p0  = replace(eom_path, ".parquet" => "_exactEOM_preP0.parquet"),
         the vintage you are about to discard is NOT the one it holds; stop and
         work out which is which before doing anything else.
 
-        If BOTH archives are listed as missing, only ONE of them can be produced
-        by renaming this file (a panel has exactly one vintage). Produce that
-        one, then set DPN_P0_SKIP_ARCHIVE_GUARD=true for the vintage that was
-        never archived on this machine, and say so in VINTAGE_P0.md.
+        If SEVERAL archives are listed as missing, only ONE of them can be
+        produced by renaming this file (a panel has exactly one vintage).
+        Produce that one, then set DPN_P0_SKIP_ARCHIVE_GUARD=true for the
+        vintages that were never archived on this machine, and say so in
+        VINTAGE_P0.md. Under DPN_SNAPSHOT_GRAIN=fund (default) the *_mmv2
+        archive holds the MM-FIX-v2 SECURITY-grain quarter panel — if the panel
+        on disk was built under the quarter rule at security grain, *_mmv2 is
+        the name it renames to.
 
         Archive the downstream artifacts this chain feeds with the same suffix
         (merged_us_eu_matched.parquet, merged_us_eu_zero_filled.parquet,
@@ -505,6 +639,7 @@ end
 # ============================================================
 println("\n========== PHASE B: ETL ($ASOF_RULE_DESC) ==========")
 println("Filters: ADJ_MV > 0 + snapshot selection (NO ISSUE_TYPE filter)")
+println("Grain    : $GRAIN_DESC")
 println("Parts dir: $ASOF_PARTS_DIR")
 println("Output   : $eom_path")
 
@@ -531,13 +666,30 @@ const ASOF_WINDOW_PREDICATE = ASOF_MODE == :quarter ?
 """
     asof_select_sql(src_glob) -> String
 
-Per (fund_id, fsym_id, quarter): keep the row with the LATEST report date inside
-the selection window — [quarter_start, qend] by default (advisor rule, Emanuele
-2026-08-04 meeting), or [max(quarter_start, qend - W), qend] under the numeric
-DPN_ASOF_WINDOW_DAYS override. Ties (same fund, same security, same date — these
-exist in the raw feed) are broken deterministically so the build is reproducible.
+DPN_SNAPSHOT_GRAIN = security (legacy): per (fund_id, fsym_id, quarter) keep the
+row with the LATEST report date inside the selection window — [quarter_start,
+qend] by default (advisor rule, Emanuele 2026-08-04 meeting), or
+[max(quarter_start, qend - W), qend] under the numeric DPN_ASOF_WINDOW_DAYS
+override. This branch is BYTE-IDENTICAL to the pre-2026-08-08 SQL.
+
+DPN_SNAPSHOT_GRAIN = fund (DEFAULT, 2026-08-08): per (fund_id, quarter) compute
+d_use = MAX(report_date_actual) over the fund's in-window ADJ_MV > 0 rows and
+keep ALL rows of that single report — the fund's quarter book is one snapshot,
+no cross-date stitching (diag_snapshot_reappearance.py; see the file header). A
+security absent from the d_use report contributes nothing that quarter (a
+genuine exit). Every kept row has report_date_actual = d_use and
+asof_gap_days = qend - d_use.
+
+Ties (same fund, same security, same date — these exist in the raw feed) are
+broken deterministically UNDER BOTH GRAINS by the same ROW_NUMBER ORDER BY, so
+the build is reproducible. n_asof_candidates keeps its P0 definition under both
+grains: raw in-window rows sharing the (fund, fsym, quarter) key (2-3 for
+monthly reporters), NOT just rows of the d_use report.
 """
 function asof_select_sql(src_glob::AbstractString)
+    if SNAPSHOT_GRAIN == :security
+    # LEGACY SECURITY GRAIN — byte-identical to the pre-2026-08-08 SQL. Do not
+    # edit this branch except in lockstep with an EXPECTED_OLD_ROWS review.
     return """
     SELECT
         fund_id, entity_name, investor_country, entity_type,
@@ -596,6 +748,88 @@ function asof_select_sql(src_glob::AbstractString)
     )
     WHERE rn = 1
     """
+    end
+    # FUND GRAIN (DEFAULT). d_use is a fund x quarter window MAX; the outer
+    # WHERE keeps only rows of the d_use report. rn is the SAME pair-level
+    # tie-break as the security grain: within a (fund, fsym, quarter) partition
+    # it orders report_date_actual DESC first, so rn = 1 always sits on the
+    # pair's latest in-window date. Combined with report_date_actual = d_use it
+    #   (a) drops entirely any pair absent from the d_use report (its rn = 1
+    #       row has an earlier date and it has NO row at d_use), and
+    #   (b) collapses same-day duplicate rows OF the d_use report with the
+    #       existing deterministic ORDER BY (report_date_actual is constant
+    #       there, so the tie-break falls through to adj_mv DESC etc. exactly
+    #       as before).
+    # CHUNK SAFETY of d_use: the PARTITION BY (fund_id, report_date) window is
+    # computed per year-chunk. report_date is the qend of the row's OWN quarter
+    # (QEND_SQL is derived from the row's REPORT_DATE), a calendar quarter never
+    # spans a year, and the chunk files split on whole, disjoint year ranges
+    # (EXPECTED_CHUNKS; asserted against the data by the per-part year-range
+    # check after the build loop). Every (fund, quarter) partition therefore
+    # lives entirely inside ONE chunk file and the within-chunk MAX equals the
+    # global MAX.
+    return """
+    SELECT
+        fund_id, entity_name, investor_country, entity_type,
+        fsym_id, fsym_primary_id, listing_flag,
+        cusip, isin, sedol, sec_country, issue_type, cap_group,
+        sec_entity_id, sec_entity_name,
+        report_date,
+        adj_holding, adj_mv, adj_shares_out, adj_price,
+        report_date_actual, asof_gap_days, n_asof_candidates
+    FROM (
+        SELECT *,
+               MAX(report_date_actual) OVER (
+                   PARTITION BY fund_id, report_date
+               ) AS d_use,
+               ROW_NUMBER() OVER (
+                   PARTITION BY fund_id, fsym_id, report_date
+                   ORDER BY report_date_actual DESC,
+                            adj_mv DESC,
+                            adj_holding DESC,
+                            COALESCE(isin, ''),
+                            COALESCE(cusip, ''),
+                            COALESCE(sedol, ''),
+                            COALESCE(sec_entity_id, ''),
+                            COALESCE(fsym_primary_id, ''),
+                            COALESCE(issue_type, '')
+               ) AS rn,
+               COUNT(*) OVER (PARTITION BY fund_id, fsym_id, report_date) AS n_asof_candidates
+        FROM (
+            SELECT
+                FACTSET_FUND_ID            AS fund_id,
+                ENTITY_PROPER_NAME         AS entity_name,
+                ISO_COUNTRY                AS investor_country,
+                ENTITY_TYPE                AS entity_type,
+                FSYM_ID                    AS fsym_id,
+                FSYM_PRIMARY_EQUITY_ID     AS fsym_primary_id,
+                LISTING_FLAG               AS listing_flag,
+                CUSIP                      AS cusip,
+                ISIN                       AS isin,
+                SEDOL                      AS sedol,
+                SEC_FIRM_ISO_COUNTRY       AS sec_country,
+                ISSUE_TYPE                 AS issue_type,
+                CAP_GROUP                  AS cap_group,
+                factset_sec_entity_id      AS sec_entity_id,
+                SEC_ENTITY_PROPER_NAME     AS sec_entity_name,
+                $QEND_SQL                  AS report_date,
+                $QSTART_SQL                AS quarter_start,
+                CAST(REPORT_DATE AS DATE)  AS report_date_actual,
+                DATEDIFF('day', CAST(REPORT_DATE AS DATE), $QEND_SQL) AS asof_gap_days,
+                ADJ_HOLDING                AS adj_holding,
+                ADJ_MV                     AS adj_mv,
+                ADJ_SHARES_OUTSTANDING     AS adj_shares_out,
+                ADJ_PRICE                  AS adj_price
+            FROM read_parquet('$src_glob')
+            WHERE ADJ_MV IS NOT NULL
+              AND ADJ_MV > 0
+        )
+        WHERE asof_gap_days >= 0
+          $ASOF_WINDOW_PREDICATE
+    )
+    WHERE report_date_actual = d_use
+      AND rn = 1
+    """
 end
 
 part_paths = String[]
@@ -626,7 +860,13 @@ end
 # Independence assumption: chunks split on YEAR boundaries and a quarter never
 # spans a year, so no (fund, fsym, quarter) key can appear in two parts. Verify
 # it rather than assume it — a chunk holding out-of-range years would silently
-# split a quarter across parts and defeat the dedup.
+# split a quarter across parts and defeat the dedup. Under the FUND grain this
+# check carries MORE weight: d_use = MAX(report_date_actual) is computed per
+# (fund, quarter) WITHIN a chunk, and it equals the global MAX only because a
+# (fund, quarter) never spans two chunk files (the declared chunk year ranges
+# in EXPECTED_CHUNKS are disjoint; this loop asserts the data respects them —
+# a violation would split a fund-quarter across parts and let each part pick
+# its own "last" report).
 println("\nPer-part year-range check (chunk name vs data):")
 for (chunk, part) in zip(EXPECTED_CHUNKS, part_paths)
     m = match(r"Factset_FundOwners_(\d{4})_(\d{4})\.parquet", chunk)
@@ -646,6 +886,112 @@ for (chunk, part) in zip(EXPECTED_CHUNKS, part_paths)
                   "key can now span two parts. Rebuild with a single global pass or re-split the chunks.")
         end
     end
+end
+
+# ============================================================
+# PHASE B-DIAG (FUND GRAIN ONLY): pathology diagnostic on the RAW feed.
+# The fund-grain parts keep ONLY the d_use report, so the information needed
+# here — how the d_use report compares to the fund's OTHER in-window reports —
+# is gone from the parts; this has to rescan the raw chunks. Per-chunk
+# aggregation is exact because a (fund, quarter) never spans two chunk files
+# (same argument as the d_use window; see asof_select_sql), so the pooled
+# numbers are plain sums over chunks. Runs even when parts were reused.
+# Reports, per chunk and pooled (03_eom_fund_grain_pathology_by_chunk.csv):
+#   * PATHOLOGY: multi-date fund-quarters whose d_use report holds
+#     n_secs < 0.5 x the quarter-max report size — a partial "last" report;
+#     expected ~0.56% of multi-date fund-quarters
+#     (diag_snapshot_reappearance.py, 2018-2023) — and their MV share;
+#   * rows kept under the fund grain vs the security-grain (legacy) row count
+#     (= distinct (fund, fsym, quarter) keys in the candidate set — exact, not
+#     an approximation), i.e. what the grain switch drops.
+# This is a DISCLOSURE, not a gate: a pathological fund-quarter still follows
+# the advisor rule (its last report IS its snapshot); the count is printed so a
+# blow-up vs the diagnostic's 0.56% is visible immediately.
+# ============================================================
+if SNAPSHOT_GRAIN == :fund && !SKIP_GRAIN_DIAG
+    println("\n========== PHASE B-DIAG: fund-grain pathology (raw rescan, per chunk) ==========")
+    diag_parts = DataFrame[]
+    for chunk in EXPECTED_CHUNKS
+        src = replace(joinpath(RAW_PARQUET_DIR, chunk), "\\" => "/")
+        d = qdf(con, """
+            WITH cand AS (
+                SELECT FACTSET_FUND_ID           AS fund_id,
+                       FSYM_ID                   AS fsym_id,
+                       $QEND_SQL                 AS report_date,
+                       $QSTART_SQL               AS quarter_start,
+                       CAST(REPORT_DATE AS DATE) AS report_date_actual,
+                       DATEDIFF('day', CAST(REPORT_DATE AS DATE), $QEND_SQL) AS asof_gap_days,
+                       ADJ_MV                    AS adj_mv
+                FROM read_parquet('$src')
+                WHERE ADJ_MV IS NOT NULL AND ADJ_MV > 0
+            ),
+            cand_w AS (
+                SELECT * FROM cand
+                WHERE asof_gap_days >= 0
+                  $ASOF_WINDOW_PREDICATE
+            ),
+            -- NOTE (disclosure-only): per_date sums RAW in-window rows,
+            -- INCLUDING same-day duplicate (fund, fsym, date) rows that the
+            -- rn = 1 tie-break collapses in the kept panel. mv_at_duse below
+            -- therefore slightly overstates BOTH numerator and denominator of
+            -- the MV-share print vs the kept panel. Ratio bias is second-order;
+            -- labeled as raw-feed MV in the print, not kept-panel MV.
+            per_date AS (
+                SELECT fund_id, report_date, report_date_actual,
+                       COUNT(DISTINCT fsym_id) AS n_secs,
+                       SUM(adj_mv)             AS mv
+                FROM cand_w GROUP BY 1, 2, 3
+            ),
+            per_fq AS (
+                SELECT fund_id, report_date,
+                       COUNT(*)                            AS n_dates,
+                       MAX(n_secs)                         AS max_n_secs,
+                       arg_max(n_secs, report_date_actual) AS n_secs_at_duse,
+                       arg_max(mv,     report_date_actual) AS mv_at_duse
+                FROM per_date GROUP BY 1, 2
+            )
+            SELECT COUNT(*)                                            AS n_fund_quarters,
+                   COUNT(*) FILTER (WHERE n_dates > 1)                 AS n_fq_multi_date,
+                   COUNT(*) FILTER (WHERE n_dates > 1
+                        AND n_secs_at_duse < 0.5 * max_n_secs)         AS n_fq_pathological,
+                   COALESCE(SUM(mv_at_duse), 0)                        AS mv_duse_total,
+                   COALESCE(SUM(mv_at_duse) FILTER (WHERE n_dates > 1
+                        AND n_secs_at_duse < 0.5 * max_n_secs), 0)     AS mv_duse_pathological,
+                   COALESCE(SUM(n_secs_at_duse), 0)                    AS rows_kept_fund_grain,
+                   (SELECT COUNT(*) FROM (
+                        SELECT DISTINCT fund_id, fsym_id, report_date FROM cand_w
+                    ))                                                 AS rows_security_grain
+            FROM per_fq
+        """)
+        d.chunk = [chunk]
+        push!(diag_parts, d)
+        @printf("  %-42s fund-qtrs %10d | multi-date %9d | pathological %7d | rows: fund %11d vs security %11d\n",
+                chunk, d.n_fund_quarters[1], d.n_fq_multi_date[1], d.n_fq_pathological[1],
+                d.rows_kept_fund_grain[1], d.rows_security_grain[1])
+    end
+    diag_df = vcat(diag_parts...)
+    CSV.write(joinpath(OUT_DIR, "03_eom_fund_grain_pathology_by_chunk.csv"), diag_df)
+    let nfq   = sum(diag_df.n_fund_quarters),
+        nmd   = sum(diag_df.n_fq_multi_date),
+        npath = sum(diag_df.n_fq_pathological),
+        mvtot = sum(diag_df.mv_duse_total),
+        mvpat = sum(diag_df.mv_duse_pathological),
+        rk    = sum(diag_df.rows_kept_fund_grain),
+        rs    = sum(diag_df.rows_security_grain)
+        println("\n--- FUND-GRAIN PATHOLOGY SUMMARY (pooled over chunks) ---")
+        @printf("  fund-quarters: %d, of which multi-date: %d (%.2f%%)\n",
+                nfq, nmd, 100 * nmd / max(nfq, 1))
+        @printf("  PATHOLOGICAL (d_use report n_secs < 0.5 x quarter-max; multi-date only): %d = %.2f%% of multi-date fund-quarters\n",
+                npath, 100 * npath / max(nmd, 1))
+        println("    (expected ~0.56% per diag_snapshot_reappearance.py, raw 2018-2023)")
+        @printf("  MV share of pathological fund-quarters (raw d_use-report MV / total raw d_use-report MV; raw rows incl. same-day dups that rn=1 collapses, so both sides slightly overstate the kept panel): %.4f%%\n",
+                100 * mvpat / max(mvtot, 1e-12))
+        @printf("  rows kept (fund grain): %d vs security-grain (legacy) rows: %d -> grain switch drops %d (%.2f%%)\n",
+                rk, rs, rs - rk, 100 * (rs - rk) / max(rs, 1))
+        println("  -> per-chunk table: 03_eom_fund_grain_pathology_by_chunk.csv")
+    end
+elseif SNAPSHOT_GRAIN == :fund
+    println("\n[PHASE B-DIAG] SKIPPED (DPN_SKIP_GRAIN_DIAG = true).")
 end
 
 parts_glob = replace(joinpath(ASOF_PARTS_DIR, "*_asof$(ASOF_TAG).parquet"), "\\" => "/")
@@ -704,6 +1050,17 @@ end
 # SQL edit, or after 03a regenerates the raw cache, would silently merge STALE
 # parts — and every other gate in this script would still pass. This is the only
 # check that makes such a regression detectable.
+#
+# FUND-GRAIN NOTE (2026-08-08). EXPECTED_OLD_ROWS is GRAIN-INVARIANT, so this
+# gate is kept UNCHANGED under DPN_SNAPSHOT_GRAIN=fund. Why it still holds: a
+# gap = 0 row can only come from a fund with an ADJ_MV > 0 report ON the
+# calendar quarter-end; qend is the maximum attainable in-window date, so for
+# such a fund d_use = qend and the fund keeps its ENTIRE quarter-end (exact-EOM)
+# report. The kept gap = 0 rows are therefore exactly the distinct
+# (fund, fsym, qend) keys carrying an exact quarter-end raw row — the same set
+# the SECURITY grain keeps at gap = 0 (a pair with a qend row has that row as
+# its own latest), and the same-day dedup is the identical ROW_NUMBER tie-break
+# in both branches. Do NOT fork this constant by grain.
 const EXPECTED_OLD_ROWS = 186_800_295   # live pre-P0 holdings_eom.parquet, re-derived 2026-08-04
 if TEST_MODE
     println("  M2 SKIPPED: TEST_MODE reads one chunk, so the full-sample old-rule " *
@@ -1076,6 +1433,12 @@ println(gap_by_era)
 #     MV-weighted mean gap spread in days
 # Under W = 10 this was bounded at 10 days and ~0.26% of fund-quarters; under the
 # quarter rule it is expected to be first order. It is a DISCLOSURE, not a gate.
+# FUND-GRAIN NOTE (2026-08-08): under DPN_SNAPSHOT_GRAIN=fund every kept row of
+# a fund-quarter carries report_date_actual = d_use, so n_distinct_actual_dates
+# MUST equal 1 everywhere and this block flips from disclosure to HARD
+# INVARIANT (asserted after the pooled table below, with the fail_canonical
+# demotion discipline — a violation means the grain SQL or the merge is
+# broken). Under the SECURITY grain it remains a disclosure.
 # ---------------------------------------------------------------------------
 DBInterface.execute(con, """
     CREATE OR REPLACE TEMP TABLE fund_snap_disp AS
@@ -1125,7 +1488,7 @@ fund_disp_pooled = qdf(con, """
            SUM(fq_mv_stale) / NULLIF(SUM(fq_mv), 0)                        AS mv_share_from_gap_gt0
     FROM fund_snap_disp
 """)
-println("\n--- C2d FUND-PORTFOLIO SNAPSHOT DISPERSION (pooled, $ASOF_RULE_DESC) ---")
+println("\n--- C2d FUND-PORTFOLIO SNAPSHOT DISPERSION (pooled, $ASOF_RULE_DESC, $GRAIN_DESC) ---")
 println("  (a fund-quarter spanning >1 report date has its cross-security SUM(adj_mv)")
 println("   stitched from several valuation dates — this is what 04's I_ict inherits)")
 println(fund_disp_pooled)
@@ -1134,6 +1497,18 @@ println(first(fund_disp_hist, 15))
 println("\n  Per-quarter -> 03_eom_fund_snapshot_dispersion.csv ($(nrow(fund_disp_q)) quarters). Last 8:")
 println(last(fund_disp_q[:, [:qend, :n_fund_quarters, :share_fq_multi_date,
                              :mv_wtd_mean_gap_spread_days, :mv_share_from_gap_gt0]], 8))
+# FUND-GRAIN HARD INVARIANT (2026-08-08; see the C2d header note): every
+# fund-quarter must be a single d_use snapshot. Post-merge check, so it must
+# demote the artifact on failure like C1/C1b.
+if SNAPSHOT_GRAIN == :fund && fund_disp_pooled.n_fq_multi_date[1] > 0
+    fail_canonical("FUND-GRAIN INVARIANT FAILED (C2d): " *
+                   "$(fund_disp_pooled.n_fq_multi_date[1]) fund-quarters span more than one " *
+                   "report_date_actual in a panel built under DPN_SNAPSHOT_GRAIN=fund. " *
+                   "Every fund-quarter must be exactly one d_use report; the fund-grain SQL, " *
+                   "a stale part, or a mixed-grain merge is broken.")
+end
+SNAPSHOT_GRAIN == :fund &&
+    println("  [OK] fund-grain invariant: every fund-quarter is a single d_use snapshot.")
 DBInterface.execute(con, "DROP TABLE fund_snap_disp")
 
 # C2c: raw actual-date distribution (replaces the old weekend-EOM audit)
@@ -1237,12 +1612,15 @@ end
 println("\n========== ETL DONE ==========")
 println("Output: $eom_path")
 println("Rule  : $ASOF_RULE_DESC")
+println("Grain : $GRAIN_DESC")
 println("\nKey diagnostic files:")
 println("  03_eom_asof_coverage_old_vs_new.csv  (GATE 1 + GATE 2, per quarter)")
 println("  03_eom_asof_gap_distribution.csv     (full gap histogram)")
 println("  03_eom_asof_gap_summary.csv          (per-quarter staleness: share gap=0, median, share>14d, max)")
 println("  03_eom_asof_gap_summary_by_era.csv   (same, by era)")
 println("  03_eom_dup_key_count.csv             (hard assert, must be 0)")
+SNAPSHOT_GRAIN == :fund &&
+    println("  03_eom_fund_grain_pathology_by_chunk.csv (fund grain: partial-d_use pathology + rows vs security grain)")
 println("  03_eom_weekend_audit.csv             (actual report dates behind each quarter)")
 println("  03_eom_coverage_by_year.csv")
 println("  03_eom_issue_type_breakdown.csv")

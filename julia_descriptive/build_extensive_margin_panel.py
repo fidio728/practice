@@ -5,6 +5,13 @@
 # it). The as-of quarter-end selection rule in 03_eom_etl.jl CHANGED the
 # panel's fund universe on EVERY quarter. PRE-P0, pending re-run, do not mix
 # with post-P0 results. Register: julia_descriptive/VINTAGE_P0.md
+# ----------------------------------------------------------------------------
+# OUTCOME-FAMILY CAVEAT (added 2026-08-08, REBUILD v3): the weight-based
+# comparators this file consumes/mirrors (portfolio_weight_eu, delta_w) are
+# the EU-restricted family. Since 2026-08-08 the regression MAIN outcome is
+# the GLOBAL full-portfolio-denominator family (delta_w_global); EU-family
+# results from this builder must be labeled within-Europe-reallocation and
+# never read side-by-side with the global headline without that label.
 # ============================================================================
 
 """

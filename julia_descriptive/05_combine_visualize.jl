@@ -440,7 +440,11 @@ CSV.write(joinpath(OUT_DIR, "05_coverage_cascade.csv"), coverage)
 # Exposure joined via the SUM-aggregated table.
 # C2 fix: pre-2003 quarters carry NULL china_share / n_cn_* (NOT zero).
 # C3 fix: LAG(china_share) over (sec_entity_id, report_date) → china_share_lagobs.
-# C1 fix: regression weight is portfolio_weight_eu (from 04), not _global.
+# C1 fix: figure weight is portfolio_weight_eu (from 04), not _global.
+# [2026-08-08 GLOBAL-MAIN NOTE] 05 is FIGURES-ONLY; the regression MAIN
+# outcome is the GLOBAL-denominator family (built in 06). portfolio_weight_eu
+# here is the within-Europe allocation view (figs 11-13 design choice,
+# labeled in 06:785-789), NOT the regression input.
 # ============================================================
 println("\nBuilding merged panel (US-investor × matched-EU-AS-OF-q × quarter)...")
 
@@ -940,7 +944,7 @@ println("  05_gap_months_diagnostic.csv            (Δw drop reasons)")
 println()
 println("Interpretation notes:")
 println("  * All figures are DESCRIPTIVE. Visual correlation is suggestive, not causal.")
-println("  * portfolio_weight_eu (regression input) restricts denominator to EU sec_country.")
+println("  * portfolio_weight_eu (FIGURES input; since 2026-08-08 the regression MAIN outcome is the GLOBAL-denominator family) restricts denominator to EU sec_country.")
 println("  * NONUS aggregate now also EU-restricted (nonus_aggregate_eu) — fair comparison.")
 println("  * Pre-2003 quarters carry NULL china_share (NOT zero).")
 println("  * Bucket uses china_share_LAG1Q to match the regression spec.")

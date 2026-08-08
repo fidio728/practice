@@ -1,3 +1,12 @@
+* [VINTAGE WARNING — EU-era / S_t battery. Stamped by REBUILD v3, 2026-08-08]
+* This file builds us_cn_shock-style S_t triples and reads dw straight off the
+* rebuilt panels. Since 2026-08-08 the panel column dw is REPURPOSED to the
+* GLOBAL full-portfolio-denominator outcome (EU-era dw lives in dw_eu) and the
+* PRIMARY timing is S_{t-1} (s_lag). Re-running this file therefore estimates
+* GLOBAL dw x S_t — neither the EU-era spec its comments/outputs describe nor
+* the current primary. MIGRATE (s_lag + outcome relabel) before citing any new
+* output; existing outputs on disk are EU-era/S_t vintage.
+
 * run_flow_heldonly.do — B8 FIX (2026-07-22).
 * Held-only zero-fill robustness on the FLOW outcome (the §7.6 primary outcome),
 * replacing test_obs_only.do which ran the SUPERSEDED `dos` comparison outcome.

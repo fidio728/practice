@@ -1,3 +1,12 @@
+* [VINTAGE WARNING — EU-era / S_t battery. Stamped by REBUILD v3, 2026-08-08]
+* This file builds us_cn_shock-style S_t triples and reads dw straight off the
+* rebuilt panels. Since 2026-08-08 the panel column dw is REPURPOSED to the
+* GLOBAL full-portfolio-denominator outcome (EU-era dw lives in dw_eu) and the
+* PRIMARY timing is S_{t-1} (s_lag). Re-running this file therefore estimates
+* GLOBAL dw x S_t — neither the EU-era spec its comments/outputs describe nor
+* the current primary. MIGRATE (s_lag + outcome relabel) before citing any new
+* output; existing outputs on disk are EU-era/S_t vintage.
+
 * run_flow_winsor.do — winsorized-flow CRVE, to sit next to the RI diagnostic.
 * flow is un-winsorized and fat-tailed (kurtosis ~5000); winsorize at p1/p99 and
 * re-run the primary (fq gq) and 3-pairwise (fq gq ig) triple-diff on the

@@ -4,11 +4,19 @@ run_ri_direction.py — randomization inference for the DIRECTION SPLIT
 Companion to run_direction_split.do; RI machinery mirrors run_ri_tercile.py.
 
 Collapse to the US-NONUS firm-quarter difference dy; two-way (firm x quarter)
-demean; regressors [sell, buy, sell*S, buy*S]; permute the 82 quarter shock
-values (only the two shock interactions move; sell/buy themselves are fixed
-firm-quarter attributes). Because the four regressors are correlated
-(sell_lag + buy_lag = cn_lag additively), each permutation re-solves the FULL
-4x4 normal equations — never single-variable FWL.
+demean; regressors [sell, buy, sell*S, buy*S] with S = S_{t-1} (s_lag, the
+PRIMARY lagged-shock timing of 2026-08-08 that run_direction_split.do runs;
+firm-quarters with missing S_{t-1} are dropped before demeaning, matching
+reghdfe); permute the quarter S_{t-1} values (only the two shock interactions
+move; sell/buy themselves are fixed firm-quarter attributes). Because the four
+regressors are correlated (sell_lag + buy_lag = cn_lag additively), each
+permutation re-solves the FULL 4x4 normal equations — never single-variable FWL.
+
+DRIFT ANCHORS (never hardcoded): the Stata MAIN triples are read at runtime
+from the living output/direction_vce_diag.csv (spec=="d_main", coef in
+{us_sell_slag, us_buy_slag}), written by run_direction_split.do on the same
+panel vintage. Missing file => cross-check reported unavailable; stale layout
+=> abort.
 
 Reported statistics (decoupling predicts all three negative):
     (1) b3_sell             — US x sell x S triple coefficient
@@ -35,7 +43,7 @@ dy = (piv[1] - piv[0]).rename("dy")
 
 meta = (df.groupby(["firm_str", "rdate"])
           .agg(sell=("sell_lag", "first"), buy=("buy_lag", "first"),
-               cn=("cn_lag", "first"), s=("shock", "first")))
+               cn=("cn_lag", "first"), s=("s_lag", "first")))  # S_{t-1} PRIMARY
 # group-invariance guard: sell/buy are firm-level attributes and must be
 # identical on the US and NONUS rows of a firm-quarter (checked, not assumed)
 for _c in ["sell_lag", "buy_lag"]:
@@ -107,13 +115,33 @@ b3s_obs, b3b_obs, bdiff_obs = stats_from_shock(Svec)
 print(f"observed b3_sell        = {b3s_obs:.6e}")
 print(f"observed b3_buy         = {b3b_obs:.6e}")
 print(f"observed b3_sell-b3_buy = {bdiff_obs:.6e}")
-# hardcoded Stata anchors for drift protection (run_direction_split.do MAIN,
-# reghdfe fq gq ig; 2026-08-02): sell +2.53e-07, buy +5.50e-06, sell-buy -5.25e-06
-print("expected (Stata MAIN)   = sell +2.53e-07, buy +5.50e-06, sell-buy -5.25e-06 "
-      "— investigate if far off")
-print("cross-check the three numbers against run_direction_split.do MAIN "
-      "(reghdfe fq gq ig) before citing — a material mismatch means a stale "
-      "panel or broken collapse.")
+
+# ---- living Stata anchors (never hardcoded): direction_vce_diag.csv ---------
+_diag_path = OUT / "direction_vce_diag.csv"
+if _diag_path.exists():
+    _dg = pd.read_csv(_diag_path)
+    if not {"spec", "coef", "b"} <= set(_dg.columns):
+        raise SystemExit(f"{_diag_path.name} lacks spec/coef/b — stale layout; "
+                         "re-run run_direction_split.do.")
+    _row_s = _dg[(_dg["spec"] == "d_main") & (_dg["coef"] == "us_sell_slag")]
+    _row_b = _dg[(_dg["spec"] == "d_main") & (_dg["coef"] == "us_buy_slag")]
+    if len(_row_s) != 1 or len(_row_b) != 1:
+        raise SystemExit(f"{_diag_path.name}: no unique d_main us_sell_slag/"
+                         "us_buy_slag rows — it predates the S_{t-1} switch; "
+                         "re-run run_direction_split.do.")
+    _st_s, _st_b = float(_row_s["b"].iloc[0]), float(_row_b["b"].iloc[0])
+    print(f"expected (Stata MAIN, living {_diag_path.name}): sell {_st_s:+.6e}, "
+          f"buy {_st_b:+.6e}, sell-buy {_st_s - _st_b:+.6e}")
+    for _lbl, _py, _st in [("sell", b3s_obs, _st_s), ("buy", b3b_obs, _st_b)]:
+        _rel = abs(_py - _st) / max(abs(_st), 1e-300)
+        if _rel > 1e-3:
+            print(f"    *** ANCHOR MISMATCH on b3_{_lbl}: python {_py:.6e} vs "
+                  f"stata {_st:.6e} (rel {_rel:.2e} > 1e-3). Expected gap is "
+                  "singleton-drop-sized only — stale panel or broken collapse; "
+                  "do NOT cite this RI run.")
+else:
+    print(f"NOTE: {_diag_path.name} not found — Stata cross-check UNAVAILABLE. "
+          "Run run_direction_split.do on the current panel before citing.")
 
 rng = np.random.default_rng(SEED)
 cnt = np.zeros(3, dtype=int)

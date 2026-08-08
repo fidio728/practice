@@ -64,6 +64,17 @@
 # ALL matches including lower-priority ones; MM-FIX sums ONLY within the
 # winning priority tier.
 #
+# GLOBAL-MAIN (2026-08-08): the FULL-portfolio (global) denominator is promoted
+# to MAIN and S_{t-1} to primary timing. This file now propagates BOTH weight
+# families from 04's country_total_ct.parquet — portfolio_weight_global /
+# w_prev_global / delta_w_global (MAIN, plan-faithful: research_plan.tex
+# "Country portfolio weight" defines w = I/T over the FULL portfolio; raw pull
+# confirms funds report the complete global book) and the legacy-named
+# portfolio_weight_eu / w_prev / delta_w (EU-restricted, retained as the
+# within-Europe reallocation DIAGNOSTIC) — plus shock_us_cn_lag1q (S_{t-1},
+# advisor-directed primary timing). Legacy column names keep their EU meaning
+# so consumers not yet migrated are bit-stable.
+#
 # Why this exists. The 05 panel keeps only (sec_entity_id, holder_country,
 # quarter) cells with a positive holding. That is selection-on-outcome for
 # a regression whose outcome is institutional holdings: an extensive-margin
@@ -196,21 +207,34 @@ DBInterface.execute(con, """
 
 # (5b) country_total_grouped — Patch 7: use COALESCE so NULL totals don't
 # nuke an entire (group × quarter).
+# (GLOBAL-MAIN, 2026-08-08) BOTH denominators now propagate from 04's
+# country_total_ct.parquet:
+#   total_holdings_global — FULL-portfolio denominator (MAIN, per
+#                           research_plan.tex "Country portfolio weight");
+#   total_holdings_eu     — EU-restricted denominator (within-Europe
+#                           reallocation DIAGNOSTIC; the C1-era input).
 DBInterface.execute(con, """
     CREATE OR REPLACE TABLE country_total_grouped AS
     SELECT CASE WHEN investor_country = 'US' THEN 'US' ELSE 'NONUS' END AS holder_group,
            report_date AS quarter_end,
-           SUM(COALESCE(country_total_holdings_eu, 0)) AS total_holdings_eu
+           SUM(COALESCE(country_total_holdings_eu, 0))     AS total_holdings_eu,
+           SUM(COALESCE(country_total_holdings_global, 0)) AS total_holdings_global
     FROM read_parquet('$COUNTRY_TOT_PATH')
     GROUP BY holder_group, report_date
 """)
 ct_check = qdf(con, """
     SELECT
         COUNT(*) AS n_rows,
-        COUNT(*) FILTER (WHERE total_holdings_eu IS NULL OR total_holdings_eu = 0) AS n_zero_or_null
+        COUNT(*) FILTER (WHERE total_holdings_eu IS NULL OR total_holdings_eu = 0) AS n_zero_or_null_eu,
+        COUNT(*) FILTER (WHERE total_holdings_global IS NULL OR total_holdings_global = 0) AS n_zero_or_null_global,
+        COUNT(*) FILTER (WHERE COALESCE(total_holdings_global, 0) < COALESCE(total_holdings_eu, 0)) AS n_global_lt_eu
     FROM country_total_grouped
 """)
-println("  country_total_grouped: $(ct_check.n_rows[1]) rows; $(ct_check.n_zero_or_null[1]) zero/NULL")
+println("  country_total_grouped: $(ct_check.n_rows[1]) rows; " *
+        "$(ct_check.n_zero_or_null_eu[1]) zero/NULL EU; " *
+        "$(ct_check.n_zero_or_null_global[1]) zero/NULL global")
+# invariant: the global book contains the EU book, so T_global >= T_eu always.
+@assert ct_check.n_global_lt_eu[1] == 0 "total_holdings_global < total_holdings_eu in $(ct_check.n_global_lt_eu[1]) (group, quarter) cells — 04 denominator build broken"
 
 # ============================================================
 # (6) ChinaExposure crosswalk — Patch 2 priority CUSIP > ISIN > SEDOL,
@@ -518,9 +542,24 @@ DBInterface.execute(con, """
     SELECT g.sec_entity_id, g.sec_country, g.holder_group, g.quarter_end,
            COALESCE(i.I_ict, 0) AS I_ict,
            COALESCE(ct.total_holdings_eu, 0) AS total_holdings_eu,
+           COALESCE(ct.total_holdings_global, 0) AS total_holdings_global,
+           -- (GLOBAL-MAIN, 2026-08-08) TWO weight families, identical NULL rule
+           -- (weight NULL iff its OWN denominator is 0/NULL that group-quarter):
+           --   portfolio_weight_global = I / T_global  -> MAIN, plan-faithful
+           --     (research_plan.tex: w over the FULL portfolio). NULL only when
+           --     the holder group's entire GLOBAL book is empty that quarter.
+           --   portfolio_weight_eu     = I / T_eu      -> within-Europe
+           --     reallocation DIAGNOSTIC (C1-era input). NULL when the group's
+           --     EU book is empty — a superset of the global-NULL cells, since
+           --     T_global >= T_eu (asserted at (5b)). A cell with an empty EU
+           --     book inside a non-empty global book is a GENUINE ZERO under
+           --     the global family (0/T_global = 0) but NULL (0/0) under EU.
            CASE WHEN COALESCE(ct.total_holdings_eu, 0) > 0
                 THEN COALESCE(i.I_ict, 0) / ct.total_holdings_eu
                 ELSE NULL END AS portfolio_weight_eu,
+           CASE WHEN COALESCE(ct.total_holdings_global, 0) > 0
+                THEN COALESCE(i.I_ict, 0) / ct.total_holdings_global
+                ELSE NULL END AS portfolio_weight_global,
            CASE WHEN g.quarter_end < DATE '2003-03-31' THEN NULL
                 ELSE e.china_share END AS china_share,
            CASE WHEN g.quarter_end < DATE '2003-03-31' THEN NULL
@@ -571,10 +610,19 @@ atomic_copy_to(con, """
         holder_group AS investor_country,  -- back-compat alias
         quarter_end AS report_date,
         I_ict,
+        -- (GLOBAL-MAIN, 2026-08-08) BOTH weight families propagate.
+        -- Column-name contract: the LEGACY names (portfolio_weight_eu, w_prev,
+        -- delta_w) keep their EU meaning so untouched consumers are bit-stable;
+        -- the *_global columns are the NEW MAIN family. build_c6_panel.py maps
+        -- dw := delta_w_global (MAIN) and dw_eu := delta_w (EU diagnostic).
         portfolio_weight_eu,
         LAG(portfolio_weight_eu, 1) OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end) AS w_prev,
         (portfolio_weight_eu
          - LAG(portfolio_weight_eu, 1) OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end)) AS delta_w,
+        portfolio_weight_global,
+        LAG(portfolio_weight_global, 1) OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end) AS w_prev_global,
+        (portfolio_weight_global
+         - LAG(portfolio_weight_global, 1) OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end)) AS delta_w_global,
         china_share,
         LAG(china_share, 1) OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end) AS china_share_lag1q,
         china_sell_link_share,
@@ -603,7 +651,14 @@ atomic_copy_to(con, """
         LAG(n_cn_customer, 1)    OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end) AS n_cn_customer_lag1q,
         LAG(n_cn_supplier, 1)    OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end) AS n_cn_supplier_lag1q,
         gpr_us_cn,
-        shock_us_cn
+        shock_us_cn,
+        -- (S_{t-1} PRIMARY TIMING, 2026-08-08, advisor-directed) lagged shock.
+        -- shock_us_cn is quarter-constant, and this grid is a contiguous
+        -- quarterly Cartesian grid (every predecessor pair exactly 3 months
+        -- apart — same argument as the EM-FIX-9 note above), so this LAG is the
+        -- TRUE quarter-level S_{t-1}. NULL only at each series' first grid
+        -- quarter or where S itself is NULL at t-1.
+        LAG(shock_us_cn, 1) OVER (PARTITION BY sec_entity_id, holder_group ORDER BY quarter_end) AS shock_us_cn_lag1q
     FROM grid_zfilled
 """, merged_path)
 merged_path_fwd = replace(merged_path, "\\" => "/")
@@ -613,9 +668,14 @@ write_manifest("06_merged_us_eu_zero_filled", merged_path; row_count=n_merged, i
 
 # ============================================================
 # (8b) EM-CHANGE-2 attribution census on the emitted panel.
-# The estimation sample for the headline is
-#     delta_w NOT NULL AND china_share_lag1q NOT NULL AND shock NOT NULL
-# (build_c6_panel.py). This table decomposes that sample into the cells that
+# (GLOBAL-MAIN, 2026-08-08) The MAIN estimation sample for the headline is now
+#     delta_w_global NOT NULL AND china_share_lag1q NOT NULL AND shock NOT NULL
+# (build_c6_panel.py). The EU-diagnostic sample (delta_w) is censused alongside;
+# their difference is EXACTLY the denominator-swap sample effect (cells where
+# the group's EU book is empty at t or t-1 but the global book is not — the EU
+# weight is NULL there while the global weight is a genuine 0). Expected ~0
+# inside the estimation window; the census makes it a printed fact, not an
+# assumption. This table also decomposes the sample into the cells that
 # existed before the recode (zero_recode_flag_lag1q = 0) and the cells the
 # recode adds (= 1 or 2), so the sample-expansion effect is separable from the
 # snapshot effect in the written update. Prior P0 headline N was 347,690.
@@ -624,30 +684,47 @@ em_attr = qdf(con, """
     SELECT COALESCE(CAST(zero_recode_flag_lag1q AS VARCHAR), 'NULL_not_codable') AS lag_flag,
            COUNT(*) AS n_panel_rows,
            COUNT(*) FILTER (WHERE china_share_lag1q IS NOT NULL) AS n_cn_lag_nonnull,
+           COUNT(*) FILTER (WHERE delta_w_global IS NOT NULL
+                              AND china_share_lag1q IS NOT NULL
+                              AND shock_us_cn IS NOT NULL) AS n_estimation_sample_main_global,
            COUNT(*) FILTER (WHERE delta_w IS NOT NULL
                               AND china_share_lag1q IS NOT NULL
-                              AND shock_us_cn IS NOT NULL) AS n_estimation_sample,
+                              AND shock_us_cn IS NOT NULL) AS n_estimation_sample_eu_diag,
            COUNT(DISTINCT sec_entity_id) AS n_firms
     FROM read_parquet('$merged_path_fwd')
     GROUP BY 1 ORDER BY 1
 """)
-println("\nEM-CHANGE-2 attribution census on merged_us_eu_zero_filled:")
+println("\nEM-CHANGE-2 attribution census on merged_us_eu_zero_filled (MAIN=global dw):")
 println(em_attr)
 CSV.write(joinpath(OUT_DIR, "06_em_attribution_census.csv"), em_attr)
 
 em_tot = qdf(con, """
-    SELECT COUNT(*) FILTER (WHERE delta_w IS NOT NULL
+    SELECT COUNT(*) FILTER (WHERE delta_w_global IS NOT NULL
                               AND china_share_lag1q IS NOT NULL
-                              AND shock_us_cn IS NOT NULL) AS n_est_total,
+                              AND shock_us_cn IS NOT NULL) AS n_est_total_main_global,
            COUNT(*) FILTER (WHERE delta_w IS NOT NULL
+                              AND china_share_lag1q IS NOT NULL
+                              AND shock_us_cn IS NOT NULL) AS n_est_total_eu_diag,
+           -- denominator-swap sample effect: MAIN-only cells (EU dw NULL there)
+           COUNT(*) FILTER (WHERE delta_w_global IS NOT NULL AND delta_w IS NULL
+                              AND china_share_lag1q IS NOT NULL
+                              AND shock_us_cn IS NOT NULL) AS n_est_global_only_cells,
+           -- S_{t-1} availability on the MAIN sample (primary timing)
+           COUNT(*) FILTER (WHERE delta_w_global IS NOT NULL
+                              AND china_share_lag1q IS NOT NULL
+                              AND shock_us_cn IS NOT NULL
+                              AND shock_us_cn_lag1q IS NULL) AS n_est_main_missing_slag,
+           COUNT(*) FILTER (WHERE delta_w_global IS NOT NULL
                               AND china_share_lag1q IS NOT NULL
                               AND shock_us_cn IS NOT NULL
                               AND zero_recode_flag_lag1q = 0) AS n_est_prechange_cells,
            COUNT(DISTINCT CASE WHEN china_share_lag1q IS NOT NULL THEN sec_entity_id END) AS n_firms_codable
     FROM read_parquet('$merged_path_fwd')
 """)
-println("  estimation-sample rows total / of which pre-change cells / codable firms:")
+println("  MAIN(global) rows / EU-diag rows / global-only cells / MAIN rows missing S_{t-1} / pre-change cells / codable firms:")
 println(em_tot)
+# The EU sample must be a subset of the MAIN sample (T_global >= T_eu):
+@assert em_tot.n_est_total_main_global[1] >= em_tot.n_est_total_eu_diag[1] "EU-diagnostic estimation sample exceeds MAIN(global) sample — NULL-semantics inversion, check (5b)/(7)"
 
 # ============================================================
 # (9) Patch 8: compute the HIGH-vs-LOW cutoff ONCE on firm-quarter distinct
@@ -665,19 +742,31 @@ const HIGH_CUTOFF = (nrow(med_q) > 0 && !ismissing(med_q.med[1]) && !isnan(med_q
 println("\nHIGH-exposure cutoff (firm-quarter median on positive cells): $(round(HIGH_CUTOFF, digits=4))")
 @assert HIGH_CUTOFF > 0 "HIGH_CUTOFF degenerated to $HIGH_CUTOFF — no positive china_share_lag1q observations in the merged panel; check exposure_by_sec_entity"
 
-# Patch 10: delta_w NULL diagnostic (backward Δw: NULL iff w_prev is NULL,
-# i.e. the first quarter of each (firm × holder_group) series).
+# Patch 10: delta_w NULL diagnostic (backward Δw: NULL iff w at t or t-1 is
+# NULL — first quarter of each (firm × holder_group) series, or an empty
+# group-book quarter). (GLOBAL-MAIN, 2026-08-08) both families censused.
 ndiag = qdf(con, """
     SELECT
         COUNT(*) FILTER (WHERE delta_w IS NULL AND w_prev IS NULL)     AS n_null_first_quarter,
         COUNT(*) FILTER (WHERE delta_w IS NULL AND w_prev IS NOT NULL) AS n_null_interior,
-        COUNT(*) FILTER (WHERE delta_w IS NOT NULL)                    AS n_delta_w_nonnull
+        COUNT(*) FILTER (WHERE delta_w IS NOT NULL)                    AS n_delta_w_nonnull,
+        COUNT(*) FILTER (WHERE delta_w_global IS NULL AND w_prev_global IS NULL)     AS n_null_first_quarter_g,
+        COUNT(*) FILTER (WHERE delta_w_global IS NULL AND w_prev_global IS NOT NULL) AS n_null_interior_g,
+        COUNT(*) FILTER (WHERE delta_w_global IS NOT NULL)                           AS n_delta_w_nonnull_g,
+        COUNT(*) FILTER (WHERE delta_w_global IS NULL AND delta_w IS NOT NULL)       AS n_global_null_eu_nonnull
     FROM read_parquet('$merged_path_fwd')
 """)
-println("Δw NULL diagnostic (backward diff):")
+println("Δw NULL diagnostic (backward diff), EU family:")
 println("  first quarter of series (w_prev missing): $(ndiag.n_null_first_quarter[1])")
 println("  interior (w_prev present but Δw NULL):    $(ndiag.n_null_interior[1])  ← should be 0")
 println("  non-NULL Δw: $(ndiag.n_delta_w_nonnull[1])")
+println("Δw NULL diagnostic, GLOBAL family (MAIN):")
+println("  first quarter of series (w_prev_global missing): $(ndiag.n_null_first_quarter_g[1])")
+println("  interior (w_prev_global present but Δw NULL):    $(ndiag.n_null_interior_g[1])  ← should be 0")
+println("  non-NULL Δw_global: $(ndiag.n_delta_w_nonnull_g[1])  (must be >= EU count $(ndiag.n_delta_w_nonnull[1]))")
+# NULL-semantics direction check at row level: global NULL where EU defined is
+# impossible (T_global >= T_eu), so any such row is a construction bug.
+@assert ndiag.n_global_null_eu_nonnull[1] == 0 "delta_w_global NULL on $(ndiag.n_global_null_eu_nonnull[1]) rows where EU delta_w is defined — impossible under T_global >= T_eu"
 
 # Held vs zero-filled composition (Patch 10)
 comp = qdf(con, """
@@ -696,6 +785,11 @@ println(comp)
 
 # ============================================================
 # (10) Descriptive analogues — _c6 suffixed CSVs.
+# (GLOBAL-MAIN, 2026-08-08) These figure inputs deliberately STAY on the
+# EU-restricted weight family: figs 11-13 depict WITHIN-EUROPE allocation
+# shares, which is exactly what portfolio_weight_eu measures. This is a
+# labeled design choice, not an oversight; the regression path (via
+# build_c6_panel.py / build_audit_panel_f1f2f7.py) uses delta_w_global.
 # ============================================================
 println("\nBuilding descriptive analogues on C6 panel...")
 
@@ -881,7 +975,11 @@ end
 println("\n========== 06 v2 DONE ==========")
 println("Key output:")
 println("  merged_us_eu_zero_filled.parquet  (REGRESSION-READY zero-filled panel,")
-println("                                      holder_group AND investor_country columns)")
+println("                                      holder_group AND investor_country columns;")
+println("                                      MAIN outcome family = *_global (full-portfolio")
+println("                                      denominator, research_plan.tex), EU family kept")
+println("                                      under legacy names as the within-Europe diagnostic;")
+println("                                      shock_us_cn_lag1q = primary S_{t-1} timing)")
 println("  05_scatter_own_vs_cn_data_c6.csv         (fig10 input incl us_ownership_share)")
 println("  05_within_europe_share_by_group_c6.csv   (fig11 input)")
 println("  05_us_vs_nonus_high_share_data_c6.csv    (fig12 input)")

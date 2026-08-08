@@ -852,6 +852,8 @@ So both halves of the original story are retracted. The **timing** story was ret
 |---|---|---|
 | `00_setup.jl` | EU country list, paths, DB helper (P0: `max_temp_directory_size=300GB` on the duckdb connection) | — |
 | `02_china_exposure.jl` | CN exposure (symmetric, bilateral, time-versioned; C2/C4/C5) | `firm_quarter_china_exposure.parquet` |
+> **[UPDATE 2026-08-08 — REBUILD v3; this table is P0-vintage and PARTLY RETIRED].** Since this table was written: (i) `03_eom_etl.jl` default is the advisor QUARTER rule at **FUND grain** (`DPN_SNAPSHOT_GRAIN=fund`; the W=10 as-of and per-security grain survive as overrides); (ii) the MAIN outcome `dw` is the **GLOBAL full-portfolio-denominator** Δw (EU-restricted Δw lives in `dw_eu`, labeled within-Europe-reallocation diagnostic); (iii) PRIMARY timing is **S_{t−1}** (`s_lag`; S_t is the labeled timing diagnostic); (iv) `headline_3pairwise_canonical.csv` uses the LOCKED layout `spec,denom,timing,fe,b3,se,p,N` (primary + primary_itgt + diag 2x2 + diag itgt-st anchor row). Row counts below are P0-era. See `VINTAGE_P0.md`, `VINTAGE_PREEM.md` and the REBUILD v3 chain log for current numbers.
+
 | `03_eom_etl.jl` | FactSet Ownership EOM ETL. **P0: the as-of W=10 snapshot rule** (latest report ≤ quarter-end within 10 days, stamped to quarter-end, `report_date_actual` + `asof_gap_days` retained); §5.0 | `holdings_eom.parquet` (208,418,523 rows) |
 | `06_cartesian_grid.jl` | Cartesian grid + zero-fill + **backward Δw** + lagged CN (C1/C6) | `merged_us_eu_zero_filled.parquet` |
 | `build_c6_panel.py` | → main estimation panel (adds `sell_lag`/`buy_lag` for §7.7) | `c6_panel.dta` (348,156) |
@@ -1071,6 +1073,8 @@ The full source is in `github.com/fidio728/practice`, branch `essay2-code-review
 ## 15. Result → source map (which file produces each headline number)
 
 All values are **P0-vintage (2026-08-04)**.
+
+> **[UPDATE 2026-08-08 — REBUILD v3: every value in this table is a RETIRED vintage.]** The panel has since been rebuilt twice (EM quarter-snapshot 2026-08-06; MM-FIX v2 + fund-grain REBUILD v3 2026-08-08) and the primary spec moved to GLOBAL denominator × S_{t−1}. Current headline cells live in `output/headline_3pairwise_canonical.csv` (LOCKED layout `spec,denom,timing,fe,b3,se,p,N`); do not cite the numbers below as current.
 
 | result | value | produced by | reads / writes |
 |---|---|---|---|

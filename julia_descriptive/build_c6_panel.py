@@ -9,13 +9,26 @@ Columns written (matches what 07_regression.do `use`s):
   firm_str  (= sec_entity_id, string)
   hgroup    (= holder_group: 'US' / 'NONUS')
   rdate     (= report_date, datetime64 -> Stata %tc)
-  dw        (= delta_w)
+  dw        (= delta_w_global; MAIN outcome, FULL-portfolio denominator per
+              research_plan.tex "Country portfolio weight" — GLOBAL-MAIN
+              promotion 2026-08-08)
+  dw_eu     (= delta_w; EU-restricted denominator, within-Europe reallocation
+              DIAGNOSTIC — the C1-era outcome, kept labeled)
   cn_lag    (= china_share_lag1q)
-  shock     (= shock_us_cn)
+  shock     (= shock_us_cn, S_t — labeled timing DIAGNOSTIC)
+  s_lag     (= shock_us_cn_lag1q, S_{t-1} — PRIMARY timing, advisor-directed)
   us        (= 1 if holder_group == 'US' else 0)
 
-Sample filter:
-  delta_w IS NOT NULL AND china_share_lag1q IS NOT NULL AND shock_us_cn IS NOT NULL
+Sample filter (GLOBAL-MAIN, 2026-08-08):
+  delta_w_global IS NOT NULL AND china_share_lag1q IS NOT NULL AND shock_us_cn IS NOT NULL
+NULL-SEMANTICS NOTE. The only sample change vs the EU-era filter is the
+denominator swap itself: delta_w_global is NULL on a strict SUBSET of the
+delta_w NULL cells (T_global >= T_eu, so an empty EU book inside a non-empty
+global book yields dw_eu = NULL but dw = genuine 0). Rows admitted by that
+relaxation are counted and printed below (n_global_only); dw_eu is NaN on
+exactly those rows and EU-diagnostic specs drop them inside Stata. s_lag and
+dw_eu are NOT filtered on — specs using them shed their few NULL rows in
+Stata, and the census below puts the counts on the record.
 
 Single duckdb SELECT projects + filters in one shot — no separate scans, no
 row-order misalignment.
@@ -57,13 +70,18 @@ df = con.execute(f"""
         CAST(sec_entity_id AS VARCHAR)                  AS firm_str,
         holder_group                                    AS hgroup,
         CAST(report_date AS TIMESTAMP)                  AS rdate,
-        delta_w                                         AS dw,
+        -- (GLOBAL-MAIN, 2026-08-08) dw = FULL-portfolio-denominator Δw (MAIN);
+        -- dw_eu = EU-restricted Δw (within-Europe reallocation diagnostic).
+        delta_w_global                                  AS dw,
+        delta_w                                         AS dw_eu,
         china_share_lag1q                               AS cn_lag,
         -- (DIRECTION FIX, 2026-08-02) directional link-count shares, lagged;
         -- sell_lag + buy_lag = cn_lag row-wise (additive decomposition).
         sell_share_lag1q                                AS sell_lag,
         buy_share_lag1q                                 AS buy_lag,
         shock_us_cn                                     AS shock,
+        -- (S_{{t-1}} PRIMARY, 2026-08-08) lagged shock = primary timing.
+        shock_us_cn_lag1q                               AS s_lag,
         CASE WHEN holder_group = 'US' THEN 1 ELSE 0 END AS us,
         -- (EM-FIX-6, 2026-08-06) ATTRIBUTION COLUMNS. The written update has to
         -- separate the SNAPSHOT effect (03's quarter rule) from the SAMPLE-
@@ -81,10 +99,28 @@ df = con.execute(f"""
         COALESCE(n_supplychain_links_lag1q, -1)         AS nsc_lag,
         COALESCE(CAST(revere_pit_present_lag1q AS INTEGER), -1) AS pit_lag
     FROM read_parquet('{panel_uri}')
-    WHERE delta_w           IS NOT NULL
+    WHERE delta_w_global    IS NOT NULL
       AND china_share_lag1q IS NOT NULL
       AND shock_us_cn       IS NOT NULL
 """).df()
+
+# (GLOBAL-MAIN) denominator-swap sample census: rows the global filter admits
+# that the EU-era filter (delta_w) would have dropped, and vice versa. The
+# "vice versa" count must be 0 (T_global >= T_eu ⇒ EU-defined ⊆ global-defined).
+_swap = con.execute(f"""
+    SELECT
+        COUNT(*) FILTER (WHERE delta_w_global IS NOT NULL AND delta_w IS NULL)     AS n_global_only,
+        COUNT(*) FILTER (WHERE delta_w IS NOT NULL AND delta_w_global IS NULL)     AS n_eu_only
+    FROM read_parquet('{panel_uri}')
+    WHERE china_share_lag1q IS NOT NULL AND shock_us_cn IS NOT NULL
+""").df()
+_n_gonly = int(_swap["n_global_only"].iloc[0])
+_n_euonly = int(_swap["n_eu_only"].iloc[0])
+assert _n_euonly == 0, (
+    f"{_n_euonly} estimation rows have EU dw defined but global dw NULL — "
+    f"impossible under T_global >= T_eu; 06 build broken")
+print(f"       denominator-swap sample effect: {_n_gonly:,} rows admitted by the "
+      f"global filter that the EU filter would drop (dw_eu is NaN there)")
 
 # Upstream integrity on the FULL grid (external-review P2): portfolio weights
 # must sum to 1 within each (group, quarter). Checked on the full parquet, NOT
@@ -118,12 +154,54 @@ assert _nbug == 0, \
     f"{_nbug} (group, quarter) cell(s) have positive holdings but all-NULL weights — 06 weight bug"
 assert _wdev < 1e-9, \
     f"weights do not sum to 1 by (group, quarter): max abs dev {_wdev:.2e} over {_nchk} non-empty cells"
+
+# (GLOBAL-MAIN, 2026-08-08) integrity of the MAIN (global-denominator) family.
+# The simplex identity does NOT apply: the grid holds only EU firms, so
+# SUM(portfolio_weight_global) over a (group, quarter) cell = T_eu/T_global,
+# the group's EU share of its GLOBAL book — strictly in (0, 1], never 1 by
+# construction. Checked instead:
+#   (i)  every cell that carries global weights sums into (0, 1 + 1e-9];
+#   (ii) no cell has positive holdings but all-NULL global weights;
+#   (iii) no cell carries EU weights while missing global weights
+#         (T_global >= T_eu makes that impossible).
+_gchk = con.execute(f"""
+    WITH cell AS (
+        SELECT holder_group, report_date,
+               SUM(portfolio_weight_global)   AS s,
+               COUNT(portfolio_weight_global) AS nn,
+               COUNT(portfolio_weight_eu)     AS nn_eu,
+               SUM(COALESCE(I_ict, 0))        AS tot_hold
+        FROM read_parquet('{panel_uri}')
+        GROUP BY 1, 2)
+    SELECT
+        MAX(CASE WHEN nn > 0 THEN s END)                     AS max_sum,
+        MIN(CASE WHEN nn > 0 THEN s END)                     AS min_sum,
+        COUNT(CASE WHEN nn > 0 THEN 1 END)                   AS n_checked,
+        COUNT(CASE WHEN nn = 0 AND tot_hold > 0 THEN 1 END)  AS n_held_but_null,
+        COUNT(CASE WHEN nn_eu > 0 AND nn = 0 THEN 1 END)     AS n_eu_but_no_global
+    FROM cell
+""").df()
+_gmax = _gchk["max_sum"].iloc[0]
+_gmin = _gchk["min_sum"].iloc[0]
+assert int(_gchk["n_held_but_null"].iloc[0]) == 0, \
+    "cell(s) with positive holdings but all-NULL GLOBAL weights — 06 global-weight bug"
+assert int(_gchk["n_eu_but_no_global"].iloc[0]) == 0, \
+    "cell(s) carry EU weights but no global weights — impossible under T_global >= T_eu"
+assert _gmax < 1 + 1e-9 and _gmin > 0, (
+    f"global-weight cell sums out of (0, 1]: min {_gmin:.6f}, max {_gmax:.6f} "
+    f"over {int(_gchk['n_checked'].iloc[0])} cells (expected T_eu/T_global in (0,1])")
+print(f"       global-weight cell sums (= EU share of the group's global book): "
+      f"min {_gmin:.4f}, max {_gmax:.4f}")
 con.close()
 
 df["firm_str"] = df["firm_str"].astype(str)
 df["hgroup"]   = df["hgroup"].astype(str)
 df["rdate"]    = pd.to_datetime(df["rdate"])
 df["dw"]       = pd.to_numeric(df["dw"],     errors="raise").astype("float64")
+# dw_eu / s_lag may legitimately be NaN on a few rows (EU book empty / first
+# shock quarter); they are DIAGNOSTIC columns, Stata drops their NaNs per spec.
+df["dw_eu"]    = pd.to_numeric(df["dw_eu"],  errors="raise").astype("float64")
+df["s_lag"]    = pd.to_numeric(df["s_lag"],  errors="raise").astype("float64")
 df["cn_lag"]   = pd.to_numeric(df["cn_lag"], errors="raise").astype("float64")
 df["sell_lag"] = pd.to_numeric(df["sell_lag"], errors="raise").astype("float64")
 df["buy_lag"]  = pd.to_numeric(df["buy_lag"],  errors="raise").astype("float64")
@@ -169,9 +247,17 @@ print(f"       n unique firm_str: {df['firm_str'].nunique():,}")
 
 # Sanity assertions (hardened per external review — hard fail, not print)
 assert n > 0, "Empty panel after filter — check upstream parquet."
-assert df["dw"].notna().all(),     "dw has NaN after filter"
+assert df["dw"].notna().all(),     "dw (global MAIN) has NaN after filter"
 assert df["cn_lag"].notna().all(), "cn_lag has NaN after filter"
 assert df["shock"].notna().all(),  "shock has NaN after filter"
+# (GLOBAL-MAIN) diagnostic-column NaN census — printed, NOT filtered on, so the
+# only sample change vs the EU era is the denominator swap itself.
+_n_dweu_nan = int(df["dw_eu"].isna().sum())
+_n_slag_nan = int(df["s_lag"].isna().sum())
+print(f"       dw_eu NaN rows (EU-diag specs drop in Stata): {_n_dweu_nan:,} "
+      f"(must equal the denominator-swap census above: {_n_gonly:,})")
+assert _n_dweu_nan == _n_gonly, "dw_eu NaN count != global-only census — projection bug"
+print(f"       s_lag NaN rows (S_t-1 specs drop in Stata):   {_n_slag_nan:,}")
 assert set(df["hgroup"].unique()) <= {"US", "NONUS"}, (
     f"Unexpected hgroup values: {df['hgroup'].unique()}"
 )
@@ -186,6 +272,17 @@ assert (_pair == 2).all(), \
 # (c) shock is one common value per quarter (no within-quarter variation)
 assert (df.groupby("rdate")["shock"].nunique() == 1).all(), \
     "shock varies within a quarter — expected a single common S_t per quarter"
+# (c2) s_lag likewise quarter-constant (nunique ignores NaN), and it must equal
+# the previous quarter's shock wherever both are observed.
+assert (df.groupby("rdate")["s_lag"].nunique() <= 1).all(), \
+    "s_lag varies within a quarter — expected a single common S_{t-1} per quarter"
+_qmap = (df.dropna(subset=["s_lag"])
+           .groupby("rdate")[["shock", "s_lag"]].first().sort_index())
+_shk = df.groupby("rdate")["shock"].first().sort_index()
+_prev = _shk.shift(1).reindex(_qmap.index)
+_cmp = _qmap["s_lag"][_prev.notna()] - _prev[_prev.notna()]
+assert (len(_cmp) == 0) or (_cmp.abs().max() < 1e-12), \
+    "s_lag != previous quarter's shock — 06 lag propagation bug"
 # (d) cn_lag in [0, 1] (it is a share)
 assert df["cn_lag"].between(0, 1).all(), "cn_lag outside [0,1]"
 # (d2) DIRECTION FIX: additive decomposition must survive the pipeline —
