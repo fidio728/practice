@@ -126,3 +126,67 @@ lives in gate_e_headline_mmfix.csv.
 
 **Figures v2 status: mm-fix + presence closed (constraint C4 satisfied at current construction). Still
 gated on the v3 bundled rebuild (snapshot grain + global denominator + S_{t-1}) before advisor-final.**
+
+## 8. v3 CANONICAL: fund-grain snapshot + global denominator + S_{t-1} primary (2026-08-09, wf_ee2826d4-e86)
+
+**Construction (all three externally-motivated, all committed):** (i) 03 snapshot at FUND grain —
+per (fund, quarter) keep the last complete in-quarter report, absent = sold; adjudicated by
+diag_snapshot_reappearance.py (carried securities reappear next quarter 10.8%/12.3% MV vs 95.2%/82.7%
+baseline; fund-date = complete snapshot in 92.8%); grain labeled RESEARCHER DECISION (advisor rule =
+last-in-quarter only). (ii) dw = GLOBAL full-portfolio denominator (FactSet-identifiable global EQUITY
+book, EQ/AD; US global/EU ratio median 7.05x), dw_eu = within-Europe reallocation diagnostic.
+(iii) s_lag = S_{t-1} primary (advisor-directed twice); S_t = timing diagnostic; shock-menu family
+intentionally stays S_t (construction diagnostic).
+
+**Panel:** holdings 255,767,682 rows (−7,802,803 = −2.96% carried/stitched rows vs mmv2; fund-quarters
+2,537,090 → 2,537,090, 0 lost/gained; pathology 0.58% of multi-date fq / 0.235% of all fq, MV 0.017%).
+c6 = 909,724 rows / 10,293 firms / 82 contiguous quarters, perfectly paired; dw/dw_eu/s_lag 0 NaN.
+Gates: M1 dup 0; M2 exact-EOM recovery 186,800,295 EXACT; M3 out-of-quarter 0; C2d hard invariant 0;
+shock artifacts sha256-identical through the whole chain (fig_ab_tension_series: 0 changed cells).
+
+**Attribution ladder (3pw, two-way cluster firm/month):**
+
+| Rung | Construction | β₃ | p | N |
+|---|---|---|---|---|
+| L0 | security grain, EU, S_t (mmv2) | −6.741e-7 | 0.543 | 910,272 |
+| L1 | fund grain, EU, S_t | −7.154e-7 | 0.531 | 909,638 |
+| L2 | fund grain, GLOBAL, S_t | +2.963e-7 | 0.770 | 909,638 |
+| **L3 = PRIMARY** | **fund grain, GLOBAL, S_{t-1}** | **−1.979e-7** | **0.849** | **909,638** |
+
+itgt variant of L3: −1.689e-7, p=0.868. Step deltas: grain −4.1e-8 (**0.037 SE** — the external
+critique's P0, once fixed, moves nothing); denominator +1.01e-6 (sign flips through zero, null both
+sides); timing −4.9e-7. Diag EU×S_{t-1}: −5.527e-7, p=0.518.
+
+**Inference on L3:** RI circular-shift (81 exhaustive rotations, reporting arbiter): headline **0.817**,
+cum1 **0.890**, cum4 **0.659** (the 0.06–0.10 cum4 tension of earlier vintages fully dissolves).
+Free-perm 5000: 0.889/0.920/0.697; moving-block L5/L8 consistent. FWL outside Stata: rel 1.9e-7 (3pw),
+1.1e-7 (itgt), fail-closed gates PASS. Timing battery all null: lead 0.80, cum1 0.90, cum2 0.84,
+cum4 0.57, in-span 0.83, GPR two-interaction ns, flow 0.38.
+
+**Figures v3:** deltas vs v2 match the 0.41%-modern-MV prediction — fig_A share_of_book max plotted
+delta 0.37pp; tension series 0 changes; all 392 flags assessed benign (largest deltas pre-2005 or
+unplotted cells). fig_A_country idx100 max delta 124pts is a small-denominator country-bucket artifact
+(assessed benign, documented).
+
+**Verification:** gates A–F independently recomputed (denominators both present, row shrink −0.08%…−1.2%
+consistent with grain change; zr_lag census exact; grain-only continuity delta 0.037 SE). v1 items
+4 (timing: 0 mismatches on 909,724 rows vs shock parquet + calendar-shift s_lag), 5 (FWL), 7 (figure
+flags) CONFIRMED; items 1/2/3/6 (raw hand-derivation, conservation checksums, denominator recompute,
+security-grain falsification) re-run post-workflow — results appended below when landed.
+
+**Chain incident log (honesty):** 03 exited 1 AFTER all gates passed (memory contention with a
+concurrently-launched diagnostic killed the reporting phase; C2d re-verified standalone); PS runner
+false-halted on an ExitCode-null after 04 SUCCEEDED (log DONE marker + fresh outputs verified); c6
+assert relaxed for the legitimate empty cell NONUS 1999-03-31 (held cells still strict (0,1], empty
+cells must sum to exactly 0); audit builder f-string brace bug (S_{t-1} in an f-string) fixed.
+
+**v1 verification COMPLETE (2026-08-09 07:40, all 7 items, 0 discrepancies):** items 1/2/3/6 finished
+post-workflow: (1) 3-fund hand-derivation from raw (monthly reporter, weekend qend d_use=Fri 2018-09-28,
+sold-position case) all EXACT_MATCH; the sold position (HV8CDN-S, $16.0M, present Jan-only) is absent
+from v3 and present in mmv2 — chimera kill demonstrated row-level. (2) Multiset-hash conservation:
+new panel ≡ kept rows of mmv2 (checksums identical), removed ≡ carried set, fund-quarter sets equal,
+0 added rows. (3) US denominators recomputed to the dollar (rel 0.0 both quarters; global/EU 7.24x /
+8.13x); 5 spot dw/dw_eu cells absdiff 0.0. (6) Legacy security-grain selection re-derived with QUALIFY
+SQL on 2012-2013 ≡ mmv2 exactly (22,141,985 rows, checksum equal). v3 status: **CANONICAL, fully
+verified.** Remaining before advisor-final: early-window reappearance diagnostics (2006-2011,
+1999-2005), full battery on the new primary, figure package sign-off.

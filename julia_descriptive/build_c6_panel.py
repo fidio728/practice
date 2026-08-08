@@ -174,11 +174,17 @@ _gchk = con.execute(f"""
         FROM read_parquet('{panel_uri}')
         GROUP BY 1, 2)
     SELECT
-        MAX(CASE WHEN nn > 0 THEN s END)                     AS max_sum,
-        MIN(CASE WHEN nn > 0 THEN s END)                     AS min_sum,
-        COUNT(CASE WHEN nn > 0 THEN 1 END)                   AS n_checked,
+        -- (0,1] is required only where the cell actually HOLDS something: an
+        -- all-zero-filled cell (tot_hold = 0; e.g. NONUS 1999-03-31, the first
+        -- grid quarter, before any NONUS holdings exist) legitimately sums to
+        -- exactly 0 and is checked separately below.
+        MAX(CASE WHEN nn > 0 AND tot_hold > 0 THEN s END)    AS max_sum,
+        MIN(CASE WHEN nn > 0 AND tot_hold > 0 THEN s END)    AS min_sum,
+        COUNT(CASE WHEN nn > 0 AND tot_hold > 0 THEN 1 END)  AS n_checked,
         COUNT(CASE WHEN nn = 0 AND tot_hold > 0 THEN 1 END)  AS n_held_but_null,
-        COUNT(CASE WHEN nn_eu > 0 AND nn = 0 THEN 1 END)     AS n_eu_but_no_global
+        COUNT(CASE WHEN nn_eu > 0 AND nn = 0 THEN 1 END)     AS n_eu_but_no_global,
+        COUNT(CASE WHEN nn > 0 AND tot_hold = 0 AND s != 0 THEN 1 END) AS n_empty_nonzero_sum,
+        COUNT(CASE WHEN nn > 0 AND tot_hold = 0 THEN 1 END)  AS n_empty_cells
     FROM cell
 """).df()
 _gmax = _gchk["max_sum"].iloc[0]
@@ -187,9 +193,12 @@ assert int(_gchk["n_held_but_null"].iloc[0]) == 0, \
     "cell(s) with positive holdings but all-NULL GLOBAL weights — 06 global-weight bug"
 assert int(_gchk["n_eu_but_no_global"].iloc[0]) == 0, \
     "cell(s) carry EU weights but no global weights — impossible under T_global >= T_eu"
+assert int(_gchk["n_empty_nonzero_sum"].iloc[0]) == 0, \
+    "zero-holdings cell(s) with a NONZERO global-weight sum — weight without holdings, 06 bug"
 assert _gmax < 1 + 1e-9 and _gmin > 0, (
-    f"global-weight cell sums out of (0, 1]: min {_gmin:.6f}, max {_gmax:.6f} "
+    f"global-weight cell sums out of (0, 1] on HELD cells: min {_gmin:.6f}, max {_gmax:.6f} "
     f"over {int(_gchk['n_checked'].iloc[0])} cells (expected T_eu/T_global in (0,1])")
+print(f"       empty zero-filled cells (sum exactly 0, allowed): {int(_gchk['n_empty_cells'].iloc[0])}")
 print(f"       global-weight cell sums (= EU share of the group's global book): "
       f"min {_gmin:.4f}, max {_gmax:.4f}")
 con.close()

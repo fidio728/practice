@@ -72,7 +72,7 @@ WITH g AS (
         m.w_prev_global                                         AS w_prev,
         m.china_share_lag1q                                     AS cn_lag,
         m.shock_us_cn                                           AS shock,
-        -- (S_{t-1} PRIMARY, 2026-08-08) lagged shock, true quarter lag on the
+        -- (S_{{t-1}} PRIMARY, 2026-08-08) lagged shock, true quarter lag on the
         -- contiguous grid (computed in 06).
         m.shock_us_cn_lag1q                                     AS s_lag,
         m.gpr_us_cn                                             AS gpr,
