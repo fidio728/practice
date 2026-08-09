@@ -190,3 +190,155 @@ new panel ≡ kept rows of mmv2 (checksums identical), removed ≡ carried set, 
 SQL on 2012-2013 ≡ mmv2 exactly (22,141,985 rows, checksum equal). v3 status: **CANONICAL, fully
 verified.** Remaining before advisor-final: early-window reappearance diagnostics (2006-2011,
 1999-2005), full battery on the new primary, figure package sign-off.
+
+## 9. Early-window reappearance diagnostics — fund-grain rule verified on the EARLY feed (2026-08-09)
+
+External re-review objection: the reappearance evidence covered only 2018-2023, while carried MV was
+believed "concentrated pre-2012", so the fund-grain rule was being extrapolated onto the very window
+where it mattered most. Diagnostic re-run on all three windows with production-aligned same-day dedup
+(per (fund,fsym,date), MAX(adj_mv)); artifacts output/diag_snapshot_reappearance_{window}.csv.
+
+| Window | multi-date fq | last report ≥90% of max | carried rows / MV | carried reappear next q | baseline reappear |
+|---|---|---|---|---|---|
+| 1999-2005 | **0.49%** | 94.63% | 0.07% / **0.07%** | 9.69% (MV 16.73%) | 86.37% (MV 93.89%) |
+| 2006-2011 | **15.33%** | 91.91% | 1.53% / **0.97%** | 14.45% (MV 20.06%) | 89.42% (MV 94.78%) |
+| 2018-2023 | 56.38% | 92.80% | 3.88% / **0.41%** | 10.76% (MV 12.34%) | 95.23% (MV 82.70%) |
+
+**Verdict: the rule holds everywhere, and the early sample is the LEAST affected, not the most.**
+Multi-date reporting is a modern phenomenon (0.5% → 15% → 56%); carried positions reappear at
+9.7-14.5% against an 86-95% baseline in every window; and the last in-quarter report is ≥90% of the
+quarter-max in 92-95% of multi-date fund-quarters throughout. No extrapolation is now involved.
+
+**This also resolves the carried-MV discrepancy.** The earlier "15.3% full-sample / 6.53% removed MV"
+figures were contaminated by the 2013 sentinel row ($184T, since removed by DQ-FIX §10): true carried
+MV is 0.07%-0.97% per window. Any text claiming carried MV is "concentrated pre-2012" is wrong and is
+retracted here.
+
+## 10. v3.1 DQ-FIX (2026-08-09, commit 8407a9e) — see commit message for full census
+
+Three EQ/AD rows claiming provably impossible positions (fund holds > firm market cap AND > shares
+outstanding) removed from I_ict: Kogeneracja 2017Q4 $239.7bn vs $0.4bn market cap (600x), Goldman
+2019Q4 $123.5bn, Roper 2020Q4 $89.4bn. Filter = material (>$5bn) AND provably impossible; ≤20-row
+assert guards regime change. Quadrillion-scale sentinel rows (NULL-entity OE instruments) were already
+quarantined by the pre-existing sec_entity_id/issue_type filter and never entered any result.
+
+| Cell | v3 | v3.1 |
+|---|---|---|
+| **PRIMARY global × S_{t-1}** | −1.98e-7, p=.849 | **−1.39e-7, p=.893** |
+| primary itgt | −1.69e-7, p=.868 | −1.12e-7, p=.912 |
+| diag global × S_t | +2.96e-7, p=.770 | +7.58e-7, p=.420 |
+| diag EU × S_{t-1} | −5.53e-7, p=.518 | −2.86e-7, p=.717 |
+| diag EU × S_t | −7.15e-7, p=.531 | **+1.08e-6, p=.221 (sign flip)** |
+
+The EU-denominator cells move most, as predicted: the Kogeneracja row alone was ~5% of the 2017Q4 EU
+denominator. All cells remain clean nulls. Timing battery all null (lead .854, cum1 .915, cum2 .840,
+cum4 **.554**, in-span .890, GPR two-interaction ns).
+
+**Vintage fix bundled:** ownership_c6_panel.dta (flow spec F6) was still the 2026-08-04 PRE-P0 build —
+its own header forbids mixing with post-P0 results, but run_headline_3pairwise.do read it anyway on
+every vintage since. Rebuilt on v3.1: N 247,210 → 420,452 (+70%); flow × S_{t-1} −9.30e-3 p=.381 →
+−5.73e-3 p=.446 (still null).
+
+**Advisor commitment closed:** country-level Figure A now produced per exposure measure
+(fig_A_country_{m1,m2,m3}_quartiles), per the 2026-08-04 minute ("each figure one version per
+exposure measure"). 88 v3 artifacts rotated `_dqpre`.
+
+### 10b. v3.1 inference (2026-08-09 evening)
+
+Attribution ladder (`attribution_ladder_v3_cells.csv`), FWL re-derivation outside Stata, and the full
+RI battery, all on the v3.1 panel.
+
+| Cell | β₃ | SE | p | identifying firms |
+|---|---|---|---|---|
+| **L3 primary, 3pw** | −1.394e-7 | 1.032e-6 | **0.893** | 1,622 |
+| L3 primary, itgt | −1.115e-7 | 1.004e-6 | 0.912 | 1,623 |
+| EU × S_t, itgt | +7.553e-7 | 7.775e-7 | 0.334 | 1,623 |
+| EU × S_{t-1}, itgt | −4.787e-7 | 7.826e-7 | 0.542 | 1,623 |
+
+Identifying variation: 49,632 treated rows (cn_lag>0), 1,622 firms, 24,816 treated firm-quarters.
+FWL outside Stata: 3pw rel 2.33e-8, itgt rel 2.67e-7 (both < 1e-6, fail-closed gates PASS).
+
+**RI battery on the primary (5,000 free perms, seed 20260702; 81 exhaustive circular shifts = the
+pre-registered reporting arbiter; moving block L5/L8):**
+
+| Horizon | β | p_free | **p_circ (arbiter)** | p_mb(L5) | p_mb(L8) | p_WCB |
+|---|---|---|---|---|---|---|
+| h0 (headline) | −1.394e-7 | 0.923 | **0.878** | 0.910 | 0.877 | 0.899 |
+| cum1 | +6.07e-8 | 0.932 | **0.915** | 0.942 | 0.941 | 0.925 |
+| cum2 | +2.03e-7 | 0.896 | **0.842** | 0.895 | 0.861 | 0.847 |
+| cum3 | +1.216e-6 | 0.213 | **0.329** | 0.276 | 0.304 | **0.043** |
+| cum4 | +6.53e-7 | 0.675 | **0.659** | 0.677 | 0.659 | 0.554 |
+
+**Report the cum3 discrepancy, do not bury it and do not promote it.** The score-based quarter-cluster
+wild bootstrap gives p = 0.043 at cum3, the only sub-0.05 number anywhere in the v3.1 battery. It does
+not survive the two corrections that apply to it: the within-family max-|t| FWER over the five horizons
+gives p = 0.132, and the serial-robust reporting arbiter (circular shift) gives p = 0.329. The shock is
+serially correlated (acf1 = +0.271), which is exactly the condition under which the WCB's quarter-cluster
+asymptotics are least reliable at long horizons; the arbiter was pre-registered for that reason before
+this number existed. Treat cum3 as a documented non-result, and say so explicitly rather than omitting
+the horizon.
+
+## 11. CORRECTIONS to §10 and to commit 8407a9e (2026-08-09, after the 7-agent audit)
+
+The audit (workflow wf_f26d34c3-4dc, 7 agents, verdict YES WITH FIXES) found two claims in §10 and in
+the commit message of 8407a9e that were wrong or overstated. Both are corrected here rather than
+quietly amended.
+
+**C1. The "vintage fix" claim was only half true. RETRACTED as written.** 8407a9e states that the F6
+flow panel was rebuilt on v3.1. `ownership_c6_panel.dta` was indeed rewritten, but its two inputs,
+`ownership_share_observed.parquet` and `ownership_share_float.parquet`, were still the 2026-08-04
+build. The reported flow coefficient was therefore a v3.1-grid × 08-04-shares hybrid, and the sample
+jump 247,210 → 420,452 came from the grid, not from the data-quality filter.
+
+Fixed properly on 2026-08-09 21:00: both shares parquets rebuilt from the current `holdings_eom.parquet`
+(old ones rotated `*_hybrid`), then the c6 flow panel, then Part B re-estimated.
+
+| vintage | flow × S_{t-1}, 3pw | p | N | note |
+|---|---|---|---|---|
+| pre-P0 (08-04 panel, cited on every vintage since) | −9.304e-3 | 0.381 | 247,210 | stale, never valid post-P0 |
+| hybrid (v3.1 grid × 08-04 shares) | −5.734e-3 | 0.446 | 420,452 | what 8407a9e reported |
+| **genuine v3.1** | **−5.620e-3** | **0.422** | **434,172** | 7,374 firms, 82 quarters |
+
+Rebuilding exposed a second thing worth recording: `build_ownership_share_panel.py` asserted that
+primary-class `shares_out` is constant within (security, quarter). That was a **pre-EM (W=10) invariant**
+— when every kept row sat within 10 days of quarter-end the float could not disagree. The advisor's
+whole-quarter rule (2026-08-06) widened the window to 91 days, so two funds can value the same security
+three months apart; the assert failed on 59,370 cells. This proves the shares panel had never been
+rebuilt since the EM rule was adopted. The fix reuses the convention already in the codebase rather than
+inventing one: EM-FIX-2's freshest-valuation-date rule from 04's market_cap (keep MIN(asof_gap_days)
+within the cell, then average), which restores the assert to its intended meaning — float must be
+constant *at a single valuation date*, and dispersion there would be a feed defect rather than a timing
+artifact. Staleness of the surviving valuation dates is now printed and disclosed.
+
+**C2. "Sign flip" was an overstatement. WITHDRAWN.** §10 flagged the diag EU × S_t cell moving from
+−7.15e-7 to +1.08e-6 as a sign flip. The move is +1.79e-6 against a v3.1 standard error of 8.74e-7,
+i.e. about two standard errors, between two estimates that are both insignificant and whose confidence
+intervals overlap over most of their length, on panels differing by 3 rows out of 12,287,854. The
+correct description is that the cell is imprecisely estimated and moved within its own noise. Presenting
+it as a sign flip would invite the reader to conclude the design is fragile in a way the data do not
+support. Use: "the EU-denominator diagnostic cells move by up to two standard errors; all remain
+insignificant."
+
+**Power, stated once and carried into every write-up.** Primary cell: β₃ = −1.394e-7, SE = 1.032e-6,
+95% CI [−2.17e-6, +1.89e-6], and the minimum detectable effect at 80% power / 5% two-sided is
+**2.89e-6**. For a firm at the mean exposure among exposed firms (12.4%) in a quarter when the shock
+rises one standard deviation, that MDE is a 1.11e-6 change in portfolio weight: 1.6% of the SD of Δw,
+but larger than 81% of the changes actually observed. 55.5% of Δw values are exactly zero. Identification
+comes from 49,634 cells (5.5% of the sample) across 1,623 of 10,293 firms. **The result bounds the
+effect from above; it is not evidence that the effect is zero.** Every future write-up states this.
+
+**Residual contamination, disclosed rather than pursued.** 373 rows failing the same impossibility tests
+below the $5bn materiality cut remain in the panel, worth $47.0bn across 196 holder-country-quarter
+cells. At the holder-group denominator the regression actually divides by, they are at most 0.067% of
+any group-quarter total. At holder-country granularity two cells are materially affected (Indonesia
+2017Q4 at 65.9%, from a single position at 2.076× float; Netherlands 2017Q3 at 0.79%, including an ABP
+position at 39.2× float). A tighter rule would lean harder on the market-cap proxy, trading a documented
+small bias for an undocumented one, so the residual is reported instead. Not yet measured, and open:
+`build_fig_ab_data.py` buckets by SECURITY country while dividing by a holder-GROUP book, and no one has
+quantified the residual on that specific combination — do it before Figure A's country panels are cited
+in text.
+
+**Also fixed:** `build_desc_trend_us_holdings.py` carried a cross-check that replicated 04's PRE-DQ
+filter and raises RuntimeError above 1e-9 relative difference. It passes today only because none of the
+three excluded rows is a US investor holding an EU security. The DQ rule is now inlined there, with a
+note to keep it in sync with 04.

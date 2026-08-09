@@ -86,23 +86,49 @@ BASE_WHERE = f"issue_type = 'EQ' AND sec_country IN {EU_SQL} AND fsym_id = fsym_
 con = duckdb.connect()
 con.execute("SET memory_limit='6GB'")
 
-print("[1/5] Primary-class float per (sec, quarter) — shares_out now constant, AVG()...")
+print("[1/5] Primary-class float per (sec, quarter) — freshest valuation date, then AVG()...")
+# (EM-RULE FIX, 2026-08-09) Under the pre-EM W=10 as-of window every kept row sat
+# within 10 days of quarter-end, so adj_shares_out was a within-cell constant and
+# the assert below held exactly. The advisor-directed quarter rule (2026-08-06)
+# widened the window to the whole quarter, so two funds can report the same
+# security up to 91 days apart and carry genuinely different float. Rebuilding
+# this panel on the current holdings without a rule would AVERAGE across
+# valuation dates — the same defect EM-FIX-2 fixed for market_cap in
+# 04_us_ownership_european.jl. Apply the SAME rule here: keep only rows at the
+# FRESHEST valuation date in the cell (MIN(asof_gap_days)), then AVG within it,
+# so the assert recovers its original meaning (constant float at a single date).
 con.execute(f"""
 CREATE OR REPLACE TEMP TABLE shr AS
+WITH src AS (
+    SELECT sec_entity_id, report_date, adj_shares_out, asof_gap_days,
+           MIN(asof_gap_days) OVER (PARTITION BY sec_entity_id, report_date) AS min_gap
+    FROM read_parquet('{EOM}')
+    WHERE {BASE_WHERE}
+      AND adj_shares_out IS NOT NULL AND adj_shares_out > 0
+)
 SELECT sec_entity_id,
        report_date,
        AVG(adj_shares_out)            AS shares_out,
        COUNT(DISTINCT adj_shares_out) AS n_distinct_shrout,
-       COUNT(*)                       AS n_holder_rows
-FROM read_parquet('{EOM}')
-WHERE {BASE_WHERE}
-  AND adj_shares_out IS NOT NULL AND adj_shares_out > 0
+       COUNT(*)                       AS n_holder_rows,
+       MAX(asof_gap_days)             AS asof_gap_days_used
+FROM src
+WHERE asof_gap_days = min_gap
 GROUP BY 1, 2
 """)
 
-# Integrity: after the primary-class filter, shares_out must be a within-cell constant.
+# Integrity: at a SINGLE valuation date, primary-class shares_out must be a
+# within-cell constant. Dispersion here would mean the feed disagrees with
+# itself on the same day, which is a data defect, not a timing artifact.
 _disp = con.execute("SELECT COUNT(*) FROM shr WHERE n_distinct_shrout > 1").fetchone()[0]
-assert _disp == 0, f"{_disp} (sec, quarter) cells still have dispersed shares_out after fsym=primary — investigate"
+_gap = con.execute("SELECT AVG(asof_gap_days_used), MAX(asof_gap_days_used), "
+                   "SUM(CASE WHEN asof_gap_days_used > 14 THEN 1 ELSE 0 END), COUNT(*) "
+                   "FROM shr").fetchone()
+print(f"      float valuation staleness: mean gap {_gap[0]:.2f}d, max {_gap[1]}d, "
+      f"{_gap[2]:,} of {_gap[3]:,} cells > 14d")
+assert _disp == 0, (
+    f"{_disp} (sec, quarter) cells have dispersed shares_out AT THE SAME "
+    f"valuation date after fsym=primary — feed defect, investigate")
 
 # Persist the primary-EQ float per (firm, quarter) so step 3 can zero-fill the grid:
 # a grid cell where a group holds nothing but the firm HAS a valid float -> ownership 0;

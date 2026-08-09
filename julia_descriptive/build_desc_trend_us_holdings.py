@@ -148,18 +148,47 @@ def main() -> None:
     # -----------------------------------------------------------------------
     # 3) CROSS-CHECK: recompute directly from holdings_eom.parquet with the
     #    exact 04 Section 1 filters. Must match to float tolerance.
+    #
+    # (DQ-FIX, 2026-08-09) 04 now also anti-joins dq_impossible — provably
+    # impossible EQ/AD positions (a fund holding more than the issuer's market
+    # cap AND more shares than exist). This cross-check must replicate THAT
+    # filter, not the pre-v3.1 one. It passes today only because none of the
+    # three excluded rows is a US investor holding an EU security (they are
+    # PL/PL, US/US, CA/US) and this query is restricted to exactly that cell;
+    # one future US-on-EU exclusion would hard-fail the RuntimeError below
+    # while 04 itself is correct. The rule is inlined rather than imported
+    # because 04 materialises dq_impossible only inside its own duckdb session.
+    # Keep the two in sync: 04_us_ownership_european.jl, "DQ-FIX" block.
     # -----------------------------------------------------------------------
     check = con.sql(f"""
-        SELECT sec_country,
-               report_date AS quarter_end,
-               SUM(adj_mv)                   AS usd_value,
-               COUNT(DISTINCT sec_entity_id) AS n_firms_held
-        FROM read_parquet('{eom}')
-        WHERE investor_country = 'US'
-          AND sec_country IN {EU_SQL_TUPLE}
-          AND sec_entity_id IS NOT NULL
-          AND issue_type IN ('EQ', 'AD')
-          AND report_date IN ({qend_list})
+        WITH mc AS (
+            SELECT cls.sec_entity_id, cls.report_date,
+                   SUM(cls.shares_out * cls.price) AS market_cap
+            FROM (
+                SELECT sec_entity_id, report_date, fsym_id,
+                       AVG(adj_shares_out) AS shares_out, AVG(adj_price) AS price
+                FROM read_parquet('{eom}')
+                WHERE fsym_id = fsym_primary_id AND issue_type = 'EQ'
+                  AND adj_shares_out > 0 AND adj_price > 0
+                GROUP BY 1, 2, 3
+            ) cls
+            GROUP BY 1, 2
+        )
+        SELECT h.sec_country,
+               h.report_date AS quarter_end,
+               SUM(h.adj_mv)                   AS usd_value,
+               COUNT(DISTINCT h.sec_entity_id) AS n_firms_held
+        FROM read_parquet('{eom}') h
+        LEFT JOIN mc ON mc.sec_entity_id = h.sec_entity_id
+                    AND mc.report_date   = h.report_date
+        WHERE h.investor_country = 'US'
+          AND h.sec_country IN {EU_SQL_TUPLE}
+          AND h.sec_entity_id IS NOT NULL
+          AND h.issue_type IN ('EQ', 'AD')
+          AND h.report_date IN ({qend_list})
+          AND NOT (h.adj_mv > 5e9 AND (
+                     (mc.market_cap IS NOT NULL AND h.adj_mv > mc.market_cap)
+                  OR (h.adj_holding > h.adj_shares_out AND h.adj_shares_out > 0)))
         GROUP BY 1, 2
         ORDER BY 1, 2
     """).df()
