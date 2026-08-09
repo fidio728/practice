@@ -154,17 +154,79 @@ println("Building I_{i,c,t} country-firm aggregation (ISSUE_TYPE in EQ, AD)...")
 
 ict_path = test_suffix_path(joinpath(OUT_DIR, "I_ict_panel.parquet"))
 
+# (DQ-FIX, 2026-08-09) PROVABLE-IMPOSSIBILITY FILTER on I_ict inputs.
+# Discovered via the 2013/2018-2022 sentinel-MV audit: a handful of EQ/AD rows
+# claim positions that cannot exist — a single fund holding MORE than the
+# firm's entire market cap, and/or more shares than are outstanding (e.g. a
+# Polish pension fund "holding" $239.7bn of Kogeneracja SA, a $0.4bn utility:
+# 600x the company). Such rows pass every pipeline-consistency check (garbage
+# in, consistently garbage out) and inflate the country/group denominators by
+# 0.4-1.6% in isolated quarters. Rule — drop a row ONLY if it is provably
+# impossible AND material:
+#     adj_mv > $5bn  AND  ( adj_mv > firm market cap  OR
+#                           adj_holding > adj_shares_out )
+# The inline market cap mirrors step (2) (primary-EQ classes, AVG within
+# class, SUM across classes) without the EM-FIX-2 freshest-gap restriction —
+# immaterial here: observed overshoots are 1.5x-600x, far beyond any
+# valuation-date noise. 2026-08-09 census: exactly 3 rows ($452.6bn), each
+# failing BOTH tests. The NULL-entity / non-EQ sentinel rows (the $1.5
+# quadrillion FXQXVW-S family) never reach I_ict — the existing
+# sec_entity_id IS NOT NULL + issue_type IN ('EQ','AD') filter quarantines
+# them; this filter closes the remaining identified-EQ/AD channel.
+DBInterface.execute(con, """
+    CREATE OR REPLACE TABLE dq_impossible AS
+    WITH cand AS (
+        SELECT fund_id, fsym_id, sec_entity_id, report_date,
+               adj_mv, adj_holding, adj_shares_out
+        FROM read_parquet('$EOM_PATH')
+        WHERE sec_entity_id IS NOT NULL AND investor_country IS NOT NULL
+          AND issue_type IN ('EQ', 'AD') AND adj_mv > 5e9
+    ),
+    mc AS (
+        SELECT cls.sec_entity_id, cls.report_date,
+               SUM(cls.shares_out * cls.price) AS market_cap
+        FROM (
+            SELECT sec_entity_id, report_date, fsym_id,
+                   AVG(adj_shares_out) AS shares_out, AVG(adj_price) AS price
+            FROM read_parquet('$EOM_PATH')
+            WHERE fsym_id = fsym_primary_id AND issue_type = 'EQ'
+              AND adj_shares_out > 0 AND adj_price > 0
+              AND sec_entity_id IN (SELECT DISTINCT sec_entity_id FROM cand)
+            GROUP BY 1, 2, 3
+        ) cls
+        GROUP BY 1, 2
+    )
+    SELECT c.fund_id, c.fsym_id, c.sec_entity_id, c.report_date, c.adj_mv
+    FROM cand c LEFT JOIN mc USING (sec_entity_id, report_date)
+    WHERE (mc.market_cap IS NOT NULL AND c.adj_mv > mc.market_cap)
+       OR (c.adj_holding > c.adj_shares_out AND c.adj_shares_out > 0)
+""")
+dq_census = qdf(con, """
+    SELECT year(report_date) AS y, COUNT(*) AS n, ROUND(SUM(adj_mv)/1e9, 1) AS mv_bn
+    FROM dq_impossible GROUP BY 1 ORDER BY 1
+""")
+dq_n = qdf(con, "SELECT COUNT(*) AS n FROM dq_impossible").n[1]
+println("  DQ-FIX provably-impossible EQ/AD rows dropped from I_ict: $dq_n")
+println(dq_census)
+dq_n <= 20 || error(
+    "DQ-FIX flagged $dq_n rows (> 20) — the impossibility filter is no longer " *
+    "surgical; the raw feed changed regime. Investigate before proceeding.")
+
 @time atomic_copy_to(con, """
     SELECT
         sec_entity_id,
         sec_country,
         investor_country,
         report_date,
-        SUM(adj_mv) AS I_ict
-    FROM read_parquet('$EOM_PATH')
+        SUM(h.adj_mv) AS I_ict
+    FROM read_parquet('$EOM_PATH') h
     WHERE sec_entity_id IS NOT NULL
       AND investor_country IS NOT NULL
       AND issue_type IN ('EQ', 'AD')
+      AND NOT EXISTS (
+          SELECT 1 FROM dq_impossible d
+          WHERE d.fund_id = h.fund_id AND d.fsym_id = h.fsym_id
+            AND d.report_date = h.report_date)
     GROUP BY sec_entity_id, sec_country, investor_country, report_date
 """, ict_path)
 ict_path_fwd = replace(ict_path, "\\" => "/")

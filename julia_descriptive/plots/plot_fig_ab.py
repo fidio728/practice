@@ -37,7 +37,7 @@
 #   plots/fig_A_firm_zero_vs_positive.{pdf,png}
 #   plots/fig_A_firm_quartile_ew.{pdf,png}
 #   plots/fig_A_firm_quartile_mcapw.{pdf,png}
-#   plots/fig_A_country_m1_quartiles.{pdf,png}
+#   plots/fig_A_country_{m1,m2,m3}_quartiles.{pdf,png}
 #   plots/fig_B_link_growth_us2.{pdf,png}
 #   plots/fig_B_link_growth_us3.{pdf,png}
 # ===========================================================================
@@ -294,12 +294,31 @@ def figure_a_firm(split: str, series: list[tuple[str, str, str, float]],
 
 
 # ---------------------------------------------------------------------------
+MEASURE_DESC = {
+    "M1": "M1, the country-aggregate China link share (sum of China customer+supplier "
+          "links / sum of all customer+supplier links, ownership-matched universe)",
+    "M2": "M2, the market-cap-weighted average of firm-level China link shares",
+    "M3": "M3, the equal-weighted (1/N) average of firm-level China link shares",
+}
+
+
 def figure_a_country(ten: pd.DataFrame) -> list[Path]:
-    d = pd.read_csv(F_A_CTRY, parse_dates=["quarter_end"])
+    # (2026-08-09) one figure per exposure measure, per the 2026-08-04 minute
+    # ("each figure has one version per exposure measure (M1, M2, M3)").
+    dd_all = pd.read_csv(F_A_CTRY, parse_dates=["quarter_end"])
+    if "measure" not in dd_all.columns:
+        dd_all["measure"] = "M1"
+    paths: list[Path] = []
+    for meas in sorted(dd_all["measure"].unique()):
+        paths += _figure_a_country_one(ten, dd_all.loc[dd_all["measure"].eq(meas)], meas)
+    return paths
+
+
+def _figure_a_country_one(ten: pd.DataFrame, d: pd.DataFrame, meas: str) -> list[Path]:
     d = d.loc[d["holder_group"].eq("US")]
-    series = [("bottom_quartile", "bottom quartile (low M1)", C_LOW, 2.0),
+    series = [("bottom_quartile", f"bottom quartile (low {meas})", C_LOW, 2.0),
               ("mid_half", "middle half", C_REF, 1.4),
-              ("top_quartile", "top quartile (high M1)", C_HIGH, 2.0)]
+              ("top_quartile", f"top quartile (high {meas})", C_HIGH, 2.0)]
 
     fig, axes = _new_figure()
     _tension_panel(axes[0], ten)
@@ -316,27 +335,28 @@ def figure_a_country(ten: pd.DataFrame) -> list[Path]:
                  "share", pct=True, label_fmt=lambda v: f"{100*v:,.1f}%")
 
     note = (
-        "Countries are ranked each quarter on M1 (country aggregate China link "
-        "share = sum of China customer+supplier links / sum of all customer+supplier "
-        "links, ownership-matched universe), then split at the cross-country 25th "
+        f"Countries are ranked each quarter on {MEASURE_DESC[meas]}, "
+        "then split at the cross-country 25th "
         "and 75th percentiles.\n"
-        "TIMING: the ranking uses M1 at t-1; holdings are measured at t. Countries "
+        f"TIMING: the ranking uses {meas} at t-1; holdings are measured at t. Countries "
         "with fewer than 20 firms in a quarter are not rankable and are dropped that "
         "quarter, so the three lines need not exhaust the book.\n"
         "The level panel is on a log scale because the two arms differ by roughly two "
         "orders of magnitude in raw dollars -- a mechanical size difference, which is "
         "exactly why the indexed and share panels are the headline. "
         "READ THE PRE-2017 BOTTOM-QUARTILE LINE WITH CARE: bucket membership churns "
-        "(5.0 of 26 countries change bucket per quarter over 2012-2016, against 2.0 "
-        "over 2018-2023), so a single large country crossing the 25th-percentile cut "
-        "-- Spain does exactly this in 2015Q2 -- moves the arm by hundreds of index "
-        "points. The quarter-by-quarter composition is in "
+        "far more before 2017 than after"
+        + (" (under M1: 5.0 of 26 countries change bucket per quarter over 2012-2016, "
+           "against 2.0 over 2018-2023; Spain crosses the 25th-percentile cut in 2015Q2 "
+           "and alone moves the arm by hundreds of index points)" if meas == "M1" else "")
+        + ", so single large countries crossing a percentile cut can move an arm "
+        "sharply. The quarter-by-quarter composition (per measure) is in "
         "fig_A_country_bucket_membership.csv. "
         f"Background silhouette = {TENSION_LABEL}, scaled to panel height with no "
         "axis and no ticks; read its level off the top panel.")
-    return _finish(fig, axes, "fig_A_country_m1_quartiles",
+    return _finish(fig, axes, f"fig_A_country_{meas.lower()}_quartiles",
                    "Figure A (country level). US holdings by country China-exposure quartile",
-                   "Countries split on M1, the country-aggregate China link share, measured at t-1",
+                   f"Countries split on {meas}, measured at t-1",
                    note)
 
 

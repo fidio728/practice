@@ -378,19 +378,25 @@ def build_figure_a_firm(df: pd.DataFrame, cpi: pd.DataFrame) -> tuple[pd.DataFra
 
 
 # ---------------------------------------------------------------------------
-def build_figure_a_country(df: pd.DataFrame, cpi: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Country-level variant: countries split on M1_{c,t-1}."""
+def build_figure_a_country(df: pd.DataFrame, cpi: pd.DataFrame,
+                           measure: str = "M1") -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Country-level variant: countries split on <measure>_{c,t-1}.
+
+    (2026-08-09) Parameterized over M1/M2/M3 — the 2026-08-04 meeting minute
+    commits to "each figure one version per exposure measure"; the caller loops
+    over all three and the `measure` column distinguishes them in the CSVs.
+    """
     if not CTRY_M.is_file():
         raise FileNotFoundError(
             f"{CTRY_M} not found — run build_country_measures.py first.")
     cm = pd.read_csv(CTRY_M, parse_dates=["quarter_end"])
     cm = cm.loc[cm["universe"].eq(COUNTRY_UNIVERSE),
-                ["country", "quarter_end", "M1", "n_firms"]].copy()
-    cm = cm.loc[cm["M1"].notna() & cm["n_firms"].ge(MIN_FIRMS_FOR_COUNTRY_RANK)]
+                ["country", "quarter_end", measure, "n_firms"]].copy()
+    cm = cm.loc[cm[measure].notna() & cm["n_firms"].ge(MIN_FIRMS_FOR_COUNTRY_RANK)]
 
     # classification at t-1 -> stamp forward one quarter to t
     cm["quarter_end"] = cm["quarter_end"] + pd.offsets.QuarterEnd(1)
-    cm = cm.rename(columns={"M1": "m1_lag", "n_firms": "n_firms_country_lag"})
+    cm = cm.rename(columns={measure: "m1_lag", "n_firms": "n_firms_country_lag"})
 
     memb = []
     for q, g in cm.groupby("quarter_end", sort=True):
@@ -406,7 +412,8 @@ def build_figure_a_country(df: pd.DataFrame, cpi: pd.DataFrame) -> tuple[pd.Data
         gg["cut_p75"] = c75
         memb.append(gg)
     memb = pd.concat(memb, ignore_index=True)
-    print(f"[A2] country classification rows: {len(memb):,} "
+    memb["measure"] = measure
+    print(f"[A2:{measure}] country classification rows: {len(memb):,} "
           f"({memb['country'].nunique()} countries, {memb['quarter_end'].nunique()} quarters)")
 
     firm_ct = (df.assign(_us=df["usd_us"].fillna(0.0), _wus=df["w_us"].fillna(0.0),
@@ -430,7 +437,7 @@ def build_figure_a_country(df: pd.DataFrame, cpi: pd.DataFrame) -> tuple[pd.Data
         a["holder_group"] = grp
         out.append(a)
     agg = pd.concat(out, ignore_index=True)
-    agg["measure"] = "M1"
+    agg["measure"] = measure
     agg["universe"] = COUNTRY_UNIVERSE
 
     groups = ["bucket", "holder_group"]
@@ -526,10 +533,17 @@ def main() -> None:
     print(f"[A1] wrote {F_A_FIRM.name} ({len(a_firm):,} rows), "
           f"{F_A_CUTS.name} ({len(a_cuts):,} rows)")
 
-    a_ctry, a_memb = build_figure_a_country(df, cpi)
+    # (2026-08-09) one version per exposure measure, per the 2026-08-04 minute
+    _ctry_parts, _memb_parts = [], []
+    for _m in ("M1", "M2", "M3"):
+        _c, _mb = build_figure_a_country(df, cpi, measure=_m)
+        _ctry_parts.append(_c)
+        _memb_parts.append(_mb)
+    a_ctry = pd.concat(_ctry_parts, ignore_index=True)
+    a_memb = pd.concat(_memb_parts, ignore_index=True)
     a_ctry.to_csv(F_A_CTRY, index=False)
     a_memb.to_csv(F_A_CMEMB, index=False)
-    print(f"[A2] wrote {F_A_CTRY.name} ({len(a_ctry):,} rows), "
+    print(f"[A2] wrote {F_A_CTRY.name} ({len(a_ctry):,} rows, measures M1/M2/M3), "
           f"{F_A_CMEMB.name} ({len(a_memb):,} rows)")
 
     b, b_cuts = build_figure_b(df)
@@ -553,7 +567,7 @@ def main() -> None:
     cus = a_ctry.loc[a_ctry["holder_group"].eq("US")]
     for q in SPOT_QUARTERS:
         for _, r in cus.loc[cus["quarter_end"].eq(q)].iterrows():
-            spot.append({"figure": "A_country", "series": f"M1|{r['bucket']}",
+            spot.append({"figure": "A_country", "series": f"{r['measure']}|{r['bucket']}",
                          "quarter_end": q.date(), "n": r["n_countries"],
                          "real_usd_2020": r["real_usd_2020"],
                          "share_of_book": r["share_of_book"],
