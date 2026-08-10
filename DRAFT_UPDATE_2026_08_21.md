@@ -50,46 +50,110 @@ evidence for the fund-grain rule, not as a proof.
 
 ## (e) Data-quality filter, its residual, and the four-version check
 
-The shipped filter (V1) drops exactly 3 impossible rows, positions above $5bn
-where market value exceeds market cap or the holding exceeds shares
-outstanding, totaling $452.6bn. A documented residual remains below the $5bn
-threshold: 373 rows, $47.0bn, spread over 196 holder-country-quarters.
-Indonesia 2017Q4 alone accounts for 65.9% of its country-quarter book.
+The shipped filter is V1. It is a union of two legs, applied only to positions
+above $5bn. The market-cap leg fires when the position's market value exceeds
+the issuer's inline market cap. The shares leg fires when the holding exceeds
+shares outstanding. A row is dropped if either leg fires. V1 drops exactly 3
+rows, $452.6bn in total. Each of the three fails both legs, so the leg
+decomposition does not change V1's dollar count.
 
-We reran the pipeline under four filter versions: V0 drops nothing; V1 is the
-shipped filter (3 rows, $452.6bn); V2 removes the same impossibility test at
-any size (304 rows, $483.0bn); V3 adds a broader plausibility screen (30,586
-rows, $496.8bn). Across the 19,340-row deltas table, 1,408 country-quarter
-cells move at all. Only 8 move by more than 1% of the V1 global book. The
-movers are the ones the filter was built around: under V0 the giant dropped
-row returns (Poland 2017Q4, +1479.7%, +$239.7bn; Canada 2020Q4, +9.74%), and
-under V2/V3 the sub-threshold residual comes out (Indonesia 2017Q4, -65.9%,
--$4.20bn, falling from $6.38bn to $2.18bn; Slovenia 2015Q2, -4.7%; Mauritius
-2004Q4, -1.7%). US-held EU country rankings at 2018Q4 and 2022Q4 show zero
-rank moves across all four versions; the GB/CH/FR/IE/DE top five is stable.
-In the figure buckets the largest share movement against V1 is 0.0010pp on
-the global denominator and 0.0022pp on the EU denominator. The filter choice
-is irrelevant for the figures and rankings, apart from the named add-backs
-and removals above.
+We reran the pipeline under four filter versions. V0 drops nothing. V1 is the
+shipped filter, 3 rows and $452.6bn. V2 is the shares leg only, applied at any
+size, with no market-cap proxy anywhere in the rule; it drops 304 rows and
+$483.0bn. V3 is V2 plus a sentinel-price screen, 30,586 rows and $496.8bn. V2
+is not V1 re-evaluated at a lower size threshold. It is narrower than V1 in one
+dimension and wider in another. It is narrower because it drops the market-cap
+leg. It is wider because it drops the size threshold. It was built that way on
+purpose. The market-cap proxy is derived from the same feed the filter is meant
+to police, so a proxy error could manufacture the filter's own justification,
+and V2 is the version that cannot.
+
+Two residual figures follow from those two definitions. They count different
+sets of rows, and both are correct. The first is the union-leg residual below
+the size threshold. Running both legs with the threshold set to zero drops 376
+rows and $499.6bn. Subtracting V1 leaves 373 rows and $47.0bn, spread over 196
+holder-country-quarters, as recorded in the audit of the filter. The second is
+the shares-leg-only residual. V2 minus V1 leaves 301 rows and $30.38bn, read
+live from the census as 304 minus 3 rows and $483.01bn minus $452.63bn; 163 of
+the quarter-end holder-country cells in the deltas table move under V2. The
+union figure is the larger of the two because it also catches sub-threshold
+rows that fail only the market-cap leg. Neither figure supersedes the other.
+Neither is stale. Any text that reports one of them has to say which one it is.
+
+Across the 19,340-row deltas table, 1,408 country-quarter cells move at all.
+Eight of those cells move by more than 1% of their own country-quarter total.
+No cell moves by as much as 1% of the global V1 book. The movers are the ones
+the filter was built around. Under V0 the dropped rows return: Poland 2017Q4 at
++1479.7% and +$239.7bn, Canada 2020Q4 at +9.74%, and the United States 2019Q4
+at +0.80%. Under V2 and V3 the sub-threshold residual comes out: Indonesia
+2017Q4 at -65.9% and -$4.20bn, falling from $6.38bn to $2.18bn, Slovenia 2015Q2
+at -4.7%, and Mauritius 2004Q4 at -1.7%.
+
+The two remaining checks had a narrower scope than the deltas table, and the
+earlier text did not say so. The country-ranking comparison was run at 2018Q4
+and 2022Q4 only. The Figure-A bucket-share comparison was run at 2018Q4, 2020Q1
+and 2022Q4 only. Both spot sets exclude 2017Q4 and 2020Q4, which are exactly
+the quarters carrying the two largest anomalies in the delta table. The earlier
+figure of 0.0010pp on the global denominator and 0.0022pp on the EU denominator
+is therefore a three-quarter maximum, not a full-sample maximum. The earlier
+claim of zero rank moves is a two-quarter statement. Neither supports a claim
+about the whole sample as it stands. Both checks have now been extended to every
+quarter, with per-quarter maxima and argmax cells, and with 2017Q4 and 2020Q4
+reported by name whatever the maxima turn out to be.
+
+<<< PLACEHOLDER, to be filled from the Run phase of 2026-08-10 >>>
+All-quarter ranking result: ___ rank positions differ from V1 across ___ non-V1
+version-quarters. Quarters where the ordered top five differs from V1: ___.
+Worst single rank move: ___. Worst percentage move: ___.
+All-quarter Figure-A bucket result: the largest share movement against V1 is
+___pp on the global denominator and ___pp on the EU denominator, attained at
+___.
+Named quarters, reported regardless of the maxima: 2017Q4 ___, 2020Q4 ___.
+Source files, all under output/dq_variants/:
+dq_ranking_quarter_summary.csv, dq_bucket_share_quarter_summary.csv,
+dq_named_quarter_rows.csv. The old spot tables are retained as
+dq_country_ranking_us_held_SPOT_SUBSET.csv and
+dq_fig_A_country_bucket_shares_SPOT_SUBSET.csv and are a subset, not evidence
+on their own.
+Only once these are filled in can this block state whether the filter choice is
+irrelevant for the figures and the rankings over the full sample.
+<<< END PLACEHOLDER >>>
 
 ## (f) Country-panel results (Step 4)
 
-The country-quarter panel regressions use CRVE p-values and a score bootstrap
-(Kline-Santos, Webb weights, 9999 replications) as the inference of record at
-27 to 28 clusters. The bootstrap engine was switched at run time: boottest
-does not run after reghdfe with two absorbed fixed-effect sets, so the
-do-file's documented fallback was used for all cells.
+These are preliminary estimates on an alternative outcome. The outcome is the
+change in log dollar holdings at the country-quarter level. It is not the
+portfolio-weight estimand you specified, so these coefficients do not answer
+the reallocation question the design was built for. We report them because
+they were run. We draw no inferential conclusion from them.
 
-The us_dlog block is cleanly null. M1: b = -0.025, p_crve = 0.77,
-p_wild = 0.76, N = 1,940. M2: b = -0.076, p_crve = 0.44, p_wild = 0.45,
-N = 2,016. M3: b = -0.008, p_crve = 0.98, p_wild = 0.98, N = 2,036.
+Two inference routines were computed. The first is cluster-robust standard
+errors, reported below as p_crve. The second is a score bootstrap with Webb
+weights and 9999 replications, following Kline and Santos, reported below as
+p_wild. There are 27 to 28 clusters. Neither routine is the arbiter for this
+panel. The bootstrap engine was switched at run time, because boottest does
+not run after reghdfe with two absorbed fixed-effect sets, so the do-file's
+documented fallback was used for all cells. The circular-shift randomization
+test, which is the arbiter under the pre-registered hierarchy, has not been
+run on these cells.
 
-The us_minus_nonus block, the DDD analogue, is uniformly negative with
-marginal inference. M1: b = -0.695, p_crve = 0.024, p_wild = 0.060,
-N = 1,938. M2: b = -0.459, p_crve = 0.104, p_wild = 0.025, N = 2,016.
-M3: b = -1.310, p_crve = 0.092, p_wild = 0.080, N = 2,034. Only the M2
-difference crosses 0.05 on the bootstrap. With 27 clusters we treat this
-pattern as suggestive, not as a headline result.
+The us_dlog block is small and indistinguishable from zero on both routines.
+M1: b = -0.025, p_crve = 0.77, p_wild = 0.76, N = 1,940. M2: b = -0.076,
+p_crve = 0.44, p_wild = 0.45, N = 2,016. M3: b = -0.008, p_crve = 0.98,
+p_wild = 0.98, N = 2,036.
+
+The us_minus_nonus block, the DDD analogue, is negative for all three
+measures. M1: b = -0.695, p_crve = 0.024, p_wild = 0.060, N = 1,938. M2:
+b = -0.459, p_crve = 0.104, p_wild = 0.025, N = 2,016. M3: b = -1.310,
+p_crve = 0.092, p_wild = 0.080, N = 2,034. The two routines disagree, and
+they disagree in both directions. For M1 the bootstrap p-value is the larger
+of the pair. For M2 it is the smaller, and M2 is the only cell that falls
+below 0.05 on either routine. The common sign is a description of these
+estimates. It is not a finding. With an outcome that is not the target
+estimand, 27 clusters, two routines that contradict each other, and no
+arbiter test on the cells, we take no position on whether these differences
+are distinguishable from zero. That position waits on the portfolio-weight
+outcome and on the circular-shift run.
 
 ## (g) Sample-span variants: a proposal for discussion
 
@@ -125,7 +189,12 @@ and exit, plus denominator and weight drift among never-linked firms) is a
 residual, and quarter-to-quarter variance shares are covariance betas of each
 component on the actual change across country-quarter cells.
 
-In the estimation universe the extensive margin dominates. For M1 the shares
+The intensive margin contributes little under every measure. The extensive and
+composition margins carry most of the variation, and which of the two leads
+depends on the measure: the blanket phrase "the extensive margin dominates" is
+wrong for M3, where composition leads at 61% against 35% extensive. The
+extensive margin is the majority contributor for M1 and M2 only.
+For M1 the shares
 are 57% extensive, 5% intensive, 39% residual (composition). For M2 they are
 51% extensive, 35% intensive, 14% residual. For M3 they are 35% extensive,
 4% intensive, 61% residual; the equal-weighted measure is the most exposed to

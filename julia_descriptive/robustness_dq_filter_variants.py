@@ -54,12 +54,27 @@
 #         n_rows_kept / n_rows_dropped
 #         *_v1, delta_*_vs_v1, delta_pct_*_vs_v1 (per family)
 #   dq_country_ranking_us_held.csv
-#       version x {2018Q4, 2022Q4} x EU sec_country: US-held value
+#       version x EVERY quarter-end x EU sec_country: US-held value
 #       (Step-4 / 04_us_own_by_eu_country_snapshot construction: investor_
 #       country = 'US', EU sec_country, NO grid-universe restriction),
 #       rank within (version, quarter), plus V1 value/rank deltas.
+#       (r3 item 1) This used to run on the two spot quarters 2018Q4 / 2022Q4
+#       only. Spot-checking rankings at two dates cannot support the claim
+#       "the filter does not move the rankings", because the two largest
+#       country-quarter dollar anomalies sit at 2017Q4 (Indonesia, -65.9%
+#       under V2/V3) and 2020Q4 (Canada, +9.74% under V0) — neither was in
+#       the checked set. The comparison now covers every quarter.
+#   dq_country_ranking_us_held_SPOT_SUBSET.csv
+#       the old two-quarter table, kept verbatim for continuity. SUBSET of
+#       the all-quarter file above; not evidence on its own.
+#   dq_ranking_quarter_summary.csv
+#       version x quarter: n rank positions moved vs V1, max |rank change|
+#       and its country, max |delta %| and its country, and whether the
+#       ordered / unordered top-5 differs from V1. This is the table the
+#       "rankings do not move" claim must be read off.
 #   dq_fig_A_country_bucket_shares.csv
-#       version x measure (M1/M2/M3) x spot quarter x bucket x holder_group:
+#       version x measure (M1/M2/M3) x EVERY membership quarter x bucket x
+#       holder_group:
 #         usd_value               bucket total (grid-universe-restricted
 #                                 numerator, mirroring 06's ict_grouped
 #                                 patch 3: firms limited to the canonical
@@ -74,11 +89,30 @@
 #       links at t-1 — holdings-DQ regimes do not move it), so exactly the
 #       same countries sit in each bucket across versions: the deltas isolate
 #       the FILTER, not reclassification.
+#       (r3 item 1) This too used to run on three spot quarters only
+#       (2018Q4 / 2020Q1 / 2022Q4), none of which is an anomaly quarter. The
+#       old "max share move 0.0010pp / 0.0022pp" number was therefore a
+#       three-quarter number, not a full-sample number. It now runs on every
+#       quarter present in the membership file.
+#   dq_fig_A_country_bucket_shares_SPOT_SUBSET.csv
+#       the old three-quarter table, kept verbatim for continuity. SUBSET.
+#   dq_bucket_share_quarter_summary.csv
+#       version x measure x quarter: max |share move vs V1| on the global and
+#       on the EU denominator, with the argmax (bucket, holder_group) for
+#       each. The full-sample maxima and their argmax quarters are printed
+#       and are what the write-up must quote.
+#   dq_named_quarter_rows.csv
+#       the anomaly quarters 2017Q4 and 2020Q4, reported explicitly and
+#       unconditionally in both families, so they can never again fall
+#       outside the checked set. A named quarter that is not on a family's
+#       calendar still gets a row, carrying present=0; absence is reported,
+#       never silently omitted.
 #
 # BUILT-IN CHECK: under V1 the bucket shares are, by construction, the same
 # numbers as fig_A_country_buckets.csv (share_of_book_global family, US
 # rows); the script prints the max abs diff when that CSV is available and
-# already carries the global columns.
+# already carries the global columns. With the all-quarter extension this
+# check now covers every shared quarter, not 54 spot cells.
 #
 # READ-ONLY on canonical inputs (holdings_eom.parquet,
 # merged_us_eu_zero_filled.parquet, fig_A_country_bucket_membership.csv,
@@ -111,6 +145,20 @@ F_CENSUS  = OUT_DQ / "dq_census.csv"
 F_DELTAS  = OUT_DQ / "dq_country_quarter_deltas_vs_v1.csv"
 F_RANKING = OUT_DQ / "dq_country_ranking_us_held.csv"
 F_BUCKETS = OUT_DQ / "dq_fig_A_country_bucket_shares.csv"
+# (r3 item 1) all-quarter extension: per-quarter summaries + the retained
+# spot subsets + the unconditional named-quarter rows.
+F_RANKING_SPOT = OUT_DQ / "dq_country_ranking_us_held_SPOT_SUBSET.csv"
+F_BUCKETS_SPOT = OUT_DQ / "dq_fig_A_country_bucket_shares_SPOT_SUBSET.csv"
+F_RANK_QSUM    = OUT_DQ / "dq_ranking_quarter_summary.csv"
+F_BUCK_QSUM    = OUT_DQ / "dq_bucket_share_quarter_summary.csv"
+F_NAMED        = OUT_DQ / "dq_named_quarter_rows.csv"
+# (rb MF-1) the membership calendar and the holdings calendar do not coincide:
+# membership runs to 2024-03-31, holdings_eom stops at 2023-12-31. A quarter
+# with no holdings denominator OUTSIDE the holdings span is a vintage fact, not
+# a bug, and must be REPORTED as excluded rather than either aborting the run
+# or vanishing silently. A quarter with no denominator INSIDE the span is a
+# real calendar mismatch and still aborts.
+F_QCENSUS      = OUT_DQ / "dq_bucket_quarter_calendar_census.csv"
 
 # EU country list, verbatim from 00_setup.jl (single source of truth there;
 # copied because this is a Python consumer of a Julia constant).
@@ -119,8 +167,20 @@ EU_COUNTRIES = ("GB","DE","FR","NL","CH","IT","ES","SE","DK","NO","FI",
                 "SI","BG","HR","EE","LV","LT")
 EU_SQL = "(" + ",".join(f"'{c}'" for c in EU_COUNTRIES) + ")"
 
-RANK_QUARTERS   = ("2018-12-31", "2022-12-31")
-BUCKET_QUARTERS = ("2018-12-31", "2020-03-31", "2022-12-31")   # fig_ab spots
+# (r3 item 1) These two tuples are NO LONGER the estimation set. Both the
+# ranking and the bucket-share comparison now run on every quarter. The spot
+# lists survive only so the old two-/three-quarter tables can still be
+# reproduced verbatim, and they are written to *_SPOT_SUBSET.csv files whose
+# names say what they are.
+RANK_QUARTERS_SPOT   = ("2018-12-31", "2022-12-31")
+BUCKET_QUARTERS_SPOT = ("2018-12-31", "2020-03-31", "2022-12-31")  # fig_ab spots
+
+# Quarters that must appear by name in every summary, whatever the maxima say.
+# 2017Q4: Indonesia -65.9% under V2/V3 (the sub-$5bn residual coming out).
+# 2020Q4: Canada +9.74% under V0 (a dropped row coming back).
+# Neither was in the old spot lists, which is exactly why the old summaries
+# could not support a full-sample claim.
+ANOMALY_QUARTERS = ("2017-12-31", "2020-12-31")
 
 VERSIONS = ("v0", "v1", "v2", "v3")
 
@@ -311,18 +371,86 @@ def write_deltas(wide: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-def ranking(con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
-    """Country ranking by US-held value at the two rank quarters, per version.
+def _argmax_row(g: pd.DataFrame, val_col: str, label_cols: list[str]) -> dict:
+    """|max| of val_col within g, plus the labels of the row attaining it.
+
+    Returns zeros / empty labels for an all-NaN or empty group, so a summary
+    row exists for every (version, quarter) cell even when nothing moves. When
+    the maximum is exactly zero the returned label is the first row of the
+    group and carries no meaning; read the label only when the value is
+    nonzero.
+    """
+    a = g[val_col].abs()
+    if len(g) == 0 or not np.isfinite(a.to_numpy(dtype=float)).any():
+        out = {f"max_abs_{val_col}": 0.0}
+        out.update({f"argmax_{c}": "" for c in label_cols})
+        return out
+    i = a.idxmax()
+    out = {f"max_abs_{val_col}": float(a.loc[i])}
+    out.update({f"argmax_{c}": g.loc[i, c] for c in label_cols})
+    return out
+
+
+def rank_quarter_summary(r: pd.DataFrame, v1_top5: dict) -> pd.DataFrame:
+    """Per (version, quarter): how far the ranking moved away from V1.
+
+    Split out of ranking() so it can be exercised without a DuckDB scan. One
+    row per version-quarter, including the quarters where nothing moves — a
+    summary that only lists movers cannot support a no-movement claim.
+    """
+    rows = []
+    for (ver, q), g in r.groupby(["version", "quarter_end"], sort=True):
+        top5 = list(g.sort_values("rank")["sec_country"].head(5))
+        base5 = v1_top5.get(q, [])
+        rec = {"version": ver, "quarter_end": q,
+               "n_countries": int(g["sec_country"].nunique()),
+               "n_rank_moves_vs_v1": int((g["rank_change_vs_v1"] != 0).sum())}
+        rec.update(_argmax_row(g, "rank_change_vs_v1", ["sec_country"]))
+        rec["argmax_rank_country"] = rec.pop("argmax_sec_country")
+        rec.update(_argmax_row(g, "delta_pct_vs_v1", ["sec_country"]))
+        rec["argmax_pct_country"] = rec.pop("argmax_sec_country")
+        rec["top5_ordered"] = "|".join(top5)
+        rec["top5_ordered_differs_from_v1"] = int(top5 != base5)
+        rec["top5_set_differs_from_v1"] = int(set(top5) != set(base5))
+        rec["is_spot_quarter"] = int(q in [pd.Timestamp(x)
+                                           for x in RANK_QUARTERS_SPOT])
+        rec["is_anomaly_quarter"] = int(q in [pd.Timestamp(x)
+                                              for x in ANOMALY_QUARTERS])
+        rows.append(rec)
+    qsum = pd.DataFrame(rows).sort_values(["version", "quarter_end"])
+    return qsum[["version", "quarter_end", "n_countries", "n_rank_moves_vs_v1",
+                 "max_abs_rank_change_vs_v1", "argmax_rank_country",
+                 "max_abs_delta_pct_vs_v1", "argmax_pct_country",
+                 "top5_ordered", "top5_ordered_differs_from_v1",
+                 "top5_set_differs_from_v1", "is_spot_quarter",
+                 "is_anomaly_quarter"]].reset_index(drop=True)
+
+
+def ranking(con: duckdb.DuckDBPyConnection) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Country ranking by US-held value, per version, at EVERY quarter-end.
+
     Step-4 construction: investor_country='US', EU sec_country, NO universe
-    restriction (mirrors 04_us_own_by_eu_country_snapshot / I_ict)."""
-    dates = ", ".join(f"DATE '{q}'" for q in RANK_QUARTERS)
+    restriction (mirrors 04_us_own_by_eu_country_snapshot / I_ict).
+
+    (r3 item 1) The old version ran on RANK_QUARTERS_SPOT = {2018Q4, 2022Q4}.
+    Two dates cannot establish "the filter does not move the rankings" when
+    the two largest dollar anomalies in the delta table live at 2017Q4 and
+    2020Q4. The ranking is now recomputed at every quarter-end that carries
+    US holdings, a per-quarter summary is emitted so the claim can be stated
+    over the full sample or refuted, and the two anomaly quarters are printed
+    by name whether or not they are the maxima.
+
+    The quarter-end restriction is the same one country_quarter_totals uses,
+    so the two families are on one calendar.
+    """
     wide = con.sql(f"""
         SELECT sec_country, report_date AS quarter_end,
                {per_version_sums('adj_mv')}
         FROM base
         WHERE investor_country = 'US'
           AND sec_country IN {EU_SQL}
-          AND report_date IN ({dates})
+          AND report_date = last_day(report_date)
+          AND month(report_date) IN (3, 6, 9, 12)
         GROUP BY 1, 2
     """).df()
     wide["quarter_end"] = pd.to_datetime(wide["quarter_end"])
@@ -346,35 +474,133 @@ def ranking(con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
     r["delta_pct_vs_v1"] = 100.0 * r["delta_usd_vs_v1"] / \
         r["us_held_usd_v1"].where(r["us_held_usd_v1"] > 0)
     r["rank_change_vs_v1"] = r["rank_v1"] - r["rank"]
+    r["is_anomaly_quarter"] = r["quarter_end"].isin(
+        [pd.Timestamp(q) for q in ANOMALY_QUARTERS])
+    r["is_spot_quarter"] = r["quarter_end"].isin(
+        [pd.Timestamp(q) for q in RANK_QUARTERS_SPOT])
     r = (r[["version", "quarter_end", "sec_country", "us_held_usd", "rank",
             "us_held_usd_v1", "rank_v1", "delta_usd_vs_v1", "delta_pct_vs_v1",
-            "rank_change_vs_v1"]]
+            "rank_change_vs_v1", "is_spot_quarter", "is_anomaly_quarter"]]
          .sort_values(["version", "quarter_end", "rank"])
          .reset_index(drop=True))
+    rotate_r3pre(F_RANKING)   # (rb A2) rotate only now, with the content in hand
     r.to_csv(F_RANKING, index=False)
+
+    n_q = r["quarter_end"].nunique()
     n_moves = int((r["rank_change_vs_v1"] != 0).sum())
-    print(f"\n[3] wrote {F_RANKING.name} ({len(r):,} rows); "
+    print(f"\n[3] wrote {F_RANKING.name} ({len(r):,} rows, ALL {n_q} quarters); "
           f"{n_moves} country-quarter rank positions differ from V1")
-    for q in RANK_QUARTERS:
+
+    # ---- the retained spot subset, marked as a subset ---------------------
+    spot = r.loc[r["is_spot_quarter"]].copy()
+    spot.to_csv(F_RANKING_SPOT, index=False)
+    print(f"    wrote {F_RANKING_SPOT.name} ({len(spot):,} rows) — SUBSET of the "
+          f"above at {', '.join(RANK_QUARTERS_SPOT)}, kept for continuity only")
+
+    # ---- per-quarter summary ---------------------------------------------
+    v1_top5 = {q: list(g.sort_values("rank")["sec_country"].head(5))
+               for q, g in r.loc[r["version"].eq("V1")].groupby("quarter_end")}
+    qsum = rank_quarter_summary(r, v1_top5)
+    qsum.to_csv(F_RANK_QSUM, index=False)
+    print(f"    wrote {F_RANK_QSUM.name} ({len(qsum):,} version-quarter rows)")
+
+    nv1 = qsum.loc[qsum["version"].ne("V1")]
+    tot_moves = int(nv1["n_rank_moves_vs_v1"].sum())
+    n_top5_ord = int(nv1["top5_ordered_differs_from_v1"].sum())
+    n_top5_set = int(nv1["top5_set_differs_from_v1"].sum())
+    print(f"    FULL SAMPLE (non-V1 version-quarters, n={len(nv1):,}): "
+          f"{tot_moves} rank moves; {n_top5_ord} quarters where the ORDERED "
+          f"top-5 differs; {n_top5_set} where the top-5 SET differs")
+    if len(nv1):
+        i = nv1["max_abs_delta_pct_vs_v1"].idxmax()
+        w = nv1.loc[i]
+        print(f"    worst |delta %| anywhere: {w['max_abs_delta_pct_vs_v1']:.4f}% "
+              f"({w['version']}, {w['quarter_end'].date()}, "
+              f"{w['argmax_pct_country']})")
+        j = nv1["max_abs_rank_change_vs_v1"].idxmax()
+        w = nv1.loc[j]
+        print(f"    worst |rank change| anywhere: "
+              f"{w['max_abs_rank_change_vs_v1']:.0f} "
+              f"({w['version']}, {w['quarter_end'].date()}, "
+              f"{w['argmax_rank_country']})")
+
+    # ---- the named anomaly quarters, unconditionally ----------------------
+    for q in ANOMALY_QUARTERS:
+        t = qsum.loc[qsum["quarter_end"].eq(pd.Timestamp(q))]
+        if not len(t):
+            print(f"    [NAMED {q}] NOT PRESENT in the US-held ranking calendar "
+                  f"— report this, do not silently omit it")
+            continue
+        print(f"    [NAMED {q}] ranking summary (all four versions):")
+        print(t[["version", "n_rank_moves_vs_v1", "max_abs_rank_change_vs_v1",
+                 "max_abs_delta_pct_vs_v1", "argmax_pct_country",
+                 "top5_ordered"]]
+              .to_string(index=False, float_format=lambda x: f"{x:,.4f}"))
+
+    # ---- the old spot printout, kept ---------------------------------------
+    for q in RANK_QUARTERS_SPOT:
         t = r.loc[r["quarter_end"].eq(pd.Timestamp(q))
                   & r["version"].isin(["V0", "V2"]) & r["rank"].le(10)]
-        print(f"    top-10 under V0/V2 at {q} (rank_change_vs_v1 != 0 rows flag moves):")
+        print(f"    [SPOT SUBSET] top-10 under V0/V2 at {q} "
+              f"(rank_change_vs_v1 != 0 rows flag moves):")
         print(t[["version", "sec_country", "us_held_usd", "rank", "rank_change_vs_v1"]]
               .to_string(index=False, float_format=lambda x: f"{x/1e9:,.1f}bn"))
-    return r
+    return r, qsum
 
 
 # ---------------------------------------------------------------------------
+def bucket_quarter_summary(out: pd.DataFrame) -> pd.DataFrame:
+    """Per (version, measure, quarter): the largest Figure-A share move vs V1.
+
+    Split out of bucket_shares() so it can be exercised without a DuckDB scan.
+    One row per version-measure-quarter, zeros included, so the full-sample
+    maximum and its argmax quarter can be read straight off the file.
+    """
+    lbl = ["bucket", "holder_group"]
+    rows = []
+    for (ver, meas, q), g in out.groupby(["version", "measure", "quarter_end"],
+                                         sort=True):
+        rec = {"version": ver, "measure": meas, "quarter_end": q,
+               "n_cells": int(len(g))}
+        a = _argmax_row(g, "delta_share_global_vs_v1_pp", lbl)
+        rec["max_abs_delta_share_global_pp"] = a["max_abs_delta_share_global_vs_v1_pp"]
+        rec["argmax_global_bucket"] = a["argmax_bucket"]
+        rec["argmax_global_holder_group"] = a["argmax_holder_group"]
+        b = _argmax_row(g, "delta_share_eu_vs_v1_pp", lbl)
+        rec["max_abs_delta_share_eu_pp"] = b["max_abs_delta_share_eu_vs_v1_pp"]
+        rec["argmax_eu_bucket"] = b["argmax_bucket"]
+        rec["argmax_eu_holder_group"] = b["argmax_holder_group"]
+        c = _argmax_row(g, "delta_usd_vs_v1", lbl)
+        rec["max_abs_delta_usd"] = c["max_abs_delta_usd_vs_v1"]
+        rec["is_spot_quarter"] = int(q in [pd.Timestamp(x)
+                                           for x in BUCKET_QUARTERS_SPOT])
+        rec["is_anomaly_quarter"] = int(q in [pd.Timestamp(x)
+                                              for x in ANOMALY_QUARTERS])
+        rows.append(rec)
+    return (pd.DataFrame(rows)
+              .sort_values(["version", "measure", "quarter_end"])
+              .reset_index(drop=True))
+
+
 def bucket_shares(con: duckdb.DuckDBPyConnection,
-                  totals_wide: pd.DataFrame) -> pd.DataFrame:
-    """fig_A country bucket shares at the spot quarters, per version.
+                  totals_wide: pd.DataFrame
+                  ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """fig_A country bucket shares at EVERY membership quarter, per version.
 
     Numerator mirrors 06's ict_grouped (patch 3): firms restricted to the
     canonical grid universe, country taken from the GRID. Denominators are the
     holder group's global / EU book recomputed under the same regime (the
     country_total_grouped construction). Membership comes verbatim from the
     canonical fig_A_country_bucket_membership.csv — classification is on
-    Revere links, which no holdings-DQ regime touches."""
+    Revere links, which no holdings-DQ regime touches.
+
+    (r3 item 1) The old version ran on BUCKET_QUARTERS_SPOT = {2018Q4, 2020Q1,
+    2022Q4}. The reported "max share move 0.0010pp global / 0.0022pp EU" was
+    therefore a three-quarter maximum, and the three quarters exclude both
+    anomaly quarters (2017Q4 Indonesia, 2020Q4 Canada). The comparison now
+    runs on every quarter in the membership file, emits a per-quarter
+    max/argmax summary, and prints the anomaly quarters by name.
+    """
     if not F_MEMB.is_file():
         raise FileNotFoundError(
             f"{F_MEMB} not found — run build_fig_ab_data.py first.")
@@ -382,9 +608,96 @@ def bucket_shares(con: duckdb.DuckDBPyConnection,
     need = {"measure", "country", "quarter_end", "bucket"}
     if not need.issubset(memb.columns):
         raise RuntimeError(f"{F_MEMB.name} lacks columns {need - set(memb.columns)}")
-    spots = [pd.Timestamp(q) for q in BUCKET_QUARTERS]
-    memb = memb.loc[memb["quarter_end"].isin(spots),
-                    ["measure", "quarter_end", "country", "bucket"]]
+    memb = memb[["measure", "quarter_end", "country", "bucket"]]
+    memb_q = sorted(pd.Timestamp(x) for x in memb["quarter_end"].unique())
+    spots = [pd.Timestamp(q) for q in BUCKET_QUARTERS_SPOT]
+
+    # ---- (rb MF-1) CALENDAR RECONCILIATION, BEFORE ANY SCAN ---------------
+    # The two families do not share a calendar. Membership (Revere-link
+    # classification) runs 2007Q3..2024Q1; holdings_eom, which supplies every
+    # denominator, runs 1999Q1..2023Q4. The previous gate demanded a
+    # denominator for EVERY membership quarter and therefore aborted on
+    # 2024-03-31 — after ten minutes of scans and after main() had already
+    # rotated the canonical files away.
+    #
+    # The distinction that matters:
+    #   * a membership quarter OUTSIDE the holdings span is a vintage fact
+    #     (the holdings feed simply has not been extended that far). It is
+    #     excluded from the comparison and REPORTED as excluded — a census row
+    #     with evaluated=0 and a stated reason, never a silent drop.
+    #   * a membership quarter INSIDE the holdings span with no denominator is
+    #     a genuine calendar mismatch and still aborts.
+    hold_q = sorted(pd.Timestamp(x) for x in totals_wide["quarter_end"].unique())
+    if not hold_q:
+        raise RuntimeError("country_quarter_totals returned no quarters.")
+    hold_set = set(hold_q)
+    hold_lo, hold_hi = hold_q[0], hold_q[-1]
+    inside_missing = [q for q in memb_q
+                      if hold_lo <= q <= hold_hi and q not in hold_set]
+    if inside_missing:
+        raise RuntimeError(
+            f"{len(inside_missing)} membership quarters lie INSIDE the "
+            f"holdings span {hold_lo.date()}..{hold_hi.date()} but carry no "
+            f"country-quarter denominator (first: {inside_missing[0].date()}) "
+            "— a real quarter-end calendar mismatch between the two families.")
+    out_of_span = [q for q in memb_q if q < hold_lo or q > hold_hi]
+    all_q = [q for q in memb_q if q in hold_set]
+    if not all_q:
+        raise RuntimeError("membership and holdings calendars are disjoint.")
+
+    memb_n = memb.groupby("quarter_end").size()
+    cen_rows = []
+    for q in memb_q:
+        ev = q in hold_set
+        cen_rows.append({
+            "quarter_end": q, "in_membership": 1,
+            "n_membership_rows": int(memb_n.get(q, 0)),
+            "in_holdings_calendar": int(q in hold_set),
+            "inside_holdings_span": int(hold_lo <= q <= hold_hi),
+            "evaluated": int(ev),
+            "reason": "" if ev else
+                      "outside holdings_eom span (no denominator; "
+                      f"holdings end {hold_hi.date()})"})
+    for q in hold_q:
+        if q in set(memb_q):
+            continue
+        cen_rows.append({
+            "quarter_end": q, "in_membership": 0, "n_membership_rows": 0,
+            "in_holdings_calendar": 1, "inside_holdings_span": 1,
+            "evaluated": 0,
+            "reason": "no fig_A bucket membership at this quarter"})
+    qcen = (pd.DataFrame(cen_rows).sort_values("quarter_end")
+              .reset_index(drop=True))
+    qcen.to_csv(F_QCENSUS, index=False)
+
+    print(f"\n[4] bucket shares. membership calendar {len(memb_q)} quarters "
+          f"({memb_q[0].date()}..{memb_q[-1].date()}); holdings calendar "
+          f"{len(hold_q)} quarters ({hold_lo.date()}..{hold_hi.date()}); "
+          f"EVALUATED on the {len(all_q)} shared quarters "
+          f"({all_q[0].date()}..{all_q[-1].date()})")
+    if out_of_span:
+        print(f"    EXCLUDED (reported, not dropped): "
+              f"{len(out_of_span)} membership quarter(s) outside the holdings "
+              f"span: {', '.join(q.date().isoformat() for q in out_of_span)}")
+    print(f"    wrote {F_QCENSUS.name} ({len(qcen):,} rows) — the calendar "
+          f"census; every quarter of either family carries a row.")
+
+    missing_spot = [q for q in spots if q not in set(all_q)]
+    if missing_spot:
+        raise RuntimeError(
+            f"spot quarters absent from the evaluated calendar: {missing_spot}")
+    # the two named anomaly quarters must be INSIDE the evaluated set — the
+    # whole point of the r3 item-1 fix. If a future vintage pushes one out,
+    # abort rather than report an all-quarter maximum that silently omits it.
+    anom_missing = [pd.Timestamp(q) for q in ANOMALY_QUARTERS
+                    if pd.Timestamp(q) in set(memb_q)
+                    and pd.Timestamp(q) not in set(all_q)]
+    if anom_missing:
+        raise RuntimeError(
+            f"named anomaly quarter(s) {[q.date() for q in anom_missing]} are "
+            "in the membership file but not evaluable — refusing to report an "
+            "all-quarter maximum that excludes them.")
+    memb = memb.loc[memb["quarter_end"].isin(all_q)].copy()
 
     con.execute(f"""
         CREATE OR REPLACE TEMP TABLE grid_univ AS
@@ -400,7 +713,7 @@ def bucket_shares(con: duckdb.DuckDBPyConnection,
             f"{int(dup)} sec_entity_id with >1 sec_country in the grid universe "
             "— the canonical-universe uniqueness assert of 06 no longer holds.")
 
-    dates = ", ".join(f"DATE '{q}'" for q in BUCKET_QUARTERS)
+    dates = ", ".join(f"DATE '{pd.Timestamp(q).date()}'" for q in all_q)
     cw = con.sql(f"""
         SELECT g.sec_country AS country, b.report_date AS quarter_end,
                CASE WHEN b.investor_country = 'US' THEN 'US' ELSE 'NONUS' END
@@ -413,8 +726,18 @@ def bucket_shares(con: duckdb.DuckDBPyConnection,
     """).df()
     cw["quarter_end"] = pd.to_datetime(cw["quarter_end"])
 
-    # holder-group books (denominators) from the country-quarter totals
-    tw = totals_wide.loc[totals_wide["quarter_end"].isin(spots)].copy()
+    # holder-group books (denominators) from the country-quarter totals.
+    # all_q is the reconciled calendar built above, so every element has a
+    # denominator by construction; the assert is a cheap tripwire against a
+    # later edit that reintroduces an unreconciled quarter list.
+    q_set = set(pd.Timestamp(q) for q in all_q)
+    missing_den = sorted(q_set - set(totals_wide["quarter_end"].unique()))
+    if missing_den:
+        raise RuntimeError(
+            f"{len(missing_den)} EVALUATED quarters have no country-quarter "
+            f"denominator (first: {pd.Timestamp(missing_den[0]).date()}) — the "
+            "calendar reconciliation above was bypassed.")
+    tw = totals_wide.loc[totals_wide["quarter_end"].isin(q_set)].copy()
     tw["holder_group"] = np.where(tw["investor_country"].eq("US"), "US", "NONUS")
     den_rows = []
     for v in VERSIONS:
@@ -459,30 +782,50 @@ def bucket_shares(con: duckdb.DuckDBPyConnection,
                                                   - out["share_global_v1"])
     out["delta_share_eu_vs_v1_pp"] = 100.0 * (out["share_of_book_eu"]
                                               - out["share_eu_v1"])
+    out["is_spot_quarter"] = out["quarter_end"].isin(spots)
+    out["is_anomaly_quarter"] = out["quarter_end"].isin(
+        [pd.Timestamp(q) for q in ANOMALY_QUARTERS])
     out = (out[["version"] + keys +
                ["n_countries", "usd_value", "book_global", "book_eu",
                 "share_of_book_global", "share_of_book_eu",
                 "usd_value_v1", "delta_usd_vs_v1",
-                "delta_share_global_vs_v1_pp", "delta_share_eu_vs_v1_pp"]]
+                "delta_share_global_vs_v1_pp", "delta_share_eu_vs_v1_pp",
+                "is_spot_quarter", "is_anomaly_quarter"]]
            .sort_values(["version"] + keys)
            .reset_index(drop=True))
     # ---- self-check FIRST, write SECOND (r1 advisory A2): a drifted V1 must
     # ---- never leave a plausible-looking four-version table on disk --------
+    # (r3 item 1) the check now runs on every quarter the two files share, not
+    # on the three spot quarters.
     if F_CTRY.is_file():
         ship = pd.read_csv(F_CTRY, parse_dates=["quarter_end"])
         if "share_of_book_global" in ship.columns and "measure" in ship.columns:
-            s = ship.loc[ship["quarter_end"].isin(spots),
+            s = ship.loc[ship["quarter_end"].isin(q_set),
                          ["measure", "quarter_end", "bucket", "holder_group",
                           "share_of_book_global"]]
+            n_dup = int(s.duplicated(subset=keys).sum())
+            if n_dup:
+                raise RuntimeError(
+                    f"{F_CTRY.name} has {n_dup} duplicate rows on "
+                    f"{keys} (a second universe or vintage in one file) — the "
+                    "self-check cannot be run one-to-one.")
             chk = out.loc[out["version"].eq("V1")].merge(
-                s, on=keys, how="inner", suffixes=("", "_ship"))
+                s, on=keys, how="inner", suffixes=("", "_ship"),
+                validate="one_to_one")
             if len(chk):
-                diff = (chk["share_of_book_global"]
-                        - chk["share_of_book_global_ship"]).abs().max()
+                chk = chk.assign(abs_diff=(chk["share_of_book_global"]
+                                           - chk["share_of_book_global_ship"]).abs())
+                diff = float(chk["abs_diff"].max())
                 print(f"    V1 vs shipped fig_A_country_buckets.csv "
-                      f"(share_of_book_global, {len(chk)} cells): "
+                      f"(share_of_book_global, {len(chk)} cells over "
+                      f"{chk['quarter_end'].nunique()} shared quarters): "
                       f"max abs diff {diff:.3e}")
                 if not diff < 1e-9:
+                    worst = (chk.sort_values("abs_diff", ascending=False)
+                                .head(10)[["measure", "quarter_end", "bucket",
+                                           "holder_group", "abs_diff"]])
+                    print("    worst offending cells:")
+                    print(worst.to_string(index=False))
                     # (r1 advisory A2) HARD ABORT: V1 failing to reproduce the
                     # shipped figure CSV means a vintage drifted somewhere —
                     # the deltas already written above would compare regimes
@@ -498,13 +841,112 @@ def bucket_shares(con: duckdb.DuckDBPyConnection,
                   "predates the global-denominator switch — re-run "
                   "build_fig_ab_data.py to enable it)")
 
+    rotate_r3pre(F_BUCKETS)   # (rb A2) rotate only now, with the content in hand
     out.to_csv(F_BUCKETS, index=False)
-    print(f"\n[4] wrote {F_BUCKETS.name} ({len(out):,} rows)")
-    mx = out.loc[out["version"].ne("V1"),
-                 ["delta_share_global_vs_v1_pp", "delta_share_eu_vs_v1_pp"]].abs().max()
-    print(f"    max |share move| vs V1: global {mx.iloc[0]:.4f} pp, "
-          f"eu {mx.iloc[1]:.4f} pp")
-    return out
+    print(f"    wrote {F_BUCKETS.name} ({len(out):,} rows, ALL "
+          f"{out['quarter_end'].nunique()} quarters)")
+
+    # ---- the retained spot subset, marked as a subset ----------------------
+    sub = out.loc[out["is_spot_quarter"]].copy()
+    sub.to_csv(F_BUCKETS_SPOT, index=False)
+    print(f"    wrote {F_BUCKETS_SPOT.name} ({len(sub):,} rows) — SUBSET at "
+          f"{', '.join(BUCKET_QUARTERS_SPOT)}, kept for continuity only")
+
+    # ---- per (version, measure, quarter) max / argmax ----------------------
+    bsum = bucket_quarter_summary(out)
+    bsum.to_csv(F_BUCK_QSUM, index=False)
+    print(f"    wrote {F_BUCK_QSUM.name} ({len(bsum):,} version-measure-quarter rows)")
+
+    nv1 = bsum.loc[bsum["version"].ne("V1")]
+    for col, tag in (("max_abs_delta_share_global_pp", "global"),
+                     ("max_abs_delta_share_eu_pp", "eu")):
+        if not len(nv1):
+            break
+        i = nv1[col].idxmax()
+        w = nv1.loc[i]
+        bk = w["argmax_global_bucket"] if tag == "global" else w["argmax_eu_bucket"]
+        hg = (w["argmax_global_holder_group"] if tag == "global"
+              else w["argmax_eu_holder_group"])
+        print(f"    FULL SAMPLE max |share move| ({tag} denominator): "
+              f"{w[col]:.4f} pp at {w['version']}, {w['measure']}, "
+              f"{w['quarter_end'].date()}, {bk}/{hg}")
+    # what the OLD three-quarter claim would have said, for contrast
+    old = bsum.loc[bsum["version"].ne("V1") & bsum["is_spot_quarter"].eq(1)]
+    if len(old):
+        print(f"    (old SPOT-ONLY maxima, for contrast: global "
+              f"{old['max_abs_delta_share_global_pp'].max():.4f} pp, eu "
+              f"{old['max_abs_delta_share_eu_pp'].max():.4f} pp)")
+
+    # ---- named anomaly quarters, printed unconditionally -------------------
+    for q in ANOMALY_QUARTERS:
+        t = bsum.loc[bsum["quarter_end"].eq(pd.Timestamp(q))]
+        if not len(t):
+            print(f"    [NAMED {q}] NOT PRESENT in the bucket membership "
+                  f"calendar — report this, do not silently omit it")
+            continue
+        print(f"    [NAMED {q}] bucket-share summary:")
+        print(t[["version", "measure", "max_abs_delta_share_global_pp",
+                 "max_abs_delta_share_eu_pp", "argmax_global_bucket",
+                 "argmax_global_holder_group"]]
+              .to_string(index=False, float_format=lambda x: f"{x:,.4f}"))
+    return out, bsum
+
+
+# ---------------------------------------------------------------------------
+def rotate_r3pre(p: Path) -> None:
+    """Project rotation rule: an existing canonical output is renamed to
+    *_r3pre before being overwritten, and the run REFUSES if that name is
+    already taken. Applied to the two files whose CONTENT CHANGES MEANING with
+    the r3 item-1 fix: they used to hold two / three spot quarters and now
+    hold every quarter, so the old and new files are not comparable and the
+    old one must not be silently replaced."""
+    if not p.is_file():
+        return
+    tgt = p.with_name(p.stem + "_r3pre" + p.suffix)
+    if tgt.exists():
+        raise RuntimeError(
+            f"rotation target {tgt.name} already exists — refusing to "
+            f"overwrite it. Move or delete it by hand, deliberately.")
+    p.rename(tgt)
+    print(f"    rotated {p.name} -> {tgt.name} (spot-era vintage preserved)")
+
+
+def write_named_quarters(rank_qsum: pd.DataFrame,
+                         buck_qsum: pd.DataFrame) -> pd.DataFrame:
+    """(r3 item 1) One file that carries the anomaly quarters by name, from
+    BOTH summary families, whether or not they attain any maximum AND whether
+    or not the quarter is on that family's calendar at all.
+
+    The point is that 2017Q4 and 2020Q4 can never again sit outside the
+    checked set. An absent quarter therefore has to leave a row that SAYS it
+    is absent (present=0). Emitting nothing would reproduce the original
+    defect in a quieter form: a reader of this file could not tell a quarter
+    that was checked and did not move from a quarter that was never checked.
+    """
+    parts = []
+    for q in ANOMALY_QUARTERS:
+        ts = pd.Timestamp(q)
+        for fam, src in (("us_held_ranking", rank_qsum),
+                         ("fig_A_bucket_share", buck_qsum)):
+            g = src.loc[src["quarter_end"].eq(ts)]
+            if len(g):
+                parts.append(g.assign(family=fam, present=1))
+            else:
+                print(f"    [NAMED {q}] absent from the {fam} calendar: "
+                      f"emitted as a present=0 row, NOT omitted")
+                parts.append(pd.DataFrame([{"family": fam, "version": "",
+                                            "quarter_end": ts, "present": 0}]))
+    # ANOMALY_QUARTERS is non-empty, so parts is never empty.
+    named = pd.concat(parts, ignore_index=True, sort=False)
+    front = ["family", "version", "quarter_end", "present"]
+    named = named[front + [c for c in named.columns if c not in front]]
+    named.to_csv(F_NAMED, index=False)
+    n_abs = int((named["present"] == 0).sum())
+    print(f"\n[5] wrote {F_NAMED.name} ({len(named):,} rows): the named "
+          f"anomaly quarters {', '.join(ANOMALY_QUARTERS)} in both families, "
+          f"reported regardless of the maxima "
+          f"({n_abs} absent-quarter placeholder rows)")
+    return named
 
 
 # ---------------------------------------------------------------------------
@@ -513,6 +955,24 @@ def main() -> None:
         if not Path(p).is_file():
             raise FileNotFoundError(f"missing canonical input: {p}")
     OUT_DQ.mkdir(parents=True, exist_ok=True)
+
+    # (rb A2) PRE-FLIGHT ONLY — no rotation here. The previous version rotated
+    # both canonical files at the top of main(), before ten minutes of scans.
+    # When a later step aborted, the canonical names were already gone AND the
+    # *_r3pre slots were occupied, so the very next run died in rotate_r3pre
+    # with "rotation target already exists" and a human had to untangle it by
+    # hand. Rotation now happens inside ranking() and bucket_shares(),
+    # immediately before each file is written, i.e. only once its replacement
+    # content actually exists. What stays here is the cheap check that the
+    # slots are free, so a doomed run fails in the first second rather than
+    # after the scans.
+    for p in (F_RANKING, F_BUCKETS):
+        tgt = p.with_name(p.stem + "_r3pre" + p.suffix)
+        if p.is_file() and tgt.exists():
+            raise RuntimeError(
+                f"pre-flight: both {p.name} and {tgt.name} exist. Rotation "
+                "would refuse later, after the scans. Move or delete "
+                f"{tgt.name} by hand, deliberately, then re-run.")
 
     con = connect()
     build_base_view(con)
@@ -523,11 +983,17 @@ def main() -> None:
 
     totals_wide = country_quarter_totals(con)
     write_deltas(totals_wide)
-    ranking(con)
-    bucket_shares(con, totals_wide)
+    _, rank_qsum = ranking(con)
+    _, buck_qsum = bucket_shares(con, totals_wide)
+    write_named_quarters(rank_qsum, buck_qsum)
 
     con.close()
     print("\nDONE — all outputs under", OUT_DQ)
+    print("READ-ME for the write-up: the ranking and bucket-share claims must "
+          "be quoted from dq_ranking_quarter_summary.csv and "
+          "dq_bucket_share_quarter_summary.csv, which cover every quarter. "
+          "The *_SPOT_SUBSET.csv files are the old two-/three-quarter tables "
+          "and are not sufficient evidence on their own.")
 
 
 if __name__ == "__main__":
