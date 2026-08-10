@@ -33,6 +33,14 @@
 # Q2 and Q3 in the CSV but plot only the bottom (Q1_low) and top (Q4_high)
 # arms the advisor asked for, with the zero bucket as a recessive reference.
 #
+# SHARE PANEL DENOMINATOR (2026-08-10). The share panel plots
+# share_of_book_global -- the share of the holder group's GLOBAL (full
+# FactSet-identifiable equity) book -- consistent with the main regression's
+# global denominator (dw, 2026-08-08 GLOBAL-MAIN decision). The EU-book
+# version of the same series (share_of_book_eu) stays in the CSVs as the
+# within-Europe reallocation diagnostic and is NOT plotted. The dollar and
+# idx100 panels are denominator-free and unchanged.
+#
 # OUTPUTS (PDF + PNG for each):
 #   plots/fig_A_firm_zero_vs_positive.{pdf,png}
 #   plots/fig_A_firm_quartile_ew.{pdf,png}
@@ -257,6 +265,10 @@ def figure_a_firm(split: str, series: list[tuple[str, str, str, float]],
                   stem: str, subtitle: str, extra_note: str,
                   ten: pd.DataFrame, timing_note: str = TIMING_ROLLING) -> list[Path]:
     d = pd.read_csv(F_A_FIRM, parse_dates=["quarter_end"])
+    if "share_of_book_global" not in d.columns:
+        raise RuntimeError(
+            f"{F_A_FIRM.name} has no share_of_book_global column — it predates the "
+            "2026-08-10 global-denominator switch. Re-run build_fig_ab_data.py.")
     d = d.loc[d["split"].eq(split) & d["holder_group"].eq("US")]
     if d.empty:
         raise RuntimeError(f"no rows for split={split}")
@@ -273,9 +285,12 @@ def figure_a_firm(split: str, series: list[tuple[str, str, str, float]],
     _draw_series(axes[2], d, series, "idx100", ten,
                  f"Same, indexed to 100 at {BASE_QUARTER.date()} (headline normalization)",
                  "index", hline=100.0, label_fmt=lambda v: f"{v:,.0f}")
-    _draw_series(axes[3], d, series, "share_of_book", ten,
-                 "Share of the US investors' whole European book held in the bucket",
-                 "share", pct=True, label_fmt=lambda v: f"{100*v:,.1f}%")
+    # (2026-08-10) GLOBAL denominator = MAIN, matching the regression's dw.
+    _draw_series(axes[3], d, series, "share_of_book_global", ten,
+                 "Share of the US investors' GLOBAL (full FactSet-identifiable "
+                 "equity) book held in the bucket",
+                 "share of global book", pct=True,
+                 label_fmt=lambda v: f"{100*v:,.2f}%")
 
     note = (
         f"Sample: European firms in the US/non-US ownership grid, 2012Q1-2023Q4. "
@@ -285,7 +300,12 @@ def figure_a_firm(split: str, series: list[tuple[str, str, str, float]],
         f"zero, a firm absent from Revere at t-1 is unclassified and excluded, so the "
         f"buckets need not exhaust the book. "
         f"Levels are CPI-U deflated (CPIAUCNS, quarter-end month, 2020 annual-average "
-        f"base) exactly as in the Figure-2 builder. Background silhouette in the "
+        f"base) exactly as in the Figure-2 builder. "
+        f"The share panel uses the GLOBAL (full FactSet-identifiable equity) "
+        f"denominator, the same denominator as the main regression; the EU-book "
+        f"version of the series (share_of_book_eu in fig_A_firm_buckets.csv) is the "
+        f"within-Europe reallocation diagnostic and is not plotted. "
+        f"Background silhouette in the "
         f"three lower panels = {TENSION_LABEL}, scaled to panel height with no "
         f"axis and no ticks; read its level off the top panel. {extra_note}")
     return _finish(fig, axes, stem,
@@ -306,6 +326,10 @@ def figure_a_country(ten: pd.DataFrame) -> list[Path]:
     # (2026-08-09) one figure per exposure measure, per the 2026-08-04 minute
     # ("each figure has one version per exposure measure (M1, M2, M3)").
     dd_all = pd.read_csv(F_A_CTRY, parse_dates=["quarter_end"])
+    if "share_of_book_global" not in dd_all.columns:
+        raise RuntimeError(
+            f"{F_A_CTRY.name} has no share_of_book_global column — it predates the "
+            "2026-08-10 global-denominator switch. Re-run build_fig_ab_data.py.")
     if "measure" not in dd_all.columns:
         dd_all["measure"] = "M1"
     paths: list[Path] = []
@@ -330,9 +354,12 @@ def _figure_a_country_one(ten: pd.DataFrame, d: pd.DataFrame, meas: str) -> list
     _draw_series(axes[2], d, series, "idx100", ten,
                  f"Same, indexed to 100 at {BASE_QUARTER.date()} (headline normalization)",
                  "index", hline=100.0, label_fmt=lambda v: f"{v:,.0f}")
-    _draw_series(axes[3], d, series, "share_of_book", ten,
-                 "Share of the US investors' whole European book held in the bucket",
-                 "share", pct=True, label_fmt=lambda v: f"{100*v:,.1f}%")
+    # (2026-08-10) GLOBAL denominator = MAIN, matching the regression's dw.
+    _draw_series(axes[3], d, series, "share_of_book_global", ten,
+                 "Share of the US investors' GLOBAL (full FactSet-identifiable "
+                 "equity) book held in the bucket",
+                 "share of global book", pct=True,
+                 label_fmt=lambda v: f"{100*v:,.2f}%")
 
     note = (
         f"Countries are ranked each quarter on {MEASURE_DESC[meas]}, "
@@ -352,6 +379,10 @@ def _figure_a_country_one(ten: pd.DataFrame, d: pd.DataFrame, meas: str) -> list
         + ", so single large countries crossing a percentile cut can move an arm "
         "sharply. The quarter-by-quarter composition (per measure) is in "
         "fig_A_country_bucket_membership.csv. "
+        "The share panel uses the GLOBAL (full FactSet-identifiable equity) "
+        "denominator, the same denominator as the main regression; the EU-book "
+        "version of the series (share_of_book_eu in fig_A_country_buckets.csv) is "
+        "the within-Europe reallocation diagnostic and is not plotted. "
         f"Background silhouette = {TENSION_LABEL}, scaled to panel height with no "
         "axis and no ticks; read its level off the top panel.")
     return _finish(fig, axes, f"fig_A_country_{meas.lower()}_quartiles",

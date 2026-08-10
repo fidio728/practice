@@ -18,7 +18,7 @@
 * at monthly frequency, brings it to the 82-quarter panel grid, standardizes each
 * to mean 0 / sd 1 OVER THE 82 PANEL QUARTERS, and writes the diagnostics. This
 * file only ESTIMATES: it merges the menu onto the P0 c6 panel, rebuilds the DDD
-* triple per variant, and runs the 3-pairwise + it+gt battery.
+* triple per variant, and runs the 3-pairwise + it+gt battery at BOTH timings.
 *
 * PRE-REGISTERED SELECTION RULE (ECHO of the builder header — the AUTHORITATIVE
 * copy lives verbatim in build_shock_menu.py, and it was fixed BEFORE any
@@ -36,6 +36,26 @@
 *      0: if the two disagree, this file aborts rather than let a hand-edit
 *      silently override the pre-registered selection.
 *
+* TIMING EXTENSION (2026-08-10). The menu was BUILT and pre-registered at S_t;
+* the paper's PRIMARY timing is S_{t-1} (run_headline_3pairwise.do, 2026-08-08
+* decision), and construction robustness must be established AT the primary
+* timing. This file therefore runs TWO arms and tags every CSV row with
+* timing in {st, slag}:
+*   st    the S_t block — byte-for-byte the pre-registered construction
+*         diagnostic, UNCHANGED. It remains the family the selection rule and
+*         the pre-registered reading were written for.
+*   slag  the S_{t-1} block — for every menu variant v the regressor becomes
+*         us x cn_lag x L.v, where L.v is the TRUE CALENDAR LAG of the
+*         standardized variant on the CONTIGUOUS quarter grid (sort the deduped
+*         quarter list, assert steps of exactly one quarter, take [_n-1] —
+*         the same derivation as the s_lag map in run_headline_3pairwise.do
+*         Part B). The lagged BASELINE us x cn_lag x S_{t-1} is the PRIMARY
+*         regressor itself, so it is drift-gated against the canonical
+*         primary/global/slag cells (see DRIFT ANCHOR below).
+* This closes the "menu not re-adjudicated at the primary timing" gap: the S_t
+* family stays the pre-registered construction diagnostic; the slag arm
+* establishes construction robustness at the timing the paper actually reports.
+*
 * INPUT CONTRACT (the interface — this file does not wait on w1's internals):
 *   `OUT'/shock_menu_quarterly.dta   (preferred)   or
 *   `OUT'/shock_menu_quarterly.csv   (fallback)
@@ -46,10 +66,14 @@
 *     - one numeric column per STANDARDIZED variant; names are enumerated
 *       GENERICALLY at runtime (see the resolver below), so w1 is free to name
 *       them, subject only to the documented exclusion patterns.
-*   Panel: `OUT'/c6_panel.dta (P0 vintage, 348,156 rows; rdate is %tc).
+*   Panel: `OUT'/c6_panel.dta (v3.1 canonical, 2026-08-09 rebuild: 909,724
+*   rows / 10,293 firms / 82 quarters; rdate is %tc). [A1 fix 2026-08-10: an
+*   earlier revision of this comment cited the superseded P0 348,156-row
+*   vintage.]
 *
 * OUTPUTS (new files only; no existing artifact is modified):
-*   `OUT'/shockmenu_results.csv    one row per (variant, dv, FE set)
+*   `OUT'/shockmenu_results.csv    one row per (variant, timing, dv, FE set);
+*                                  timing in {st, slag}
 *   `OUT'/shockmenu_vce_diag.csv   B9 degenerate-two-way-cluster-VCE guard
 *   Under SMOKE=1 BOTH gain a `_SMOKE' filename suffix and every row carries
 *   smoke=1 plus the firm count, so a syntax-pass CSV can never be mistaken on
@@ -65,19 +89,26 @@
 * Where the B9 guard flags a degenerate VCE, the CRVE p in shockmenu_results.csv
 * is NOT valid inference — read the RI p instead.
 *
-* DRIFT ANCHOR (LOCKED 2026-08-08 layout; fail-closed since REBUILD v3). Before
-* the battery this file READS the canonical S_t diagnostic cells
-* (spec=="diag" & denom=="global" & timing=="st", fe fq_gq_ig / fq_gq) from
-* `OUT'/headline_3pairwise_canonical.csv (the LIVING SOURCE, same artifact cited
-* by run_fourgroup.do) and hard-asserts the baseline_panel_shock_raw b3 against
-* them to 6 significant figures for BOTH FE sets — those cells ARE this battery's
-* baseline regressions (dw global x S_t). A missing file, stale layout, or absent
-* anchor rows ABORT with exit 459: the menu must never run vintage-unprotected.
-* Stale panel vintages sit in the same directory as c6_panel.dta, so a silent
-* panel-vintage swap would otherwise produce a full menu of plausible-looking
-* numbers with nothing to catch it. b3 is order-invariant, so an exact gate is
-* legitimate; p and N are printed beside the anchors rather than gated, because
-* reghdfe's singleton drop can legitimately move df_r.
+* DRIFT ANCHOR (LOCKED 2026-08-08 layout; fail-closed since REBUILD v3; slag
+* cells added 2026-08-10). Before the battery this file READS FOUR canonical
+* cells from `OUT'/headline_3pairwise_canonical.csv (the LIVING SOURCE, same
+* artifact cited by run_fourgroup.do):
+*   S_t   arm:  spec=="diag"          & denom=="global" & timing=="st",
+*               fe fq_gq_ig / fq_gq  — those cells ARE the S_t baseline
+*               regressions (dw global x S_t);
+*   S_t-1 arm:  spec=="primary"       & denom=="global" & timing=="slag",
+*               fe=="fq_gq_ig", and
+*               spec=="primary_itgt"  & denom=="global" & timing=="slag",
+*               fe=="fq_gq"          — those cells ARE the slag baseline
+*               regressions (dw global x S_{t-1} = the PRIMARY spec itself).
+* Each baseline b3 is HARD-ASSERTED against its cell to 6 significant figures.
+* A missing file, stale layout, or absent anchor rows ABORT with exit 459: the
+* menu must never run vintage-unprotected. Stale panel vintages sit in the same
+* directory as c6_panel.dta, so a silent panel-vintage swap would otherwise
+* produce a full menu of plausible-looking numbers with nothing to catch it.
+* b3 is order-invariant, so an exact gate is legitimate; p and N are printed
+* beside the anchors rather than gated, because reghdfe's singleton drop can
+* legitimately move df_r.
 *
 * HONESTY. Every number verbatim from the run. Specs that fail reghdfe are
 * written to the CSV with status=FAILED and reported as failures, never dropped
@@ -108,6 +139,22 @@
 *      ONE EXPECTED FALSE POSITIVE at this family size. Only the pre-registered
 *      preferred variant and the continuity baseline carry weight, and p_circ
 *      (run_ri_shockmenu.py) governs over p_free wherever they diverge.
+*
+* TIMING-EXTENSION NOTE on the reading (2026-08-10, added AFTER the block above
+* which is left verbatim): the reading was pre-registered for the S_t family.
+* The slag arm re-uses (a)-(e) verbatim at the primary timing; the family size
+* DOUBLES, so (e)'s one-expected-false-positive arithmetic applies WITHIN each
+* timing arm, and a slag-only rejection with the st twin null is a
+* timing-sensitivity observation, not a construction result.
+*
+* VINTAGE NOTE on the reading (2026-08-10, r1 advisory A1 — appended, block
+* above left verbatim): item (a)'s cited cells (b3=-5.28e-7, CRVE p=0.763,
+* RI p=0.801) are the 2026-08-04 P0 348,156-row vintage's numbers. The LIVING
+* canonical cells this file hard-asserts in section 0 are the v3.1
+* (909,724-row) values: diag/global/st b3=+7.578581e-7 p=0.420 and
+* primary/global/slag b3=-1.394461e-7 p=0.893 (RI circ arbiter 0.878). Read
+* "the P0 deep null" in (a) as "the canonical deep null at the current
+* vintage" — the null itself carries over; the cited magnitudes do not.
 *==============================================================================
 
 clear all
@@ -138,6 +185,29 @@ local SFX ""
 if `SMOKE' == 1 local SFX "_SMOKE"
 local RESCSV "`OUT'/shockmenu_results`SFX'.csv"
 local VCECSV "`OUT'/shockmenu_vce_diag`SFX'.csv"
+
+*------------------------------------------------------------------------------
+* ROTATION DISCIPLINE (r1 must-fix M2, 2026-08-10): REFUSE to clobber the
+* canonical anchors in place. shockmenu_results.csv is the b3 anchor-of-record
+* for run_ri_shockmenu.py, so silently overwriting an old vintage destroys the
+* audit trail of the P1 pre-registration. Rename the existing files to *_r2pre
+* first, then re-run. _SMOKE-suffixed paths are exempt (self-documenting
+* scratch that must never be mistaken for the real artifact anyway).
+*------------------------------------------------------------------------------
+if `SMOKE' == 0 {
+    capture confirm file "`RESCSV'"
+    if _rc == 0 {
+        display as error "target `RESCSV' already exists —"
+        display as error "rename it to shockmenu_results_r2pre.csv (rotation rule) before re-running."
+        error 602
+    }
+    capture confirm file "`VCECSV'"
+    if _rc == 0 {
+        display as error "target `VCECSV' already exists —"
+        display as error "rename it to shockmenu_vce_diag_r2pre.csv (rotation rule) before re-running."
+        error 602
+    }
+}
 
 *------------------------------------------------------------------------------
 * PREFERRED-VARIANT MACRO. Filled from the pre-registered whiteness rule (whitest
@@ -192,27 +262,40 @@ if "`PREFERRED'" != "" & "`PREF_FILE'" != "" & "`PREFERRED'" != "`PREF_FILE'" {
 display "PREFERRED variant (menu column) in force: `PREFERRED'"
 
 *==============================================================================
-* 0. DRIFT ANCHOR — read the canonical S_t diagnostic cells from the LIVING
-*    SOURCE output/headline_3pairwise_canonical.csv (LOCKED 2026-08-08 layout:
-*    spec,denom,timing,fe,b3,se,p,N). The battery below runs dw x S_t, so its
-*    anchors are the TWO diag/global/st cells:
+* 0. DRIFT ANCHOR — read the FOUR canonical cells from the LIVING SOURCE
+*    output/headline_3pairwise_canonical.csv (LOCKED 2026-08-08 layout:
+*    spec,denom,timing,fe,b3,se,p,N).
+*    S_t arm anchors (diag/global/st):
 *      fe=="fq_gq_ig" -> baseline_panel_shock_raw at fq gq ig (3pw)
 *      fe=="fq_gq"    -> baseline_panel_shock_raw at fq gq    (itgt)
+*    S_{t-1} arm anchors (the PRIMARY cells, added 2026-08-10):
+*      spec=="primary"      & timing=="slag" & fe=="fq_gq_ig" -> the slag
+*        baseline at fq gq ig IS the primary regression itself;
+*      spec=="primary_itgt" & timing=="slag" & fe=="fq_gq"    -> its itgt twin.
 *    (the canonical writers run the identical regressions on audit_c6_panel;
-*    reghdfe's estimation sample coincides with the c6_panel run, so a
-*    6-sig-fig b3 gate is legitimate).
+*    reghdfe's estimation sample coincides with the c6_panel run after
+*    singleton drops, so a 6-sig-fig b3 gate is legitimate — for the slag
+*    cells the audit panel's s_lag and the in-file Part-B derivation below
+*    both leave the first observable quarter missing, so the samples coincide
+*    the same way).
 *    FAIL-CLOSED (REBUILD v3, 2026-08-08): a missing file, a stale layout, or
 *    absent anchor rows ABORT with exit 459. The old behaviour — HAVE_ANCHOR=0
 *    and a self-DISABLED gate — was exactly the stale-vintage failure mode the
 *    layout guard exists to kill; a full menu must never run unprotected.
 *==============================================================================
 local ANCHORCSV "`OUT'/headline_3pairwise_canonical.csv"
-local A3_B3 .
-local A3_P  .
-local A3_N  .
-local AI_B3 .
-local AI_P  .
-local AI_N  .
+local A3_B3  .
+local A3_P   .
+local A3_N   .
+local AI_B3  .
+local AI_P   .
+local AI_N   .
+local A3L_B3 .
+local A3L_P  .
+local A3L_N  .
+local AIL_B3 .
+local AIL_P  .
+local AIL_N  .
 * (nothing is in memory yet — `clear all' above — so no preserve/restore needed;
 *  section 1 loads the menu into a fresh dataset immediately after.)
 capture confirm file "`ANCHORCSV'"
@@ -233,11 +316,19 @@ quietly count if spec == "diag" & denom == "global" & timing == "st" & fe == "fq
 local _n3 = r(N)
 quietly count if spec == "diag" & denom == "global" & timing == "st" & fe == "fq_gq"
 local _ni = r(N)
-if `_n3' != 1 | `_ni' != 1 {
+quietly count if spec == "primary" & denom == "global" & timing == "slag" & fe == "fq_gq_ig"
+local _n3l = r(N)
+quietly count if spec == "primary_itgt" & denom == "global" & timing == "slag" & fe == "fq_gq"
+local _nil = r(N)
+if `_n3' != 1 | `_ni' != 1 | `_n3l' != 1 | `_nil' != 1 {
     display as error "ANCHOR ROWS MISSING/AMBIGUOUS in `ANCHORCSV':"
-    display as error "  diag/global/st/fq_gq_ig rows: `_n3'   diag/global/st/fq_gq rows: `_ni'  (each must be 1)"
+    display as error "  diag/global/st/fq_gq_ig rows        : `_n3'   (must be 1)"
+    display as error "  diag/global/st/fq_gq rows           : `_ni'   (must be 1)"
+    display as error "  primary/global/slag/fq_gq_ig rows   : `_n3l'  (must be 1)"
+    display as error "  primary_itgt/global/slag/fq_gq rows : `_nil'  (must be 1)"
     display as error "  The diag itgt-st row was added to all three writers on 2026-08-08"
-    display as error "  (REBUILD v3); a CSV without it is a stale vintage. Re-run"
+    display as error "  (REBUILD v3); the primary rows are the first two rows of the LOCKED"
+    display as error "  layout. A CSV missing any of them is a stale vintage. Re-run"
     display as error "  run_headline_3pairwise.do. Refusing to run unprotected (fail-closed)."
     exit 459
 }
@@ -253,12 +344,26 @@ quietly summarize p  if spec == "diag" & denom == "global" & timing == "st" & fe
 local AI_P  = r(mean)
 quietly summarize N  if spec == "diag" & denom == "global" & timing == "st" & fe == "fq_gq", meanonly
 local AI_N  = r(mean)
+quietly summarize b3 if spec == "primary" & denom == "global" & timing == "slag" & fe == "fq_gq_ig", meanonly
+local A3L_B3 = r(mean)
+quietly summarize p  if spec == "primary" & denom == "global" & timing == "slag" & fe == "fq_gq_ig", meanonly
+local A3L_P  = r(mean)
+quietly summarize N  if spec == "primary" & denom == "global" & timing == "slag" & fe == "fq_gq_ig", meanonly
+local A3L_N  = r(mean)
+quietly summarize b3 if spec == "primary_itgt" & denom == "global" & timing == "slag" & fe == "fq_gq", meanonly
+local AIL_B3 = r(mean)
+quietly summarize p  if spec == "primary_itgt" & denom == "global" & timing == "slag" & fe == "fq_gq", meanonly
+local AIL_P  = r(mean)
+quietly summarize N  if spec == "primary_itgt" & denom == "global" & timing == "slag" & fe == "fq_gq", meanonly
+local AIL_N  = r(mean)
 local HAVE_ANCHOR 1
 clear
-display _newline "=== CANONICAL S_t DRIFT ANCHOR (living source: headline_3pairwise_canonical.csv, diag/global/st) ==="
-display "  3pw_fq_gq_ig : b3=" %14.6e `A3_B3' "  p=" %8.6f `A3_P' "  N=" %12.0fc `A3_N'
-display "  itgt_fq_gq   : b3=" %14.6e `AI_B3' "  p=" %8.6f `AI_P' "  N=" %12.0fc `AI_N'
-display "  -> baseline_panel_shock_raw b3 will be HARD-ASSERTED to 6 significant figures."
+display _newline "=== CANONICAL DRIFT ANCHORS (living source: headline_3pairwise_canonical.csv) ==="
+display "  S_t   diag/global/st        3pw_fq_gq_ig : b3=" %14.6e `A3_B3'  "  p=" %8.6f `A3_P'  "  N=" %12.0fc `A3_N'
+display "  S_t   diag/global/st        itgt_fq_gq   : b3=" %14.6e `AI_B3'  "  p=" %8.6f `AI_P'  "  N=" %12.0fc `AI_N'
+display "  S_t-1 primary/global/slag   3pw_fq_gq_ig : b3=" %14.6e `A3L_B3' "  p=" %8.6f `A3L_P' "  N=" %12.0fc `A3L_N'
+display "  S_t-1 primary_itgt/gl/slag  itgt_fq_gq   : b3=" %14.6e `AIL_B3' "  p=" %8.6f `AIL_P' "  N=" %12.0fc `AIL_N'
+display "  -> BOTH baseline rows (st and slag) will be HARD-ASSERTED to 6 significant figures."
 
 *==============================================================================
 * 1. LOAD THE MENU + RESOLVE THE VARIANT COLUMN LIST GENERICALLY
@@ -385,9 +490,28 @@ forval i = 1/`NV' {
     quietly summarize `v'
     display "  [`i'] `v'   n=" %4.0f r(N) "  mean=" %9.3e r(mean) "  sd=" %9.3e r(sd)
 }
-display "  -> `NV' variant column(s) will be estimated."
+display "  -> `NV' variant column(s) will be estimated (each at BOTH timings st and slag)."
 
-keep qtr `VARIANTS'
+*--- LAGGED arm (timing=slag): L.v = the TRUE CALENDAR LAG of every variant -----
+* Same derivation as the s_lag map in run_headline_3pairwise.do Part B: sort the
+* deduped quarter list, ASSERT the grid is contiguous (steps of exactly one
+* quarter — so [_n-1] IS the previous calendar quarter, never "the previous row
+* of a gapped series"), then take [_n-1]. Lags are built HERE, on the FULL menu
+* grid BEFORE the panel merge: if the menu ever starts before the panel, the
+* first panel quarter legitimately gets a non-missing lag from the pre-panel
+* quarter (run_ri_shockmenu.py mirrors this ordering exactly). Lag columns are
+* named lagv`i' by menu index — variant names are s_-prefixed and near Stata's
+* 32-char limit, so a name-prefix scheme could truncate-collide.
+sort qtr
+assert qtr - qtr[_n-1] == 1 if _n > 1
+forval i = 1/`NV' {
+    local v : word `i' of `VARIANTS'
+    gen double lagv`i' = `v'[_n-1]
+}
+display "  lagged arm: lagv1..lagv`NV' = L.variant built on the contiguous menu grid"
+display "  (first menu quarter -> missing by construction; contiguity asserted)."
+
+keep qtr `VARIANTS' lagv*
 tempfile MENU
 quietly save "`MENU'"
 
@@ -439,6 +563,60 @@ gen double us_cn_base_raw = us * cn_lag * shock
 label var us_cn          "us x CN(t-1)"
 label var us_cn_base_raw "us x CN(t-1) x S_t  (BASELINE, UNSTANDARDIZED — continuity anchor)"
 
+*--- S_{t-1} on the panel (LAGGED-arm baseline). c6_panel.dta carries shock (S_t)
+*--- quarter-constant; s_lag is derived IN-FILE from the deduped quarter-level
+*--- shock series — the SAME derivation as the s_lag map in
+*--- run_headline_3pairwise.do Part B: dedupe the quarter list, assert one row
+*--- per quarter (shock is quarter-constant), assert the quarter grid is
+*--- CONTIGUOUS (so [_n-1] IS the true previous calendar quarter), take
+*--- shock[_n-1], merge back m:1. BOUNDARY (2026-08-10 first-run fix): the
+*--- derived map is structurally missing in the FIRST panel quarter, but the
+*--- PANEL's own s_lag column (build_c6_panel) is non-missing there — it comes
+*--- from the CONTIGUOUS GPR series extending BEFORE the panel window. The
+*--- canonical primary cells were estimated on that full-panel column
+*--- (N=909,724 itgt / 909,638 3pw = no Q1 drop), so the baseline slag spec
+*--- MUST keep the panel column or the drift gate below would fail by sample.
+*--- The lagged VARIANTS (lagv*) have no pre-panel history, so their Q1 IS
+*--- missing and variant slag specs drop that quarter — a labeled sample fact
+*--- carried in each row's N.
+preserve
+keep qtr shock
+duplicates drop
+sort qtr
+by qtr: assert _N == 1
+assert qtr - qtr[_n-1] == 1 if _n > 1
+gen double s_lag_d = shock[_n-1]
+keep qtr s_lag_d
+tempfile SLAGMAP
+quietly save "`SLAGMAP'"
+restore
+merge m:1 qtr using "`SLAGMAP'", assert(match) nogen
+capture confirm variable s_lag
+if _rc == 0 {
+    * panel vintage already carries s_lag: the in-file derivation must MATCH it
+    * on every DERIVABLE quarter — a divergence means the panel's s_lag was
+    * built off a different grid and the slag arm would silently test a
+    * different regressor. Tolerance 1e-6 (not exact): a float-stored panel
+    * column carries ~1e-7 relative storage noise; a REAL grid divergence
+    * (wrong quarter alignment) is orders larger. MISSINGNESS (first-run fix
+    * 2026-08-10): the panel column must be COMPLETE (its Q1 value comes from
+    * the pre-panel GPR series); the derived map is missing EXACTLY on the
+    * first panel quarter — asserting equal missingness was wrong by design
+    * and aborted the first run (872 Q1 rows).
+    assert !missing(s_lag)
+    quietly summarize qtr, meanonly
+    assert missing(s_lag_d) == (qtr == r(min))
+    assert reldif(s_lag, s_lag_d) < 1e-6 if !missing(s_lag_d)
+    drop s_lag_d
+    display "panel already carries s_lag — in-file Part-B derivation matches it on all derivable quarters (cross-checked, kept panel column; Q1 s_lag from the pre-panel GPR series)."
+}
+else {
+    rename s_lag_d s_lag
+    display "s_lag derived in-file (Part-B map): first panel quarter missing by construction."
+}
+gen double us_cn_base_raw_slag = us * cn_lag * s_lag
+label var us_cn_base_raw_slag "us x CN(t-1) x S_{t-1}  (LAGGED-ARM BASELINE = PRIMARY regressor, unstandardized)"
+
 *--- lead outcome dw_{t+1}. c6_panel.dta carries no dw_lead1, so it is built here
 *--- on the (firm x group) time series. tsset's F. operator respects the time
 *--- index, so a gap yields missing rather than a silently misaligned lead.
@@ -465,11 +643,15 @@ display "panel quarters: `NQ_PANEL'"
 *==============================================================================
 * Name-collision guard: a menu column sharing a panel variable name (e.g. a
 * variant literally called `shock') would make merge abort with a bare r(108);
-* fail here instead, naming the offender.
+* fail here instead, naming the offender. The lagv`i' columns are checked too.
 local CLASH ""
 foreach v of local VARIANTS {
     capture confirm variable `v'
     if _rc == 0 local CLASH "`CLASH' `v'"
+}
+forval i = 1/`NV' {
+    capture confirm variable lagv`i'
+    if _rc == 0 local CLASH "`CLASH' lagv`i'"
 }
 if "`CLASH'" != "" {
     display as error "menu variant name(s) collide with panel variables:`CLASH'"
@@ -492,7 +674,12 @@ quietly drop if _mm == 2
 drop _mm
 display "menu merge: all `NQ_PANEL' panel quarters covered; `n_menuonly' menu-only quarter(s) dropped."
 
-*--- per-variant triple + correlation with the panel's own raw shock ------------
+*--- per-variant triples (both timings) + correlation with the panel's own shock
+* st  rows: corr(variant, shock)  — the S_t pairing (unchanged);
+* slag rows: corr(L.variant, s_lag) — the SAME pairing shifted one quarter, so
+*            the corr column always compares the regressor's S-vector to the
+*            panel shock AT THE SAME TIMING (first quarter missing on both
+*            sides by construction).
 egen byte _qtag = tag(qtr)
 forval i = 1/`NV' {
     local v : word `i' of `VARIANTS'
@@ -500,20 +687,26 @@ forval i = 1/`NV' {
     label var sv`i' "us x CN(t-1) x `v'"
     quietly corr shock `v' if _qtag == 1
     local rho`i' = r(rho)
+    gen double svl`i' = us * cn_lag * lagv`i'
+    label var svl`i' "us x CN(t-1) x L.`v'  (slag arm)"
+    quietly corr s_lag lagv`i' if _qtag == 1
+    local rhol`i' = r(rho)
 }
 
 *==============================================================================
 * 4. ESTIMATION BATTERY + B9 GUARD
 *    3-pairwise (fq gq ig) = headline FE; it+gt (fq gq) = companion.
-*    Two-way cluster(firm, month) throughout.
+*    Two-way cluster(firm, month) throughout. Run per timing arm:
+*    st (pre-registered S_t diagnostic, UNCHANGED) then slag (S_{t-1}, the
+*    menu re-adjudicated AT THE PRIMARY TIMING).
 *==============================================================================
 * SMOKE marker travels ON DISK, in the filename AND in every row (see the SMOKE
 * note at the top): a 200-firm CSV must never be mistakable for the real anchor.
 tempname rh vh
 file open `rh' using "`RESCSV'", write replace
-file write `rh' "variant,dv,fe,b2_us_cn,se2,p2,b3_triple,se3,p3,N,n_clust_firm,n_clust_month,df_r,r2,corr_S_with_panel_shock,status,smoke,n_firms" _n
+file write `rh' "variant,dv,fe,timing,b2_us_cn,se2,p2,b3_triple,se3,p3,N,n_clust_firm,n_clust_month,df_r,r2,corr_S_with_panel_shock,status,smoke,n_firms" _n
 file open `vh' using "`VCECSV'", write replace
-file write `vh' "variant,dv,fe,coef,b,se,se_valid,smoke,n_firms" _n
+file write `vh' "variant,dv,fe,timing,coef,b,se,se_valid,smoke,n_firms" _n
 
 global SM_FAILED ""
 global SM_DEGEN  ""
@@ -547,17 +740,41 @@ end
 
 display _newline "=============================================================================="
 display "SHOCK MENU BATTERY — dv=dw, FE in {fq gq ig (3pw headline), fq gq (it+gt)}"
+display "  timing arms: st = pre-registered S_t construction diagnostic (UNCHANGED);"
+display "               slag = S_{t-1}, the SAME menu re-adjudicated AT THE PRIMARY TIMING"
 display "=============================================================================="
 
-*--- ordered spec list: baseline continuity anchor first, then the menu ---------
+*--- ordered spec list: the S_t block first (baseline continuity anchor, then
+*--- the menu — the pre-registered construction diagnostic, byte-for-byte
+*--- UNCHANGED), then the S_{t-1} LAGGED block (lagged baseline = the PRIMARY
+*--- regressor, then every lagged variant). `SPEC_GATE' marks the two baseline
+*--- rows that carry a canonical drift gate ("-" = no gate; "st" gates on the
+*--- diag/global/st cells, "slag" on the primary/global/slag cells).
 local SPEC_LBL  "baseline_panel_shock_raw"
 local SPEC_TRIP "us_cn_base_raw"
 local SPEC_RHO  "1"
+local SPEC_TIM  "st"
+local SPEC_GATE "st"
 forval i = 1/`NV' {
     local v : word `i' of `VARIANTS'
     local SPEC_LBL  "`SPEC_LBL' `v'"
     local SPEC_TRIP "`SPEC_TRIP' sv`i'"
     local SPEC_RHO  "`SPEC_RHO' `rho`i''"
+    local SPEC_TIM  "`SPEC_TIM' st"
+    local SPEC_GATE "`SPEC_GATE' -"
+}
+local SPEC_LBL  "`SPEC_LBL' baseline_panel_shock_raw"
+local SPEC_TRIP "`SPEC_TRIP' us_cn_base_raw_slag"
+local SPEC_RHO  "`SPEC_RHO' 1"
+local SPEC_TIM  "`SPEC_TIM' slag"
+local SPEC_GATE "`SPEC_GATE' slag"
+forval i = 1/`NV' {
+    local v : word `i' of `VARIANTS'
+    local SPEC_LBL  "`SPEC_LBL' `v'"
+    local SPEC_TRIP "`SPEC_TRIP' svl`i'"
+    local SPEC_RHO  "`SPEC_RHO' `rhol`i''"
+    local SPEC_TIM  "`SPEC_TIM' slag"
+    local SPEC_GATE "`SPEC_GATE' -"
 }
 local NSPEC : word count `SPEC_LBL'
 
@@ -565,17 +782,19 @@ forval s = 1/`NSPEC' {
     local lbl  : word `s' of `SPEC_LBL'
     local trip : word `s' of `SPEC_TRIP'
     local rho  : word `s' of `SPEC_RHO'
-    display _newline "--- `lbl' ---"
+    local tim  : word `s' of `SPEC_TIM'
+    local gate : word `s' of `SPEC_GATE'
+    display _newline "--- `lbl' [timing=`tim'] ---"
     foreach FE in "fq gq ig" "fq gq" {
         local felab = cond("`FE'" == "fq gq ig", "3pw_fq_gq_ig", "itgt_fq_gq")
         _smrun dw `trip' "`FE'"
         if r(ok) == 0 {
             local st "`r(status)'"
             display as error "    `felab': reghdfe `st' — reported as a FAILURE, not dropped."
-            global SM_FAILED "$SM_FAILED `lbl':`felab'"
-            file write `rh' "`lbl',dw,`felab',,,,,,,,,,,,`rho',`st',`SMOKE',`NFIRMS'" _n
-            file write `vh' "`lbl',dw,`felab',us_cn,,,0,`SMOKE',`NFIRMS'" _n
-            file write `vh' "`lbl',dw,`felab',triple,,,0,`SMOKE',`NFIRMS'" _n
+            global SM_FAILED "$SM_FAILED `lbl':`tim':`felab'"
+            file write `rh' "`lbl',dw,`felab',`tim',,,,,,,,,,,,`rho',`st',`SMOKE',`NFIRMS'" _n
+            file write `vh' "`lbl',dw,`felab',`tim',us_cn,,,0,`SMOKE',`NFIRMS'" _n
+            file write `vh' "`lbl',dw,`felab',`tim',triple,,,0,`SMOKE',`NFIRMS'" _n
             continue
         }
         local b2  = r(b2)
@@ -595,14 +814,14 @@ forval s = 1/`NSPEC' {
         * ---- B9: degenerate two-way-cluster VCE detection ----
         local ok2 = (!missing(`se2') & `se2' > 0)
         local ok3 = (!missing(`se3') & `se3' > 0)
-        file write `vh' "`lbl',dw,`felab',us_cn,`b2',`se2',`ok2',`SMOKE',`NFIRMS'" _n
-        file write `vh' "`lbl',dw,`felab',triple,`b3',`se3',`ok3',`SMOKE',`NFIRMS'" _n
+        file write `vh' "`lbl',dw,`felab',`tim',us_cn,`b2',`se2',`ok2',`SMOKE',`NFIRMS'" _n
+        file write `vh' "`lbl',dw,`felab',`tim',triple,`b3',`se3',`ok3',`SMOKE',`NFIRMS'" _n
         if (`ok2' == 0 | `ok3' == 0) {
-            global SM_DEGEN "$SM_DEGEN `lbl':`felab'"
+            global SM_DEGEN "$SM_DEGEN `lbl':`tim':`felab'"
             display as error "    >>> `felab': DEGENERATE VCE (SE missing/zero) — CRVE p INVALID. Use run_ri_shockmenu.py. <<<"
         }
 
-        file write `rh' "`lbl',dw,`felab'," ///
+        file write `rh' "`lbl',dw,`felab',`tim'," ///
             (cond(missing(`b2'), "", strtrim(strofreal(`b2', "%14.6e")))) "," ///
             (cond(missing(`se2'), "", strtrim(strofreal(`se2', "%14.6e")))) "," ///
             (cond(missing(`p2'), "", strtrim(strofreal(`p2', "%9.6f"))))  "," ///
@@ -621,21 +840,32 @@ forval s = 1/`NSPEC' {
                 "  fclust=" %6.0f `c1' "  mclust=" %4.0f `c2'
 
         *---------------------------------------------------------------------
-        * DRIFT GATE (baseline_panel_shock_raw only). b3 on the UNSTANDARDIZED
-        * panel shock IS the canonical P0 headline coefficient, so it must equal
-        * headline_3pairwise_canonical.csv to 6 significant figures. b3 is
-        * order-invariant, so an exact gate is legitimate. p / N are PRINTED
-        * beside the anchors, not gated (reghdfe singleton drops can move df_r).
-        * A mismatch means a stale panel or the wrong vintage (c6_panel_preP0.dta
-        * lives in the same directory) — abort rather than emit a full menu of
-        * plausible-looking numbers built on the wrong data.
+        * DRIFT GATES (the two baseline rows only). The S_t baseline on the
+        * UNSTANDARDIZED panel shock IS the canonical diag/global/st cell; the
+        * S_{t-1} baseline on the unstandardized s_lag IS the canonical PRIMARY
+        * cell (primary/global/slag — the primary regression itself), so each
+        * must equal headline_3pairwise_canonical.csv to 6 significant figures.
+        * b3 is order-invariant, so an exact gate is legitimate. p / N are
+        * PRINTED beside the anchors, not gated (reghdfe singleton drops can
+        * move df_r). A mismatch means a stale panel or the wrong vintage
+        * (c6_panel_preP0.dta lives in the same directory) — abort rather than
+        * emit a full menu of plausible-looking numbers built on the wrong data.
         *---------------------------------------------------------------------
-        if `s' == 1 & `HAVE_ANCHOR' == 1 {
-            local ANC_B3 = cond("`felab'" == "3pw_fq_gq_ig", `A3_B3', `AI_B3')
-            local ANC_P  = cond("`felab'" == "3pw_fq_gq_ig", `A3_P',  `AI_P')
-            local ANC_N  = cond("`felab'" == "3pw_fq_gq_ig", `A3_N',  `AI_N')
+        if "`gate'" != "-" & `HAVE_ANCHOR' == 1 {
+            if "`gate'" == "st" {
+                local ANC_B3  = cond("`felab'" == "3pw_fq_gq_ig", `A3_B3', `AI_B3')
+                local ANC_P   = cond("`felab'" == "3pw_fq_gq_ig", `A3_P',  `AI_P')
+                local ANC_N   = cond("`felab'" == "3pw_fq_gq_ig", `A3_N',  `AI_N')
+                local ANCCELL = cond("`felab'" == "3pw_fq_gq_ig", "diag/global/st/fq_gq_ig", "diag/global/st/fq_gq")
+            }
+            else {
+                local ANC_B3  = cond("`felab'" == "3pw_fq_gq_ig", `A3L_B3', `AIL_B3')
+                local ANC_P   = cond("`felab'" == "3pw_fq_gq_ig", `A3L_P',  `AIL_P')
+                local ANC_N   = cond("`felab'" == "3pw_fq_gq_ig", `A3L_N',  `AIL_N')
+                local ANCCELL = cond("`felab'" == "3pw_fq_gq_ig", "primary/global/slag/fq_gq_ig", "primary_itgt/global/slag/fq_gq")
+            }
             local RELERR = abs(`b3'/`ANC_B3' - 1)
-            display "    [DRIFT GATE] `felab': anchor b3=" %14.6e `ANC_B3' ///
+            display "    [DRIFT GATE `ANCCELL'] anchor b3=" %14.6e `ANC_B3' ///
                     "  observed b3=" %14.6e `b3' "  relerr=" %9.2e `RELERR'
             display "                 anchor p=" %8.6f `ANC_P' "  observed p=" %8.6f `p3' ///
                     "   |  anchor N=" %12.0fc `ANC_N' "  observed N=" %12.0fc `NN'
@@ -644,31 +874,36 @@ forval s = 1/`NSPEC' {
             }
             else if `RELERR' > 1e-6 {
                 display as error "=============================================================="
-                display as error "DRIFT GATE FAILED — `felab' b3 does not match the canonical P0"
-                display as error "headline (relerr=`RELERR' > 1e-6)."
+                display as error "DRIFT GATE FAILED — `felab' (timing=`tim') b3 does not match the"
+                display as error "canonical cell `ANCCELL' (relerr=`RELERR' > 1e-6)."
                 display as error "  living source : `ANCHORCSV'"
                 display as error "  anchor b3     : `ANC_B3'"
                 display as error "  observed b3   : `b3'"
                 display as error "  STALE PANEL OR WRONG VINTAGE — check that `OUT'/c6_panel.dta"
-                display as error "  is the P0 vintage and not c6_panel_preP0.dta. Refusing to"
-                display as error "  continue: every menu number below would be untrustworthy."
+                display as error "  is the P0 vintage and not c6_panel_preP0.dta. For the slag"
+                display as error "  gate, also check the in-file s_lag derivation above matched"
+                display as error "  the audit panel's s_lag (first quarter missing on both)."
+                display as error "  Refusing to continue: every menu number below would be"
+                display as error "  untrustworthy."
                 display as error "=============================================================="
                 file close `rh'
                 file close `vh'
                 exit 459
             }
             else {
-                display "                 -> PASS (b3 matches to 6 significant figures)."
+                display "                 -> PASS (b3 matches `ANCCELL' to 6 significant figures)."
             }
         }
     }
-    display "    corr(S_variant, panel shock) over the `NQ_PANEL' panel quarters = " %8.6f `rho'
+    display "    corr(S-vector, panel shock at the SAME timing) over the panel quarters = " %8.6f `rho'
 }
 
 *==============================================================================
-* 5. LEAD SPEC (dw_{t+1}) — baseline + the PREFERRED variant ONLY.
+* 5. LEAD SPEC (dw_{t+1}) — baseline + the PREFERRED variant ONLY, S_t arm only
+*    (the lead family was pre-registered at S_t; dw_{t+1} x S_t already IS a
+*    lagged-timing read of the outcome, so a slag lead arm would double-lag).
 *    The preferred variant comes from the pre-registered diagnostics rule, never
-*    from anything computed above.
+*    from anything computed above. Rows are tagged timing=st.
 *==============================================================================
 * `PREFERRED' was resolved and cross-checked in section 0 (macro vs
 * shock_menu_preferred.txt), so a mismatch has already aborted this run.
@@ -690,12 +925,13 @@ else {
 
 if `HAS_LEAD' == 0 {
     display as error "dw_lead1 unavailable — ALL lead specs skipped."
-    file write `rh' "ALL,dw_lead1,NA,,,,,,,,,,,,,SKIPPED_no_lead,`SMOKE',`NFIRMS'" _n
+    file write `rh' "ALL,dw_lead1,NA,st,,,,,,,,,,,,,SKIPPED_no_lead,`SMOKE',`NFIRMS'" _n
 }
 else {
     display _newline "=============================================================================="
     display "LEAD SPEC — dv=dw_lead1 (pure lagged-shock outcome, no look-ahead in the DV)"
     display "=============================================================================="
+    local tim "st"
     local LEAD_LBL  "baseline_panel_shock_raw"
     local LEAD_TRIP "us_cn_base_raw"
     local LEAD_RHO  "1"
@@ -705,14 +941,14 @@ else {
         local LEAD_RHO  "`LEAD_RHO' `rho`PREF_IDX''"
     }
     else {
-        file write `rh' "PREFERRED_UNSET,dw_lead1,NA,,,,,,,,,,,,,SKIPPED_preferred_not_set,`SMOKE',`NFIRMS'" _n
+        file write `rh' "PREFERRED_UNSET,dw_lead1,NA,st,,,,,,,,,,,,,SKIPPED_preferred_not_set,`SMOKE',`NFIRMS'" _n
     }
     local NLEAD : word count `LEAD_LBL'
     forval s = 1/`NLEAD' {
         local lbl  : word `s' of `LEAD_LBL'
         local trip : word `s' of `LEAD_TRIP'
         local rho  : word `s' of `LEAD_RHO'
-        display _newline "--- `lbl' (lead) ---"
+        display _newline "--- `lbl' (lead) [timing=`tim'] ---"
         foreach FE in "fq gq ig" "fq gq" {
             local felab = cond("`FE'" == "fq gq ig", "3pw_fq_gq_ig", "itgt_fq_gq")
             _smrun dw_lead1 `trip' "`FE'"
@@ -720,9 +956,9 @@ else {
                 local st "`r(status)'"
                 display as error "    `felab': reghdfe `st' — reported as a FAILURE."
                 global SM_FAILED "$SM_FAILED `lbl':lead:`felab'"
-                file write `rh' "`lbl',dw_lead1,`felab',,,,,,,,,,,,`rho',`st',`SMOKE',`NFIRMS'" _n
-                file write `vh' "`lbl',dw_lead1,`felab',us_cn,,,0,`SMOKE',`NFIRMS'" _n
-                file write `vh' "`lbl',dw_lead1,`felab',triple,,,0,`SMOKE',`NFIRMS'" _n
+                file write `rh' "`lbl',dw_lead1,`felab',`tim',,,,,,,,,,,,`rho',`st',`SMOKE',`NFIRMS'" _n
+                file write `vh' "`lbl',dw_lead1,`felab',`tim',us_cn,,,0,`SMOKE',`NFIRMS'" _n
+                file write `vh' "`lbl',dw_lead1,`felab',`tim',triple,,,0,`SMOKE',`NFIRMS'" _n
                 continue
             }
             local b2  = r(b2)
@@ -740,13 +976,13 @@ else {
             if (`se3' > 0 & !missing(`se3')) local p3 = 2*ttail(`dfr', abs(`b3'/`se3'))
             local ok2 = (!missing(`se2') & `se2' > 0)
             local ok3 = (!missing(`se3') & `se3' > 0)
-            file write `vh' "`lbl',dw_lead1,`felab',us_cn,`b2',`se2',`ok2',`SMOKE',`NFIRMS'" _n
-            file write `vh' "`lbl',dw_lead1,`felab',triple,`b3',`se3',`ok3',`SMOKE',`NFIRMS'" _n
+            file write `vh' "`lbl',dw_lead1,`felab',`tim',us_cn,`b2',`se2',`ok2',`SMOKE',`NFIRMS'" _n
+            file write `vh' "`lbl',dw_lead1,`felab',`tim',triple,`b3',`se3',`ok3',`SMOKE',`NFIRMS'" _n
             if (`ok2' == 0 | `ok3' == 0) {
                 global SM_DEGEN "$SM_DEGEN `lbl':lead:`felab'"
                 display as error "    >>> `felab': DEGENERATE VCE — CRVE p INVALID. <<<"
             }
-            file write `rh' "`lbl',dw_lead1,`felab'," ///
+            file write `rh' "`lbl',dw_lead1,`felab',`tim'," ///
                 (cond(missing(`b2'), "", strtrim(strofreal(`b2', "%14.6e")))) "," ///
                 (cond(missing(`se2'), "", strtrim(strofreal(`se2', "%14.6e")))) "," ///
                 (cond(missing(`p2'), "", strtrim(strofreal(`p2', "%9.6f"))))  "," ///
@@ -795,7 +1031,12 @@ display "headline-continuity anchor regardless of what the menu shows."
 display "PREFERRED variant in force this run: `PREFERRED'  (from shock_menu_preferred.txt)"
 * HAVE_ANCHOR is always 1 here: section 0 exits 459 (fail-closed) when the
 * canonical anchor cannot be read, so an unprotected run cannot reach this line.
-display "DRIFT GATE: baseline b3 matched headline_3pairwise_canonical.csv (diag/global/st) to 6 sig figs."
+display "DRIFT GATES: st baseline matched diag/global/st and slag baseline matched"
+display "primary(_itgt)/global/slag (headline_3pairwise_canonical.csv) to 6 sig figs each."
+display "TIMING: the st block is the PRE-REGISTERED construction diagnostic (unchanged);"
+display "the slag block re-adjudicates the SAME menu at the PRIMARY timing S_{t-1},"
+display "closing the 'menu not re-adjudicated at the primary timing' gap. Reading"
+display "(a)-(e) below applies WITHIN each timing arm (family size doubles)."
 if `SMOKE' == 1 {
     display as error "SMOKE=1 (`NFIRMS' firms): outputs carry the _SMOKE suffix and smoke=1 rows."
     display as error "  These numbers are a SYNTAX PASS. They are NOT valid inference and must"
@@ -822,5 +1063,11 @@ display "  (e) Any SINGLE one of ~12 columns crossing p<.05 with the rest null i
 display "      roughly ONE EXPECTED FALSE POSITIVE at this family size. Only the"
 display "      pre-registered preferred variant and the continuity baseline carry"
 display "      weight, and p_circ governs over p_free wherever they diverge."
+display "  VINTAGE NOTE (2026-08-10, appended — reading above frozen verbatim):"
+display "  item (a)'s cited cells (b3=-5.28e-7, CRVE p=0.763, RI p=0.801) are the"
+display "  2026-08-04 P0 348,156-row vintage. The living canonical cells asserted"
+display "  in section 0 are the v3.1 values: diag/global/st b3=+7.578581e-7 p=0.420"
+display "  and primary/global/slag b3=-1.394461e-7 p=0.893 (RI circ 0.878). Read"
+display "  'the P0 deep null' as 'the canonical deep null at the current vintage'."
 display "=============================================================================="
 display "Done."

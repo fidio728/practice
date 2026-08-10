@@ -46,9 +46,25 @@
 #                     base) deflated level -- SAME convention as
 #                     build_desc_trend_us_holdings.py, via the shared
 #                     desc_trend_metrics helpers.
-#     share_of_book   sum of portfolio_weight_eu over the bucket = the share of
-#                     that holder group's whole European book sitting in the
-#                     bucket. Scale-free, sums to 1 across all firms.
+#     share_of_book_global / share_of_book_eu / share_of_book
+#                     (DENOMINATOR SWITCH, 2026-08-10) BOTH portfolio-weight
+#                     families are now carried through every firm/country
+#                     aggregation, mirroring the 2026-08-08 GLOBAL-MAIN
+#                     decision on the regression side (dw = global family):
+#                       share_of_book_global = sum of portfolio_weight_global
+#                           over the bucket = share of the holder group's
+#                           GLOBAL (full FactSet-identifiable equity) book
+#                           sitting in the bucket. MAIN series -- consistent
+#                           with the main regression's global denominator.
+#                       share_of_book_eu = sum of portfolio_weight_eu = share
+#                           of the holder group's EUROPEAN book only. Kept as
+#                           the WITHIN-EUROPE REALLOCATION DIAGNOSTIC.
+#                       share_of_book = ALIAS of share_of_book_global, kept
+#                           under the old name so existing readers keep
+#                           working. WARNING: in CSVs written BEFORE
+#                           2026-08-10 this column held the EU series; any
+#                           comparison against old vintages must use
+#                           share_of_book_eu, not share_of_book.
 #     idx100          real_usd_2020 indexed to 100 at BASE_QUARTER.
 #   The headline figure uses the normalized series; the level version is kept
 #   because the advisor asked to see both.
@@ -209,18 +225,25 @@ def build_firm_quarter_table(con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
     con.execute(f"""
         CREATE OR REPLACE TABLE fq AS
         WITH us AS (
+            -- (2026-08-10) BOTH weight families carried: *_g = global
+            -- (full-portfolio) denominator, MAIN; *_eu = EU-restricted
+            -- denominator, within-Europe reallocation diagnostic.
             SELECT sec_entity_id, sec_country, report_date,
-                   I_ict AS usd_us, portfolio_weight_eu AS w_us,
+                   I_ict AS usd_us,
+                   portfolio_weight_global AS w_us_g,
+                   portfolio_weight_eu     AS w_us_eu,
                    china_share, china_share_lag1q,
                    CAST(n_cn_customer + n_cn_supplier AS BIGINT) AS cn_links,
                    n_supplychain_links, zero_recode_flag, revere_pit_present
             FROM read_parquet('{GRID}') WHERE holder_group = 'US'
         ), nonus AS (
             SELECT sec_entity_id, report_date,
-                   I_ict AS usd_nonus, portfolio_weight_eu AS w_nonus
+                   I_ict AS usd_nonus,
+                   portfolio_weight_global AS w_nonus_g,
+                   portfolio_weight_eu     AS w_nonus_eu
             FROM read_parquet('{GRID}') WHERE holder_group = 'NONUS'
         )
-        SELECT u.*, n.usd_nonus, n.w_nonus, m.market_cap AS mcap
+        SELECT u.*, n.usd_nonus, n.w_nonus_g, n.w_nonus_eu, m.market_cap AS mcap
         FROM us u
         JOIN nonus n USING (sec_entity_id, report_date)
         LEFT JOIN read_parquet('{MCAP}') m
@@ -246,7 +269,7 @@ def build_firm_quarter_table(con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
     df = con.sql("""
         SELECT sec_entity_id AS fid, sec_country AS country,
                report_date AS quarter_end,
-               usd_us, w_us, usd_nonus, w_nonus,
+               usd_us, w_us_g, w_us_eu, usd_nonus, w_nonus_g, w_nonus_eu,
                china_share AS cn, china_share_lag1q AS cn_lag,
                cn_links, n_supplychain_links AS sc_links,
                zero_recode_flag, mcap,
@@ -347,14 +370,18 @@ def build_figure_a_firm(df: pd.DataFrame, cpi: pd.DataFrame) -> tuple[pd.DataFra
     tagged = pd.concat(frames, ignore_index=True)
 
     # ---- aggregate to (split, bucket, holder_group, quarter) ---------
+    # (2026-08-10) both weight families summed; share_of_book aliases GLOBAL.
     out = []
-    for grp, usd_col, w_col in (("US", "usd_us", "w_us"),
-                                ("NONUS", "usd_nonus", "w_nonus")):
+    for grp, usd_col, wg_col, we_col in (
+            ("US", "usd_us", "w_us_g", "w_us_eu"),
+            ("NONUS", "usd_nonus", "w_nonus_g", "w_nonus_eu")):
         a = (tagged.assign(_usd=tagged[usd_col].fillna(0.0),
-                           _w=tagged[w_col].fillna(0.0))
+                           _wg=tagged[wg_col].fillna(0.0),
+                           _we=tagged[we_col].fillna(0.0))
                    .groupby(["split", "bucket", "quarter_end"], as_index=False)
                    .agg(usd_value=("_usd", "sum"),
-                        share_of_book=("_w", "sum"),
+                        share_of_book_global=("_wg", "sum"),
+                        share_of_book_eu=("_we", "sum"),
                         n_firms=("fid", "size"),
                         n_firms_held=("_usd", lambda s: int((s > 0).sum())),
                         mean_cn_lag=("cn_lag", "mean"),
@@ -362,16 +389,20 @@ def build_figure_a_firm(df: pd.DataFrame, cpi: pd.DataFrame) -> tuple[pd.DataFra
         a["holder_group"] = grp
         out.append(a)
     agg = pd.concat(out, ignore_index=True)
+    agg["share_of_book"] = agg["share_of_book_global"]   # alias, GLOBAL family
 
     groups = ["split", "bucket", "holder_group"]
     agg = deflate(agg, groups, cpi)
     agg = add_index100(agg, groups)
 
-    # sanity: within a split and quarter, share_of_book over buckets must not
-    # exceed 1 (buckets are disjoint subsets of the same book)
-    tot = agg.groupby(["split", "holder_group", "quarter_end"])["share_of_book"].sum()
-    if (tot > 1 + 1e-9).any():
-        raise RuntimeError(f"share_of_book sums above 1: max={tot.max():.6f}")
+    # sanity: within a split and quarter, each share family summed over buckets
+    # must not exceed 1 (buckets are disjoint subsets of the same book; the
+    # global sum is additionally far below 1 because EU firms are a slice of
+    # the global book)
+    for shcol in ("share_of_book_global", "share_of_book_eu"):
+        tot = agg.groupby(["split", "holder_group", "quarter_end"])[shcol].sum()
+        if (tot > 1 + 1e-9).any():
+            raise RuntimeError(f"{shcol} sums above 1: max={tot.max():.6f}")
 
     cuts = pd.DataFrame(cut_rows).sort_values(["split", "quarter_end"])
     return agg.sort_values(groups + ["quarter_end"]).reset_index(drop=True), cuts
@@ -416,27 +447,38 @@ def build_figure_a_country(df: pd.DataFrame, cpi: pd.DataFrame,
     print(f"[A2:{measure}] country classification rows: {len(memb):,} "
           f"({memb['country'].nunique()} countries, {memb['quarter_end'].nunique()} quarters)")
 
-    firm_ct = (df.assign(_us=df["usd_us"].fillna(0.0), _wus=df["w_us"].fillna(0.0),
-                         _nu=df["usd_nonus"].fillna(0.0), _wnu=df["w_nonus"].fillna(0.0))
+    # (2026-08-10) both weight families carried through the country
+    # aggregation; share_of_book aliases the GLOBAL family.
+    firm_ct = (df.assign(_us=df["usd_us"].fillna(0.0),
+                         _wus_g=df["w_us_g"].fillna(0.0),
+                         _wus_e=df["w_us_eu"].fillna(0.0),
+                         _nu=df["usd_nonus"].fillna(0.0),
+                         _wnu_g=df["w_nonus_g"].fillna(0.0),
+                         _wnu_e=df["w_nonus_eu"].fillna(0.0))
                  .groupby(["country", "quarter_end"], as_index=False)
-                 .agg(usd_us=("_us", "sum"), w_us=("_wus", "sum"),
-                      usd_nonus=("_nu", "sum"), w_nonus=("_wnu", "sum"),
+                 .agg(usd_us=("_us", "sum"),
+                      w_us_g=("_wus_g", "sum"), w_us_eu=("_wus_e", "sum"),
+                      usd_nonus=("_nu", "sum"),
+                      w_nonus_g=("_wnu_g", "sum"), w_nonus_eu=("_wnu_e", "sum"),
                       n_firms=("fid", "size")))
     j = memb.merge(firm_ct, on=["country", "quarter_end"], how="inner",
                    validate="one_to_one")
 
     out = []
-    for grp, usd_col, w_col in (("US", "usd_us", "w_us"),
-                                ("NONUS", "usd_nonus", "w_nonus")):
+    for grp, usd_col, wg_col, we_col in (
+            ("US", "usd_us", "w_us_g", "w_us_eu"),
+            ("NONUS", "usd_nonus", "w_nonus_g", "w_nonus_eu")):
         a = (j.groupby(["bucket", "quarter_end"], as_index=False)
               .agg(usd_value=(usd_col, "sum"),
-                   share_of_book=(w_col, "sum"),
+                   share_of_book_global=(wg_col, "sum"),
+                   share_of_book_eu=(we_col, "sum"),
                    n_countries=("country", "nunique"),
                    n_firms=("n_firms", "sum"),
                    mean_m1_lag=("m1_lag", "mean")))
         a["holder_group"] = grp
         out.append(a)
     agg = pd.concat(out, ignore_index=True)
+    agg["share_of_book"] = agg["share_of_book_global"]   # alias, GLOBAL family
     agg["measure"] = measure
     agg["universe"] = COUNTRY_UNIVERSE
 
@@ -503,6 +545,27 @@ def main() -> None:
         if not Path(p).is_file():
             raise FileNotFoundError(f"missing input: {p}")
 
+    # ------------------------------------------------------------------
+    # ROTATION DISCIPLINE (r1 must-fix M1, 2026-08-10): REFUSE to overwrite
+    # any existing output in place. This run FLIPS the semantics of the
+    # share_of_book column (pre-2026-08-10 CSVs hold the EU series under that
+    # name; from now on it aliases the GLOBAL series — see the WARNING in the
+    # header), so a bare in-place rewrite is exactly the silent semantic swap
+    # the L62-67 warning describes. Mirror of build_country_panel.py's guard:
+    # rename each existing file to *_r2pre first, then re-run.
+    # ------------------------------------------------------------------
+    _targets = (F_TENSION, F_A_FIRM, F_A_CUTS, F_A_CTRY,
+                F_A_CMEMB, F_B_GROWTH, F_B_CUTS, F_SPOT)
+    _existing = [p for p in _targets if p.exists()]
+    if _existing:
+        raise RuntimeError(
+            "target output(s) already exist — refusing to overwrite canonical "
+            "figure CSVs in place (rotation rule): "
+            + ", ".join(p.name for p in _existing)
+            + ". Rename each to *_r2pre (e.g. fig_A_firm_buckets_r2pre.csv) "
+            "before re-running; pre-2026-08-10 vintages hold the EU series "
+            "under the share_of_book name and must stay comparable on disk.")
+
     con = duckdb.connect()
     con.execute("SET memory_limit='8GB'")
     con.execute("SET threads=4")
@@ -562,7 +625,9 @@ def main() -> None:
             spot.append({"figure": "A_firm", "series": f"{r['split']}|{r['bucket']}",
                          "quarter_end": q.date(), "n": r["n_firms"],
                          "real_usd_2020": r["real_usd_2020"],
-                         "share_of_book": r["share_of_book"],
+                         "share_of_book": r["share_of_book"],            # = global
+                         "share_of_book_global": r["share_of_book_global"],
+                         "share_of_book_eu": r["share_of_book_eu"],
                          "idx100": r["idx100"]})
     cus = a_ctry.loc[a_ctry["holder_group"].eq("US")]
     for q in SPOT_QUARTERS:
@@ -570,7 +635,9 @@ def main() -> None:
             spot.append({"figure": "A_country", "series": f"{r['measure']}|{r['bucket']}",
                          "quarter_end": q.date(), "n": r["n_countries"],
                          "real_usd_2020": r["real_usd_2020"],
-                         "share_of_book": r["share_of_book"],
+                         "share_of_book": r["share_of_book"],            # = global
+                         "share_of_book_global": r["share_of_book_global"],
+                         "share_of_book_eu": r["share_of_book_eu"],
                          "idx100": r["idx100"]})
     for q in SPOT_QUARTERS:
         for _, r in b.loc[b["quarter_end"].eq(q)].iterrows():
@@ -586,7 +653,7 @@ def main() -> None:
     pd.set_option("display.width", 200)
     print("\n=== FIGURE A (firm level, holder_group = US) spot values ===")
     cols = ["split", "bucket", "quarter_end", "n_firms", "n_firms_held",
-            "real_usd_2020", "share_of_book", "idx100"]
+            "real_usd_2020", "share_of_book_global", "share_of_book_eu", "idx100"]
     for q in SPOT_QUARTERS:
         print(f"--- {q.date()}")
         t = us.loc[us["quarter_end"].eq(q), cols].copy()
@@ -596,7 +663,7 @@ def main() -> None:
 
     print("\n=== FIGURE A (country level, M1 quartiles, holder_group = US) spot values ===")
     ccols = ["bucket", "quarter_end", "n_countries", "n_firms", "mean_m1_lag",
-             "real_usd_2020", "share_of_book", "idx100"]
+             "real_usd_2020", "share_of_book_global", "share_of_book_eu", "idx100"]
     for q in SPOT_QUARTERS:
         print(f"--- {q.date()}")
         t = cus.loc[cus["quarter_end"].eq(q), ccols].copy()
