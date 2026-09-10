@@ -1,0 +1,25 @@
+\begin{table}[t]
+\centering
+\begin{threeparttable}
+\caption{Anatomy of the abnormal Amihud increase (diagnostic decomposition)}
+\label{tab:decomp}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lccccl@{}}
+\toprule
+ & TWFE & \makecell{Borusyak\\et al.\ (2024)} & Pre-trend & & \\
+Component & coef.\ (s.e.) & coef.\ (s.e.) & $p$ & $N$ & Reading \\
+\midrule
+Return variance (AVAR)        & $0.099^{**}$\ (0.043)  & $0.121^{**}$\ (0.050)  & 0.52 & 27{,}327 & up (clean) \\
+Absolute abnormal return      & $0.030$\ (0.021)       & $0.054^{**}$\ (0.024)  & 0.29 & 27{,}314 & up \\
+Dollar volume                 & $0.026$\ (0.021)       & $0.061^{**}$\ (0.026)  & 0.83 & 27{,}327 & up (denom.) \\
+Ratio-of-means Amihud         & $0.010$\ (0.022)       & $-0.003$\ (0.026)      & 0.64 & 27{,}314 & \textbf{null (key)} \\
+Composition wedge             & $0.013$\ (0.014)       & $0.038^{**}$\ (0.019)  & 0.59 & 27{,}314 & up (fragile) \\
+Abnormal volume (AVOL)        & $0.018$\ (0.020)       & $0.048^{*}$\ (0.025)   & 0.79 & 27{,}327 & up (marginal) \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item \textit{Notes.} Each row is the same firm- and filing-month fixed-effects specification as Table~\ref{tab:main}, with the labelled component (a within-event $[-1,+1]$ minus $[-60,-10]$ abnormal measure) as the dependent variable; AVAR is the abnormal squared market-adjusted return and the composition wedge is the gap between the mean of daily Amihud ratios and the ratio of the window means---a diagnostic term that reconciles the two, not a separate liquidity measure. TWFE columns are without controls; the second column reports the \citet{BorusyakJaravelSpiess2024} imputation estimator (580 treated firms), and the pre-trend column gives its 12-period pre-trend $p$. Standard errors clustered by firm. The near-zero ratio-of-means cell shows no uniform proportional price-impact shift; the increase is carried by the composition wedge (higher price impact on thin-volume days). Within-$R^2$ of the TWFE specifications ranges 0.00001--0.0002. $^{*}$, $^{**}$, $^{***}$ denote 10\%, 5\%, 1\%.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

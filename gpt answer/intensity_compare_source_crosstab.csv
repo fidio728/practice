@@ -1,0 +1,9 @@
+intensity_source_ours,allow_zero,fetch_error_na,full_one,partial_no_sitemap_na,partial_no_urls_na,partial_refetch_error_na,partial_sitemap,partial_sitemap_error_na
+allow_zero,4970,5,0,1,0,0,0,0
+fetch_error_na,106,782,0,3,1,1,23,1
+full_one,0,0,32,0,0,0,0,0
+partial_no_sitemap_na,0,2,0,1040,0,1,0,0
+partial_no_urls_na,2,1,0,0,345,3,22,1
+partial_refetch_error_na,0,0,0,0,2,0,7,1
+partial_sitemap,2,1,0,0,9,2,2282,1
+partial_sitemap_error_na,0,1,1,0,6,1,80,324

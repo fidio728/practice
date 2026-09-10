@@ -1,0 +1,667 @@
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  botfamily
+       log:  C:/Users/xl/OneDrive - Universitat Ramón Llull/git/practice/bot_family_twfe_bjs_internal.txt
+  log type:  text
+ opened on:   1 Jun 2026, 02:37:24
+
+. 
+. local event_csv "`out_dir'/bot_family_event_estimation.csv"
+
+. local results_csv "`out_dir'/bot_family_twfe_bjs_results.csv"
+
+. 
+. capture which reghdfe
+
+. if _rc {
+.     di as error "reghdfe is required. Install with: ssc install reghdfe"
+.     exit 499
+. }
+
+. capture which did_imputation
+
+. if _rc {
+.     di as error "did_imputation is required. Install with: ssc install did_imputation"
+.     exit 499
+. }
+
+. 
+. tempname posth
+
+. postfile `posth' str40 comparison str20 estimator str80 term ///
+>     double b se p n firms treated_firms control_firms using "`out_dir'/bot_family_twfe_bjs_results_tmp.dta", replace
+(file C:/Users/xl/OneDrive - Universitat Ramón Llull/git/practice/bot_family_twfe_bjs_results_tmp.dta not found)
+
+. 
+. program define post_twfe_coef
+  1.     args posth comparison term coefname n firms treated control
+  2.     tempname bb vv
+  3.     scalar `bb' = .
+  4.     scalar `vv' = .
+  5.     capture scalar `bb' = _b[`coefname']
+  6.     capture scalar `vv' = _se[`coefname']
+  7.     scalar pp = 2 * ttail(e(df_r), abs(`bb' / `vv'))
+  8.     post `posth' ("`comparison'") ("TWFE") ("`term'") (`bb') (`vv') (pp) (`n') (`firms') (`treated') (`control')
+  9. end
+
+. 
+. program define post_bjs_tau
+  1.     args posth comparison term n firms treated control
+  2.     tempname bb vv
+  3.     scalar `bb' = .
+  4.     scalar `vv' = .
+  5.     capture scalar `bb' = _b[tau]
+  6.     if _rc {
+  7.         capture scalar `bb' = _b[effect]
+  8.     }
+  9.     capture scalar `vv' = _se[tau]
+ 10.     if _rc {
+ 11.         capture scalar `vv' = _se[effect]
+ 12.     }
+ 13.     capture scalar pp = 2 * normal(-abs(`bb' / `vv'))
+ 14.     if _rc {
+ 15.         scalar pp = .
+ 16.     }
+ 17.     if `vv' == 0 & `bb' == 0 {
+ 18.         scalar `bb' = .
+ 19.         scalar `vv' = .
+ 20.         scalar pp = .
+ 21.     }
+ 22.     post `posth' ("`comparison'") ("BJS") ("`term'") (`bb') (`vv') (pp) (`n') (`firms') (`treated') (`control')
+ 23. end
+
+. 
+. program define run_pair
+  1.     syntax, COMP(name) G1(name) G2(name) LAB1(string) LAB2(string) POSTH(name)
+  2. 
+.     di as text "============================================================"
+  3.     di as text "PAIR: `comp' | `lab1' vs `lab2'"
+  4.     di as text "============================================================"
+  5. 
+.     preserve
+  6.         gen byte arm = .
+  7.         replace arm = 0 if `g1'_clean_never == 1 & `g2'_clean_never == 1
+  8.         replace arm = 1 if `g1'_canon_treated == 1 & `g2'_clean_never == 1
+  9.         replace arm = 2 if `g2'_canon_treated == 1 & `g1'_clean_never == 1
+ 10.         keep if inlist(arm, 0, 1, 2)
+ 11. 
+.         gen double first_g1_n = ym(floor(`g1'_first_block / 100), mod(`g1'_first_block, 100)) if arm == 1
+ 12.         gen double first_g2_n = ym(floor(`g2'_first_block / 100), mod(`g2'_first_block, 100)) if arm == 2
+ 13.         format first_g1_n first_g2_n %tm
+ 14. 
+.         gen byte post_g1 = (arm == 1 & filing_ym_n > first_g1_n) if !missing(filing_ym_n)
+ 15.         replace post_g1 = 0 if missing(post_g1)
+ 16.         gen byte post_g2 = (arm == 2 & filing_ym_n > first_g2_n) if !missing(filing_ym_n)
+ 17.         replace post_g2 = 0 if missing(post_g2)
+ 18. 
+.         keep if !(arm == 1 & filing_ym_n == first_g1_n)
+ 19.         keep if !(arm == 2 & filing_ym_n == first_g2_n)
+ 20. 
+.         count
+ 21.         local n_all = r(N)
+ 22.         egen tag_all = tag(gvkey_id)
+ 23.         count if tag_all == 1
+ 24.         local firms_all = r(N)
+ 25.         egen tag_g1 = tag(gvkey_id) if arm == 1
+ 26.         count if tag_g1 == 1
+ 27.         local firms_g1 = r(N)
+ 28.         egen tag_g2 = tag(gvkey_id) if arm == 2
+ 29.         count if tag_g2 == 1
+ 30.         local firms_g2 = r(N)
+ 31.         egen tag_ctl = tag(gvkey_id) if arm == 0
+ 32.         count if tag_ctl == 1
+ 33.         local firms_ctl = r(N)
+ 34.         drop tag_all tag_g1 tag_g2 tag_ctl
+ 35.         di as result "exclusive sample: N=" `n_all' " firms=" `firms_all' " `lab1' firms=" `firms_g1' " `lab2' firms=" `firms_g2' " clean-control firms=" `firms_ctl'
+ 36. 
+.         capture noisily reghdfe y_w post_g1 post_g2, absorb(gvkey_id filing_ym_n) vce(cluster gvkey_id)
+ 37.         if _rc {
+ 38.             di as error "TWFE failed for `comp' rc=" _rc
+ 39.         }
+ 40.         else {
+ 41.             post_twfe_coef `posth' "`comp'" "`lab1'" "post_g1" e(N) e(N_clust) `firms_g1' `firms_ctl'
+ 42.             post_twfe_coef `posth' "`comp'" "`lab2'" "post_g2" e(N) e(N_clust) `firms_g2' `firms_ctl'
+ 43.             capture noisily lincom post_g1 - post_g2
+ 44.             if _rc {
+ 45.                 post `posth' ("`comp'") ("TWFE") ("diff_`lab1'_minus_`lab2'") ///
+>                     (.) (.) (.) (e(N)) (e(N_clust)) (`firms_g1') (`firms_ctl')
+ 46.             }
+ 47.             else {
+ 48.                 post `posth' ("`comp'") ("TWFE") ("diff_`lab1'_minus_`lab2'") ///
+>                     (r(estimate)) (r(se)) (r(p)) (e(N)) (e(N_clust)) (`firms_g1') (`firms_ctl')
+ 49.             }
+ 50.         }
+ 51. 
+.         tempfile pairdata
+ 52.         save `pairdata', replace
+ 53. 
+.         foreach a in 1 2 {
+ 54.             use `pairdata', clear
+ 55.             if `a' == 1 {
+ 56.                 local lab "`lab1'"
+ 57.                 keep if arm == 0 | arm == 1
+ 58.                 gen double g_n = first_g1_n if arm == 1
+ 59.             }
+ 60.             else {
+ 61.                 local lab "`lab2'"
+ 62.                 keep if arm == 0 | arm == 2
+ 63.                 gen double g_n = first_g2_n if arm == 2
+ 64.             }
+ 65. 
+.             collapse (mean) y_w (firstnm) g_n arm, by(gvkey_id filing_ym_n)
+ 66.             count
+ 67.             local n_bjs = r(N)
+ 68.             egen tag_all = tag(gvkey_id)
+ 69.             count if tag_all == 1
+ 70.             local f_bjs = r(N)
+ 71.             egen tag_t = tag(gvkey_id) if !missing(g_n)
+ 72.             count if tag_t == 1
+ 73.             local t_bjs = r(N)
+ 74.             egen tag_c = tag(gvkey_id) if missing(g_n)
+ 75.             count if tag_c == 1
+ 76.             local c_bjs = r(N)
+ 77.             drop tag_all tag_t tag_c
+ 78. 
+.             capture noisily did_imputation y_w gvkey_id filing_ym_n g_n, ///
+>                 autosample cluster(gvkey_id) maxit(5000) tol(1e-5)
+ 79.             if _rc {
+ 80.                 di as error "BJS failed for `comp' `lab' rc=" _rc
+ 81.                 post `posth' ("`comp'") ("BJS") ("`lab'") (.) (.) (.) (`n_bjs') (`f_bjs') (`t_bjs') (`c_bjs')
+ 82.             }
+ 83.             else {
+ 84.                 post_bjs_tau `posth' "`comp'" "`lab'" `n_bjs' `f_bjs' `t_bjs' `c_bjs'
+ 85.             }
+ 86.         }
+ 87.     restore
+ 88. end
+
+. 
+. import delimited using "`event_csv'", clear varnames(1) bindquote(strict) stringcols(1)
+(encoding automatically selected: ISO-8859-1)
+(29 vars, 70,966 obs)
+
+. destring filing_ym_int filing_ym_n abn_amihud_mean_0_5, replace force
+filing_ym_int already numeric; no replace
+filing_ym_n already numeric; no replace
+abn_amihud_mean_0_5 already numeric; no replace
+
+. 
+. foreach v of varlist *_first_block *_canon_treated *_left_censored *_clean_never {
+  2.     destring `v', replace force
+  3. }
+core_ai_search_first_block already numeric; no replace
+broad_ai_discovery_first_block already numeric; no replace
+training_llm_core_first_block already numeric; no replace
+traditional_search_first_block already numeric; no replace
+oai_search_first_block already numeric; no replace
+gptbot_first_block already numeric; no replace
+core_ai_search_canon_treated already numeric; no replace
+broad_ai_discovery_canon_treated already numeric; no replace
+training_llm_core_canon_treated already numeric; no replace
+traditional_search_canon_treated already numeric; no replace
+oai_search_canon_treated already numeric; no replace
+gptbot_canon_treated already numeric; no replace
+core_ai_search_left_censored already numeric; no replace
+broad_ai_discovery_left_censored already numeric; no replace
+training_llm_core_left_censored already numeric; no replace
+traditional_search_left_censored already numeric; no replace
+oai_search_left_censored already numeric; no replace
+gptbot_left_censored already numeric; no replace
+core_ai_search_clean_never already numeric; no replace
+broad_ai_discovery_clean_never already numeric; no replace
+training_llm_core_clean_never already numeric; no replace
+traditional_search_clean_never already numeric; no replace
+oai_search_clean_never already numeric; no replace
+gptbot_clean_never already numeric; no replace
+
+. 
+. egen gvkey_id = group(gvkey)
+
+. 
+. summ abn_amihud_mean_0_5, detail
+
+                     abn_amihud_mean_0_5
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%    -3.781958      -887.2834
+ 5%     -.354908      -825.8964
+10%     -.080428      -454.9836       Obs              70,966
+25%    -.0025255      -374.2343       Sum of wgt.      70,966
+
+50%    -.0000299                      Mean           .0165882
+                        Largest       Std. dev.      12.22638
+75%     .0006446       631.4158
+90%     .0274487       686.0173       Variance       149.4843
+95%     .1437819       780.7982       Skewness       29.79927
+99%     1.694866       1482.942       Kurtosis       4675.365
+
+. scalar p1 = r(p1)
+
+. scalar p99 = r(p99)
+
+. gen double y_w = abn_amihud_mean_0_5
+
+. replace y_w = p1 if y_w < p1 & !missing(y_w)
+(709 real changes made)
+
+. replace y_w = p99 if y_w > p99 & !missing(y_w)
+(709 real changes made)
+
+. 
+. run_pair, comp(core_ai_vs_traditional) ///
+>     g1(core_ai_search) g2(traditional_search) ///
+>     lab1(core_ai_search) lab2(traditional_search) posth(`posth')
+============================================================
+PAIR: core_ai_vs_traditional | core_ai_search vs traditional_search
+============================================================
+(70,966 missing values generated)
+(64,946 real changes made)
+(1,177 real changes made)
+(2,175 real changes made)
+(2,668 observations deleted)
+(67,121 missing values generated)
+(66,123 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(18 observations deleted)
+(30 observations deleted)
+  68,250
+  4,294
+  78
+  136
+  4,080
+exclusive sample: N=68250 firms=4294 core_ai_search firms=78 traditional_search firms=136 clean-control firms=4080
+(dropped 19 singleton observations)
+(MWFE estimator converged in 8 iterations)
+
+HDFE Linear regression                            Number of obs   =     68,231
+Absorbing 2 HDFE groups                           F(   2,   4274) =       0.79
+Statistics robust to heteroskedasticity           Prob > F        =     0.4518
+                                                  R-squared       =     0.1627
+                                                  Adj R-squared   =     0.1060
+                                                  Within R-sq.    =     0.0000
+Number of clusters (gvkey_id) =      4,275        Root MSE        =     0.4851
+
+                           (Std. err. adjusted for 4,275 clusters in gvkey_id)
+------------------------------------------------------------------------------
+             |               Robust
+         y_w | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     post_g1 |   .0523993   .0490943     1.07   0.286    -.0438511    .1486496
+     post_g2 |   .0232934   .0346642     0.67   0.502    -.0446665    .0912533
+       _cons |  -.0541219   .0004271  -126.73   0.000    -.0549592   -.0532847
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+    gvkey_id |      4275        4275           0    *|
+ filing_ym_n |        54           1          53     |
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+ ( 1)  post_g1 - post_g2 = 0
+
+------------------------------------------------------------------------------
+         y_w | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   .0291059   .0600729     0.48   0.628    -.0886683      .14688
+------------------------------------------------------------------------------
+(file C:\Users\xl\AppData\Local\Temp\ST_9d4_000002.tmp not found)
+file C:\Users\xl\AppData\Local\Temp\ST_9d4_000002.tmp saved as .dta format
+(2,145 observations deleted)
+(64,946 missing values generated)
+  65,020
+  4,158
+  78
+  4,080
+Warning: part of the sample was dropped for the following coefficients because FE could not be imputed: tau.
+
+                                                        Number of obs = 65,018
+------------------------------------------------------------------------------
+         y_w | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         tau |   .0547217   .0428209     1.28   0.201    -.0292058    .1386491
+------------------------------------------------------------------------------
+(1,159 observations deleted)
+(64,946 missing values generated)
+  65,986
+  4,216
+  136
+  4,080
+Warning: part of the sample was dropped for the following coefficients because FE could not be imputed: tau.
+
+                                                        Number of obs = 65,881
+------------------------------------------------------------------------------
+         y_w | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         tau |    .028659   .0181996     1.57   0.115    -.0070116    .0643296
+------------------------------------------------------------------------------
+
+. 
+. run_pair, comp(broad_ai_vs_traditional) ///
+>     g1(broad_ai_discovery) g2(traditional_search) ///
+>     lab1(broad_ai_discovery) lab2(traditional_search) posth(`posth')
+============================================================
+PAIR: broad_ai_vs_traditional | broad_ai_discovery vs traditional_search
+============================================================
+(70,966 missing values generated)
+(64,436 real changes made)
+(1,641 real changes made)
+(1,270 real changes made)
+(3,619 observations deleted)
+(65,706 missing values generated)
+(66,077 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(29 observations deleted)
+(16 observations deleted)
+  67,302
+  4,232
+  109
+  77
+  4,046
+exclusive sample: N=67302 firms=4232 broad_ai_discovery firms=109 traditional_search firms=77 clean-control firms=4046
+(dropped 19 singleton observations)
+(MWFE estimator converged in 8 iterations)
+
+HDFE Linear regression                            Number of obs   =     67,283
+Absorbing 2 HDFE groups                           F(   2,   4212) =       1.30
+Statistics robust to heteroskedasticity           Prob > F        =     0.2730
+                                                  R-squared       =     0.1592
+                                                  Adj R-squared   =     0.1023
+                                                  Within R-sq.    =     0.0000
+Number of clusters (gvkey_id) =      4,213        Root MSE        =     0.4792
+
+                           (Std. err. adjusted for 4,213 clusters in gvkey_id)
+------------------------------------------------------------------------------
+             |               Robust
+         y_w | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     post_g1 |   .0438635   .0330845     1.33   0.185    -.0209995    .1087266
+     post_g2 |   .0152495   .0160922     0.95   0.343    -.0162997    .0467987
+       _cons |  -.0527711   .0002214  -238.31   0.000    -.0532053    -.052337
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+    gvkey_id |      4213        4213           0    *|
+ filing_ym_n |        54           1          53     |
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+ ( 1)  post_g1 - post_g2 = 0
+
+------------------------------------------------------------------------------
+         y_w | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   .0286141   .0364448     0.79   0.432     -.042837    .1000651
+------------------------------------------------------------------------------
+(file C:\Users\xl\AppData\Local\Temp\ST_9d4_000002.tmp not found)
+file C:\Users\xl\AppData\Local\Temp\ST_9d4_000002.tmp saved as .dta format
+(1,254 observations deleted)
+(64,436 missing values generated)
+  64,965
+  4,155
+  109
+  4,046
+Warning: part of the sample was dropped for the following coefficients because FE could not be imputed: tau.
+
+                                                        Number of obs = 64,920
+------------------------------------------------------------------------------
+         y_w | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         tau |   .0571171   .0212696     2.69   0.007     .0154294    .0988049
+------------------------------------------------------------------------------
+(1,612 observations deleted)
+(64,436 missing values generated)
+  64,623
+  4,123
+  77
+  4,046
+Warning: part of the sample was dropped for the following coefficients because FE could not be imputed: tau.
+
+                                                        Number of obs = 64,535
+------------------------------------------------------------------------------
+         y_w | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         tau |   .0230315   .0085646     2.69   0.007     .0062452    .0398177
+------------------------------------------------------------------------------
+
+. 
+. run_pair, comp(training_vs_traditional) ///
+>     g1(training_llm_core) g2(traditional_search) ///
+>     lab1(training_llm_core) lab2(traditional_search) posth(`posth')
+============================================================
+PAIR: training_vs_traditional | training_llm_core vs traditional_search
+============================================================
+(70,966 missing values generated)
+(63,130 real changes made)
+(2,834 real changes made)
+(1,945 real changes made)
+(3,057 observations deleted)
+(65,075 missing values generated)
+(65,964 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(44 observations deleted)
+(29 observations deleted)
+  67,836
+  4,270
+  182
+  122
+  3,966
+exclusive sample: N=67836 firms=4270 training_llm_core firms=182 traditional_search firms=122 clean-control firms=3966
+(dropped 18 singleton observations)
+(MWFE estimator converged in 8 iterations)
+
+HDFE Linear regression                            Number of obs   =     67,818
+Absorbing 2 HDFE groups                           F(   2,   4251) =       0.24
+Statistics robust to heteroskedasticity           Prob > F        =     0.7903
+                                                  R-squared       =     0.1633
+                                                  Adj R-squared   =     0.1065
+                                                  Within R-sq.    =     0.0000
+Number of clusters (gvkey_id) =      4,252        Root MSE        =     0.4859
+
+                           (Std. err. adjusted for 4,252 clusters in gvkey_id)
+------------------------------------------------------------------------------
+             |               Robust
+         y_w | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     post_g1 |  -.0090868   .0336354    -0.27   0.787    -.0750297    .0568562
+     post_g2 |   .0235854   .0375324     0.63   0.530    -.0499978    .0971686
+       _cons |  -.0543019   .0004899  -110.83   0.000    -.0552624   -.0533414
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+    gvkey_id |      4252        4252           0    *|
+ filing_ym_n |        54           1          53     |
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+ ( 1)  post_g1 - post_g2 = 0
+
+------------------------------------------------------------------------------
+         y_w | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0326721   .0501907    -0.65   0.515    -.1310721    .0657278
+------------------------------------------------------------------------------
+(file C:\Users\xl\AppData\Local\Temp\ST_9d4_000002.tmp not found)
+file C:\Users\xl\AppData\Local\Temp\ST_9d4_000002.tmp saved as .dta format
+(1,916 observations deleted)
+(63,130 missing values generated)
+  64,841
+  4,148
+  182
+  3,966
+Warning: part of the sample was dropped for the following coefficients because FE could not be imputed: tau.
+
+                                                        Number of obs = 64,816
+------------------------------------------------------------------------------
+         y_w | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         tau |   .0024342   .0252997     0.10   0.923    -.0471523    .0520208
+------------------------------------------------------------------------------
+(2,790 observations deleted)
+(63,130 missing values generated)
+  63,975
+  4,088
+  122
+  3,966
+Warning: part of the sample was dropped for the following coefficients because FE could not be imputed: tau.
+
+                                                        Number of obs = 63,886
+------------------------------------------------------------------------------
+         y_w | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         tau |   .0292522   .0200014     1.46   0.144    -.0099499    .0684542
+------------------------------------------------------------------------------
+
+. 
+. run_pair, comp(oai_search_vs_gptbot) ///
+>     g1(oai_search) g2(gptbot) ///
+>     lab1(oai_search) lab2(gptbot) posth(`posth')
+============================================================
+PAIR: oai_search_vs_gptbot | oai_search vs gptbot
+============================================================
+(70,966 missing values generated)
+(66,924 real changes made)
+(25 real changes made)
+(2,906 real changes made)
+(1,111 observations deleted)
+(69,830 missing values generated)
+(66,949 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 observations deleted)
+(44 observations deleted)
+  69,811
+  4,388
+  2
+  185
+  4,201
+exclusive sample: N=69811 firms=4388 oai_search firms=2 gptbot firms=185 clean-control firms=4201
+(dropped 19 singleton observations)
+(MWFE estimator converged in 8 iterations)
+
+HDFE Linear regression                            Number of obs   =     69,792
+Absorbing 2 HDFE groups                           F(   2,   4368) =       4.48
+Statistics robust to heteroskedasticity           Prob > F        =     0.0114
+                                                  R-squared       =     0.1675
+                                                  Adj R-squared   =     0.1111
+                                                  Within R-sq.    =     0.0000
+Number of clusters (gvkey_id) =      4,369        Root MSE        =     0.4826
+
+                           (Std. err. adjusted for 4,369 clusters in gvkey_id)
+------------------------------------------------------------------------------
+             |               Robust
+         y_w | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     post_g1 |   .0299566   .0100222     2.99   0.003     .0103081    .0496052
+     post_g2 |  -.0058272   .0323493    -0.18   0.857    -.0692483    .0575939
+       _cons |   -.053849   .0002712  -198.59   0.000    -.0543806   -.0533174
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+    gvkey_id |      4369        4369           0    *|
+ filing_ym_n |        54           1          53     |
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+
+ ( 1)  post_g1 - post_g2 = 0
+
+------------------------------------------------------------------------------
+         y_w | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   .0357838   .0339557     1.05   0.292    -.0307866    .1023542
+------------------------------------------------------------------------------
+(file C:\Users\xl\AppData\Local\Temp\ST_9d4_000002.tmp not found)
+file C:\Users\xl\AppData\Local\Temp\ST_9d4_000002.tmp saved as .dta format
+(2,862 observations deleted)
+(66,924 missing values generated)
+  65,853
+  4,203
+  2
+  4,201
+WARNING: suppressing the following coefficients from estimation because of insufficient effective sample size: tau. To report them nevertheless, set the minn option to a smaller number or 0, but keep in mind that the estimates may be unreliable and their 
+> SE may be downward biased.
+
+                                                        Number of obs = 65,853
+------------------------------------------------------------------------------
+         y_w | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         tau |          0  (omitted)
+------------------------------------------------------------------------------
+(25 observations deleted)
+(66,924 missing values generated)
+  68,643
+  4,386
+  185
+  4,201
+Warning: part of the sample was dropped for the following coefficients because FE could not be imputed: tau.
+
+                                                        Number of obs = 68,614
+------------------------------------------------------------------------------
+         y_w | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         tau |   .0051261   .0246667     0.21   0.835    -.0432196    .0534719
+------------------------------------------------------------------------------
+
+. 
+. postclose `posth'
+
+. 
+. use "`out_dir'/bot_family_twfe_bjs_results_tmp.dta", clear
+
+. export delimited using "`results_csv'", replace
+file C:/Users/xl/OneDrive - Universitat Ramón Llull/git/practice/bot_family_twfe_bjs_results.csv saved
+
+. 
+. di as text "Results written to `results_csv'"
+Results written to C:/Users/xl/OneDrive - Universitat Ramón Llull/git/practice/bot_family_twfe_bjs_results.csv
+
+. list, sepby(comparison) abbreviate(24)
+
+     +---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+     |              comparison   estimator                                               term            b         se          p       n   firms   treated_firms   control_firms |
+     |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  1. |  core_ai_vs_traditional        TWFE                                     core_ai_search    .05239926   .0490943   .2858884   68231    4275              78            4080 |
+  2. |  core_ai_vs_traditional        TWFE                                 traditional_search    .02329341   .0346642   .5016378   68231    4275             136            4080 |
+  3. |  core_ai_vs_traditional        TWFE       diff_core_ai_search_minus_traditional_search    .02910585   .0600729   .6280499   68231    4275              78            4080 |
+  4. |  core_ai_vs_traditional         BJS                                     core_ai_search    .05472166   .0428209   .2012781   65020    4158              78            4080 |
+  5. |  core_ai_vs_traditional         BJS                                 traditional_search    .02865899   .0181996   .1153253   65986    4216             136            4080 |
+     |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  6. | broad_ai_vs_traditional        TWFE                                 broad_ai_discovery    .04386355   .0330845   .1849763   67283    4213             109            4046 |
+  7. | broad_ai_vs_traditional        TWFE                                 traditional_search     .0152495   .0160922   .3433711   67283    4213              77            4046 |
+  8. | broad_ai_vs_traditional        TWFE   diff_broad_ai_discovery_minus_traditional_search    .02861405   .0364448   .4324195   67283    4213             109            4046 |
+  9. | broad_ai_vs_traditional         BJS                                 broad_ai_discovery    .05711714   .0212696   .0072447   64965    4155             109            4046 |
+ 10. | broad_ai_vs_traditional         BJS                                 traditional_search    .02303147   .0085646   .0071632   64623    4123              77            4046 |
+     |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+ 11. | training_vs_traditional        TWFE                                  training_llm_core   -.00908677   .0336354   .7870541   67818    4252             182            3966 |
+ 12. | training_vs_traditional        TWFE                                 traditional_search    .02358536   .0375324   .5297762   67818    4252             122            3966 |
+ 13. | training_vs_traditional        TWFE    diff_training_llm_core_minus_traditional_search   -.03267213   .0501907   .5151075   67818    4252             182            3966 |
+ 14. | training_vs_traditional         BJS                                  training_llm_core    .00243424   .0252997   .9233489   64841    4148             182            3966 |
+ 15. | training_vs_traditional         BJS                                 traditional_search    .02925218   .0200014   .1436027   63975    4088             122            3966 |
+     |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+ 16. |    oai_search_vs_gptbot        TWFE                                         oai_search    .02995662   .0100222   .0028142   69792    4369               2            4201 |
+ 17. |    oai_search_vs_gptbot        TWFE                                             gptbot    -.0058272   .0323493   .8570561   69792    4369             185            4201 |
+ 18. |    oai_search_vs_gptbot        TWFE                       diff_oai_search_minus_gptbot    .03578382   .0339557   .2920153   69792    4369               2            4201 |
+ 19. |    oai_search_vs_gptbot         BJS                                         oai_search            .          .          .   65853    4203               2            4201 |
+ 20. |    oai_search_vs_gptbot         BJS                                             gptbot    .00512614   .0246667   .8353722   68643    4386             185            4201 |
+     +---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+. 
+. log close botfamily
+      name:  botfamily
+       log:  C:/Users/xl/OneDrive - Universitat Ramón Llull/git/practice/bot_family_twfe_bjs_internal.txt
+  log type:  text
+ closed on:   1 Jun 2026, 02:37:47
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

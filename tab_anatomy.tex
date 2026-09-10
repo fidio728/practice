@@ -1,0 +1,28 @@
+\begin{table}[t]
+\centering
+\begin{threeparttable}
+\caption{Naming specificity: wildcard-only vs.\ named crawlers}
+\label{tab:anatomy}
+\small
+\begin{tabular}{lc}
+\toprule
+ & Abn.\ Amihud (log) \\
+\midrule
+\textit{Within-treated differential (TWFE):} & \\
+\quad Names-specific $\times$ Post                 & $-0.0065$\ (0.0104) \\[2pt]
+\textit{Split sample, arm vs.\ never-restricting controls:} & \\
+\quad Wildcard-only --- TWFE                       & $0.0114^{**}$\ (0.0056) \\
+\quad Wildcard-only --- Borusyak et al.\ (2024)    & $0.0139^{**}$\ (0.0054) \\
+\quad Names-specific --- TWFE                      & $0.0049$\ (0.0095) \\
+\quad Names-specific --- Borusyak et al.\ (2024)   & $0.0112$\ (0.0157) \\
+\quad \quad \emph{of which, with no wildcard} --- Borusyak et al.\ & $0.0130$\ (0.0221) \\
+\midrule
+Firm FE          & Yes \\
+Filing-month FE  & Yes \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item \textit{Notes.} The sample, fixed effects, clustering, and winsorization are those of Table~\ref{tab:main}. The treated cohort is split by whether the firm's first-block month itself names and disallows one of the 31 search/discovery crawlers (``names-specific'') or restricts them only through a \texttt{User-agent: *} group (``wildcard-only''); the flag is fixed at the onset event, so a crawler named only after a pre-existing wildcard---which adds no actual restriction---is classified wildcard-only. In the estimation sample 647 of the 735 treated firms (88\%) are wildcard-only and 88 name a crawler at onset; the within-treated differential (names-specific $\times$ Post) is a precise zero, so we cannot distinguish the two. The split-sample arms re-estimate the headline on each arm against the same never-restricting controls (the other arm dropped): the wildcard-only arm---the bulk of the cohort and the content-agnostic population of Section~\ref{sec:bg_why}---reproduces the headline (640 firms under TWFE, 511 under the imputation estimator; pre-trend $p=0.49$), while the names-specific arm (82 firms; 69 under imputation, 56 for the no-wildcard subset) is statistically null but same-signed positive with clean pre-trends. Its minimum detectable effect at 80\% power is roughly two to six times the headline, so its nulls reflect limited power, not an absent effect. We therefore read this as showing that naming specificity does not change the effect, not that wildcards ``cause'' it. Standard errors clustered by firm in parentheses. $^{*}$, $^{**}$, $^{***}$ denote 10\%, 5\%, 1\%.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

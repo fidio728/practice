@@ -1,0 +1,35 @@
+\begin{table}[t]
+\centering
+\begin{threeparttable}
+\caption{Where the effect is strongest: firm age and other moderators}
+\label{tab:locus}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccccc}
+\toprule
+ & (1) & (2) & (3) & (4) & (5) \\
+Moderator $Z$: & Age & Coverage & Size & EDGAR & Joint \\
+\midrule
+Crawler block $\times$ Post        & $0.0156^{**}$ & $0.0108$ & $0.0101^{*}$ & $0.0097$ & $0.0185^{**}$ \\
+                                   & (0.0065)      & (0.0070) & (0.0057)     & (0.0061) & (0.0077) \\
+\quad $\times$ Log(firm age)       & $-0.0151^{*}$ &          &              &          & $-0.0184^{**}$ \\
+                                   & (0.0079)      &          &              &          & (0.0087) \\
+\quad $\times$ Analyst coverage    &               & $-0.0025$ &             &          & $-0.0145$ \\
+                                   &               & (0.0069)  &             &          & (0.0094) \\
+\quad $\times$ Log(size)           &               &           & $0.0028$    &          & $0.0179^{*}$ \\
+                                   &               &           & (0.0070)    &          & (0.0108) \\
+\quad $\times$ EDGAR attention     &               &           &             & $0.0020$ & \\
+                                   &               &           &             & (0.0066) & \\
+\midrule
+Firm FE          & Yes & Yes & Yes & Yes & Yes \\
+Filing-month FE  & Yes & Yes & Yes & Yes & Yes \\
+Treated firms    & 722 & 604 & 628 & 604 & 583 \\
+Firm clusters    & 1{,}908 & 1{,}790 & 1{,}814 & 1{,}790 & 1{,}769 \\
+Observations     & 27{,}327 & 26{,}104 & 26{,}627 & 26{,}104 & 25{,}977 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item \textit{Notes.} Each column estimates the moderated difference-in-differences of Eq.~\eqref{eq:locus}: the dependent variable is the abnormal filing-window Amihud (log), and the reported $\times Z$ row is the triple interaction $\mathit{Block}\times\mathit{Post}\times Z$, where $Z$ is a predetermined, $z$-scored firm characteristic measured before restriction (so the coefficient is the change in the treatment effect per one-standard-deviation increase in $Z$). Firm fixed effects absorb the level of $Z$ and $\mathit{Block}\times Z$; there is no separate $\mathit{Post}\times Z$ term because controls are never-treated. Columns (1)--(4) enter one moderator at a time, each on the firms that carry that moderator (hence the differing treated counts); column (5) enters age, coverage, and size jointly. The negative, significant age interaction---robust to the joint specification---means the effect is stronger among younger firms; coverage, size, and EDGAR attention are individually insignificant. These interactions are estimated by two-way fixed effects (the imputation estimator does not estimate interactions) and carry no parallel-trends test; the young-treated cell is thin, so the joint column is read with caution. Standard errors clustered by firm in parentheses. $^{*}$, $^{**}$, $^{***}$ denote 10\%, 5\%, 1\%.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

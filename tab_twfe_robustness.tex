@@ -1,0 +1,27 @@
+\begin{table}[t]
+\centering
+\begin{threeparttable}
+\caption{Two-way fixed-effects benchmark for the headline}
+\label{tab:twfe_robustness}
+\small
+\begin{tabular}{lcc}
+\toprule
+ & \multicolumn{2}{c}{TWFE} \\
+\cmidrule(lr){2-3}
+ & (1) & (2) \\
+\midrule
+Crawler block $\times$ Post & $0.0109^{**}$ & $0.0111^{**}$ \\
+                            & (0.0051)      & (0.0051) \\
+Within-$R^2$                & 0.000         & 0.002 \\
+\midrule
+Controls         & No   & Yes \\
+Firm FE          & Yes  & Yes \\
+Filing-month FE  & Yes  & Yes \\
+Observations     & 27{,}327 & 27{,}327 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item \textit{Notes.} Two-way fixed-effects estimate of the headline abnormal filing-window Amihud (Eq.~\ref{eq:twfe}; firm and filing-month fixed effects, standard errors clustered by firm), without and with the control set. We report the \citet{BorusyakJaravelSpiess2024} imputation estimator as the primary specification (Table~\ref{tab:main}); the two coincide to within rounding, which is the point of this table. Within-$R^2$ is small by construction (a single difference-in-differences indicator net of firm and month fixed effects). $^{*}$, $^{**}$, $^{***}$ denote 10\%, 5\%, 1\%.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

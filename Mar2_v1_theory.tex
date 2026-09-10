@@ -1,0 +1,851 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{natbib}
+\geometry{margin=1in}
+\onehalfspacing
+
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{remark}{Remark}
+\newtheorem{corollary}{Corollary}
+\newtheorem{assumption}{Assumption}
+
+\title{Cherry-Picking under Screening:\\
+  Selective Disclosure and Participation in
+  Pharmaceutical Approval}
+\author{Xueyang}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+% ============================================================
+\section{Introduction}
+% ============================================================
+
+A pharmaceutical firm develops a drug and conducts a clinical
+trial to persuade the FDA to approve it. The FDA does not know
+the firm's type---the set of experiments available to the
+firm---and designs an approval rule to screen different types.
+This screening problem is studied by Min (2023), where the FDA
+observes both the experiment chosen and its outcome.
+
+I modify Min's model in two respects.
+
+\emph{First (disclosure choice):} the trial outcome is the
+firm's private information, and the firm chooses whether to
+include it in its drug application. If included, the FDA
+observes verified evidence. If omitted, the FDA observes only
+an application without supporting trial data.
+
+\emph{Second (participation):} drug development is costly.
+The firm chooses whether to develop at all before running any
+experiment. If the expected payoff from the approval mechanism
+is too low, the firm does not develop---and no drug exists for
+the FDA to evaluate.
+
+\paragraph{Main results.}
+\begin{enumerate}
+  \item \textbf{Without the participation constraint}
+    (Theorem~\ref{thm:no_IR}): the FDA's optimal committed
+    mechanism always sets $A(\emptyset) = 0$ (reject
+    applications without trial evidence). The model reduces
+    exactly to Min (2023). Cherry-picking is
+    payoff-irrelevant under commitment.
+
+  \item \textbf{With the participation constraint}
+    (Theorem~\ref{thm:with_IR}): when the small type's
+    expected approval probability is too low to cover
+    development costs, the FDA may optimally set
+    $A(\emptyset) > 0$ to encourage participation. This
+    $A(\emptyset) > 0$ arises \emph{endogenously} from the
+    model---not from external assumptions.
+
+  \item \textbf{Welfare cost of pooling}
+    (Corollary~\ref{cor:welfare}): the pooling constraint
+    ($A(\emptyset)$ is shared across all types) makes
+    participation-inducing strictly more costly than in Min,
+    where the FDA can set type-specific bad-result approval
+    probabilities. The welfare difference measures the cost
+    of cherry-picking.
+\end{enumerate}
+
+
+% ============================================================
+\section{Model Setup}
+% ============================================================
+
+\subsection{Primitives}
+
+Two players: a pharmaceutical firm (the agent, ``he'') and
+the FDA (the principal, ``she'').
+
+\paragraph{States and prior.}
+$\omega \in \{G, B\}$, with
+$\Pr(G) = p \in (0, 1/2)$.
+
+\paragraph{Payoffs.}
+The FDA receives 1 for a correct decision and 0 otherwise.
+The firm cares only about approval:
+$U_A(A, \cdot) = 1$, $U_A(D, \cdot) = 0$.
+
+\paragraph{Development cost.}
+Before running any experiment, the firm incurs a development
+cost $c > 0$. If the firm does not develop, no drug exists
+and the FDA makes no decision. The FDA's payoff from
+non-participation equals $1 - p$ (equivalent to always
+rejecting: correct on bad drugs, incorrect on good ones).
+
+\begin{remark}[Role of $c$]
+In Min (2023), the firm always participates
+($c = 0$ implicitly). With $c > 0$, the firm's individual
+rationality (IR) constraint can bind, creating a force for
+$A(\emptyset) > 0$ that is absent from Min.
+\end{remark}
+
+
+% ------------------------------------------------------------
+\subsection{Types and Feasible Sets}
+% ------------------------------------------------------------
+
+The firm has a privately known type
+$\theta_i \in \{\theta_1, \theta_2\}$, with
+$\Pr(\theta_1) = t$. Type determines the set of feasible
+experiments $S_i$.
+
+\begin{assumption}[Feasible sets]\label{as:feasible}
+$S_2 \subset S_1$, and both satisfy:
+\begin{enumerate}
+  \item[(i)] Each $S_i$ is a closed, convex subset of
+    $\{(x, y) \in [0,1]^2 : y \geq 1 - x\}$.
+  \item[(ii)] The upper boundary
+    $\bar{S}_i(x) := \max\{y : (x,y) \in S_i\}$ is
+    continuous, concave, and strictly decreasing.
+\end{enumerate}
+\end{assumption}
+
+Here $\theta_1$ is the ``big type'' (larger feasible set)
+and $\theta_2$ is the ``small type.''
+
+
+% ------------------------------------------------------------
+\subsection{Experiments}
+% ------------------------------------------------------------
+
+An experiment $\pi = (x, y) \in S_i$ produces a binary outcome
+$j \in \{g, b\}$:
+\[
+  \Pr(g \mid G, \pi) = y, \quad
+  \Pr(g \mid B, \pi) = 1 - x.
+\]
+An experiment is \emph{convincing} if
+$py \geq (1 - p)(1 - x)$.
+
+
+% ============================================================
+\subsection{Disclosure and Information Structure}
+\label{sec:modification}
+% ============================================================
+
+After observing the trial outcome $j$, the firm submits a
+drug application to the FDA. The firm chooses what evidence to
+include:
+\begin{itemize}
+  \item \textbf{Disclose:} include the trial design and
+    verified outcome $(\pi, j)$ in the application.
+  \item \textbf{No evidence:} submit the application without
+    trial data ($\emptyset$).
+\end{itemize}
+
+When the firm discloses, the FDA observes $(\pi, j)$, exactly
+as in Min. When the firm submits without evidence, the FDA
+sees only $\emptyset$: it does not learn which experiment was
+conducted or what the outcome was.
+
+
+% ============================================================
+\subsection{Timeline}
+\label{sec:timeline}
+% ============================================================
+
+\begin{enumerate}
+  \item The FDA commits to approval probabilities:
+    $A(\pi, j)$ for disclosed evidence, $A(\emptyset)$ for
+    no-evidence applications.
+  \item The firm learns its type $\theta_i$.
+  \item The firm decides whether to develop (pay $c$) or
+    not.
+  \item If the firm develops: it conducts experiment
+    $\pi \in S_i$, observes $j \in \{g, b\}$.
+  \item The firm submits a drug application, choosing
+    whether to include $(\pi, j)$ or submit with
+    $\emptyset$.
+  \item The FDA decides according to its committed rule.
+\end{enumerate}
+
+\begin{remark}[Comparison with Min]
+Min's timeline has no step~3 (development decision) and no
+step~5 (disclosure choice). Adding step~3 introduces the
+participation constraint; adding step~5 introduces the
+pooling constraint on $A(\emptyset)$.
+\end{remark}
+
+
+% ============================================================
+\section{Analysis of the Disclosure Subgame}
+\label{sec:disclosure}
+% ============================================================
+
+Conditional on the firm developing, the disclosure subgame
+analysis is identical to the model without participation.
+
+\begin{lemma}[Bad news]\label{lem:bad_news}
+For any $\pi = (x,y)$ with $y \geq 1 - x$ and $p < 1/2$:
+$\mu(G \mid \pi, b) < 1/2$.
+\end{lemma}
+
+\begin{proof}
+$p(1-y) \leq p \cdot x < (1-p) \cdot x$.
+\end{proof}
+
+\begin{remark}[Silence dominates bad news informationally]
+\label{rem:silence}
+In any strategy profile, the FDA's posterior upon seeing
+$\emptyset$ is weakly higher than upon seeing $b$:
+\[
+  \mu(G \mid \emptyset) \;\geq\; \mu(G \mid \pi, b),
+\]
+with strict inequality whenever silence can arise from a
+hidden good result.
+
+\medskip
+\noindent\textit{Proof.}
+Let $\sigma_g := \Pr(\text{hide}\mid g)$ and
+$\sigma_b := \Pr(\text{hide}\mid b)$.
+Write $H_g$ (resp.\ $H_b$) for the event that the firm
+hides a good (resp.\ bad) result. Then
+$\Pr(\emptyset) = \Pr(H_g) + \Pr(H_b)$, and by the law of
+total probability:
+\[
+  \mu(G\mid\emptyset)
+  \;=\;
+  w\,\mu(G\mid g) \;+\; (1-w)\,\mu(G\mid b),
+  \qquad
+  w \;:=\; \frac{\Pr(H_g)}{\Pr(\emptyset)} \;\in\; [0,1].
+\]
+It remains to show $\mu(G\mid g) \geq \mu(G\mid b)$ for
+any experiment $(x,y)$ with $y\geq 1-x$.
+Cross-multiplying the inequality
+$\frac{py}{py+(1-p)(1-x)} \geq \frac{p(1-y)}{p(1-y)+(1-p)x}$
+reduces to
+\[
+  p(1-p)\,xy \;\geq\; p(1-p)(1-x)(1-y),
+\]
+i.e.\ $x+y \geq 1$, which holds by the feasibility
+constraint $y\geq 1-x$.
+Hence $\mu(G\mid\emptyset) \geq \mu(G\mid b)$ for any
+$w\in[0,1]$, with strict inequality iff $w>0$, i.e.\
+iff $\sigma_g>0$ (silence is genuinely ambiguous because
+it can arise from hiding a good result).
+\hfill$\square$
+
+\medskip
+The remark gives information-theoretic grounding for
+$A(\emptyset)\geq A(b)$: silence is weakly better news
+than an explicit bad result, so the FDA has no reason to
+reward $b$ more than silence.
+\end{remark}
+
+\begin{lemma}[Equilibrium disclosure]\label{lem:disclosure}
+The firm discloses $j$ iff $A(\pi, j) \geq A(\emptyset)$;
+hides $j$ iff $A(\pi, j) < A(\emptyset)$.
+\end{lemma}
+
+\begin{proof}
+The firm's payoff is $1$ if approved, $0$ otherwise.
+Disclosing $j$ yields approval probability $A(\pi,j)$;
+hiding $j$ yields $A(\emptyset)$, since the FDA sees only
+$\emptyset$ and cannot distinguish which outcome was hidden.
+The firm strictly prefers whichever action gives higher
+approval probability, and is indifferent when
+$A(\pi,j) = A(\emptyset)$.
+\end{proof}
+
+\begin{lemma}[WLOG: $A_b^i \leq A(\emptyset)$]
+\label{lem:wlog_Ab}
+In any optimal mechanism, $A(\pi_i, b) \leq A(\emptyset)$
+for each type~$i$.
+\end{lemma}
+
+\begin{proof}
+The FDA is the mechanism designer and strictly prefers low
+$A(\pi_i, b)$: by Lemma~\ref{lem:bad_news},
+$\mu(G \mid \pi_i, b) < 1/2$, so approving upon observing
+$b$ is a mistake in expectation, and the FDA's ex-ante
+payoff is strictly decreasing in $A(\pi_i, b)$.
+
+It remains to show that the FDA can freely set
+$A(\pi_i, b) \leq A(\emptyset)$ without affecting the
+firm's payoff. By Lemma~\ref{lem:disclosure}, whenever
+$A(\pi_i, b) < A(\emptyset)$ the firm hides $b$ and
+receives $A(\emptyset)$. Hence the firm's effective payoff
+from the $b$-outcome is $A(\emptyset)$ regardless of
+$A(\pi_i, b) \leq A(\emptyset)$: the firm can always
+guarantee $A(\emptyset)$ by hiding, so $A(\pi_i, b)$ below
+this threshold is irrelevant to every IC and IR constraint.
+The FDA therefore sets $A(\pi_i, b) \leq A(\emptyset)$,
+and by Lemma~\ref{lem:disclosure} the firm hides $b$.
+\end{proof}
+
+\begin{lemma}[WLOG: $A_g^i \geq A(\emptyset)$]
+\label{lem:wlog_Ag}
+In any optimal mechanism, $A_g^i \geq A(\emptyset)$ for each
+type~$i$.
+\end{lemma}
+
+\begin{proof}
+If $A_g^i < A(\emptyset)$, the firm hides $g$ by
+Lemma~\ref{lem:disclosure}, so both outcomes are hidden and
+the experiment is payoff-irrelevant. Replacing $A_g^i$ with
+$A(\emptyset)$ leaves all payoffs unchanged; then raising
+$A_g^i$ above $A(\emptyset)$ for convincing experiments
+weakly improves the FDA's payoff while satisfying
+Lemma~\ref{lem:bad_news} for $g$ (since
+$\mu(G \mid \pi, g) \geq 1/2$ for a convincing experiment).
+\end{proof}
+
+\begin{corollary}[Simplified disclosure structure]
+\label{cor:disclosure}
+In any optimal mechanism: the firm discloses $g$ and hides
+$b$. The three lemmas above justify reducing the full
+approval rule $\{A(\pi,g),\,A(\pi,b),\,A(\emptyset)\}$ to
+the two-parameter object $\{A_g^i,\,A(\emptyset)\}$.
+\end{corollary}
+
+The simplified menu is:
+\begin{equation}\label{eq:menu}
+  \mathcal{M} = \left\{
+    \left(\pi_1, A_g^1\right),\;
+    \left(\pi_2, A_g^2\right);\;
+    A(\emptyset)
+  \right\}.
+\end{equation}
+
+
+% ============================================================
+\section{The Mechanism Design Problem}
+\label{sec:mechanism}
+% ============================================================
+
+\subsection{Payoffs}
+
+Write $h_i := \Pr(g \mid \pi_i) = p y_i + (1-p)(1-x_i)$.
+
+The firm's expected payoff from option $i$ (conditional on
+developing):
+\begin{equation}\label{eq:EU_A}
+  EU^A_i = A_g^i \cdot h_i
+    + A(\emptyset) \cdot (1 - h_i).
+\end{equation}
+
+The FDA's expected payoff from type $\theta_i$
+(conditional on type~$i$ participating):
+\begin{equation}\label{eq:EU_P_compact}
+  EU^P_i = (1-p) + \Delta_g(\pi_i) \, A_g^i
+           + \Delta_b(\pi_i) \, A(\emptyset),
+\end{equation}
+where:
+\begin{align}
+  \Delta_g(\pi_i)
+    &:= p \, y_i - (1-p)(1-x_i),
+    \label{eq:delta_g_def} \\
+  \Delta_b(\pi_i)
+    &:= p(1-y_i) - (1-p) x_i.
+    \label{eq:delta_b_def}
+\end{align}
+
+Key identity: $\Delta_g + \Delta_b = 2p - 1 < 0$.
+
+
+\subsection{Constraints}
+
+\paragraph{Incentive compatibility.}
+Type $\theta_1$ prefers option 1:
+\begin{equation}\label{eq:IC1}
+  \text{IC}_1: \quad
+  A_g^1 h_1 + A(\emptyset)(1 - h_1)
+  \geq
+  A_g^2 h_2 + A(\emptyset)(1 - h_2).
+\end{equation}
+Type $\theta_2$ prefers option 2 (automatic if
+$\pi_1 \notin S_2$).
+
+\paragraph{Individual rationality (participation).}
+Type $\theta_i$ develops iff:
+\begin{equation}\label{eq:IR}
+  \text{IR}_i: \quad
+  A_g^i \cdot h_i + A(\emptyset) \cdot (1 - h_i) \geq c.
+\end{equation}
+
+
+\subsection{FDA's Problem}
+
+Define the indicator $\mathbb{1}_i = 1$ if type~$i$
+participates, $0$ otherwise. The FDA's total expected payoff:
+\begin{equation}\label{eq:fda_total}
+  V = \sum_{i=1}^{2} \Pr(\theta_i) \left[
+    \mathbb{1}_i \cdot EU^P_i
+    + (1 - \mathbb{1}_i) \cdot (1-p)
+  \right].
+\end{equation}
+
+Since $EU^P_i \geq 1-p$ for convincing experiments with
+$A_g^i > 0$ (because $\Delta_g A_g^i > 0$ and
+$\Delta_b A(\emptyset) < 0$, but net is positive for
+reasonable mechanisms), the FDA generally prefers
+participation.
+
+The FDA maximizes $V$ over
+$(\pi_1, \pi_2, A_g^1, A_g^2, A(\emptyset))$ subject to
+IC, IR, and feasibility.
+
+
+% ============================================================
+\section{Main Results}
+\label{sec:main}
+% ============================================================
+
+\subsection{Without Participation Constraint}
+
+\begin{theorem}[Irrelevance of cherry-picking under
+  commitment]\label{thm:no_IR}
+If $\mathrm{IR}_i$ does not bind for either type (e.g.,
+$c = 0$), then the optimal mechanism has
+$A(\emptyset) = 0$. The FDA's optimal payoff equals Min
+(2023)'s optimal payoff.
+\end{theorem}
+
+\begin{proof}
+Fix any experiments $\pi_1, \pi_2$. The FDA's payoff is:
+\[
+  V = (1-p)
+    + t \, \Delta_g(\pi_1) A_g^1
+    + (1-t) \Delta_g(\pi_2) A_g^2
+    + \bigl[t \, \Delta_b(\pi_1)
+      + (1-t) \Delta_b(\pi_2)\bigr] A(\emptyset).
+\]
+We show $dV/dA(\emptyset) < 0$ in all cases.
+
+\medskip
+\noindent\textbf{Case 1: No IC binds.}
+$A_g^i$ do not adjust with $A(\emptyset)$:
+$dV/dA(\emptyset) = t \Delta_b(\pi_1)
++ (1-t) \Delta_b(\pi_2) < 0$.
+
+\medskip
+\noindent\textbf{Case 2: $\mathrm{IC}_1$ binds,
+$A_g^1 = 1$.}
+Binding $\mathrm{IC}_1$:
+$A_g^2 = [h_1 + A(\emptyset)(h_2 - h_1)]/h_2$.
+Then $dA_g^2/dA(\emptyset) = (h_2 - h_1)/h_2$.
+
+\begin{align*}
+  \frac{dV}{dA(\emptyset)}
+  &= (1-t)\left[
+       \Delta_g(\pi_2) \cdot \frac{h_2 - h_1}{h_2}
+       + \Delta_b(\pi_2)
+     \right]
+     + t \, \Delta_b(\pi_1) \\
+  &= (1-t)\left[
+       \underbrace{(\Delta_g(\pi_2) + \Delta_b(\pi_2))}
+         _{= \, 2p-1 \, < \, 0}
+       - \Delta_g(\pi_2) \cdot \frac{h_1}{h_2}
+     \right]
+     + t \, \Delta_b(\pi_1) < 0.
+\end{align*}
+
+\medskip
+\noindent\textbf{Case 3: $\mathrm{IC}_2$ binds,
+$A_g^2 = 1$.}
+By symmetric reasoning:
+$dV/dA(\emptyset) = t[(2p-1) - \Delta_g(\pi_1) h_2/h_1]
++ (1-t) \Delta_b(\pi_2) < 0$.
+
+\medskip
+Since $dV/dA(\emptyset) < 0$ for all experiment pairs,
+$A(\emptyset) = 0$ is globally optimal. At
+$A(\emptyset) = 0$: $EU^A = A_g^i h_i$, identical to Min
+with $A_b^i = 0$.
+\end{proof}
+
+\begin{remark}[Economic intuition]
+The key identity is $\Delta_g + \Delta_b = 2p - 1 < 0$.
+Even when raising $A(\emptyset)$ relaxes an IC constraint
+(the screening benefit), this benefit equals at most
+$\Delta_g$. The direct cost is $|\Delta_b|$. Since
+$\Delta_g < |\Delta_b|$ (because their sum is $2p-1 < 0$),
+the cost always exceeds the benefit.
+
+Put differently: $A(\emptyset)$ is a \textbf{pooled}
+instrument affecting all types. Min's $A_b^i$ is
+type-specific. The pooling makes $A(\emptyset)$ too
+blunt---it always does more harm than good as a screening
+tool.
+\end{remark}
+
+
+% ============================================================
+\subsection{With Participation Constraint}
+\label{sec:with_IR}
+% ============================================================
+
+We now study the case where IR can bind. Focus on the
+leading case: $\pi_1 \notin S_2$ (so $\mathrm{IC}_2$ is
+automatic and the small type cannot mimic the big type's
+experiment).
+
+\begin{lemma}[When does IR bind?]\label{lem:IR_binding}
+Suppose $\pi_1 \notin S_2$ and $\mathrm{IC}_1$ does not
+bind. Then the optimal mechanism sets $A_g^1 = A_g^2 = 1$,
+and type~$i$'s payoff is:
+\[
+  EU^A_i = h_i + A(\emptyset)(1 - h_i).
+\]
+At $A(\emptyset) = 0$: $EU^A_i = h_i$. Since
+$h_2 \leq h_1$ (because $S_2 \subset S_1$), type~2 is
+the marginal participant.
+
+If $\mathrm{IC}_1$ binds (binding at $A(\emptyset) = 0$),
+then type~2's payoff equals type~1's payoff $= h_1 \geq c$
+whenever type~1 participates. In this case, $\mathrm{IR}_2$
+is automatically satisfied.
+\end{lemma}
+
+\begin{proof}
+When $\mathrm{IC}_1$ does not bind, $A_g^i$ are
+unconstrained and the FDA sets $A_g^i = 1$ (optimal for
+convincing experiments). Type~$i$'s payoff is
+$h_i + A(\emptyset)(1-h_i)$, which is $h_i$ at
+$A(\emptyset) = 0$.
+
+When $\mathrm{IC}_1$ binds with $A_g^1 = 1$:
+$h_1 + A(\emptyset)(1-h_1)
+= A_g^2 h_2 + A(\emptyset)(1-h_2)$.
+Type~2's equilibrium payoff from option~2 equals
+type~1's payoff from option~1 $= h_1 + A(\emptyset)(1-h_1)$.
+At $A(\emptyset) = 0$: type~2's payoff $= h_1 \geq c$.
+\end{proof}
+
+\begin{remark}
+Lemma~\ref{lem:IR_binding} says the interesting case is:
+$\mathrm{IC}_1$ slack and $h_1 \geq c > h_2$. The big type
+can profitably develop; the small type cannot, unless the
+FDA provides a participation subsidy through
+$A(\emptyset) > 0$.
+\end{remark}
+
+\begin{theorem}[Endogenous $A(\emptyset) > 0$]
+\label{thm:with_IR}
+Suppose $\pi_1 \notin S_2$, $\mathrm{IC}_1$ is slack,
+$A_g^1 = A_g^2 = 1$, and $h_1 \geq c > h_2$.
+
+Define $\alpha^* := (c - h_2)/(1 - h_2)$, the minimum
+$A(\emptyset)$ that induces type~2's participation. Then
+$A(\emptyset) = \alpha^*$ is optimal if and only if:
+\begin{equation}\label{eq:threshold_condition}
+  (1-t) \, \Delta_g(\pi_2)
+  > \bigl|t \, \Delta_b(\pi_1)
+    + (1-t) \, \Delta_b(\pi_2)\bigr|
+    \cdot \alpha^*.
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+\emph{Step~1: Structure of $V(A(\emptyset))$.}
+At $A(\emptyset) = \alpha$:
+\begin{itemize}
+  \item If $\alpha < \alpha^*$: type~2 does not participate.
+    $V(\alpha) = t[(1-p) + \Delta_g(\pi_1)
+    + \Delta_b(\pi_1) \alpha] + (1-t)(1-p)$.
+    This is linear and decreasing in $\alpha$ (slope
+    $= t \, \Delta_b(\pi_1) < 0$).
+  \item If $\alpha \geq \alpha^*$: both types participate.
+    $V(\alpha) = (1-p)
+    + t[\Delta_g(\pi_1) + \Delta_b(\pi_1) \alpha]
+    + (1-t)[\Delta_g(\pi_2) + \Delta_b(\pi_2) \alpha]$.
+    This is linear and decreasing in $\alpha$ (slope
+    $= t \Delta_b(\pi_1) + (1-t) \Delta_b(\pi_2) < 0$
+    by Theorem~\ref{thm:no_IR}).
+\end{itemize}
+So $V$ is piecewise linear: decreasing on
+$[0, \alpha^*)$, then an upward jump at $\alpha^*$
+(from type~2 joining), then decreasing on
+$[\alpha^*, 1]$.
+
+\medskip
+\emph{Step~2: The jump at $\alpha^*$.}
+\begin{align*}
+  V(\alpha^*) - V(\alpha^{*-})
+  &= (1-t) \left[
+       \Delta_g(\pi_2) + \Delta_b(\pi_2) \alpha^*
+     \right] \\
+  &= (1-t) \left[
+       \Delta_g(\pi_2)(1 - \alpha^*)
+       + (2p-1) \alpha^*
+     \right].
+\end{align*}
+For the jump to be positive, we need
+$\Delta_g(\pi_2)(1-\alpha^*) > (1-2p)\alpha^*$, i.e.,
+$\Delta_g(\pi_2) + \Delta_b(\pi_2) \alpha^* > 0$. This
+is the participation value condition: the FDA's gain from
+type~2's good-result approvals exceeds the cost from
+type~2's silence-channel approvals.
+
+\medskip
+\emph{Step~3: Comparison with $\alpha = 0$.}
+Since $V$ is decreasing on $[0, \alpha^*)$, the best
+below the jump is $\alpha = 0$. Since $V$ is decreasing
+on $[\alpha^*, 1]$, the best above the jump is
+$\alpha = \alpha^*$. So the global optimum is either
+$\alpha = 0$ or $\alpha = \alpha^*$.
+\begin{align}
+  V(\alpha^*) - V(0)
+  &= (1-t) \, \Delta_g(\pi_2)
+     + \bigl[t \, \Delta_b(\pi_1)
+       + (1-t) \, \Delta_b(\pi_2)\bigr] \alpha^*.
+     \label{eq:net_gain}
+\end{align}
+This is positive iff
+\eqref{eq:threshold_condition} holds.
+\end{proof}
+
+\begin{corollary}[Development cost threshold]
+\label{cor:threshold}
+Define:
+\begin{equation}\label{eq:cstar}
+  c^* := h_2
+  + \frac{(1-t) \, \Delta_g(\pi_2) \cdot (1 - h_2)}
+         {\bigl|t \, \Delta_b(\pi_1)
+           + (1-t) \, \Delta_b(\pi_2)\bigr|}.
+\end{equation}
+Then:
+\begin{enumerate}
+  \item[(i)] If $c \leq h_2$: both types participate at
+    $A(\emptyset) = 0$. By Theorem~\ref{thm:no_IR},
+    $A(\emptyset) = 0$ optimal. No cherry-picking.
+  \item[(ii)] If $c \in (h_2, c^*)$: type~2 does not
+    participate at $A(\emptyset) = 0$. The FDA optimally
+    sets $A(\emptyset) = \alpha^* = (c - h_2)/(1-h_2) > 0$
+    to induce participation. \textbf{Cherry-picking
+    is endogenous.}
+  \item[(iii)] If $c \geq c^*$: the cost of
+    participation-inducing $A(\emptyset)$ exceeds the
+    benefit. Type~2 does not participate; $A(\emptyset) = 0$.
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+In \eqref{eq:net_gain}, substitute
+$\alpha^* = (c - h_2)/(1-h_2)$ and solve
+$V(\alpha^*) - V(0) > 0$ for $c$. This gives $c < c^*$.
+\end{proof}
+
+\begin{remark}[When is $A(\emptyset) > 0$ most likely
+  optimal?]
+Condition \eqref{eq:threshold_condition} is most easily
+satisfied when:
+\begin{itemize}
+  \item $(1-t)$ is large: the small type is common, so
+    losing its participation is costly.
+  \item $\Delta_g(\pi_2)$ is large: the small type's
+    experiment is highly convincing, so its participation
+    is valuable to the FDA.
+  \item $\alpha^*$ is small: the participation constraint
+    barely binds ($c$ close to $h_2$), so little
+    $A(\emptyset)$ subsidy is needed.
+\end{itemize}
+\end{remark}
+
+
+% ============================================================
+\subsection{Welfare Cost of Pooling}
+\label{sec:welfare}
+% ============================================================
+
+\begin{corollary}[Welfare cost of cherry-picking]
+\label{cor:welfare}
+Consider the same model primitives
+$(p, t, S_1, S_2, c)$ under Min's full-transparency regime
+(FDA observes $(\pi, j)$ always) and under my voluntary
+disclosure regime. Both have the participation constraint
+$EU^A_i \geq c$.
+
+When $c \in (h_2, c^*)$:
+\begin{enumerate}
+  \item[(i)] \textbf{Min:} the FDA sets $A_b^2 > 0$
+    specifically for type~2, leaving $A_b^1 = 0$. Cost:
+    only type~2's bad-result channel is opened.
+  \item[(ii)] \textbf{My model:} the FDA sets
+    $A(\emptyset) = \alpha^* > 0$ for all types. Cost:
+    both types' silence channels are opened.
+\end{enumerate}
+The welfare difference is:
+\begin{equation}\label{eq:welfare_cost}
+  V_{\text{Min}} - V_{\text{mine}}
+  = t \cdot |\Delta_b(\pi_1)| \cdot \alpha^* > 0.
+\end{equation}
+This is the cost of the \textbf{pooling constraint}:
+the FDA must subsidize type~1 (who doesn't need it)
+in order to subsidize type~2 (who does).
+\end{corollary}
+
+\begin{proof}
+In Min, $\mathrm{IR}_2$ requires
+$A_g^2 h_2 + A_b^2 (1-h_2) \geq c$. With $A_g^2 = 1$:
+$A_b^2 = (c - h_2)/(1-h_2) = \alpha^*$. Set $A_b^1 = 0$.
+
+Min's payoff:
+$V_{\text{Min}} = t[(1-p) + \Delta_g(\pi_1)]
++ (1-t)[(1-p) + \Delta_g(\pi_2) + \Delta_b(\pi_2) \alpha^*]$.
+
+My payoff:
+$V_{\text{mine}} = t[(1-p) + \Delta_g(\pi_1)
++ \Delta_b(\pi_1) \alpha^*]
++ (1-t)[(1-p) + \Delta_g(\pi_2) + \Delta_b(\pi_2) \alpha^*]$.
+
+Difference: $V_{\text{Min}} - V_{\text{mine}}
+= -t \, \Delta_b(\pi_1) \alpha^*
+= t \, |\Delta_b(\pi_1)| \, \alpha^* > 0$.
+\end{proof}
+
+\begin{remark}[Interpretation]
+In Min, $A_b^2 > 0$ is a targeted subsidy: only type~2
+gets bad-result approval. In my model, $A(\emptyset)$ is a
+blanket subsidy: all types get silence approval. The excess
+cost $t |\Delta_b(\pi_1)| \alpha^*$ is the price of
+type~1's unnecessary cherry-picking channel.
+
+This is the \textbf{welfare cost of cherry-picking}: not
+from the act of hiding per se, but from the FDA's inability
+to target bad-result tolerance to specific types.
+\end{remark}
+
+
+% ============================================================
+\section{Discussion}
+\label{sec:discussion}
+% ============================================================
+
+\subsection{Summary of Results}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{l|c|c}
+& \textbf{$c \leq h_2$} & \textbf{$c \in (h_2, c^*)$} \\
+\hline
+$A(\emptyset)$ & $0$ & $\alpha^* > 0$ \\
+Cherry-picking & irrelevant & endogenous \\
+Equiv.\ to Min? & yes & no \\
+Welfare cost & $0$ & $t|\Delta_b(\pi_1)|\alpha^*$
+\end{tabular}
+\end{center}
+
+
+\subsection{Limitations and Honest Assessment}
+
+\paragraph{What is rigorous:}
+\begin{itemize}
+  \item Lemmas 1--3 (bad news, disclosure, WLOG $A_g$):
+    straightforward, fully proved.
+  \item Theorem~\ref{thm:no_IR} ($A(\emptyset) = 0$
+    without IR): fully proved for all IC cases.
+  \item Theorem~\ref{thm:with_IR} (endogenous
+    $A(\emptyset) > 0$): fully proved for the case
+    $\pi_1 \notin S_2$, $\mathrm{IC}_1$ slack.
+  \item Corollary~\ref{cor:welfare} (welfare cost):
+    clean comparison under the same assumptions.
+\end{itemize}
+
+\paragraph{What requires further work:}
+\begin{itemize}
+  \item When $\pi_1 \in S_2$ (both IC constraints active):
+    the interaction between IC and IR is more complex.
+    Closed-form characterization is not available; this is
+    where numerical methods are needed.
+  \item The threshold $c^*$ depends on fixed experiments
+    $\pi_1, \pi_2$. Joint optimization over experiments
+    and approval probabilities with IR is a
+    higher-dimensional problem without clean closed form.
+  \item Min's Propositions~4--5 (sufficient conditions for
+    favorite experiments, ex post optimality) have not been
+    extended to the IR case. This extension is non-trivial.
+\end{itemize}
+
+
+\subsection{Interpreting $A(\emptyset) > 0$}
+
+The model's prediction that the FDA optimally commits to
+$A(\emptyset) > 0$ maps to several real-world regulatory
+institutions:
+\begin{itemize}
+  \item \textbf{Accelerated/conditional approval:}
+    The FDA approves drugs based on preliminary or surrogate
+    evidence, requiring post-market confirmatory studies.
+    The firm submits with incomplete data ($\emptyset$) and
+    receives approval with positive probability---exactly
+    the participation subsidy in the model.
+
+  \item \textbf{Emergency use authorization:}
+    EUAs allow approval before full trial completion, a
+    direct analog of $A(\emptyset) > 0$ when development
+    incentives are especially pressing.
+
+  \item \textbf{Silence as preliminary outcome:}
+    From the FDA's perspective, $\emptyset$ is
+    informationally ambiguous---it could reflect a hidden
+    bad result \emph{or} an ongoing trial with no
+    conclusion yet. By Remark~\ref{rem:silence},
+    $\mu(G|\emptyset) \geq \mu(G|b)$: silence is weakly
+    better news than confirmed bad results. The FDA's
+    willingness to set $A(\emptyset) > 0$ reflects this
+    ambiguity.
+\end{itemize}
+The key insight: $A(\emptyset) > 0$ is not regulatory
+negligence but a rational design choice---the FDA accepts
+higher risk of approving bad drugs to ensure good drugs get
+developed. Corollary~\ref{cor:welfare} quantifies the cost.
+
+
+\subsection{Policy Implications}
+
+\paragraph{Pre-registration as restoring targeting.}
+Mandatory trial pre-registration makes the experiment
+$\pi$ observable even when the firm omits results. This
+breaks the pooling constraint:
+$A(\emptyset) \to A(\pi, \emptyset)$ becomes
+experiment-specific, like Min's $A_b^i$. The FDA can
+target subsidies, eliminating the welfare cost of pooling.
+
+\paragraph{Reducing development costs.}
+Government subsidies or tax credits that lower $c$
+can eliminate the need for $A(\emptyset) > 0$ entirely
+(moving from regime (ii) to (i) in the table above).
+This is more efficient than tolerating cherry-picking.
+
+
+% ============================================================
+\section*{References}
+% ============================================================
+
+\begin{itemize}
+  \item Min, D.\ (2023). Screening for experiments.
+    \emph{Games and Economic Behavior}, 142, 898--920.
+\end{itemize}
+
+\end{document}

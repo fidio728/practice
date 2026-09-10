@@ -1,0 +1,213 @@
+\section{Robots.txt Restrictions, Filing-Window Illiquidity, and Drift}
+\label{sec:robots_txt_illiquidity_drift}
+
+\subsection{Treatment Definition}
+\label{subsec:robots_treatment}
+
+I construct the treatment directly from archived \texttt{robots.txt}
+rules.  For each firm-month, I identify whether at least one observed
+corporate host restricts automated search-bot access through a
+\texttt{Disallow} rule.  The main treatment is a search-bot-specific
+restriction, denoted \textit{SearchBotSpec}.  It equals one once the firm
+adopts a bot-specific \texttt{User-agent} rule that blocks at least one
+search-oriented crawler, and zero before adoption.  I require treated
+firms to have an observed clean pre-treatment month in which the relevant
+search-bot group is not blocked, so firms already blocked at the beginning
+of the robots.txt panel are excluded as left-censored.  Firms with valid
+robots.txt observations that never block the relevant bots form the
+clean-never control group.
+
+For firm \(i\), let \(G_i^{SB}\) denote the first calendar month in which
+a search-bot-specific block is observed.  For filing event \(e\) in month
+\(m(e)\), the post-treatment indicator is
+\[
+    \text{Post}^{SB}_{i,e}
+    =
+    \mathbf{1}\{m(e)>G_i^{SB}\}.
+\]
+Thus the first blocking month itself is not treated as post.  The
+filing-window regressions exclude filings in the first blocking month.
+I also report robustness using broader robots.txt treatments: any
+search-bot restriction, any bot-specific restriction across the broader
+crawler set, and full-site bot-specific restrictions.
+
+\begin{table}[!htbp]
+\centering
+\caption{Robots.txt Treatment Definitions}
+\label{tab:robots_treatment_definitions}
+\begin{threeparttable}
+\begin{tabular}{llp{7.5cm}}
+\toprule
+Variable & Label & Definition \\
+\midrule
+\textit{SearchBotSpec} & Main treatment &
+Firm adopts a bot-specific \texttt{User-agent} rule that blocks at least
+one search-oriented crawler. \\
+\textit{BotSpec} & Bot-specific robustness &
+Firm adopts a bot-specific \texttt{User-agent} rule that blocks at least
+one crawler in the broader tracked crawler set. \\
+\textit{RobotsAny} & Broad robots.txt restriction &
+Firm blocks at least one tracked crawler through any robots.txt rule,
+including wildcard rules. \\
+\textit{RootSpec} & Full-site bot-specific restriction &
+Firm adopts a bot-specific rule with \texttt{Disallow: /}, restricting
+the full site for the targeted crawler. \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]\footnotesize
+\item Treated firms must exhibit an observed clean-to-block transition
+within the robots.txt panel.  Left-censored and future-treated firms are
+excluded.  Clean-never firms are retained as controls.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\subsection{Filing-Window Illiquidity}
+\label{subsec:robots_amihud}
+
+I measure filing-window illiquidity using Amihud's price-impact measure,
+\[
+    \text{Amihud}_{i,d}
+    =
+    10^6 \times \frac{|R_{i,d}|}{\text{DollarVolume}_{i,d}},
+\]
+following \citet{Amihud2002}.  For each filing window, the outcome is the
+average filing-window Amihud measure minus the firm's pre-filing benchmark
+average over days \([-30,-6]\).  The main event windows are \([0,+1]\),
+\([0,+3]\), \([0,+5]\), \([-5,+5]\), \([+6,+30]\), and \([0,+30]\).  The
+estimating equation absorbs firm and filing-month fixed effects.
+
+\begin{table}[!htbp]
+\centering
+\caption{Robots.txt Restrictions and Filing-Window Amihud Illiquidity}
+\label{tab:robots_amihud_main}
+\begin{threeparttable}
+\begin{tabular}{lcccccccc}
+\toprule
+Treatment &
+\multicolumn{3}{c}{BJS, \([0,+5]\)} &
+\multicolumn{5}{c}{TWFE companion, \([0,+5]\)} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-9}
+& Est. & \(p\) & Pretrend \(p\)
+& Est. & \(p\) & \(N\) & Firms & Within \(R^2\) \\
+\midrule
+SearchBotSpec & 0.054 & 0.006 & 0.535 & 0.057 & 0.049 & 69,529 & 4,351 & 0.0001 \\
+BotSpec       & 0.045 & 0.001 & 0.416 & 0.046 & 0.033 & 67,693 & 4,242 & 0.0001 \\
+RobotsAny     & 0.025 & 0.110 & 0.985 & 0.019 & 0.213 & 30,881 & 1,947 & 0.0001 \\
+RootSpec      & 0.050 & 0.007 & 0.152 & 0.050 & 0.096 & 69,224 & 4,333 & 0.0000 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]\footnotesize
+\item The dependent variable is abnormal average Amihud illiquidity in the
+filing window.  BJS estimates use imputation DID with firm clustering and
+12-month pretrend tests.  TWFE companion estimates include firm and
+filing-month fixed effects with firm-clustered standard errors.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The search-bot-specific treatment produces a positive and statistically
+significant filing-window increase in illiquidity.  The effect is
+concentrated around the filing date: the \([0,+5]\) estimate is large and
+significant, while delayed windows such as \([+6,+30]\) and \([0,+30]\)
+are economically small and statistically insignificant.  The broader
+\textit{RobotsAny} treatment is attenuated, consistent with wildcard and
+general crawl restrictions pooling together more heterogeneous firm
+policies.
+
+\begin{table}[!htbp]
+\centering
+\caption{Pre-Filing Benchmark Robustness for Abnormal Amihud}
+\label{tab:amihud_benchmark_robustness}
+\begin{threeparttable}
+\begin{tabular}{lccc}
+\toprule
+Pre-filing benchmark & \([0,+5]\) estimate & \(p\)-value & \([+6,+30]\) \(p\)-value \\
+\midrule
+\([-30,-6]\)  & 0.0369 & 0.005 & 0.720 \\
+\([-45,-6]\)  & 0.0353 & 0.009 & 0.415 \\
+\([-60,-6]\)  & 0.0374 & 0.017 & 0.218 \\
+\([-60,-16]\) & 0.0303 & 0.047 & 0.596 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]\footnotesize
+\item The table varies the pre-filing benchmark used to construct abnormal
+Amihud.  The delayed-window placebo remains insignificant across all
+benchmark definitions.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\subsection{Post-Earnings-Announcement Drift}
+\label{subsec:robots_pead}
+
+I also test whether robots.txt restrictions amplify
+post-earnings-announcement drift.  This test follows the PEAD literature,
+using announcement and drift windows similar to \citet{DellaVignaPollet2009}
+and \citet{HirshleiferLimTeoh2009}, and explicitly accounting for the
+post-2000 decline in PEAD documented by \citet{Martineau2021}.  The drift
+outcome is benchmark-adjusted buy-and-hold abnormal return over
+post-announcement windows.  Surprise ranks are constructed from either
+random-walk seasonal earnings surprise or analyst forecast error.  I first
+verify that baseline PEAD remains detectable in the sample; consistent
+with \citet{Martineau2021}, the remaining signal is concentrated in
+microcap firms and short post-announcement windows.
+
+I then estimate whether the PEAD slope changes after robots.txt treatment:
+\[
+    BHAR_{i,q,w}
+    =
+    \beta\,\text{SurpriseRank}_{i,q}
+    +
+    \alpha\,\text{PostTreat}_{i,q}
+    +
+    \gamma\,
+    \text{SurpriseRank}_{i,q}\times \text{PostTreat}_{i,q}
+    +
+    \mu_i+\tau_q+\varepsilon_{i,q,w}.
+\]
+The coefficient of interest is \(\gamma\).  A positive \(\gamma\) would
+imply that robots.txt restrictions amplify drift by steepening the
+relation between earnings surprise and post-announcement abnormal returns.
+
+\begin{table}[!htbp]
+\centering
+\caption{Robots.txt Restrictions and PEAD Amplification}
+\label{tab:robots_pead_drift}
+\begin{threeparttable}
+\begin{tabular}{llccccc}
+\toprule
+Treatment & Cell & Implied \(D10-D1\) effect & \(p\) & \(N\) & Treated firms & Within \(R^2\) \\
+\midrule
+SearchBotSpec & SUE microcap, \([+2,+5]\)    &  5.26\% & 0.360 & 31,417 &  93 & 0.0024 \\
+SearchBotSpec & SUE microcap, \([+2,+60]\)   &  0.69\% & 0.887 & 31,418 &  93 & 0.0007 \\
+SearchBotSpec & Analyst FE full, \([+2,+60]\) & -1.98\% & 0.712 & 36,041 &  79 & 0.0020 \\
+BotSpec       & SUE microcap, \([+2,+5]\)    &  5.41\% & 0.287 & 30,733 & 116 & 0.0025 \\
+BotSpec       & SUE microcap, \([+2,+60]\)   & -1.28\% & 0.785 & 30,734 & 116 & 0.0007 \\
+RobotsAny     & SUE microcap, \([+2,+5]\)    &  1.44\% & 0.059 & 14,455 & 416 & 0.0037 \\
+RobotsAny     & SUE microcap, \([+2,+60]\)   &  2.83\% & 0.248 & 14,456 & 416 & 0.0006 \\
+Broad discovery & SUE microcap, \([+2,+60]\) & -1.39\% & 0.706 & 31,029 & 144 & 0.0007 \\
+Broad discovery & Analyst FE full, \([+2,+60]\) & -2.82\% & 0.226 & 33,882 & 196 & 0.0022 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]\footnotesize
+\item Each estimate reports \(\gamma \times 9\), the implied change in the
+\(D10-D1\) drift spread after treatment.  All regressions include firm and
+fiscal-quarter fixed effects and use firm-clustered standard errors.
+Two-way firm-by-quarter clustering gives identical point estimates; singular
+two-way cells are flagged separately in the appendix.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The drift results do not support a delayed-earnings-news channel.  Even in
+the microcap cells where baseline PEAD remains alive, robots.txt
+restrictions do not robustly amplify post-announcement drift.  The only
+marginal estimate appears for the broadest \textit{RobotsAny} treatment in
+the short \([+2,+5]\) window, and it does not persist over the cumulative
+\([+2,+60]\) drift window.  For the broad discovery treatment that produces
+the filing-window Amihud effect, the drift-window interactions are null or
+negative.  These findings suggest that the main effect operates through a
+filing-window liquidity or price-impact channel, rather than through
+delayed earnings-news diffusion.
+

@@ -1,0 +1,30 @@
+\begin{table}[t]
+\centering
+\begin{threeparttable}
+\caption{The effect is not an earnings-announcement artifact}
+\label{tab:earnings}
+\small
+\begin{tabular}{lc}
+\toprule
+ & Abn.\ Amihud (log) \\
+\midrule
+\multicolumn{2}{l}{\textit{Panel A: By proximity to the earnings announcement (Borusyak et al.\ 2024)}}\\[2pt]
+Concurrent ($|\text{filing}-\text{rdq}|\le 1$)   & $+0.0036$\ (0.44) \\
+Mid (2--10 days)                                  & $+0.0069$\ (0.086) \\
+Standalone ($>10$ days)                           & $+0.0066$\ (0.32) \\[4pt]
+\multicolumn{2}{l}{\textit{Panel B: Drop earnings-concurrent filings (non-concurrent subsample)}}\\[2pt]
+\quad TWFE                                        & $0.0102^{**}$\ (0.0046) \\
+\quad Borusyak et al.\ (2024)                     & $0.0072^{**}$\ (0.0035) \\
+\quad\quad Borusyak et al.\ pre-trend $p$         & 0.56 \\[4pt]
+\multicolumn{2}{l}{\textit{Panel C: Earnings-window control on the matched sample (TWFE)}}\\[2pt]
+Crawler block $\times$ Post (net of EA dummy)     & $0.0061$\ (0.0038) \\[4pt]
+\multicolumn{2}{l}{\textit{Panel D: Re-anchored on the earnings announcement (Borusyak et al.\ 2024)}}\\[2pt]
+Announcement-anchored $\mathit{AbnAIM}$           & $0.0034$\ (0.0033) \\
+\quad Pre-trend $p$; 80\% MDE                     & 0.71;\ 0.0094 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item \textit{Notes.} The filing panel is entirely periodic reports (10-K/10-Q). Filing events are matched to the nearest Compustat earnings-announcement date (rdq) within an own-quarter window; ``concurrent'' filings are filed within one day of the announcement. Panel~A reports the Borusyak et al.\ (2024) estimate (with the coefficient $p$-value in parentheses) by proximity; the effect is not concentrated in concurrent filings. Panel~B re-estimates the headline on the non-concurrent subsample (filings filed more than one day from the announcement, within the matched-rdq sample; 313 treated firms): the effect survives with a clean pre-trend. Panel~C adds an earnings-window indicator to the matched-sample headline; standard errors clustered by firm in parentheses. Panel~D re-anchors the entire design on the earnings-announcement date: day~0 is the first trading day on or after rdq, with identical windows, outcome construction, and treatment timing (76{,}696 announcement events; 567 treated firms in the imputation panel). The estimate is a null with a clean pre-trend, and the test is well powered: its 80\% minimum detectable effect (0.0094) is below the filing-anchored estimate ($+0.0134$). The effect is individually significant among 10-Q filings (Borusyak et al.\ 2024 $+0.0129$, $p=0.026$) and not among 10-K filings ($+0.0056$, $p=0.40$), but the two are not statistically distinguishable (form interaction $p=0.76$), so we do not read a form-specific mechanism. $^{*}$, $^{**}$, $^{***}$ denote 10\%, 5\%, 1\%.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

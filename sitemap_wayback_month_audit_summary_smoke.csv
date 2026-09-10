@@ -1,0 +1,3 @@
+year_month,population_rows,sample_n,exact_n,near_le_3m_n,stale_gt_3m_n,missing_n,exact_share,near_le_3m_share,stale_gt_3m_share,missing_share
+2025-07,5927,3,2,1,0,0,0.6667,0.3333,0.0,0.0
+2025-08,5599,3,3,0,0,0,1.0,0.0,0.0,0.0

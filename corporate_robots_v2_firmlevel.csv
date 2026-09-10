@@ -1,0 +1,56 @@
+firm,ticker,domain,date,cap_group,sector,status_code,RetrievalBlockRoot,TrainBlockRoot,GooglebotBlock,any_ai_rule,notes
+Apple,AAPL,apple.com,2026-03-20,mega,Tech,200,0,0,0,0,
+Microsoft,MSFT,microsoft.com,2026-03-20,mega,Tech,200,0,0,0,0,
+NVIDIA,NVDA,nvidianews.nvidia.com,2026-03-20,mega,Tech,200,0,0,0,0,
+Amazon,AMZN,aboutamazon.com,2026-03-20,mega,Tech,200,0,0,0,0,
+Alphabet,GOOGL,blog.google,2026-03-20,mega,Tech,200,0,0,0,0,
+Meta,META,about.meta.com,2026-03-20,mega,Tech,200,0,1,0,1,blocks training only
+Tesla,TSLA,ir.tesla.com,2026-03-20,mega,Auto,200,0,0,0,0,
+Berkshire Hathaway,BRK.B,berkshirehathaway.com,2026-03-20,mega,Finance,404,0,0,0,0,no robots.txt
+Broadcom,AVGO,broadcom.com,2026-03-20,mega,Tech,200,0,0,0,0,
+JPMorgan,JPM,jpmorganchase.com,2026-03-20,mega,Finance,200,0,0,0,0,
+Walmart,WMT,corporate.walmart.com,2026-03-20,large,Retail,200,0,0,0,1,has AI rules but no root blocks (path-only or allow)
+Visa,V,visa.com,2026-03-20,large,Finance,200,0,0,0,0,
+Johnson & Johnson,JNJ,jnj.com,2026-03-20,large,Healthcare,200,0,0,0,0,
+Procter & Gamble,PG,us.pg.com,2026-03-20,large,Consumer,200,0,0,0,0,
+Mastercard,MA,mastercard.com,2026-03-20,large,Finance,403,NA,NA,NA,NA,robots.txt returns 403 for all User-Agents tried
+ExxonMobil,XOM,corporate.exxonmobil.com,2026-03-20,large,Energy,200,0,0,0,0,
+Costco,COST,costco.com,2026-03-20,large,Retail,200,0,0,0,0,
+Pfizer,PFE,pfizer.com,2026-03-20,large,Healthcare,200,0,0,0,0,
+Goldman Sachs,GS,goldmansachs.com,2026-03-20,large,Finance,200,0,0,0,1,has AI rules but no root blocks (path-only or allow)
+Netflix,NFLX,about.netflix.com,2026-03-20,large,Media,200,0,0,0,0,
+Adobe,ADBE,adobe.com,2026-03-20,large,Tech,200,0,0,0,1,has AI rules but no root blocks (path-only or allow)
+Salesforce,CRM,salesforce.com,2026-03-20,large,Tech,200,0,0,0,0,
+Chevron,CVX,chevron.com,2026-03-20,large,Energy,200,0,0,0,0,
+Merck,MRK,merck.com,2026-03-20,large,Healthcare,200,0,0,0,0,
+Bank of America,BAC,newsroom.bankofamerica.com,2026-03-20,large,Finance,200,0,0,0,0,
+Dominos Pizza,DPZ,dominos.com,2026-03-20,mid,Consumer,200,0,0,0,0,
+Zillow,Z,zillow.com,2026-03-20,mid,Tech,200,0,0,0,0,
+HubSpot,HUBS,hubspot.com,2026-03-20,mid,Tech,200,0,0,0,0,
+Etsy,ETSY,etsy.com,2026-03-20,mid,Retail,200,0,0,0,0,
+Roku,ROKU,roku.com,2026-03-20,mid,Tech,200,0,0,0,0,
+Carvana,CVNA,carvana.com,2026-03-20,mid,Auto,403,NA,NA,NA,NA,robots.txt returns 403 for all User-Agents tried
+Cloudflare,NET,cloudflare.com,2026-03-20,mid,Tech,200,0,0,0,0,
+Ralph Lauren,RL,ralphlauren.com,2026-03-20,mid,Consumer,200,0,0,0,0,
+Hershey,HSY,thehersheycompany.com,2026-03-20,mid,Consumer,404,0,0,0,0,no robots.txt
+Williams-Sonoma,WSM,williams-sonomainc.com,2026-03-20,mid,Retail,200,0,0,0,0,
+Cleveland-Cliffs,CLF,clevelandcliffs.com,2026-03-20,mid,Materials,200,0,0,0,0,
+Textron,TXT,textron.com,2026-03-20,mid,Industrial,200,0,0,0,0,
+Leidos,LDOS,leidos.com,2026-03-20,mid,Defense,200,0,0,0,0,
+Expedia,EXPE,expediagroup.com,2026-03-20,mid,Travel,200,0,0,0,0,
+Tractor Supply,TSCO,tractorsupply.com,2026-03-20,mid,Retail,403,NA,NA,NA,NA,robots.txt returns 403 for all User-Agents tried
+Chewy,CHWY,chewy.com,2026-03-20,small,Retail,200,0,0,0,0,
+Shutterstock,SSTK,shutterstock.com,2026-03-20,small,Media,200,1,1,0,1,blocks both retrieval and training
+Coursera,COUR,coursera.org,2026-03-20,small,Education,200,0,0,0,1,has AI rules but no root blocks (path-only or allow)
+Lemonade,LMND,lemonade.com,2026-03-20,small,Insurance,200,0,0,0,0,
+BigCommerce,BIGC,bigcommerce.com,2026-03-20,small,Tech,200,0,0,0,0,
+Weave Communications,WEAV,getweave.com,2026-03-20,small,Tech,200,0,0,0,0,
+Couchbase,BASE,couchbase.com,2026-03-20,small,Tech,403,NA,NA,NA,NA,robots.txt returns 403 for all User-Agents tried
+Dine Brands,DIN,dinebrands.com,2026-03-20,small,Consumer,403,NA,NA,NA,NA,robots.txt returns 403 for all User-Agents tried
+Quaker Chemical,KWR,quakerhoughton.com,2026-03-20,small,Materials,200,0,0,0,0,
+Donnelley Financial,DFIN,dfinsolutions.com,2026-03-20,small,Finance,200,0,0,0,0,
+ScanSource,SCSC,scansource.com,2026-03-20,small,Tech,200,0,0,0,1,has AI rules but no root blocks (path-only or allow)
+Xperi,XPER,xperi.com,2026-03-20,small,Tech,200,0,0,0,0,
+Duolingo,DUOL,duolingo.com,2026-03-20,small,Education,200,0,0,0,0,
+BioAtla,BCAB,bioatla.com,2026-03-20,small,Healthcare,200,0,0,0,0,
+Veritone,VERI,veritone.com,2026-03-20,small,Tech,200,0,0,0,0,

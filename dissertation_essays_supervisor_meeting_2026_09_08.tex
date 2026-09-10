@@ -1,0 +1,373 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+
+\usepackage{fontspec}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{ragged2e}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+
+\setsansfont{Arial}
+\setmonofont{Consolas}
+
+\definecolor{ink}{HTML}{111111}
+\definecolor{muted}{HTML}{60656F}
+\definecolor{rule}{HTML}{C7CBD1}
+\definecolor{panel}{HTML}{F1F3F5}
+\definecolor{accent}{HTML}{2474E5}
+\definecolor{accentlight}{HTML}{DDEBFF}
+\definecolor{green}{HTML}{19734A}
+\definecolor{red}{HTML}{B23A3A}
+
+\setbeamercolor{normal text}{fg=ink,bg=white}
+\setbeamercolor{frametitle}{fg=ink,bg=white}
+\setbeamercolor{structure}{fg=accent}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize item}{\color{accent}\raise0.25ex\hbox{\rule{0.55ex}{0.55ex}}}
+\setbeamertemplate{itemize subitem}{\color{muted}\raise0.25ex\hbox{\rule{0.45ex}{0.45ex}}}
+\setbeamersize{text margin left=0.62cm,text margin right=0.62cm}
+
+\setbeamerfont{frametitle}{size=\fontsize{21}{24},series=\bfseries}
+\setbeamerfont{normal text}{size=\fontsize{11}{14}}
+\setbeamerfont{footline}{size=\fontsize{6.5}{8}}
+
+\setbeamertemplate{frametitle}{%
+  \vspace{0.20cm}%
+  \insertframetitle\par
+  \vspace{0.06cm}%
+  {\color{accent}\rule{1.55cm}{1.2pt}}%
+}
+
+\setbeamertemplate{footline}{%
+  \leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=.90\paperwidth,ht=2.7ex,dp=1.2ex,leftskip=.62cm]{normal text}%
+      {\color{muted}\insertshorttitle}
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.10\paperwidth,ht=2.7ex,dp=1.2ex,rightskip=.62cm plus1fil]{normal text}%
+      {\color{muted}\insertframenumber}
+    \end{beamercolorbox}%
+  }%
+}
+
+\newcommand{\eyebrow}[1]{%
+  {\color{accent}\fontsize{7.3}{9}\selectfont\bfseries\MakeUppercase{#1}}\par\vspace{0.10cm}%
+}
+\newcommand{\smallhead}[1]{%
+  {\fontsize{11}{13}\selectfont\bfseries #1}\par\vspace{0.08cm}%
+}
+\newcommand{\bodytext}{\fontsize{9.4}{12.1}\selectfont}
+\newcommand{\smalltext}{\fontsize{8.1}{10.2}\selectfont}
+\newcommand{\tinycite}[1]{{\color{muted}\fontsize{5.8}{7}\selectfont #1}}
+\newcommand{\keyline}[1]{%
+  \begin{beamercolorbox}[wd=\linewidth,sep=0.17cm]{normal text}%
+    \colorbox{accentlight}{\parbox{0.965\linewidth}{\color{ink}\bodytext\bfseries #1}}%
+  \end{beamercolorbox}%
+}
+\newcommand{\metric}[2]{%
+  {\color{accent}\fontsize{25}{27}\selectfont\bfseries #1}\par
+  {\color{muted}\fontsize{7.7}{9.4}\selectfont #2}%
+}
+
+\title[Dissertation essays | Supervisor meeting | 8 Sep 2026]{Dissertation essays}
+
+\begin{document}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Essay 1: crawler access and disclosure-window liquidity}
+\eyebrow{Current paper --- short update}
+
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.53\textwidth}
+    \smallhead{Question and design}
+    {\bodytext
+    \begin{itemize}\setlength\itemsep{0.15cm}
+      \item Do firm-initiated crawler restrictions change how markets process mandatory filings?
+      \item Treatment: first restriction of any of 31 search/discovery crawlers in archived \texttt{robots.txt} files.
+      \item Staggered design, 2021--2025: 27,327 10-K/10-Q events; 1,908 firms.
+      \item Outcome: filing-window log Amihud minus its local benchmark.
+    \end{itemize}}
+  \end{column}
+  \begin{column}{0.43\textwidth}
+    \smallhead{Current result}
+    \metric{+0.0134}{Abnormal log Amihud (BJS), $p=0.010$}
+    \vspace{0.18cm}
+    {\smalltext
+    \begin{itemize}\setlength\itemsep{0.11cm}
+      \item Benchmark liquidity improves faster; the filing window does not keep pace.
+      \item Quoted spreads: null; dollar volume: up.
+      \item Return variance: up; post-filing drift: null.
+      \item \textbf{Reading:} price impact/depth, not trading withdrawal.
+    \end{itemize}}
+  \end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Feedback: sharpen the contribution and causal story}
+\eyebrow{Committee feedback + our discussion}
+
+\vspace{0.22cm}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.30\textwidth}
+    {\color{accent}\fontsize{18}{20}\selectfont\bfseries 01}\par\vspace{0.13cm}
+    \smallhead{Measurement paper}
+    {\bodytext Candidate contribution: the first systematic evidence that firms \textbf{deliberately reduce the machine discoverability of their own public information}.}\par
+    \vspace{0.06cm}
+    {\smalltext\color{muted}Validate actual discoverability, not only the stated policy.}
+  \end{column}
+  \begin{column}{0.03\textwidth}\centering
+    {\color{rule}\rule{0.55pt}{4.2cm}}
+  \end{column}
+  \begin{column}{0.30\textwidth}
+    {\color{accent}\fontsize{18}{20}\selectfont\bfseries 02}\par\vspace{0.13cm}
+    \smallhead{Mechanism}
+    {\bodytext \textbf{Amihud is not information deterioration.} Separate less information, informed-trader composition, noise-trader exit, and disclosure content.}\par
+    \vspace{0.06cm}
+    {\smalltext\color{muted}Adjudicate with spreads, volume, breadth, and price response.}
+  \end{column}
+  \begin{column}{0.03\textwidth}\centering
+    {\color{rule}\rule{0.55pt}{4.2cm}}
+  \end{column}
+  \begin{column}{0.30\textwidth}
+    {\color{accent}\fontsize{18}{20}\selectfont\bfseries 03}\par\vspace{0.13cm}
+    \smallhead{More outcome variables}
+    {\bodytext Expand the outcome battery, but require each variable to distinguish a mechanism rather than add another correlation.}\par
+    \vspace{0.06cm}
+    {\smalltext\color{muted}Families: price response, investor breadth, monitoring, disclosure.}
+  \end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{New architecture: three uses of discoverability}
+\eyebrow{New dissertation architecture}
+
+{\fontsize{12.5}{15}\selectfont\bfseries
+Public information must be discoverable before it can discipline managers or enter prices.}\par
+
+\vspace{0.30cm}
+\centering
+\begin{tikzpicture}[
+  node distance=1.00cm,
+  every node/.style={font=\sffamily},
+  essay/.style={draw=rule,very thick,fill=panel,minimum width=4.02cm,minimum height=2.02cm,align=left,inner sep=0.25cm},
+  arr/.style={-{Latex[length=3mm]},line width=1.2pt,draw=accent}
+]
+  % Connectors first so they remain behind the nodes.
+  \draw[arr] (4.20,0) -- (5.05,0);
+  \draw[arr] (9.25,0) -- (10.10,0);
+  \node[essay] (e1) at (2.05,0) {\color{accent}\bfseries ESSAY 1\\[0.12cm]\color{ink}\bfseries Access choice\\[-0.03cm]\color{muted}\small Liquidity and price impact};
+  \node[essay] (e2) at (7.15,0) {\color{accent}\bfseries ESSAY 2\\[0.12cm]\color{ink}\bfseries External monitoring\\[-0.03cm]\color{muted}\small Managerial behavior};
+  \node[essay] (e3) at (12.25,0) {\color{accent}\bfseries ESSAY 3\\[0.12cm]\color{ink}\bfseries Price learning\\[-0.03cm]\color{muted}\small Timing and informativeness};
+\end{tikzpicture}
+
+\vspace{0.25cm}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \smallhead{Common theoretical primitive}
+    {\bodytext Firms can raise outsiders' cost of discovering and processing legally public information.}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \smallhead{Separation across essays}
+    {\bodytext Distinct equilibrium objects; Essay 3 should ideally use separate identifying variation.}
+  \end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Essay 1: Choosing to Become Harder to Find}
+\eyebrow{Measurement + market microstructure}
+
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \smallhead{Research question}
+    {\bodytext Do firms restrict crawler access to their websites, and does this access choice change trading around mandatory disclosures?}\par
+    \vspace{0.22cm}
+    \smallhead{Core evidence}
+    {\bodytext
+    \begin{itemize}\setlength\itemsep{0.12cm}
+      \item New monthly panel of crawler-access policies and staggered switches.
+      \item Filing-window price impact relative to local market conditions.
+    \end{itemize}}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \smallhead{Contribution}
+    {\bodytext
+    \begin{itemize}\setlength\itemsep{0.12cm}
+      \item The supply of discoverability is a firm choice, not a fixed feature of public disclosure.
+      \item Information can remain legally public while becoming economically harder to find.
+      \item The access choice has a measurable market-microstructure consequence.
+    \end{itemize}}
+    \vspace{0.14cm}
+    \colorbox{panel}{\parbox{0.93\linewidth}{\smalltext\textbf{Boundary:} this is not an AI paper, and it does not equate illiquidity with informational inefficiency.}}
+  \end{column}
+\end{columns}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Essay 2: External monitoring}
+\eyebrow{Turning Off the Machines --- access and the erosion of monitoring}
+
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.39\textwidth}
+    \smallhead{Core question}
+    {\bodytext Can a firm weaken outside monitoring by withdrawing machine access to information that remains publicly available?}\par
+    \vspace{0.20cm}
+    \smallhead{Mechanism}
+    {\bodytext Machine discovery is an input into scalable monitoring. Blocking raises detection costs and lowers the probability that irregular behavior is noticed.}\par
+    \vspace{0.10cm}
+    \colorbox{accentlight}{\parbox{0.92\linewidth}{\smalltext\bfseries New object: monitoring technology, not trading liquidity.}}
+  \end{column}
+  \begin{column}{0.57\textwidth}
+    \smallhead{Empirical design}
+    {\smalltext
+    \begin{itemize}\setlength\itemsep{0.11cm}
+      \item Access restrictions $\rightarrow$ managerial outcomes; use passive/vendor-driven adoption where possible.
+      \item Heterogeneity by machine-information reliance and conventional monitoring.
+      \item Placebos: routine insider trades; firms with strong institutional monitoring.
+    \end{itemize}}
+    \vspace{0.12cm}
+    \smallhead{Primary outcome families}
+    {\smalltext
+    \begin{itemize}\setlength\itemsep{0.10cm}
+      \item Opportunistic Form 4 trading and trading profitability.
+      \item Discretionary accruals and real earnings management.
+      \item Late filings, amendments, restatements, and reporting discipline.
+    \end{itemize}}
+  \end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Where Prices Learn}
+\eyebrow{Essay 3 --- search discovery and the timing of fundamental information}
+
+{\fontsize{11.8}{14}\selectfont\bfseries
+Does lower discoverability shift learning from the months between filings to the filing date?}\par
+
+\vspace{0.27cm}
+\centering
+\begin{tikzpicture}[
+  every node/.style={font=\sffamily},
+  phase/.style={draw=rule,very thick,fill=panel,minimum width=4.05cm,minimum height=1.63cm,align=left,inner sep=0.22cm},
+  arr/.style={-{Latex[length=2.8mm]},line width=1.1pt,draw=accent}
+]
+  \draw[arr] (4.17,0) -- (5.05,0);
+  \draw[arr] (9.24,0) -- (10.12,0);
+  \node[phase] at (2.05,0) {\color{accent}\bfseries PRE-FILING\\[-0.01cm]\color{ink}\small Continuous, dispersed signals\\\color{red}\bfseries Fundamental response $\downarrow$};
+  \node[phase] at (7.15,0) {\color{accent}\bfseries FILING\\[-0.01cm]\color{ink}\small Mandatory disclosure reset\\\color{green}\bfseries Fundamental response $\uparrow$};
+  \node[phase] at (12.25,0) {\color{accent}\bfseries POST-FILING\\[-0.01cm]\color{ink}\small Residual learning\\\color{muted}\bfseries Delay or permanent loss?};
+\end{tikzpicture}
+
+\vspace{0.27cm}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \smallhead{Temporal reallocation}
+    {\bodytext Pre-filing response falls, filing response rises, and the full-cycle response is unchanged. Information is delayed, not destroyed.}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \smallhead{Information destruction}
+    {\bodytext The filing response does not fully compensate; total price--fundamental covariance falls or post-filing learning persists.}
+  \end{column}
+\end{columns}
+
+\vspace{0.08cm}
+{\smalltext\bfseries\color{accent}Main requirement: link returns to future fundamentals. Variance alone shows when prices move, not when they learn.}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{When is Essay 3 a separate paper?}
+\eyebrow{Overlap audit against Essay 1}
+
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.47\textwidth}
+    {\color{red}\fontsize{12}{14}\selectfont\bfseries MERGE INTO ESSAY 1 IF}\par\vspace{0.15cm}
+    {\bodytext
+    \begin{itemize}\setlength\itemsep{0.15cm}
+      \item It uses the same robots event, sample, filing window, and staggered event study.
+      \item Price delay, variance ratios, synchronicity, or announcement volatility are simply added as outcomes.
+      \item The conclusion is only that restrictions worsen market quality.
+    \end{itemize}}
+    \vspace{0.22cm}
+    \metric{70--80\%}{Estimated design overlap in this weak version}
+  \end{column}
+  \begin{column}{0.04\textwidth}\centering
+    {\color{rule}\rule{0.6pt}{4.45cm}}
+  \end{column}
+  \begin{column}{0.47\textwidth}
+    {\color{green}\fontsize{12}{14}\selectfont\bfseries STANDALONE IF}\par\vspace{0.15cm}
+    {\bodytext
+    \begin{itemize}\setlength\itemsep{0.15cm}
+      \item The estimand is the \textbf{timing versus total amount} of fundamental learning.
+      \item The unit is the inter-filing learning cycle, not filing-window illiquidity.
+      \item Returns are anchored to future earnings or another external fundamental realization.
+      \item Preferably, identification comes from a separate external shock to search discovery.
+    \end{itemize}}
+  \end{column}
+\end{columns}
+
+\vspace{0.10cm}
+{\smalltext\bfseries\color{accent}Strongest version: ask when prices learn, not whether trading becomes less liquid.}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Three essays, one coherent dissertation}
+\eyebrow{Dissertation map}
+
+\vspace{0.12cm}
+{\smalltext
+\renewcommand{\arraystretch}{1.38}
+\setlength{\tabcolsep}{0.09cm}
+\begin{tabularx}{\textwidth}{>{\bfseries\RaggedRight\arraybackslash}p{2.15cm} >{\RaggedRight\arraybackslash}X >{\RaggedRight\arraybackslash}X >{\RaggedRight\arraybackslash}X}
+\toprule
+ & \textbf{Essay 1} & \textbf{Essay 2} & \textbf{Essay 3} \\
+\midrule
+Question & Do firms restrict discoverability, and does liquidity change? & Does removing machine access weaken external monitoring? & Does search discovery change when prices learn? \\
+Core estimand & Filing-window price impact relative to local liquidity & Change in opportunistic managerial behavior & Reallocation of fundamental response across time \\
+Preferred variation & Firm crawler-access restrictions & Restrictions plus passive/vendor-driven adoption variation & Separate external search-discovery shock; robots as fallback \\
+Literature home & Market microstructure & Corporate governance and disclosure & Information economics and asset pricing \\
+\bottomrule
+\end{tabularx}}
+
+\vspace{0.18cm}
+{\smalltext\bfseries\color{accent}Common spine: firms shape effective access to public information. Distinct objects: liquidity, governance, and informativeness.}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Questions for the meeting}
+\eyebrow{Decisions that determine the next iteration}
+
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.61\textwidth}
+    {\fontsize{11.6}{14}\selectfont\bfseries
+    1. Is ``firms choose to become less discoverable'' strong enough as Essay 1's measurement contribution?}\par
+    \vspace{0.25cm}
+    {\fontsize{11.6}{14}\selectfont\bfseries
+    2. Should Essay 2 prioritize governance/monitoring over analyst information production?}\par
+    \vspace{0.25cm}
+    {\fontsize{11.6}{14}\selectfont\bfseries
+    3. For Essay 3, should I preserve the robots link or require a separate discoverability shock?}\par
+  \end{column}
+  \begin{column}{0.35\textwidth}
+    \colorbox{panel}{\parbox{0.90\linewidth}{%
+      \smallhead{Next two weeks}
+      {\smalltext
+      \begin{itemize}\setlength\itemsep{0.13cm}
+        \item Run a direct discoverability first-stage pilot.
+        \item Lock the Essay 1 mechanism horse race and outcome battery.
+        \item Build minimum-viability pilots for Form 4 outcomes and a separate discovery shock.
+      \end{itemize}}
+    }}
+  \end{column}
+\end{columns}
+
+\vspace{0.25cm}
+{\color{accent}\fontsize{13.2}{16}\selectfont\bfseries
+Goal for the meeting: choose the dissertation architecture before expanding the empirical workload.}
+\end{frame}
+
+\end{document}

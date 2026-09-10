@@ -1,0 +1,5 @@
+treatment_category_ours,allow,fetch_error,full_disallow,partial_disallow
+allow,4970,5,0,1
+fetch_error,106,782,0,29
+full_disallow,0,0,32,0
+partial_disallow,4,5,1,4127

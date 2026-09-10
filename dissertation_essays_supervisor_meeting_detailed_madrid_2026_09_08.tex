@@ -1,0 +1,797 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+
+\usepackage{fontspec}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{ragged2e}
+\usepackage{makecell}
+
+\setsansfont{Arial}
+\setmonofont{Consolas}
+
+\definecolor{MadridBlue}{RGB}{36,74,122}
+\definecolor{SoftBlue}{RGB}{232,240,248}
+\definecolor{SoftGray}{RGB}{244,245,247}
+\definecolor{DarkGray}{RGB}{70,74,82}
+\definecolor{GoodGreen}{RGB}{24,112,72}
+\definecolor{WarnRed}{RGB}{165,52,52}
+
+\setbeamercolor{structure}{fg=MadridBlue}
+\setbeamercolor{alerted text}{fg=WarnRed}
+\setbeamertemplate{navigation symbols}{}
+\setbeamersize{text margin left=0.55cm,text margin right=0.55cm}
+
+\newcommand{\key}[1]{\textcolor{MadridBlue}{\textbf{#1}}}
+\newcommand{\risk}[1]{\textcolor{WarnRed}{\textbf{#1}}}
+\newcommand{\good}[1]{\textcolor{GoodGreen}{\textbf{#1}}}
+\newcommand{\source}[1]{\vfill{\scriptsize\textcolor{DarkGray}{#1}}}
+\newcommand{\tightitems}{\setlength\itemsep{0.11cm}\setlength\parskip{0pt}}
+
+\title[Dissertation Essays]{Dissertation Essays: Supervisor Meeting}
+\author{}
+\institute{}
+\date{8 September 2026}
+
+\begin{document}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Essay 1: current paper in one slide}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.54\textwidth}
+    \begin{block}{Question and setting}
+      Do firm website restrictions on search and discovery crawlers change market liquidity around mandatory disclosures?
+    \end{block}
+    \footnotesize
+    \begin{itemize}\tightitems
+      \item Treatment: the first restriction of any of 31 search/discovery crawlers in archived monthly \texttt{robots.txt} files.
+      \item Not an AI paper: the treatment covers the full search/discovery layer, including conventional search bots.
+      \item Design: staggered adoption from 2021 to 2025; 27,327 10-K/10-Q filing events for 1,908 firms.
+      \item Main outcome: filing-window log Amihud, measured over $[-1,+1]$, relative to the firm's local benchmark $[-60,-10]$.
+    \end{itemize}
+  \end{column}
+  \begin{column}{0.43\textwidth}
+    \begin{alertblock}{Current headline result}
+      BJS estimate: \textbf{+0.0134}, $p=0.010$. The TWFE estimate is \textbf{+0.0109}.
+    \end{alertblock}
+    \footnotesize
+    \begin{itemize}\tightitems
+      \item The filing window does not become less liquid in levels; its local benchmark improves faster.
+      \item Quoted spreads are null, dollar volume rises, and return variance rises.
+      \item Effects are concentrated among smaller, low-institutional-ownership, and low-coverage firms.
+    \end{itemize}
+    \begin{exampleblock}{Current interpretation}
+      \footnotesize
+      The evidence points toward price impact/depth or trader composition, not wider quoted spreads or trading withdrawal.
+    \end{exampleblock}
+  \end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Feedback from the committee and our discussion}
+\vspace{0.20cm}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.31\textwidth}
+    \begin{block}{1. Measurement paper}
+      \small
+      Candidate contribution: the first systematic evidence that firms \textbf{actively make their own public information harder for machines to discover}.
+
+      \vspace{0.12cm}
+      This requires a first stage in actual discoverability, not only a stated \texttt{robots.txt} policy.
+    \end{block}
+  \end{column}
+  \begin{column}{0.31\textwidth}
+    \begin{block}{2. Mechanism}
+      \small
+      \textbf{Amihud is not information deterioration.}
+
+      \vspace{0.12cm}
+      Separate lower information acquisition, more informed trading, noise-trader exit, and changes in disclosure content.
+    \end{block}
+  \end{column}
+  \begin{column}{0.31\textwidth}
+    \begin{block}{3. More output variables}
+      \small
+      Expand the outcome set, but require each variable to adjudicate among mechanisms.
+
+      \vspace{0.12cm}
+      Priority families: price response, information timing, investor breadth, monitoring, and disclosure behavior.
+    \end{block}
+  \end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{The dissertation studies effective, not merely legal, publicity}
+\begin{block}{Common theoretical primitive}
+\centering
+\Large
+$\text{Effective public information}
+=
+\text{legal availability}
+\times
+\text{discoverability}
+\times
+\text{processing capacity}$
+\end{block}
+
+\vspace{0.18cm}
+\small
+Information can be legally public and still behave like private information if outsiders cannot find it cheaply and repeatedly. The three essays study a different equilibrium margin of this same friction:
+
+\vspace{0.18cm}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.31\textwidth}
+    \begin{exampleblock}{Trading margin}
+      Who trades, how much depth they supply, and how strongly prices move per unit of volume.
+    \end{exampleblock}
+  \end{column}
+  \begin{column}{0.31\textwidth}
+    \begin{exampleblock}{Monitoring margin}
+      Who continuously reads firm information and how managers respond when monitoring becomes costly.
+    \end{exampleblock}
+  \end{column}
+  \begin{column}{0.31\textwidth}
+    \begin{exampleblock}{Intermediation margin}
+      Whether open-web discovery substitutes for or complements traditional human intermediaries.
+    \end{exampleblock}
+  \end{column}
+\end{columns}
+
+\source{Conceptual anchors: Grossman and Stiglitz (1980), Merton (1987), Kyle (1985), and Dugast and Foucault (2018).}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Three essays share a friction, not an outcome swap}
+\scriptsize
+\renewcommand{\arraystretch}{1.20}
+\setlength{\tabcolsep}{0.11cm}
+\begin{tabularx}{\textwidth}{>{\bfseries\RaggedRight\arraybackslash}p{2.25cm} >{\RaggedRight\arraybackslash}X >{\RaggedRight\arraybackslash}X >{\RaggedRight\arraybackslash}X}
+\toprule
+ & \textbf{Essay 1} & \textbf{Essay 2} & \textbf{Essay 3} \\
+\midrule
+Working title & Crawler-Access Restrictions and Disclosure-Window Liquidity & Turning Off the Machines & Searchability and Information Intermediary Substitution \\
+Literature home & Market microstructure & Corporate governance & Information intermediaries \\
+Economic margin & Trading and price impact & External monitoring & Substitution vs. complementarity \\
+Main shock & Firm website crawler restriction & Firm website crawler restriction & Broker closure or research-department shutdown \\
+Role of discoverability & Treatment and measured friction & Treatment plus monitoring exposure & Predetermined moderator, not treatment \\
+Primary object & Liquidity and the timing of price learning & Opportunistic managerial behavior & Damage caused by exogenous analyst loss \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.20cm}
+\begin{alertblock}{Important correction}
+\footnotesize
+Essay 2 still uses the robots restriction shock. It is independent only if it establishes a distinct monitoring channel and a prespecified governance outcome. Essay 3 genuinely changes the treatment.
+\end{alertblock}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Essay 1 measures a firm choice over discoverability}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{What the measure captures}
+    \small
+    \begin{itemize}\tightitems
+      \item A monthly policy governing whether named crawlers may request content from the firm's website.
+      \item A firm's ability to change the machine accessibility of information that remains visible to a human visitor.
+      \item A broad search/discovery infrastructure choice, not a narrow response to generative AI.
+    \end{itemize}
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{block}{What it does not yet prove}
+    \small
+    \begin{itemize}\tightitems
+      \item That major crawlers obeyed the restriction at the relevant time.
+      \item That indexed pages, ranking, or discovery latency actually changed.
+      \item That managers personally intended the change rather than inheriting a vendor or security template.
+    \end{itemize}
+    \end{block}
+  \end{column}
+\end{columns}
+
+\begin{exampleblock}{Careful contribution language}
+Until intent and the actual discovery first stage are validated, the defensible statement is: \textbf{firms' websites impose restrictions that reduce permitted machine access}. ``Firms deliberately hide'' is the stronger hypothesis to be tested.
+\end{exampleblock}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Essay 1 uses filing events to isolate a high-information window}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.52\textwidth}
+    \begin{block}{Empirical design}
+    \small
+    \begin{itemize}\tightitems
+      \item Unit: firm filing event for 10-K and 10-Q disclosures.
+      \item Treatment date: first observed restriction of any focal search/discovery crawler.
+      \item Comparison: matched never-restricting firms and not-yet-treated observations.
+      \item Estimators: BJS imputation as the main design; conventional TWFE as a transparent comparison.
+      \item Outcome: abnormal filing-window log Amihud relative to a firm-local pre-filing benchmark.
+    \end{itemize}
+    \end{block}
+  \end{column}
+  \begin{column}{0.44\textwidth}
+    \begin{block}{Why use a local benchmark?}
+    \small
+    The estimand compares the filing window with the same firm's recent normal trading environment. This removes much of the persistent cross-sectional difference in baseline liquidity.
+    \end{block}
+    \begin{alertblock}{Interpretation constraint}
+    \small
+    A positive abnormal measure may arise because the event window worsens, because normal days improve, or both. The two components must be shown separately.
+    \end{alertblock}
+  \end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{The main effect is relative deterioration, not a level collapse}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.37\textwidth}
+    \begin{alertblock}{Main estimate}
+      \centering
+      \LARGE \textbf{+0.0134}
+
+      \normalsize BJS abnormal log Amihud
+
+      \small $p=0.010$
+    \end{alertblock}
+    \begin{block}{Concentration}
+      \footnotesize The effect is stronger for small firms, firms with low institutional ownership, and firms with little analyst coverage.
+    \end{block}
+  \end{column}
+  \begin{column}{0.59\textwidth}
+    \begin{block}{What moves underneath the ratio?}
+    \footnotesize
+    \begin{itemize}\tightitems
+      \item Filing-window Amihud does not rise materially in levels.
+      \item The non-event benchmark improves faster after restrictions.
+      \item Dollar volume rises rather than falls.
+      \item Quoted spreads do not widen.
+      \item Return variance rises around filings.
+      \item Post-filing drift and delayed-response share are currently null.
+    \end{itemize}
+    \end{block}
+    \begin{exampleblock}{Most accurate current reading}
+      \footnotesize The filing window becomes relatively more price-impact intensive. The evidence does not yet distinguish lower depth, concentrated information arrival, and trader composition.
+    \end{exampleblock}
+  \end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t,shrink=3]{Amihud can increase for economically different reasons}
+\begin{block}{The measure}
+\centering
+\Large $\text{Amihud}_{it}=10^{6}\,\dfrac{|r_{it}|}{\text{DollarVolume}_{it}}$
+\end{block}
+
+\scriptsize
+\renewcommand{\arraystretch}{1.14}
+\setlength{\tabcolsep}{0.10cm}
+\begin{tabularx}{\textwidth}{>{\bfseries\RaggedRight\arraybackslash}p{2.50cm} >{\RaggedRight\arraybackslash}X >{\RaggedRight\arraybackslash}X}
+\toprule
+Channel & Why Amihud rises & Additional implication \\
+\midrule
+Lower market depth & A given order imbalance moves price more & Effective-spread or price-impact proxies rise; breadth may fall \\
+More informative trades & Returns respond more strongly to fundamentals & Return-news covariance rises, even if liquidity is unchanged \\
+Noise traders exit & Denominator falls because uninformed volume disappears & Volume and participation breadth fall \\
+Information becomes concentrated & More of the quarterly news arrives at the filing & Pre-filing learning falls; filing response rises \\
+Local benchmark changes & Normal-day liquidity improves faster than event liquidity & Abnormal measure rises without an event-window level increase \\
+\bottomrule
+\end{tabularx}
+
+\begin{alertblock}{Therefore}
+\footnotesize The paper cannot infer ``information worsens'' from Amihud. It must identify the component and price-learning pattern that changed.
+\end{alertblock}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Essay 1 needs a mechanism horse race, not a larger outcome menu}
+\scriptsize
+\renewcommand{\arraystretch}{1.25}
+\setlength{\tabcolsep}{0.08cm}
+\begin{tabularx}{\textwidth}{>{\bfseries\RaggedRight\arraybackslash}p{2.35cm} >{\RaggedRight\arraybackslash}X >{\RaggedRight\arraybackslash}X >{\RaggedRight\arraybackslash}X >{\RaggedRight\arraybackslash}X}
+\toprule
+Mechanism & Volume / breadth & Spread / depth & Fundamental response & Post-filing learning \\
+\midrule
+Information loss & May fall & May worsen & Full-cycle response falls & Drift or delayed response rises \\
+Temporal concentration & Need not fall & Event price impact may rise & Pre-filing down; filing up; total unchanged & Little residual learning \\
+Informed-trader composition & Volume may rise or stay flat & Price impact rises more than quoted spread & Response per trade rises & No necessary drift \\
+Noise-trader exit & Volume and breadth fall & Price impact may rise & Fundamental mapping need not change & No sharp prediction \\
+Disclosure-content change & Depends on news quantity and complexity & Depends on content & Changes are explained by filing news & Depends on omitted content \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.20cm}
+\begin{exampleblock}{How the current facts narrow the race}
+Higher dollar volume and null quoted spreads make simple trading withdrawal less plausible. Higher return variance with no post-filing drift is consistent with either concentrated information arrival or a change in price impact. The next tests must distinguish these two.
+\end{exampleblock}
+
+\source{Theoretical motivation: Kyle (1985); Merton (1987); Davila and Parlatore (2026) on the non-monotone relation between trading costs and price informativeness.}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{``Where Prices Learn'' belongs inside Essay 1}
+\begin{block}{Its role in the paper}
+\large
+It explains \textbf{why the same mandatory filing may generate greater price movement per unit of trading after search access is restricted}.
+\end{block}
+
+\small
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.47\textwidth}
+    \begin{exampleblock}{Before restriction}
+      Search and discovery tools expose continuous website signals: IR updates, product news, hiring, operational announcements, and changes to firm pages.
+
+      Some quarterly information may therefore enter prices before the filing date.
+    \end{exampleblock}
+  \end{column}
+  \begin{column}{0.47\textwidth}
+    \begin{alertblock}{After restriction}
+      The cost of finding continuous signals rises. The mandatory SEC filing remains accessible and may become a larger information reset.
+
+      Price learning may shift from dispersed pre-filing days to the filing window.
+    \end{alertblock}
+  \end{column}
+\end{columns}
+
+\vspace{0.12cm}
+\textbf{This is a mechanism for the Essay 1 market result.} With the same restriction events, firms, filing cycle, and return data, it would look like salami slicing if presented as a separate essay.
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{The relevant question is when and through which channel prices learn}
+\begin{center}
+\begin{tabular}{ccc}
+\colorbox{SoftBlue}{\parbox{0.27\textwidth}{\centering\textbf{PRE-FILING}\\Continuous web signals\\Anticipatory incorporation}} &
+$\Longrightarrow$ &
+\colorbox{SoftBlue}{\parbox{0.27\textwidth}{\centering\textbf{FILING}\\Mandatory disclosure\\Scheduled information reset}} \\
+&&\\[-0.18cm]
+&& $\Downarrow$ \\
+&&\\[-0.18cm]
+&& \colorbox{SoftGray}{\parbox{0.27\textwidth}{\centering\textbf{POST-FILING}\\Residual learning\\Delay or correction?}}
+\end{tabular}
+\end{center}
+
+\begin{block}{Terminology}
+\small
+``Where'' does not mean a physical trading venue. It means \textbf{where in the information cycle} and \textbf{through which disclosure channel} fundamental news enters prices. A more precise section title is: \emph{When and Through Which Channel Do Prices Learn?}
+\end{block}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t,shrink=2]{Price learning requires a fundamental anchor}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Primary measures}
+    \small
+    \begin{itemize}\tightitems
+      \item Window-specific earnings response coefficients using standardized unexpected earnings.
+      \item Covariance between current returns and future earnings innovations.
+      \item Horizon-specific price informativeness in the spirit of Bai, Philippon, and Savov.
+      \item Full-cycle price accuracy relative to subsequently realized fundamentals.
+    \end{itemize}
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Diagnostic measures only}
+    \small
+    \begin{itemize}\tightitems
+      \item Absolute returns and return variance.
+      \item Hou-Moskowitz price delay.
+      \item Variance ratios and return synchronicity.
+      \item Post-earnings-announcement drift.
+    \end{itemize}
+    \end{block}
+  \end{column}
+\end{columns}
+
+\begin{exampleblock}{Measurement hierarchy}
+Lead with return-fundamental mapping. Use variance, delay, and drift to interpret the timing and persistence of learning, not as substitutes for price informativeness.
+\end{exampleblock}
+
+\source{Methodological anchors: Hou and Moskowitz (2005); Bai, Philippon, and Savov (2016); Davila and Parlatore (2026).}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{A window-by-window design separates reallocation from destruction}
+\footnotesize
+For $w\in\{\text{pre-filing, filing, post-filing, full cycle}\}$, estimate:
+
+\begin{block}{Core specification}
+\centering
+$R^{w}_{iq}=\alpha_w+\beta_w News_{iq}
++\theta_w\bigl(Restricted_{iq}\times News_{iq}\bigr)
++\Gamma_w X_{iq}+\mu_i+\tau_q+\varepsilon^{w}_{iq}$
+\end{block}
+
+\renewcommand{\arraystretch}{1.16}
+\begin{tabularx}{\textwidth}{>{\bfseries\RaggedRight\arraybackslash}p{2.50cm} >{\RaggedRight\arraybackslash}X >{\RaggedRight\arraybackslash}X >{\RaggedRight\arraybackslash}X}
+\toprule
+Scenario & Pre-filing & Filing / post-filing & Full-cycle implication \\
+\midrule
+Temporal reallocation & $\theta_{pre}<0$ & $\theta_{filing}>0$, little drift & $\sum_w\theta_w\approx0$ \\
+Information destruction & $\theta_{pre}<0$ & Filing response does not compensate; later learning persists & $\sum_w\theta_w<0$ \\
+Depth / composition only & Little change in return-news coefficients & Amihud or price impact rises & Total fundamental mapping is unchanged \\
+\bottomrule
+\end{tabularx}
+
+\begin{alertblock}{Interpretive payoff}
+\scriptsize If filing-day response rises for the same news, part of the Amihud result is information concentration in the numerator, not simply worse liquidity.
+\end{alertblock}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Essay 1 revision should proceed through three gates}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.31\textwidth}
+    \begin{block}{Gate 1: discovery first stage}
+    \small
+    Test whether restriction changes indexed-page counts, search ranking, cache recency, discovery latency, or verified crawler consumption.
+
+    \vspace{0.10cm}
+    EDGAR downloads are an indirect spillover, not the clean first stage.
+    \end{block}
+  \end{column}
+  \begin{column}{0.31\textwidth}
+    \begin{block}{Gate 2: Amihud decomposition}
+    \small
+    Show event-window and benchmark components separately; add price-impact/depth proxies, breadth, volume, and spread evidence.
+
+    \vspace{0.10cm}
+    Avoid claiming a level liquidity collapse that the current data do not show.
+    \end{block}
+  \end{column}
+  \begin{column}{0.31\textwidth}
+    \begin{block}{Gate 3: price learning}
+    \small
+    Link returns to fundamental news across the pre-filing, filing, and post-filing windows.
+
+    \vspace{0.10cm}
+    Determine whether information is delayed, destroyed, or simply incorporated with greater price impact.
+    \end{block}
+  \end{column}
+\end{columns}
+
+\begin{exampleblock}{Revised Essay 1 contribution}
+\footnotesize The paper would establish a corporate choice over discoverability, document its market consequence, and separate depth, composition, and the relocation of price learning toward mandatory disclosure dates.
+\end{exampleblock}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Essay 2: machine discovery may function as external monitoring}
+\begin{block}{Research question}
+\large
+When a firm restricts machine access to continuously updated public information, does outside monitoring weaken enough to change managerial behavior?
+\end{block}
+
+\small
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Economic mechanism}
+      Automated discovery is an input into scalable anomaly detection. Restrictions raise monitoring costs, reduce the probability that irregular behavior is noticed, and may increase managers' private benefit from opportunism.
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Why this is not Essay 1}
+      The outcome is managerial conduct rather than market liquidity. The mechanism operates through detection and discipline, not through the composition of traders at a disclosure event.
+    \end{block}
+  \end{column}
+\end{columns}
+
+\source{Conceptual precedents: Zhu (2019) on data as governance; Heese, Perez-Cavazos, and Peter (2022) on the loss of local monitoring; Diamond and Verrecchia (1991).}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t,shrink=3]{The monitoring channel must focus on information outside mandatory filings}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.47\textwidth}
+    \begin{exampleblock}{Information plausibly affected}
+    \small
+    \begin{itemize}\tightitems
+      \item Investor-relations page updates.
+      \item Product and operating announcements.
+      \item Hiring, location, and organizational changes.
+      \item Corrections, disappearing pages, and other website changes detectable only through repeated crawling.
+    \end{itemize}
+    \end{exampleblock}
+  \end{column}
+  \begin{column}{0.47\textwidth}
+    \begin{alertblock}{Information that remains available}
+    \small
+    \begin{itemize}\tightitems
+      \item 10-K, 10-Q, 8-K, and Form 4 filings on EDGAR.
+      \item Historical data already collected by institutions.
+      \item Bloomberg, direct feeds, and other proprietary channels.
+      \item Human access to pages that robots are prohibited from crawling.
+    \end{itemize}
+    \end{alertblock}
+  \end{column}
+\end{columns}
+
+\begin{block}{Required exposure measure}
+The paper needs a pre-treatment measure of \textbf{website-native monitoring dependence}: how much economically relevant information is updated on the corporate site and not promptly mirrored in EDGAR or major feeds.
+\end{block}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Opportunistic insider trading should be the primary outcome family}
+\scriptsize
+\renewcommand{\arraystretch}{1.18}
+\setlength{\tabcolsep}{0.10cm}
+\begin{tabularx}{\textwidth}{>{\bfseries\RaggedRight\arraybackslash}p{2.55cm} >{\RaggedRight\arraybackslash}X >{\RaggedRight\arraybackslash}X}
+\toprule
+Outcome family & Role in the design & Expected timing \\
+\midrule
+Opportunistic Form 4 trades & \textbf{Primary}: frequency, trade direction before news, and post-trade abnormal profits & Can move quickly after monitoring weakens \\
+Routine Form 4 trades & \textbf{Within-dataset placebo}: mechanically scheduled trades should respond much less & No systematic change \\
+Accrual and real earnings management & External validity: behavior that requires managerial discretion and accumulates over time & Slower, quarterly or annual response \\
+Reporting discipline & Mechanism extension: NT filings, filing delays, amendments, and restatements & Delayed and potentially asymmetric \\
+\bottomrule
+\end{tabularx}
+
+\begin{alertblock}{Avoid outcome mining}
+\scriptsize Prespecify opportunistic insider trading as the main family. Use accounting choices and reporting discipline only to test generalization and predicted timing.
+\end{alertblock}
+
+\source{Classification template: Cohen, Malloy, and Pomorski (2012).}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Essay 2 faces a sharper endogeneity problem than Essay 1}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.49\textwidth}
+    \begin{alertblock}{Threat}
+    \footnotesize
+    A firm may restrict crawlers because it anticipates bad news, litigation, website attacks, or opportunistic behavior. Pre-trend tests alone cannot eliminate event-time anticipation.
+    \end{alertblock}
+    \begin{block}{Design response}
+    \footnotesize
+    \begin{itemize}\tightitems
+      \item Separate active firm-specific changes from vendor/template waves.
+      \item Control for website redesigns, security incidents, and disclosure changes.
+      \item Compare routine and opportunistic trades within the same filing system.
+    \end{itemize}
+    \end{block}
+  \end{column}
+  \begin{column}{0.47\textwidth}
+    \begin{block}{Identification target}
+    \small
+    Reuse the BJS staggered framework only after establishing:
+    \begin{enumerate}\tightitems
+      \item an actual decline in machine discovery;
+      \item no pre-trend in insider trading or reporting behavior;
+      \item stronger effects where website-native monitoring should matter;
+      \item comparable findings in plausibly passive adoption waves.
+    \end{enumerate}
+    \end{block}
+    \begin{exampleblock}{Interpretation discipline}
+    \scriptsize High institutional ownership is heterogeneity, not a perfect placebo: proprietary and web-based monitoring may be complements.
+    \end{exampleblock}
+  \end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Essay 2 opens only if three kill-gates pass}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.31\textwidth}
+    \begin{block}{1. Consumption gate}
+      \small Restrictions must reduce an independently measured form of machine discovery or repeated website monitoring.
+    \end{block}
+  \end{column}
+  \begin{column}{0.31\textwidth}
+    \begin{block}{2. Pre-trend gate}
+      \small Opportunistic trading, bad-news indicators, and reporting behavior must not begin changing before restriction.
+    \end{block}
+  \end{column}
+  \begin{column}{0.31\textwidth}
+    \begin{block}{3. Passive-wave gate}
+      \small Results must survive separating vendor/template-driven changes from firm-specific active changes.
+    \end{block}
+  \end{column}
+\end{columns}
+
+\vspace{0.20cm}
+\begin{exampleblock}{Why the idea remains attractive}
+Form 4 and EDGAR reporting outcomes cover small and low-coverage firms that disappear from IBES, 13F, or TAQ-based designs. This aligns the outcome data with the firms for which Essay 1 finds the largest effects.
+\end{exampleblock}
+
+\begin{alertblock}{Main risk}
+Insider-profit outcomes are noisy and the treatment's causal first stage is currently incomplete. The Form 4 prototype and first-stage pilot should precede full data construction.
+\end{alertblock}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Essay 3 asks whether searchability replaces a lost analyst}
+\begin{block}{Research question}
+\large
+When a broker closure or research-department shutdown removes analyst coverage, does strong pre-existing web discoverability buffer the capital-market damage?
+\end{block}
+
+\footnotesize
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Why this design is distinct}
+      The treatment is an external shock to the human intermediary. Discoverability is measured before the event and enters as a moderator. The paper does not estimate another consequence of the firm's robots decision.
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Why it solves the coverage problem}
+      Treated firms have analyst coverage by construction. The outcome panel therefore exists exactly where the coverage-loss treatment occurs, avoiding the empty-cell problem in a robots-to-analyst-production design.
+    \end{block}
+  \end{column}
+\end{columns}
+
+\source{Shock-design precedents: Kelly and Ljungqvist (2012); Derrien and Kecskes (2013). Infrastructure precedents: Chang, Ljungqvist, and Tseng (2023); Guo and Mota (2021).}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Substitution and complementarity make opposite predictions}
+\small
+Let $Q$ be a market-quality outcome for which higher values are better. Estimate the effect of analyst loss as a function of pre-event discoverability $D_i$:
+
+\begin{block}{Core interaction}
+\centering
+$Q_{it}=\alpha_i+\tau_t+\beta Loss_{it}
++\gamma\bigl(Loss_{it}\times D_i^{pre}\bigr)+\Gamma X_{it}+\varepsilon_{it}$
+\end{block}
+
+\scriptsize
+\renewcommand{\arraystretch}{1.12}
+\begin{tabularx}{\textwidth}{>{\bfseries\RaggedRight\arraybackslash}p{2.80cm} >{\RaggedRight\arraybackslash}X >{\RaggedRight\arraybackslash}X}
+\toprule
+Mechanism & Economic logic & Prediction for $\gamma$ \\
+\midrule
+Substitution & After the processed analyst channel disappears, investors fall back on searchable raw information. High discoverability reduces the damage. & $\gamma>0$ for market quality; $\gamma<0$ if the outcome is illiquidity \\
+Complementarity & Analysts use discoverable raw information as an input. Firms with high discoverability had more productive analyst coverage and lose more when it disappears. & $\gamma<0$ for market quality; $\gamma>0$ if the outcome is illiquidity \\
+\bottomrule
+\end{tabularx}
+
+\source{Raw vs. processed information: Dugast and Foucault (2018).}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Predetermined discoverability is useful, but not automatically exogenous}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Preferred moderator}
+    \footnotesize
+    A pre-event discoverability index combining:
+    \begin{itemize}\tightitems
+      \item crawler permissions;
+      \item indexed-page breadth;
+      \item ranking or official-site visibility;
+      \item cache/update latency;
+      \item share of material information available on the open web.
+    \end{itemize}
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{alertblock}{What ``predetermined'' does not solve}
+    \footnotesize
+    Discoverability may correlate with firm size, investor-relations quality, disclosure policy, and the strength of the remaining analyst ecosystem. Measuring it before closure prevents reverse timing but does not make it random.
+    \end{alertblock}
+  \end{column}
+\end{columns}
+
+\begin{exampleblock}{Identification discipline}
+\scriptsize Compare firms within the same broker-closure event; include broker-event-by-time structure, baseline coverage controls, balance tests, and moderator bins. Call the result treatment-effect heterogeneity unless discoverability is itself plausibly exogenous.
+\end{exampleblock}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Essay 3 should prioritize information replacement, not Amihud again}
+\scriptsize
+\renewcommand{\arraystretch}{1.18}
+\setlength{\tabcolsep}{0.10cm}
+\begin{tabularx}{\textwidth}{>{\bfseries\RaggedRight\arraybackslash}p{2.55cm} >{\RaggedRight\arraybackslash}X >{\RaggedRight\arraybackslash}X}
+\toprule
+Outcome layer & Measures & Purpose \\
+\midrule
+Price informativeness & Future-earnings response, price delay, PEAD, horizon-specific informativeness & Primary evidence that open-web information replaces or complements analysts \\
+Intermediary response & Entry by other analysts, changes in remaining forecast accuracy or dispersion & Shows whether the analyst ecosystem repairs the loss \\
+Information demand & EDGAR or website consumption where valid; media attention & Shows whether investors substitute toward raw sources \\
+Firm response & 8-K Item 2.02, earnings releases, and guidance if available & Tests whether firms compensate by supplying more disclosure \\
+Investor base and liquidity & Holding breadth, Amihud, and spread proxies & Secondary capital-market consequences \\
+\bottomrule
+\end{tabularx}
+
+\begin{exampleblock}{Boundary from Essay 1}
+\scriptsize Essay 1 studies a firm restriction. Essay 3 asks whether pre-existing discovery absorbs an exogenous loss of human intermediation. Amihud can be secondary, but should not define the contribution.
+\end{exampleblock}
+
+\source{Firm disclosure response after coverage loss: Balakrishnan, Billings, Kelly, and Ljungqvist (2014).}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{The broker-shutdown design has one immediate kill-gate: event count}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.48\textwidth}
+    \begin{block}{Two-week feasibility audit}
+    \small
+    \begin{enumerate}\tightitems
+      \item Build a 2016-2024 list of broker closures, mergers, and research-department shutdowns.
+      \item Verify events using public news and map affected analysts in IBES Detail.
+      \item Count firms, coverage lost, and the low-discoverability interaction cell.
+      \item Check whether post-event outcomes remain observable for at least four quarters.
+    \end{enumerate}
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{alertblock}{Kill criterion}
+      \small A large total event count is insufficient. The design needs enough firms that both lose meaningful coverage and differ substantially in pre-event discoverability.
+    \end{alertblock}
+    \begin{exampleblock}{Fallback sequence}
+      \small Expand carefully to broker-level research layoffs or analyst-team departures. If the clean shock remains too thin, transplant the same moderator design to local-newspaper closures rather than forcing a low-powered broker sample.
+    \end{exampleblock}
+  \end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{The three-paper architecture is now cleaner than the earlier version}
+\scriptsize
+\renewcommand{\arraystretch}{1.18}
+\setlength{\tabcolsep}{0.10cm}
+\begin{tabularx}{\textwidth}{>{\bfseries\RaggedRight\arraybackslash}p{2.15cm} >{\RaggedRight\arraybackslash}X >{\RaggedRight\arraybackslash}X >{\RaggedRight\arraybackslash}X}
+\toprule
+ & \textbf{Essay 1: Trading} & \textbf{Essay 2: Monitoring} & \textbf{Essay 3: Intermediation} \\
+\midrule
+Central question & What happens when firms restrict machine discovery? & Does reduced discovery weaken external discipline? & Can discovery capacity replace a lost analyst? \\
+Treatment & Robots restriction & Robots restriction & Broker-level coverage loss \\
+Primary outcome & Filing-window liquidity and fundamental response timing & Opportunistic insider trading & Price informativeness after analyst loss \\
+Distinct mechanism & Depth, composition, and timing of learning & Detection probability and managerial private benefits & Raw vs. processed information substitution \\
+Main empirical gate & Actual discoverability first stage & Consumption first stage plus no behavioral pre-trend & Sufficient broker-event-by-discoverability cells \\
+Literature community & Microstructure & Governance & Information intermediaries \\
+\bottomrule
+\end{tabularx}
+
+\begin{block}{Thesis-level contribution}
+\scriptsize Corporate information policy is not exhausted by legal publicity. Its effect also depends on machine discoverability and investors' processing capacity.
+\end{block}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Recommended sequence minimizes wasted data work}
+\begin{enumerate}
+  \item \key{Run the discoverability pilot first.} This is the life-or-death gate for Essay 1, the monitoring channel in Essay 2, and the moderator quality in Essay 3.
+  \item \key{Add the price-learning module to Essay 1.} Test temporal reallocation, information destruction, and depth/composition before adding broad outcome families.
+  \item \key{Run the broker-event count audit.} A two-week count determines whether Essay 3 can be identified with adequate power.
+  \item \key{Prototype Form 4 outcomes.} Measure the incidence and noise of opportunistic trades before committing to a full historical parse.
+\end{enumerate}
+
+\vspace{0.18cm}
+\begin{alertblock}{Why this order}
+The first two pilots answer whether the core friction is measurable and whether the independent-treatment essay is feasible. The Form 4 prototype then determines whether the governance paper has a credible primary outcome.
+\end{alertblock}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[t]{Decisions for the supervisor meeting}
+\begin{block}{My recommendation}
+\large
+Keep ``When and Through Which Channel Do Prices Learn?'' inside Essay 1. Develop the governance and intermediary-substitution ideas as the two candidate later essays.
+\end{block}
+
+\vspace{0.12cm}
+\begin{enumerate}
+  \item Is the proposed thesis-level primitive - effective public information depends on discoverability and processing capacity - strong enough to organize all three essays?
+  \item For Essay 2, is opportunistic insider trading the right primary governance outcome, conditional on passing the first-stage and pre-trend gates?
+  \item For Essay 3, should the immediate priority be a broker-closure event-count audit before building additional outcomes?
+  \item What evidence would the committee require before allowing the phrase ``firms actively make themselves harder to find''?
+\end{enumerate}
+
+\vfill
+\centering
+\large\textcolor{MadridBlue}{\textbf{Coherence comes from one economic friction, not from reusing one dataset.}}
+\end{frame}
+
+\end{document}

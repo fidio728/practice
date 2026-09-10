@@ -1,0 +1,21 @@
+\begin{table}[t]
+\centering
+\begin{threeparttable}
+\caption{Analyst response among covered firms}
+\label{tab:analyst}
+\small
+\setlength{\tabcolsep}{8pt}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+ & TWFE & \makecell{Borusyak\\et al.\ (2024)} & \makecell{Pre-trend\\$p$} \\
+\midrule
+\# distinct analysts updating & $0.077^{**}$\ (0.033) & $0.090^{**}$\ (0.037) & 0.101 \\
+\# forecast updates           & $0.101^{**}$\ (0.051) & $0.123^{**}$\ (0.058) & 0.027 \\
+Forecast dispersion           & $0.003$\ (0.015)      & $0.011$\ (0.019)      & 0.575 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item \textit{Notes.} Crawler block $\times$ Post estimated on the subsample of firms with pre-existing analyst coverage. The first two measures are counts over the $[0,+30]$ post-filing window, entered as $\ln(1+\text{count})$ (about 265 treated firms under TWFE, 200 under the imputation estimator); the third is the within-firm cross-analyst forecast dispersion (SD of estimates over $|$mean$|$), as the change from the last consensus before the filing to the first after it (about 249/186 treated firms). These are count and dispersion measures rather than continuous prices, so they are \emph{not} built in the abnormal within-event form of the headline Amihud outcome. TWFE columns are without controls; the second column reports the \citet{BorusyakJaravelSpiess2024} estimator and the last its 12-period pre-trend $p$ (0.10 bar). Read together: the number of analysts updating and the number of updates rise after restriction, the direction implied by \citet{ChangLjungqvistTseng2023}, who find that \emph{easier} disclosure access constrains analysts and erodes their informational edge, so costlier machine access should, if anything, widen the room for analyst intermediation; but the pre-trends are borderline (the distinct-analyst count just clears the bar; the update count fails it), so we treat the engagement result as suggestive, not a validated channel. Forecast dispersion, the direct proxy for disagreement, does not move; it is measured on monthly analyst-consensus snapshots for this smaller covered subsample, which is not the younger-firm population where the headline effect concentrates, so it is a weak test. Standard errors clustered by firm in parentheses. $^{*}$, $^{**}$, $^{***}$ denote 10\%, 5\%, 1\%.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

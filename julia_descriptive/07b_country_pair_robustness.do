@@ -1,3 +1,12 @@
+* [VINTAGE WARNING — S_t timing. Stamped 2026-08-21, missed by REBUILD v3 of 2026-08-08]
+* This file estimates the CONTEMPORANEOUS triple us*cn_lag*shock (S_t). On
+* 2026-08-04 the advisors directed that BOTH the China-tie term and the tension
+* term be lagged one quarter, and the live primary is therefore
+* us*cn_lag*s_lag, estimated in run_headline_3pairwise.do (see its line 16).
+* S_t specifications are retained as TIMING DIAGNOSTICS only. Any "headline" or
+* "recommended" wording below predates that decision and does not describe the
+* reported specification. Output artifacts from this file also predate the
+* current 909,724-row panel.
 * 07b_country_pair_robustness.do
 * Country-pair GPR shock robustness for the GB+DE+FR subsample.
 *

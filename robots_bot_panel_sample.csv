@@ -1,0 +1,41 @@
+scan_utc,scan_date,firm,ticker,domain,bot,bot_group,root_block,path_block,googlebot_block,status_code,fetch_error,specific_rule,effective_source,retrieval_block_root,train_block_root,robots_final_url
+2026-03-20T13:44:02Z,2026-03-20,Amazon,AMZN,aboutamazon.com,GPTBot,train,0,0,0,200,,0,none,0,0,https://www.aboutamazon.com:443/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Amazon,AMZN,aboutamazon.com,ClaudeBot,train,0,0,0,200,,0,none,0,0,https://www.aboutamazon.com:443/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Amazon,AMZN,aboutamazon.com,Google-Extended,train,0,0,0,200,,0,none,0,0,https://www.aboutamazon.com:443/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Amazon,AMZN,aboutamazon.com,CCBot,train,0,0,0,200,,0,none,0,0,https://www.aboutamazon.com:443/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Amazon,AMZN,aboutamazon.com,OAI-SearchBot,retrieval,0,0,0,200,,0,none,0,0,https://www.aboutamazon.com:443/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Amazon,AMZN,aboutamazon.com,Claude-SearchBot,retrieval,0,0,0,200,,0,none,0,0,https://www.aboutamazon.com:443/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Amazon,AMZN,aboutamazon.com,ChatGPT-User,retrieval,0,0,0,200,,0,none,0,0,https://www.aboutamazon.com:443/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Amazon,AMZN,aboutamazon.com,Claude-User,user,0,0,0,200,,0,none,0,0,https://www.aboutamazon.com:443/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Amazon,AMZN,aboutamazon.com,Googlebot,search_engine,0,0,0,200,,0,none,0,0,https://www.aboutamazon.com:443/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Amazon,AMZN,aboutamazon.com,Bingbot,search_engine,0,0,0,200,,0,none,0,0,https://www.aboutamazon.com:443/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Walmart,WMT,corporate.walmart.com,GPTBot,train,0,1,0,200,,0,wildcard,0,0,https://corporate.walmart.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Walmart,WMT,corporate.walmart.com,ClaudeBot,train,0,1,0,200,,1,specific,0,0,https://corporate.walmart.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Walmart,WMT,corporate.walmart.com,Google-Extended,train,0,1,0,200,,0,wildcard,0,0,https://corporate.walmart.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Walmart,WMT,corporate.walmart.com,CCBot,train,0,1,0,200,,0,wildcard,0,0,https://corporate.walmart.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Walmart,WMT,corporate.walmart.com,OAI-SearchBot,retrieval,0,1,0,200,,1,specific,0,0,https://corporate.walmart.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Walmart,WMT,corporate.walmart.com,Claude-SearchBot,retrieval,0,1,0,200,,1,specific,0,0,https://corporate.walmart.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Walmart,WMT,corporate.walmart.com,ChatGPT-User,retrieval,0,1,0,200,,0,wildcard,0,0,https://corporate.walmart.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Walmart,WMT,corporate.walmart.com,Claude-User,user,0,1,0,200,,0,wildcard,0,0,https://corporate.walmart.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Walmart,WMT,corporate.walmart.com,Googlebot,search_engine,0,1,0,200,,0,wildcard,0,0,https://corporate.walmart.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Walmart,WMT,corporate.walmart.com,Bingbot,search_engine,0,1,0,200,,0,wildcard,0,0,https://corporate.walmart.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Meta,META,about.meta.com,GPTBot,train,1,0,0,200,,1,specific,0,1,https://about.meta.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Meta,META,about.meta.com,ClaudeBot,train,1,0,0,200,,1,specific,0,1,https://about.meta.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Meta,META,about.meta.com,Google-Extended,train,1,0,0,200,,1,specific,0,1,https://about.meta.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Meta,META,about.meta.com,CCBot,train,0,1,0,200,,0,wildcard,0,1,https://about.meta.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Meta,META,about.meta.com,OAI-SearchBot,retrieval,0,1,0,200,,0,wildcard,0,1,https://about.meta.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Meta,META,about.meta.com,Claude-SearchBot,retrieval,0,1,0,200,,0,wildcard,0,1,https://about.meta.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Meta,META,about.meta.com,ChatGPT-User,retrieval,0,1,0,200,,0,wildcard,0,1,https://about.meta.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Meta,META,about.meta.com,Claude-User,user,0,1,0,200,,0,wildcard,0,1,https://about.meta.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Meta,META,about.meta.com,Googlebot,search_engine,0,1,0,200,,0,wildcard,0,1,https://about.meta.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Meta,META,about.meta.com,Bingbot,search_engine,0,1,0,200,,0,wildcard,0,1,https://about.meta.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Goldman Sachs,GS,goldmansachs.com,GPTBot,train,0,0,0,403,,0,none,0,0,https://goldmansachs.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Goldman Sachs,GS,goldmansachs.com,ClaudeBot,train,0,0,0,403,,0,none,0,0,https://goldmansachs.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Goldman Sachs,GS,goldmansachs.com,Google-Extended,train,0,0,0,403,,0,none,0,0,https://goldmansachs.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Goldman Sachs,GS,goldmansachs.com,CCBot,train,0,0,0,403,,0,none,0,0,https://goldmansachs.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Goldman Sachs,GS,goldmansachs.com,OAI-SearchBot,retrieval,0,0,0,403,,0,none,0,0,https://goldmansachs.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Goldman Sachs,GS,goldmansachs.com,Claude-SearchBot,retrieval,0,0,0,403,,0,none,0,0,https://goldmansachs.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Goldman Sachs,GS,goldmansachs.com,ChatGPT-User,retrieval,0,0,0,403,,0,none,0,0,https://goldmansachs.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Goldman Sachs,GS,goldmansachs.com,Claude-User,user,0,0,0,403,,0,none,0,0,https://goldmansachs.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Goldman Sachs,GS,goldmansachs.com,Googlebot,search_engine,0,0,0,403,,0,none,0,0,https://goldmansachs.com/robots.txt
+2026-03-20T13:44:02Z,2026-03-20,Goldman Sachs,GS,goldmansachs.com,Bingbot,search_engine,0,0,0,403,,0,none,0,0,https://goldmansachs.com/robots.txt

@@ -243,6 +243,12 @@ every vintage since. Rebuilt on v3.1: N 247,210 → 420,452 (+70%); flow × S_{t
 (fig_A_country_{m1,m2,m3}_quartiles), per the 2026-08-04 minute ("each figure one version per
 exposure measure"). 88 v3 artifacts rotated `_dqpre`.
 
+*Scope note (2026-08-18 coverage audit):* the transcript ties the multiple-versions request to
+Figure A only; the minute's "each figure" wording over-generalized and has been corrected in the
+minute. A per-measure Figure B is NOT advisor-owed (its arms are US-ownership splits; the exposure
+measures do not enter its construction) and does not exist; treat it as an optional proposal, not
+an open commitment.
+
 ### 10b. v3.1 inference (2026-08-09 evening)
 
 Attribution ladder (`attribution_ladder_v3_cells.csv`), FWL re-derivation outside Stata, and the full
@@ -318,6 +324,17 @@ correct description is that the cell is imprecisely estimated and moved within i
 it as a sign flip would invite the reader to conclude the design is fragile in a way the data do not
 support. Use: "the EU-denominator diagnostic cells move by up to two standard errors; all remain
 insignificant."
+
+**⚠️ CORRECTED 2026-08-21 — the SE below is inflated by Chinese investors sitting in the NONUS
+control arm.** They are 2.95% of the non-US GLOBAL book (the outcome's denominator), 9.2-9.8% in
+Q2/Q4 and 0.00% in Q1/Q3 on a semiannual reporting cycle, but only 0.0063% of the non-US holdings
+of EUROPEAN securities (the numerator), so they inject a large alternating denominator movement
+carrying almost no European information. Dropping them, same panel and spec
+(`_audit_cn_nonus.do`, N=909,638): β₃ = **+1.072e-7, SE 3.587e-7, p = 0.766** — SE is 0.35x the
+figure below, implying **MDE ≈ 1.0e-6**, not 2.89e-6. CN+HK: +1.05e-7, SE 3.59e-7, p = 0.770.
+Report BOTH and say which control arm each belongs to. Whether CN belongs in the control arm is an
+open question for the advisors, not a decision to make silently. The paragraph below is the
+pre-registered arm and is retained for that reason.
 
 **Power, stated once and carried into every write-up.** Primary cell: β₃ = −1.394e-7, SE = 1.032e-6,
 95% CI [−2.17e-6, +1.89e-6], and the minimum detectable effect at 80% power / 5% two-sided is

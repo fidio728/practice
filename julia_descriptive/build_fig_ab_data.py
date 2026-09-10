@@ -422,8 +422,16 @@ def build_figure_a_country(df: pd.DataFrame, cpi: pd.DataFrame,
             f"{CTRY_M} not found — run build_country_measures.py first.")
     cm = pd.read_csv(CTRY_M, parse_dates=["quarter_end"])
     cm = cm.loc[cm["universe"].eq(COUNTRY_UNIVERSE),
-                ["country", "quarter_end", measure, "n_firms"]].copy()
+                ["country", "quarter_end", measure, "n_firms",
+                 "sum_sc_links"]].copy()
     cm = cm.loc[cm[measure].notna() & cm["n_firms"].ge(MIN_FIRMS_FOR_COUNTRY_RANK)]
+    # (2026-08-21) A link-count floor was briefly applied here and has been
+    # REMOVED. The number chosen (20) had no basis beyond matching the firm-count
+    # floor above, which is itself unjustified, and no advisor directive covers
+    # either. The thin-denominator problem it targeted is real -- Poland reaches
+    # M1 = 0.5 on two recorded links, against a sample median of 0.012 -- and is
+    # documented as an open item rather than patched with an invented constant.
+    cm = cm.drop(columns=["sum_sc_links"])
 
     # classification at t-1 -> stamp forward one quarter to t
     cm["quarter_end"] = cm["quarter_end"] + pd.offsets.QuarterEnd(1)

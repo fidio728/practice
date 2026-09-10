@@ -1,0 +1,7 @@
+year_month,host,sitemap_url,requested_timestamp,actual_timestamp,actual_year_month,classification,abs_month_diff,http_status,source,norm_key,digest
+2025-07,www.ssga.com,https://www.ssga.com/ca/en/sitemap.xml,20250730153257,20250802072321,2025-08,near_le_3m,1,200,live_wayback_lookup,https://www.ssga.com/ca/en/sitemap.xml,UTJRNYYRTGGAB37A7ZKKSYMM2GYIK7BD
+2025-07,mayfairgold.ca,https://mayfairgold.ca/wp-sitemap.xml,20250720135744,20250720135833,2025-07,exact,0,200,live_wayback_lookup,https://mayfairgold.ca/wp-sitemap.xml,F6OXQQTN55B37BCFZ2EVRE25U6GVGXEV
+2025-07,www.aquabounty.com,https://aquabounty.com/sitemap.xml,20250713001315,20250703081249,2025-07,exact,0,200,live_wayback_lookup,https://aquabounty.com/sitemap.xml,45QHXBE65VUZUAFD2GQ6YK3AMXXAX5LK
+2025-08,www.cintas.com,https://www.cintas.com/sitemap-index.xml,20250822185718,20250809182929,2025-08,exact,0,200,live_wayback_lookup,https://www.cintas.com/sitemap-index.xml,BSGVCWZCMQKIVEKM7HPVVSCUD4L762XD
+2025-08,www.bny.com,https://www.bny.com/investments/us/sitemap.xml,20250807032515,20250807032531,2025-08,exact,0,200,live_wayback_lookup,https://www.bny.com/investments/us/sitemap.xml,OJ423VVA4CXLABJBUGIE5KJHSRENVLWP
+2025-08,www.bd.com,https://www.bd.com/en-in/sitemap_products.xml,20250808145653,20250802230543,2025-08,exact,0,200,live_wayback_lookup,https://www.bd.com/en-in/sitemap_products.xml,EEAL4E7LXJHVGSRM5D2M2WH53ZVKK23M

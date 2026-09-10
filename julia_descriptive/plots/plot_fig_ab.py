@@ -6,9 +6,11 @@
 #
 # BACKGROUND SERIES, and how it is drawn.
 # The advisor asked for the US->China tension series "in the background". It is
-# the USA|China direction of the Iacoviello-Tong bilateral AI-GPR index, i.e.
-# US-media attention to geopolitical risk involving China -- NOT the China|USA
-# direction, which is a different column of the same file. Every figure states
+# the USA|China direction of a bilateral newspaper-text geopolitical-risk index:
+# the United States is the ACTING party of the dyad and China the counterparty.
+# It is NOT a measure of "US media attention" -- the corpus is a shared newspaper
+# panel, not a US-only one -- and it is NOT the China|USA direction, which is a
+# different column of the same file. The source citation is still unconfirmed. Every figure states
 # the direction in the caption.
 # It is rendered TWICE, deliberately:
 #   (a) as its own top panel, with its own labelled axis, so the level can
@@ -29,9 +31,11 @@
 # Encoding is never colour-alone -- each figure carries a legend AND direct
 # end-of-line labels, and the ordered arms additionally differ in line weight.
 #
-# SERIES CAP. Each panel draws at most three lines. The quartile figures keep
-# Q2 and Q3 in the CSV but plot only the bottom (Q1_low) and top (Q4_high)
-# arms the advisor asked for, with the zero bucket as a recessive reference.
+# SERIES CAP. Each panel draws at most three lines. The quartile figures plot the
+# lowest and highest CN quartiles -- the low-versus-high contrast requested by
+# Stefano on 2026-08-04 -- with the zero bucket as a recessive reference. Q2 and
+# Q3 are computed and written to the CSV; their end-of-sample values are quoted in
+# the caption so the reader can check monotonicity without a five-line chart.
 #
 # SHARE PANEL DENOMINATOR (2026-08-10). The share panel plots
 # share_of_book_global -- the share of the holder group's GLOBAL (full
@@ -76,13 +80,20 @@ F_A_FIRM   = OUT / "fig_A_firm_buckets.csv"
 F_A_CTRY   = OUT / "fig_A_country_buckets.csv"
 F_B_GROWTH = OUT / "fig_B_link_growth.csv"
 F_TENSION  = OUT / "fig_ab_tension_series.csv"
+F_A_CHAIN  = OUT / "fig_A_firm_chained.csv"   # built by build_fig_a_chained.py
 
-PLOT_START = pd.Timestamp("2012-03-31")
+# Plot the FULL available span of each series rather than a hand-set window, so
+# that the early-sample Revere coverage build-out is visible to the reader
+# instead of being silently cropped away. _XSTART is set per figure from the
+# data itself. No "interpretable window" marker is drawn: the bucket-size panel
+# shows where the classification settles, and the reader can judge it directly.
+PLOT_START = pd.Timestamp("1999-03-31")
+_XSTART = PLOT_START
 PLOT_END   = pd.Timestamp("2023-12-31")
 BASE_QUARTER = pd.Timestamp("2017-12-31")
 
-TENSION_LABEL = ("Bilateral AI-GPR, USA|China direction "
-                 "(US-media geopolitical-risk attention to China)")
+TENSION_LABEL = ("Bilateral geopolitical-risk index, USA|China direction "
+                 "(United States acting, China counterparty)")
 
 # --- palette (documented values, documented roles) -------------------------
 C_BG    = "#fcfcfb"
@@ -92,6 +103,13 @@ C_GRID  = "#e8e8e6"
 C_ZERO  = "#eb6834"   # categorical slot 2 -- the "no tie" category
 C_POS   = "#2a78d6"   # categorical slot 1 -- the "has tie" category
 C_LOW   = "#86b6ef"   # blue ordinal step 250 -- bottom arm
+C_Q2    = "#3987e5"   # blue ordinal step 400 -- second quartile
+C_Q3    = "#1c5cab"   # blue ordinal step 550 -- third quartile
+# Steps 250/400/550/600 are the widest spacing the documented light-surface ramp
+# allows for four ordered arms (250 is the light floor, 600 the dark floor). The
+# node validator is not installed here, so separation was not machine-checked;
+# identity does not rest on colour alone, since every arm carries a direct
+# end-of-line label and the top arm is drawn heavier.
 C_HIGH  = "#184f95"   # blue ordinal step 600 -- top arm
 C_REF   = "#9c9b94"   # recessive reference line (residual / middle half)
 C_SHADE = "#d8d7d1"   # background tension silhouette
@@ -107,7 +125,7 @@ plt.rcParams.update({
 
 def _load_tension() -> pd.DataFrame:
     t = pd.read_csv(F_TENSION, parse_dates=["quarter_end"])
-    return t[(t["quarter_end"] >= PLOT_START) & (t["quarter_end"] <= PLOT_END)]
+    return t[(t["quarter_end"] >= _XSTART) & (t["quarter_end"] <= PLOT_END)]
 
 
 def _style(ax) -> None:
@@ -119,7 +137,7 @@ def _style(ax) -> None:
     for s in ("left", "bottom"):
         ax.spines[s].set_color(C_GRID)
     ax.tick_params(colors=C_TEXT2, labelsize=8, length=3)
-    ax.set_xlim(PLOT_START, PLOT_END)
+    ax.set_xlim(_XSTART, PLOT_END)
     ax.xaxis.set_major_locator(mdates.YearLocator(2))
     ax.xaxis.set_minor_locator(mdates.YearLocator(1))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
@@ -143,7 +161,8 @@ def _tension_panel(ax, ten: pd.DataFrame) -> None:
     ax.plot(ten["quarter_end"], ten["gpr_us_cn"], color=C_TEXT2, lw=1.2)
     _style(ax)
     ax.set_ylabel("index", fontsize=8, color=C_TEXT2)
-    ax.set_title(TENSION_LABEL, fontsize=9, color=C_TEXT, loc="left", pad=3)
+    ax.set_title(_paper_title(TENSION_LABEL), fontsize=9, color=C_TEXT,
+                 loc="left", pad=3)
     ax.set_ylim(bottom=0)
 
 
@@ -180,7 +199,8 @@ def _draw_series(ax, data: pd.DataFrame, series: list[tuple[str, str, str, float
         # NB: must not run on a log panel — MaxNLocator would silently replace
         # the LogLocator set above and print near-linear ticks on a log axis.
         ax.yaxis.set_major_locator(mticker.MaxNLocator(5))
-    ax.set_title(title, fontsize=9.5, color=C_TEXT, loc="left", pad=3)
+    ax.set_title(_paper_title(title), fontsize=9.5, color=C_TEXT,
+                 loc="left", pad=3)
     ax.set_ylabel(ylabel, fontsize=8, color=C_TEXT2)
     _end_labels(ax, xs_end, label_fmt)
 
@@ -222,31 +242,127 @@ def _end_labels(ax, xs_end, label_fmt, min_gap: float = 0.075) -> None:
                     annotation_clip=False, zorder=4)
 
 
-def _new_figure():
-    """4 stacked panels: the readable tension panel on top, three data panels
-    below. Margins are set explicitly rather than by tight_layout, because the
-    direct end-of-line labels live OUTSIDE the axes and tight_layout would
-    either clip them or fight the footnote block."""
-    fig, axes = plt.subplots(4, 1, figsize=(11.4, 11.2), sharex=True,
-                             height_ratios=[0.58, 1, 1, 1])
+def _set_xstart(*frames) -> None:
+    """Start every axis at the first quarter the figure's own data actually
+    covers, so nothing is cropped and the reader sees the full history."""
+    global _XSTART
+    mins = [f["quarter_end"].min() for f in frames if f is not None and len(f)]
+    _XSTART = min(mins) if mins else PLOT_START
+
+
+def _new_figure(counts_panel: bool = False):
+    """Stacked panels sharing one x axis: the readable tension panel on top,
+    three data panels below, and optionally a bucket-size panel at the bottom.
+    Margins are set explicitly rather than by tight_layout, because the direct
+    end-of-line labels live OUTSIDE the axes and tight_layout would either clip
+    them or fight the footnote block."""
+    if counts_panel:
+        fig, axes = plt.subplots(5, 1, figsize=(11.4, 12.9), sharex=True,
+                                 height_ratios=[0.58, 1, 1, 1, 0.62])
+    else:
+        fig, axes = plt.subplots(4, 1, figsize=(11.4, 11.2), sharex=True,
+                                 height_ratios=[0.58, 1, 1, 1])
     fig.subplots_adjust(left=0.070, right=0.760, top=0.900, bottom=0.150,
                         hspace=0.30)
     return fig, axes
 
 
+def _n_fixed(bucket: str) -> str:
+    """True fixed-cohort arm size, read from the data so the note cannot go
+    stale when the panel is rebuilt."""
+    d = pd.read_csv(F_A_FIRM, usecols=["split", "bucket", "n_firms"])
+    v = d.loc[d["split"].eq("zero_vs_positive_fixed") & d["bucket"].eq(bucket),
+              "n_firms"]
+    return f"{int(v.iloc[0]):,}" if len(v) else "n/a"
+
+
+def _n_roll(quarter_end: str) -> str:
+    """Rolling positive-arm firm count at a given quarter, read from the data so
+    the caveat text cannot go stale when the panel is rebuilt."""
+    d = pd.read_csv(F_A_FIRM, usecols=["split", "bucket", "holder_group",
+                                       "quarter_end", "n_firms"])
+    v = d.loc[d["split"].eq("zero_vs_positive") & d["bucket"].eq("positive_tie")
+              & d["holder_group"].eq("US") & d["quarter_end"].eq(quarter_end), "n_firms"]
+    return f"{int(v.iloc[0]):,}" if len(v) else "n/a"
+
+
+def _counts_panel(ax, data: pd.DataFrame,
+                  series: list[tuple[str, str, str, float]],
+                  title: str, ylabel: str = "firms",
+                  col: str = "n_firms") -> None:
+    """Number of firms in each arm, quarter by quarter. This panel is the
+    figure's own audit trail: where the counts step up in batches, the arms are
+    being repopulated by the relationship data rather than by anything
+    economic, and movement in the panels above should be read accordingly."""
+    xs_end = []
+    for bucket, lbl, color, lw in series:
+        s = (data.loc[data["bucket"].eq(bucket)]
+                 .sort_values("quarter_end")
+                 .set_index("quarter_end")[col])
+        s = s[(s.index >= PLOT_START) & (s.index <= PLOT_END)].dropna()
+        if s.empty:
+            continue
+        ax.plot(s.index, s.to_numpy(), color=color, lw=lw, solid_capstyle="round")
+        xs_end.append((s.index[-1], float(s.iloc[-1]), color, lbl))
+    _style(ax)
+    ax.set_yscale("log")
+    ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v:,.0f}"))
+    ax.set_ylabel(ylabel, fontsize=8, color=C_TEXT2)
+    ax.set_title(_paper_title(title), fontsize=9.5, color=C_TEXT, loc="left", pad=3)
+    _end_labels(ax, xs_end, lambda v: f"{v:,.0f}")
+
+
+# Paper mode: suppress the in-figure title, subtitle and technical footnote
+# (the LaTeX caption in Essay2_figures_AB.tex carries all three) and write to
+# *_paper.{pdf,png} alongside the standard files. Enable with --paper on the
+# command line or DPN_FIG_PAPER=1.
+PAPER = ("--paper" in sys.argv) or (os.environ.get("DPN_FIG_PAPER", "0") == "1")
+
+
+def _paper_title(title: str) -> str:
+    """Panel-title rewrites applied only in paper mode: same content, journal
+    wording, no internal shorthand ("bucket", "headline", vendor labels)."""
+    if not PAPER:
+        return title
+    rules = [
+        ("Bilateral geopolitical-risk index, USA|China direction "
+         "(United States acting, China counterparty)",
+         "US-China geopolitical tension index "
+         "(USA|China direction: United States acting, China counterparty)"),
+        (" (headline normalization)", ""),
+        (" (headline)", ""),
+        ("Share of the US investors' GLOBAL (full FactSet-identifiable "
+         "equity) book held in the bucket",
+         "Share of the US investors' worldwide equity portfolio "
+         "held by the group"),
+        ("per firm in the bucket", "per firm in the group"),
+    ]
+    for old, new in rules:
+        title = title.replace(old, new)
+    return title
+
+
 def _finish(fig, axes, path_stem: str, suptitle: str, subtitle: str,
             note: str) -> list[Path]:
-    fig.suptitle(suptitle, x=0.010, y=0.984, ha="left", fontsize=12.5,
-                 color=C_TEXT, fontweight="bold")
-    fig.text(0.010, 0.958, subtitle, ha="left", va="top", fontsize=9.2,
-             color=C_TEXT2)
     handles, labels = axes[1].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper left", bbox_to_anchor=(0.010, 0.937),
-               frameon=False, fontsize=8.4, ncols=len(labels),
-               labelcolor=C_TEXT2, handlelength=1.8, columnspacing=1.8)
-    fig.text(0.010, 0.012, textwrap.fill(" ".join(note.split()), width=196),
-             ha="left", va="bottom", fontsize=7.2, color=C_TEXT2,
-             linespacing=1.35)
+    if PAPER:
+        fig.subplots_adjust(top=0.945, bottom=0.045)
+        fig.legend(handles, labels, loc="upper left",
+                   bbox_to_anchor=(0.010, 0.998), frameon=False, fontsize=8.4,
+                   ncols=len(labels), labelcolor=C_TEXT2, handlelength=1.8,
+                   columnspacing=1.8)
+        path_stem = f"{path_stem}_paper"
+    else:
+        fig.suptitle(suptitle, x=0.010, y=0.984, ha="left", fontsize=12.5,
+                     color=C_TEXT, fontweight="bold")
+        fig.text(0.010, 0.958, subtitle, ha="left", va="top", fontsize=9.2,
+                 color=C_TEXT2)
+        fig.legend(handles, labels, loc="upper left", bbox_to_anchor=(0.010, 0.937),
+                   frameon=False, fontsize=8.4, ncols=len(labels),
+                   labelcolor=C_TEXT2, handlelength=1.8, columnspacing=1.8)
+        fig.text(0.010, 0.012, textwrap.fill(" ".join(note.split()), width=196),
+                 ha="left", va="bottom", fontsize=7.2, color=C_TEXT2,
+                 linespacing=1.35)
     written = []
     for ext in ("pdf", "png"):
         p = PLOTS / f"{path_stem}.{ext}"
@@ -273,7 +389,21 @@ def figure_a_firm(split: str, series: list[tuple[str, str, str, float]],
     if d.empty:
         raise RuntimeError(f"no rows for split={split}")
 
-    fig, axes = _new_figure()
+    # Every variant carries a bucket-size panel, but they answer different
+    # questions. The rolling variants plot how many firms are CLASSIFIED into
+    # each arm, which exposes the Revere coverage build-out. The fixed-cohort
+    # variant has a constant classified population by construction, so it plots
+    # how many of those firms are actually HELD, which exposes the semi-annual
+    # reporting pattern of the early 2000s.
+    fixed = split.endswith("_fixed")
+    show_counts = True
+    counts_col = "n_firms_held" if fixed else "n_firms"
+    counts_title = ("Number of firms in each bucket actually held (log scale)"
+                    if fixed else
+                    "Number of firms classified into each bucket (log scale)")
+    _set_xstart(d)
+    ten = _load_tension()
+    fig, axes = _new_figure(counts_panel=show_counts)
     _tension_panel(axes[0], ten)
 
     dd = d.copy()
@@ -291,9 +421,14 @@ def figure_a_firm(split: str, series: list[tuple[str, str, str, float]],
                  "equity) book held in the bucket",
                  "share of global book", pct=True,
                  label_fmt=lambda v: f"{100*v:,.2f}%")
+    if show_counts:
+        _counts_panel(axes[4], d, series, counts_title,
+                      ylabel="firms held" if fixed else "firms",
+                      col=counts_col)
 
     note = (
-        f"Sample: European firms in the US/non-US ownership grid, 2012Q1-2023Q4. "
+        f"Sample: European firms in the US/non-US ownership grid, "
+        f"full available span. "
         f"{timing_note} "
         f"CN = (China customer + China supplier links) / (all customer + supplier "
         f"links); a Revere-covered firm with no supply-chain links is a genuine "
@@ -322,6 +457,52 @@ MEASURE_DESC = {
 }
 
 
+def figure_a_chained(ten: pd.DataFrame) -> list[Path]:
+    """Composition control without a freeze date (2026-08-21): a chain-linked
+    matched-sample index. Each quarter's growth uses only firms present in that
+    quarter and the previous one AND classified in the same arm at both dates,
+    so roster changes cannot move the lines by construction. Replaces the
+    frozen-cohort variant as the figure shown; the residual it leaves is a
+    single number rather than a function of a chosen freeze quarter."""
+    d = pd.read_csv(F_A_CHAIN, parse_dates=["quarter_end"])
+    series = [("zero", "zero China ties", C_ZERO, 2.0),
+              ("positive", "positive China ties", C_POS, 2.0)]
+
+    _set_xstart(d)
+    ten = _load_tension()
+    fig, axes = plt.subplots(3, 1, figsize=(11.4, 8.6), sharex=True,
+                             height_ratios=[0.58, 1.6, 0.62])
+    fig.subplots_adjust(left=0.070, right=0.760, top=0.900, bottom=0.150,
+                        hspace=0.30)
+    _tension_panel(axes[0], ten)
+    _draw_series(axes[1], d, series, "chained_idx", ten,
+                 f"Chain-linked matched-sample index, {BASE_QUARTER.date()} = 100",
+                 "index", hline=100.0, label_fmt=lambda v: f"{v:,.0f}")
+    _counts_panel(axes[2], d, series,
+                  "Matched firms entering each quarter's growth (log scale)",
+                  ylabel="firms", col="matched_firms")
+
+    note = (
+        "Composition control WITHOUT a freeze date. For each quarter t and each arm, "
+        "growth is computed only over firms present in t-1 and t AND classified in "
+        "the same arm (on CN at t-1) at both dates; quarterly growth rates are then "
+        "chained. A firm whose links enter Revere, or that switches arms, contributes "
+        "nothing in the quarter it moves, so the roster growth visible in "
+        "fig_A_firm_zero_vs_positive cannot move these lines. The 2017Q4 = 100 base "
+        "is presentation only: it fixes where the lines cross 100, not who is "
+        "compared with whom. Values are real 2020 USD before growth is taken. "
+        "Pre-2009 zigzag = the odd-quarter reporting gap (many US funds filed "
+        "semiannually), which also thins the matched counts in those quarters. "
+        "Supersedes the frozen-2017Q4 cohort variant: a sweep over all 52 candidate "
+        "freeze quarters left residual gaps from -19.5 to +18.4 index points "
+        "(positive in 24 of 52), so no freeze-dependent residual is interpretable.")
+
+    return _finish(fig, axes, "fig_A_firm_zero_vs_positive_chained",
+                   "Figure A. US holdings of European firms, by China-link exposure",
+                   "variant (i), composition control: chain-linked matched sample",
+                   note)
+
+
 def figure_a_country(ten: pd.DataFrame) -> list[Path]:
     # (2026-08-09) one figure per exposure measure, per the 2026-08-04 minute
     # ("each figure has one version per exposure measure (M1, M2, M3)").
@@ -344,7 +525,9 @@ def _figure_a_country_one(ten: pd.DataFrame, d: pd.DataFrame, meas: str) -> list
               ("mid_half", "middle half", C_REF, 1.4),
               ("top_quartile", f"top quartile (high {meas})", C_HIGH, 2.0)]
 
-    fig, axes = _new_figure()
+    _set_xstart(d)
+    ten = _load_tension()
+    fig, axes = _new_figure(counts_panel=True)
     _tension_panel(axes[0], ten)
     dd = d.copy()
     dd["real_bn"] = dd["real_usd_2020"] / 1e9
@@ -360,6 +543,9 @@ def _figure_a_country_one(ten: pd.DataFrame, d: pd.DataFrame, meas: str) -> list
                  "equity) book held in the bucket",
                  "share of global book", pct=True,
                  label_fmt=lambda v: f"{100*v:,.2f}%")
+    _counts_panel(axes[4], d, series,
+                  "Number of countries in each bucket", ylabel="countries",
+                  col="n_countries")
 
     note = (
         f"Countries are ranked each quarter on {MEASURE_DESC[meas]}, "
@@ -371,11 +557,12 @@ def _figure_a_country_one(ten: pd.DataFrame, d: pd.DataFrame, meas: str) -> list
         "The level panel is on a log scale because the two arms differ by roughly two "
         "orders of magnitude in raw dollars -- a mechanical size difference, which is "
         "exactly why the indexed and share panels are the headline. "
-        "READ THE PRE-2017 BOTTOM-QUARTILE LINE WITH CARE: bucket membership churns "
-        "far more before 2017 than after"
-        + (" (under M1: 5.0 of 26 countries change bucket per quarter over 2012-2016, "
-           "against 2.0 over 2018-2023; Spain crosses the 25th-percentile cut in 2015Q2 "
-           "and alone moves the arm by hundreds of index points)" if meas == "M1" else "")
+        "READ THE PRE-2017 BOTTOM-QUARTILE LINE WITH CARE: the pre-2017 arms are far "
+        "more sensitive to a single country than the post-2017 ones"
+        + (" (under M1: 2.5 countries change bucket per quarter through 2016 and 2.3 "
+           "afterward, so turnover itself is flat; but the bottom quartile holds only "
+           "6-7 countries, so when Spain crosses the 25th-percentile cut in 2015Q2 it "
+           "alone moves that arm from 119 to 687 index points)" if meas == "M1" else "")
         + ", so single large countries crossing a percentile cut can move an arm "
         "sharply. The quarter-by-quarter composition (per measure) is in "
         "fig_A_country_bucket_membership.csv. "
@@ -405,7 +592,9 @@ def figure_b(split: str, series: list[tuple[str, str, str, float]],
     d = d.merge(base, on="bucket", how="left", validate="many_to_one")
     d["links_idx100"] = 100.0 * d["cn_links_t"] / d["_b"].where(d["_b"] > 0)
 
-    fig, axes = _new_figure()
+    _set_xstart(d)
+    ten = _load_tension()
+    fig, axes = _new_figure(counts_panel=True)
     _tension_panel(axes[0], ten)
     _draw_series(axes[1], d, series, "growth_yoy", ten,
                  "Year-over-year growth in China supply-chain links (headline)",
@@ -417,6 +606,9 @@ def figure_b(split: str, series: list[tuple[str, str, str, float]],
     _draw_series(axes[3], d, series, "mean_cn_links_t", ten,
                  "China supply-chain links per firm in the bucket",
                  "links / firm", label_fmt=lambda v: f"{v:,.2f}")
+    _counts_panel(axes[4], d, series,
+                  "Number of firms in each bucket (log scale)",
+                  col="n_firms_cohort")
 
     note = (
         "Pre-emptive de-linking test. TIMING: firms are bucketed on their US "
@@ -454,30 +646,34 @@ def main() -> None:
         "fig_A_firm_zero_vs_positive", "variant (i), zero vs positive ties",
         "Both arms are Revere-covered at t-1; the zero arm is a measured zero, "
         "not a missing value. CAVEAT, and the reason the companion figure exists: "
-        "with the rolling t-1 rule the positive arm grows from 144 firms in 2012Q1 "
-        "to 766 in 2023Q1 because Revere keeps adding relationships, so part of the "
+        f"with the rolling t-1 rule the positive arm grows from {_n_roll('2012-03-31')} firms in 2012Q1 "
+        f"to {_n_roll('2023-12-31')} in 2023Q4 because Revere keeps adding relationships, so part of the "
         "rise in its share of the book is RECLASSIFICATION, not reallocation. "
-        "fig_A_firm_zero_vs_positive_fixedcohort freezes bucket membership at "
-        "2017Q4 and isolates the reallocation component.", ten)
+        "fig_A_firm_zero_vs_positive_chained removes reclassification by chaining "
+        "growth over matched same-arm firms, no freeze date involved.", ten)
 
-    written += figure_a_firm(
-        "zero_vs_positive_fixed",
-        [("zero_tie_fixed", "zero China ties in 2017Q4", C_ZERO, 2.0),
-         ("positive_tie_fixed", "positive China ties in 2017Q4", C_POS, 2.0)],
-        "fig_A_firm_zero_vs_positive_fixedcohort",
-        "variant (i), composition control: membership frozen at 2017Q4",
-        "Firms not classifiable in 2017Q4 are excluded throughout. Because the firm "
-        "set is frozen, movement here is portfolio reallocation rather than Revere "
-        "reclassifying firms into the positive arm; compare against the rolling "
-        "version in fig_A_firm_zero_vs_positive.", ten,
-        timing_note=("TIMING: this figure DEPARTS from the t-1 convention on purpose. "
-                     "Each firm is bucketed ONCE on its CN at 2017Q4 (7,379 zero-tie, "
-                     "491 positive-tie) and keeps that bucket in every quarter; only "
-                     "the holdings vary with t."))
+    # (2026-08-21) The frozen-2017Q4 cohort variant is retired as the shown
+    # composition control: its residual gap was a function of the freeze date
+    # (-19.5 to +18.4 index points across the 52 candidate quarters). The chained
+    # matched-sample variant needs no date. The zero_vs_positive_fixed split
+    # remains in fig_A_firm_buckets.csv for provenance.
+    if F_A_CHAIN.is_file():
+        written += figure_a_chained(ten)
+    else:
+        raise FileNotFoundError(
+            f"missing {F_A_CHAIN} — run build_fig_a_chained.py first")
 
+    # (2026-08-21) Back to the low-versus-high contrast Stefano asked for in his
+    # 2026-08-04 email ("low versus high quartile firms/countries by china-link
+    # share"). Drawing all four quartiles was tried and abandoned: four sequential
+    # blues on a log axis are not separable by eye, and the middle arms buried the
+    # comparison the advisor actually wanted. The monotonicity question the middle
+    # arms were meant to answer is settled numerically in the caption instead,
+    # where all four end-of-sample index values are reported. Q2 and Q3 stay in
+    # fig_A_firm_buckets.csv.
     quart_series = [("zero_tie", "zero ties (reference)", C_ZERO, 1.4),
-                    ("Q1_low", "bottom quartile of CN", C_LOW, 2.0),
-                    ("Q4_high", "top quartile of CN", C_HIGH, 2.0)]
+                    ("Q1_low", "Q1, lowest CN", C_LOW, 2.0),
+                    ("Q4_high", "Q4, highest CN", C_HIGH, 2.0)]
     written += figure_a_firm(
         "quartile_ew", quart_series,
         "fig_A_firm_quartile_ew", "variant (ii), equal-weighted quartiles (M3-style)",

@@ -1,0 +1,1181 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{natbib}
+\geometry{margin=1in}
+\onehalfspacing
+
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+\newtheorem{corollary}{Corollary}
+\newtheorem{assumption}{Assumption}
+
+\title{Cherry-Picking under Screening:\\ Selective Disclosure in Pharmaceutical Approval}
+\author{Xueyang}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+% ============================================================
+\section{Introduction}
+% ============================================================
+
+A pharmaceutical firm conducts a clinical trial to persuade the
+FDA to approve a drug. The FDA does not know the firm's
+type---that is, the set of experiments available to the
+firm---and must design an approval rule to screen different
+types. This screening problem is studied by Min (2023), where
+the FDA observes both the experiment chosen and its outcome.
+
+I modify Min's model in one respect: the experimental outcome
+is the firm's private information, and the firm chooses whether
+to disclose it. If the firm discloses, the FDA observes both
+the experiment and the verified outcome. If the firm remains
+silent, the FDA observes nothing---neither the experiment
+conducted nor its result.
+
+This information structure captures a key feature of
+pharmaceutical regulation: when a firm publishes or submits
+trial results, the data are verifiable (hard evidence); but
+when a firm buries a trial, the regulator often does not know
+the details of the unreported experiment. Empirical evidence
+supports this asymmetry. A \emph{Science}/AAAS investigation
+found that sponsors violated ClinicalTrials.gov reporting
+requirements more than 55\% of the time, and the FDA levied
+zero fines over seven years of mandatory reporting. A BMJ study
+of high-risk cardiovascular devices found that approximately
+half of the clinical studies submitted to the FDA were never
+published, and among those that were, 11\% of primary endpoint
+results were substantially different from the FDA's records.
+
+The modification has two consequences. First, silence is
+informationally ambiguous: the FDA cannot distinguish between a
+firm that ran an informative experiment and got a bad result, and
+a firm that ran a less informative experiment and got a bad
+result. This prevents the complete unraveling that would occur
+if the FDA could observe the experiment under silence. Second,
+the FDA's approval probability after silence, $A(\emptyset)$,
+becomes a single instrument that affects all firm types
+simultaneously---unlike Min's type-specific approval
+probabilities. This pooling constraint generates a new
+tradeoff: $A(\emptyset)$ changes which menu option each firm
+type prefers (the screening channel), potentially altering the
+equilibrium assignment of experiments to types, but also lets
+more bad drugs through when firms hide unfavorable evidence.
+
+
+% ============================================================
+\section{Model Setup}
+% ============================================================
+
+\subsection{Primitives}
+
+There are two players: a pharmaceutical firm (the agent,
+``he'') and the FDA (the principal, ``she'').
+
+\paragraph{States and prior.}
+The true quality of the drug is described by a state
+$\omega \in \{G, B\}$, where $G$ denotes a good drug and $B$
+denotes a bad drug. The common prior is
+\begin{equation}
+  \Pr(G) = p, \qquad \Pr(B) = 1 - p,
+\end{equation}
+where $p \in (0, 1/2)$. The restriction $p < 1/2$ means that,
+absent any evidence, the drug is more likely bad than good.
+
+\paragraph{Actions.}
+The FDA chooses to approve ($A$) or reject ($D$).
+
+\paragraph{Payoffs.}
+The FDA receives 1 for a correct decision and 0 otherwise:
+\begin{equation}\label{eq:fda_payoff}
+\begin{aligned}
+  U_P(A, G) &= 1, & U_P(A, B) &= 0, \\
+  U_P(D, G) &= 0, & U_P(D, B) &= 1.
+\end{aligned}
+\end{equation}
+The firm cares only about approval:
+\begin{equation}\label{eq:firm_payoff}
+  U_A(A, \cdot) = 1, \qquad U_A(D, \cdot) = 0.
+\end{equation}
+In matrix form:
+\begin{center}
+\begin{tabular}{c|cc}
+         & $G$       & $B$       \\ \hline
+  $A$    & $(1,\;1)$ & $(1,\;0)$ \\
+  $D$    & $(0,\;0)$ & $(0,\;1)$
+\end{tabular}
+\end{center}
+All primitives above are identical to Min (2023).
+
+
+% ------------------------------------------------------------
+\subsection{Types and Feasible Sets}
+% ------------------------------------------------------------
+
+The firm has a privately known type
+$\theta_i \in \Theta = \{\theta_1, \theta_2\}$, with
+$\Pr(\theta_1) = t$. Type determines the set of feasible
+experiments $S_i$. Following Min (2023):
+
+\begin{assumption}[Feasible sets]\label{as:feasible}
+$S_2 \subset S_1$, and both $S_1$ and $S_2$ satisfy:
+\begin{enumerate}
+  \item[(i)] Each $S_i$ is a closed, convex subset of
+    $\{(x, y) \in [0,1]^2 : y \geq 1 - x\}$.
+  \item[(ii)] For each $S_i$, the upper boundary
+    $\bar{S}_i(x) := \max\{y : (x,y) \in S_i\}$ is
+    continuous, concave, and strictly decreasing on its
+    domain.
+\end{enumerate}
+\end{assumption}
+
+Here $\theta_1$ is the ``big type'' (e.g., a large firm with
+a complex, multi-endpoint trial offering more analytical
+flexibility) and $\theta_2$ is the ``small type'' (e.g., a
+small firm or rare-disease trial with fewer endpoints and less
+flexibility). The inclusion $S_2 \subset S_1$ means that any
+experiment available to the small type is also available to the
+big type, but not vice versa.
+
+
+% ------------------------------------------------------------
+\subsection{Experiments}
+% ------------------------------------------------------------
+
+An experiment $\pi = (x, y) \in S_i$ produces a binary outcome
+$j \in \{g, b\}$:
+\begin{equation}\label{eq:experiment}
+\begin{aligned}
+  \Pr(g \mid G, \pi) &= y,
+    &\qquad \Pr(b \mid G, \pi) &= 1 - y, \\
+  \Pr(g \mid B, \pi) &= 1 - x,
+    &\qquad \Pr(b \mid B, \pi) &= x.
+\end{aligned}
+\end{equation}
+Here $y$ is the true positive rate and $x$ is the true
+negative rate. The restriction $y \geq 1 - x$ ensures that $g$
+is ``good news'' and $b$ is ``bad news.''
+
+An experiment is \emph{convincing} if a good result is
+sufficient for the FDA to approve under ex post optimal
+behavior, i.e.,
+\begin{equation}\label{eq:convincing}
+  py \geq (1 - p)(1 - x).
+\end{equation}
+All definitions above are identical to Min (2023).
+
+
+% ============================================================
+\subsection{The Modification: Voluntary Disclosure with
+  Unobservable Experiments}
+\label{sec:modification}
+% ============================================================
+
+In Min (2023), the FDA observes both the experiment $\pi$ and
+the outcome $j$. I modify this as follows.
+
+After observing $j \in \{g, b\}$, the firm chooses a message
+$m$ to send to the FDA:
+\begin{itemize}
+  \item \textbf{Disclose:} $m = (\pi, j)$. The firm reveals
+    both the experiment conducted and the realized outcome.
+    This is verifiable: if the firm claims $(\pi, g)$, the true
+    outcome must be $g$.
+  \item \textbf{Silence:} $m = \emptyset$. The firm reveals
+    nothing.
+\end{itemize}
+
+\medskip
+\noindent\textbf{Key assumption:} When the firm discloses, the
+FDA observes $(\pi, j)$---exactly as in Min. When the firm
+remains silent, the FDA observes \emph{only} $\emptyset$: it
+does not learn which experiment was conducted, nor what the
+outcome was.
+
+\medskip
+This asymmetry is the single modification to Min's model. It
+captures the empirical reality that published trial results are
+verifiable and detailed (the medical community sees the trial
+design, endpoints, sample size, and results), while buried
+trials are often invisible to regulators: many are never
+registered, and even registered trials frequently lack posted
+results.
+
+All other primitives---states, prior, payoffs, type structure,
+feasible sets, and the definition of experiments---are
+unchanged from Min (2023).
+
+
+% ============================================================
+\subsection{Timeline}
+\label{sec:timeline}
+% ============================================================
+
+\begin{enumerate}
+  \item The FDA commits to a decision rule: approval
+    probabilities $A(\pi, j)$ for each possible disclosed
+    evidence $(\pi, j)$, and a single approval probability
+    $A(\emptyset)$ for silence.
+  \item The firm observes the FDA's rule and privately learns
+    its type $\theta_i$ (i.e., learns $S_i$).
+  \item The firm selects and conducts an experiment
+    $\pi \in S_i$. The outcome $j \in \{g, b\}$ is realized
+    and privately observed by the firm.
+  \item The firm chooses $m \in \{(\pi, j), \emptyset\}$.
+  \item The FDA observes $m$ and makes its decision according
+    to the committed rule.
+\end{enumerate}
+
+\begin{remark}[Comparison with Min's timeline]
+Steps 1--3 are identical to Min (2023). The difference is in
+step~4: Min's firm has no disclosure choice (the FDA
+automatically sees $(\pi, j)$), whereas here the firm chooses
+whether to disclose or remain silent. Crucially, if the firm
+stays silent, the FDA does not observe $\pi$---this is what
+distinguishes the model from a simple addition of
+$\emptyset$ to Min's observation space.
+\end{remark}
+
+
+% ============================================================
+\subsection{Strategies}
+\label{sec:strategies}
+% ============================================================
+
+\paragraph{Firm's strategy.}
+The firm's strategy has two components:
+\begin{enumerate}
+  \item \textbf{Experiment choice:} a mapping from type and
+    decision rule to an experiment,
+    $\sigma: \Theta \to S_i$, where $\sigma(\theta_i) \in S_i$.
+  \item \textbf{Disclosure decision:} for each experiment $\pi$
+    and outcome $j$, a probability of disclosing,
+    \begin{equation}\label{eq:delta}
+    \begin{aligned}
+      \delta_g(\pi) &:= \Pr(m = (\pi, g) \mid j = g, \pi)
+        \in [0, 1], \\
+      \delta_b(\pi) &:= \Pr(m = (\pi, b) \mid j = b, \pi)
+        \in [0, 1].
+    \end{aligned}
+    \end{equation}
+    The probability of silence is $1 - \delta_j(\pi)$.
+\end{enumerate}
+
+\paragraph{FDA's decision rule.}
+The FDA commits to:
+\begin{equation}\label{eq:fda_rule}
+  A(\pi, g), \quad A(\pi, b) \in [0, 1]
+  \quad \text{for each } \pi \in S_1,
+  \qquad\text{and}\qquad
+  A(\emptyset) \in [0, 1].
+\end{equation}
+Note that $A(\pi, g)$ and $A(\pi, b)$ can be
+experiment-specific (the FDA sees $\pi$ when the firm
+discloses), but $A(\emptyset)$ is a \textbf{single number}
+applying to all silent firms regardless of type or experiment.
+This is because, under silence, the FDA does not observe $\pi$.
+
+
+% ============================================================
+\section{Analysis of the Disclosure Subgame}
+\label{sec:disclosure}
+% ============================================================
+
+I first establish a basic fact, then analyze the firm's
+optimal disclosure strategy and derive posterior beliefs.
+
+\begin{lemma}[Bad news]\label{lem:bad_news}
+For any experiment $\pi = (x,y)$ with $y \geq 1 - x$ and
+prior $p < 1/2$:
+\[
+  \mu(G \mid \pi, b)
+  = \frac{p(1-y)}{p(1-y) + (1-p)x}
+  < \frac{1}{2}.
+\]
+\end{lemma}
+
+\begin{proof}
+$\mu(G \mid \pi, b) < 1/2$ iff $p(1-y) < (1-p)x$.
+Since $p < 1/2$, we have $p/(1-p) < 1$.
+Since $y \geq 1-x$, we have $1-y \leq x$.
+Therefore $p(1-y) \leq p \cdot x < (1-p) \cdot x$.
+\end{proof}
+
+Fix an experiment $\pi = (x, y)$ and the FDA's rule
+$(A(\pi, g), A(\pi, b), A(\emptyset))$. I analyze the
+firm's optimal disclosure strategy, then derive the FDA's
+posterior beliefs.
+
+\subsection{Firm's Optimal Disclosure}
+
+The firm's payoff equals the approval probability. For each
+outcome $j$, the firm compares the payoff from disclosing
+versus silence.
+
+\paragraph{Upon $j = g$:}
+Disclosing yields $A(\pi, g)$; silence yields $A(\emptyset)$.
+The firm discloses if and only if
+$A(\pi, g) \geq A(\emptyset)$.
+
+\paragraph{Upon $j = b$:}
+Disclosing yields $A(\pi, b)$; silence yields $A(\emptyset)$.
+The firm discloses if and only if
+$A(\pi, b) \geq A(\emptyset)$.
+
+\begin{lemma}[Equilibrium disclosure]\label{lem:disclosure}
+For a firm using experiment $\pi$ under FDA rule
+$(A(\pi, g), A(\pi, b), A(\emptyset))$:
+\begin{enumerate}
+  \item[(i)] If $A(\pi, j) > A(\emptyset)$, outcome $j$ is
+    disclosed: $\delta_j^* = 1$.
+  \item[(ii)] If $A(\pi, j) < A(\emptyset)$, outcome $j$ is
+    hidden: $\delta_j^* = 0$.
+  \item[(iii)] If $A(\pi, j) = A(\emptyset)$, the firm is
+    indifferent: any $\delta_j^* \in [0, 1]$ is consistent.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+The firm's payoff from disclosing $j$ is $A(\pi, j)$; from
+silence it is $A(\emptyset)$. The firm chooses whichever is
+higher.
+\end{proof}
+
+\begin{remark}[Typical case]
+In the mechanism design analysis below, we will show that in
+any optimal mechanism $A(\pi_i, g) \geq A(\emptyset)$ and
+$A(\pi_i, b) \leq A(\emptyset)$
+(Lemmas~\ref{lem:wlog_Ag} and~\ref{lem:hiding_dominates}).
+Under these conditions, the firm discloses good results and
+hides bad results---the ``cherry-picking'' behavior that is
+this paper's focus.
+\end{remark}
+
+
+% ------------------------------------------------------------
+\subsection{Posterior Beliefs}
+\label{sec:posteriors}
+% ------------------------------------------------------------
+
+\paragraph{Upon disclosed evidence $(\pi, j)$.}
+Since disclosure is verifiable, the posteriors are the same as
+in Min (2023):
+\begin{align}
+  \mu(G \mid \pi, g)
+    &= \frac{py}{py + (1-p)(1-x)},
+    \label{eq:post_g} \\
+  \mu(G \mid \pi, b)
+    &= \frac{p(1-y)}{p(1-y) + (1-p)x}.
+    \label{eq:post_b}
+\end{align}
+These do not depend on the disclosure probabilities (the
+$\delta$'s cancel by Bayes' rule).
+
+\paragraph{Upon silence $m = \emptyset$.}
+This is the key object. Silence pools over all types and
+experiments that produce undisclosed outcomes. Suppose in
+equilibrium, type $\theta_i$ chooses experiment
+$\pi_i = (x_i, y_i)$ and follows the disclosure strategy in
+Lemma~\ref{lem:disclosure} (disclose $g$, hide $b$).
+
+The probability of silence under each state is:
+\begin{align}
+  \Pr(\emptyset \mid G)
+    &= \sum_{i=1}^{2} \Pr(\theta_i) \cdot (1 - y_i),
+    \label{eq:silence_G} \\
+  \Pr(\emptyset \mid B)
+    &= \sum_{i=1}^{2} \Pr(\theta_i) \cdot x_i.
+    \label{eq:silence_B}
+\end{align}
+Here, $(1 - y_i)$ is the probability of a bad result when the
+drug is good and the firm uses experiment $\pi_i$, and $x_i$ is
+the probability of a bad result when the drug is bad.
+
+Applying Bayes' rule:
+\begin{equation}\label{eq:post_silence}
+\boxed{
+  \mu(G \mid \emptyset)
+  = \frac{p \sum_{i} t_i (1 - y_i)}
+         {p \sum_{i} t_i (1 - y_i)
+          + (1-p) \sum_{i} t_i \, x_i},
+}
+\end{equation}
+where $t_1 = t$ and $t_2 = 1 - t$.
+
+\begin{remark}[Contrast with Feb~27 model]
+In the Feb~27 model, the FDA observed $(\pi, \emptyset)$---it
+knew which experiment was conducted. The silence posterior
+reduced to $\mu(G \mid \pi, b)$, leading to complete
+unraveling: silence was perfectly informative, $A(\emptyset) = 0$,
+and cherry-picking was irrelevant.
+
+Here, the FDA sees only $\emptyset$. The posterior
+\eqref{eq:post_silence} depends on the \emph{equilibrium mix}
+of experiments chosen by both types. It is a weighted average
+across types and experiments, not a single experiment's bad
+posterior. This is what prevents unraveling.
+\end{remark}
+
+
+\begin{remark}[Why unraveling fails]\label{rem:no_unravel}
+In the classic Milgrom--Grossman unraveling argument, the
+receiver can infer the sender's information from silence
+because the receiver knows the sender's ``type'' (i.e., what
+information the sender could have). Here, the FDA does not know
+the firm's type $\theta_i$, so it cannot determine which
+experiment produced the hidden bad result. Different experiments
+have different $(x, y)$, so the informational content of ``bad
+result from $\pi_1$'' differs from ``bad result from $\pi_2$.''
+Pooling across types and experiments makes silence genuinely
+ambiguous.
+\end{remark}
+
+
+% ------------------------------------------------------------
+\subsection{FDA's Optimal Response}
+\label{sec:fda_response}
+% ------------------------------------------------------------
+
+The FDA approves if and only if its posterior exceeds $1/2$
+(since its payoff is 1 for correct decisions, 0 otherwise):
+
+\paragraph{Response to disclosed $(\pi, g)$:}
+The FDA approves if $\mu(G \mid \pi, g) \geq 1/2$, i.e., if
+the experiment is convincing:\ $py \geq (1-p)(1-x)$.
+Same as Min.
+
+\paragraph{Response to disclosed $(\pi, b)$:}
+Under $p < 1/2$ and $y \geq 1 - x$, we have
+$\mu(G \mid \pi, b) < 1/2$ (Lemma~\ref{lem:bad_news}). So the
+FDA always rejects: $A(\pi, b) = 0$. Same as Min.
+
+\paragraph{Response to silence $\emptyset$:}
+The FDA approves if
+$\mu(G \mid \emptyset) \geq 1/2$.
+
+\begin{lemma}[Silence posterior is below bad-news posterior
+  of the best experiment]\label{lem:silence_bound}
+For any equilibrium experiment choices $\pi_1, \pi_2$:
+\[
+  \mu(G \mid \emptyset)
+  \leq \max_{i \in \{1,2\}} \mu(G \mid \pi_i, b)
+  < \frac{1}{2}.
+\]
+Therefore, under ex post optimal FDA behavior:
+$A(\emptyset) = 0$.
+\end{lemma}
+
+\begin{proof}
+Since silence occurs only when $j = b$ (because $\delta_g = 1$),
+the silence posterior is a weighted average of the type-specific
+bad-result posteriors:
+\[
+  \mu(G \mid \emptyset)
+  = \frac{\sum_i t_i \, p(1-y_i)}
+         {\sum_i t_i [p(1-y_i) + (1-p)x_i]}
+  = \frac{\sum_i t_i \, p(1-y_i)}
+         {\sum_i t_i \, \Pr(b \mid \pi_i)}.
+\]
+Each term $\frac{p(1-y_i)}{p(1-y_i) + (1-p)x_i}
+= \mu(G \mid \pi_i, b) < 1/2$ by Lemma~\ref{lem:bad_news}.
+A weighted average of quantities each strictly below $1/2$
+is strictly below $1/2$.
+\end{proof}
+
+\begin{remark}[The ex post optimality trap]
+Under ex post optimal behavior, $A(\emptyset) = 0$, and the
+model collapses back to Min (2023): the firm's payoff from any
+experiment becomes $\Pr(g \mid \pi) \cdot A(\pi, g)$,
+identical to Min. Cherry-picking is again irrelevant.
+
+This is exactly the advisor's critique of the Feb~27 model.
+The result is trivial because the FDA's response to silence is
+``too easy.''
+
+The resolution, following Min's approach, is to recognize that
+the FDA \textbf{commits} to a decision rule \emph{before}
+observing the firm's choice. As Min shows, the FDA sometimes
+benefits from committing to ex post suboptimal actions (e.g.,
+$A(\pi, b) > 0$) to screen firm types. Similarly, here the FDA
+may benefit from committing to $A(\emptyset) > 0$---not
+because silence is good news, but because this commitment
+changes the firm's experiment-choice incentives.
+\end{remark}
+
+
+% ============================================================
+\section{The Mechanism Design Problem}
+\label{sec:mechanism}
+% ============================================================
+
+Following Min (2023), I formulate the FDA's problem as a
+mechanism design problem using the revelation principle.
+
+\subsection{General Menu}
+
+The FDA offers a menu of options, one intended for each type,
+together with a silence approval probability:
+\begin{equation}\label{eq:menu_full}
+  \mathcal{M} = \left\{
+    \left(\pi_1, A_g^1, A_b^1\right),\;
+    \left(\pi_2, A_g^2, A_b^2\right);\;
+    A(\emptyset)
+  \right\},
+\end{equation}
+where:
+\begin{itemize}
+  \item $\pi_i = (x_i, y_i) \in S_i$ is the experiment
+    intended for type $\theta_i$.
+  \item $A_g^i \in [0, 1]$ is the approval probability when
+    the firm discloses a good result from experiment $\pi_i$.
+  \item $A_b^i \in [0, 1]$ is the approval probability when
+    the firm discloses a bad result from experiment $\pi_i$.
+  \item $A(\emptyset) \in [0, 1]$ is the approval probability
+    upon silence---\textbf{shared across all types}.
+\end{itemize}
+
+By Lemma~\ref{lem:disclosure}, type $\theta_i$'s disclosure
+behavior depends on comparing $A_g^i$, $A_b^i$ with
+$A(\emptyset)$:
+\begin{itemize}
+  \item If $A_b^i > A(\emptyset)$: firm discloses $b$
+    (the FDA sees $(\pi_i, b)$ and approves with prob
+    $A_b^i$). This is a \textbf{disclosure regime} for type
+    $i$, identical to Min.
+  \item If $A_b^i \leq A(\emptyset)$: firm hides $b$
+    (silence; FDA approves with prob $A(\emptyset)$). This
+    is the \textbf{hiding regime}---the paper's focus.
+\end{itemize}
+
+The next two lemmas show that the menu
+\eqref{eq:menu_full} can be simplified.
+
+\begin{lemma}[WLOG: $A_g^i \geq A(\emptyset)$]
+\label{lem:wlog_Ag}
+In any optimal mechanism, $A_g^i \geq A(\emptyset)$ for each
+type~$i$.
+\end{lemma}
+
+\begin{proof}
+Suppose $A_g^i < A(\emptyset)$. Then by
+Lemma~\ref{lem:disclosure}, type~$i$ hides both $g$ and $b$
+(always silent), earning $A(\emptyset)$ regardless of
+experiment or outcome. Replace $A_g^i$ with $A(\emptyset)$.
+
+\emph{Firm payoffs are unchanged:} type $i$'s payoff from
+option~$i$ remains $A(\emptyset)$ (the firm is now indifferent
+about disclosing $g$; WLOG assume $\delta_g = 1$, but payoff
+is the same either way since $A_g^i = A(\emptyset)$). Any
+other type deviating to option~$i$ also gets $A(\emptyset)$
+from option~$i$, same as before.
+
+\emph{IC constraints are preserved:} all firm payoffs from
+all options are unchanged.
+
+\emph{FDA payoff is unchanged:} the FDA approves with
+probability $A(\emptyset)$ in all events involving type~$i$,
+same as before.
+
+So the modified mechanism is equivalent. From
+$A_g^i = A(\emptyset)$, the FDA can weakly improve by
+increasing $A_g^i$ above $A(\emptyset)$ whenever the assigned
+experiment is convincing ($\Delta_g(\pi_i) > 0$), since this
+strictly improves the FDA's payoff from type~$i$'s
+good-result events.
+\end{proof}
+
+\begin{lemma}[Hiding dominates disclosure of bad results]
+\label{lem:hiding_dominates}
+Fix an optimal mechanism with $A_g^i < 1$ for type~$i$.
+If $A_b^i > A(\emptyset)$ (so type~$i$ discloses $b$),
+the FDA can weakly improve by switching to hiding:
+set $A_b^i' = 0$ and raise $A_g^i$ by
+$\Delta := (A_b^i - A(\emptyset)) \cdot
+\Pr(b \mid \pi_i) / \Pr(g \mid \pi_i)$.
+\end{lemma}
+
+\begin{proof}
+\emph{Step 1: Firm payoffs are unchanged.}
+Under the original mechanism, type~$i$'s payoff from option~$i$
+is $A_g^i \Pr(g|\pi_i) + A_b^i \Pr(b|\pi_i)$ (disclosing both
+$g$ and $b$). Under the modified mechanism, it is
+$(A_g^i + \Delta) \Pr(g|\pi_i) + A(\emptyset) \Pr(b|\pi_i)$.
+By construction of $\Delta$, these are equal. Any other type
+deviating to option~$i$ faces the same payoff calculation, so
+all firm payoffs from option~$i$ are unchanged. IC is
+preserved.
+
+\emph{Step 2: FDA payoff improves.}
+The FDA's payoff from type~$i$ is
+$EU^P_i = (1-p) + \Delta_g(\pi_i) A_g^i
++ \Delta_b(\pi_i) A_{\text{eff}}^i$, where
+$\Delta_g := py_i - (1-p)(1-x_i)$,
+$\Delta_b := p(1-y_i) - (1-p)x_i$, and $A_{\text{eff}}^i$ is
+the effective bad-result approval ($A_b^i$ under disclosure,
+$A(\emptyset)$ under hiding). The change is:
+\[
+  \Delta_g(\pi_i) \cdot \Delta
+  + \Delta_b(\pi_i) \cdot (A(\emptyset) - A_b^i).
+\]
+Substituting $\Delta$ and simplifying, the net change equals:
+\[
+  \frac{(A_b^i - A(\emptyset))}{\Pr(g|\pi_i)}
+  \left[\Delta_g(\pi_i) \Pr(b|\pi_i)
+    - \Delta_b(\pi_i) \Pr(g|\pi_i)\right].
+\]
+The bracketed expression expands to
+$2p(1-p)(x_i + y_i - 1) \geq 0$ (since $y_i \geq 1 - x_i$
+by the information constraint), and
+$A_b^i - A(\emptyset) > 0$ by assumption. So the FDA's payoff
+weakly improves (strictly when $x_i + y_i > 1$).
+\end{proof}
+
+\begin{remark}[Scope of Lemma~\ref{lem:hiding_dominates}]
+The lemma requires $A_g^i < 1$ (so there is room to raise
+$A_g^i$ to compensate IC). When $A_g^i = 1$, the compensation
+argument does not directly apply. However, under $A_g^i = 1$
+the firm already receives near-maximal approval; further
+raising the bad-result approval $A_b^i$ above $A(\emptyset)$
+would require the FDA to approve type~$i$ even more
+generously, which is costly. A full characterization of this
+corner case requires solving the optimization problem for
+specific feasible sets.
+\end{remark}
+
+Combining Lemmas~\ref{lem:wlog_Ag}
+and~\ref{lem:hiding_dominates}, I henceforth focus on
+mechanisms satisfying $A_g^i \geq A(\emptyset) \geq A_b^i$.
+Under these conditions, the firm discloses $g$ and hides $b$,
+and $A_b^i$ is payoff-irrelevant (the effective bad-result
+approval is $A(\emptyset)$). The menu simplifies to:
+\begin{equation}\label{eq:menu}
+  \mathcal{M} = \left\{
+    \left(\pi_1, A_g^1\right),\;
+    \left(\pi_2, A_g^2\right);\;
+    A(\emptyset)
+  \right\}.
+\end{equation}
+
+\begin{remark}[Comparison with Min's menu]
+\label{rem:menu_comparison}
+In Min (2023), the FDA always observes $(\pi, j)$, so the menu
+is $\{(\pi_1, A_g^1, A_b^1), (\pi_2, A_g^2, A_b^2)\}$---6
+instruments (plus experiments). Each type has its own
+bad-result approval probability $A_b^i$.
+
+In my model, Lemma~\ref{lem:hiding_dominates} shows that the
+FDA (generically) prefers the firm to hide bad results. The
+effective instruments are $(\pi_1, \pi_2, A_g^1, A_g^2,
+A(\emptyset))$---5 instruments. The type-specific $A_b^i$
+collapses to a single pooled $A(\emptyset)$: the FDA has one
+fewer screening tool.
+\end{remark}
+
+
+% ------------------------------------------------------------
+\subsection{Firm's Expected Payoff}
+\label{sec:firm_payoff}
+% ------------------------------------------------------------
+
+Under the simplified menu \eqref{eq:menu} with
+$A_g^i \geq A(\emptyset)$, the firm discloses $g$ and hides
+$b$ (Lemma~\ref{lem:disclosure}). The firm's expected payoff
+from choosing option $(\pi_i, A_g^i)$ is:
+\begin{equation}\label{eq:EU_A}
+  EU^A(\pi_i, A_g^i, A(\emptyset))
+  = A_g^i \cdot \Pr(g \mid \pi_i)
+    + A(\emptyset) \cdot \Pr(b \mid \pi_i),
+\end{equation}
+where
+\begin{align}
+  \Pr(g \mid \pi_i) &= p \, y_i + (1-p)(1-x_i),
+    \label{eq:prob_g} \\
+  \Pr(b \mid \pi_i) &= p(1-y_i) + (1-p) \, x_i.
+    \label{eq:prob_b}
+\end{align}
+
+\begin{remark}[Comparison with Min's firm payoff]
+In Min (2023):
+$EU^A_{\text{Min}} = A_g^i \cdot \Pr(g \mid \pi_i)
+  + A_b^i \cdot \Pr(b \mid \pi_i)$.
+
+My model replaces the type-specific $A_b^i$ with the
+pooled $A(\emptyset)$. When $A(\emptyset) = 0$, the two
+payoffs coincide (both reduce to
+$A_g^i \cdot \Pr(g \mid \pi_i)$).
+
+When $A(\emptyset) > 0$, the firm gets a ``floor'' payoff
+$A(\emptyset) \cdot \Pr(b \mid \pi_i)$ from hiding bad
+results. This floor is the same regardless of type---unlike
+Min, where the FDA can set different floors for different
+types.
+\end{remark}
+
+
+% ------------------------------------------------------------
+\subsection{Incentive Compatibility}
+\label{sec:ic}
+% ------------------------------------------------------------
+
+The IC constraints ensure that each type prefers its intended
+option. Type $\theta_1$ (big) must prefer option 1 over
+option 2:
+\begin{equation}\label{eq:IC1}
+  A_g^1 \cdot \Pr(g \mid \pi_1)
+    + A(\emptyset) \cdot \Pr(b \mid \pi_1)
+  \geq
+  A_g^2 \cdot \Pr(g \mid \pi_2)
+    + A(\emptyset) \cdot \Pr(b \mid \pi_2).
+\end{equation}
+Type $\theta_2$ (small) must prefer option 2 over option 1.
+If $\pi_1 \in S_1 \setminus S_2$, this is automatically
+satisfied since $\theta_2$ cannot conduct $\pi_1$. If
+$\pi_1 \in S_2$, then:
+\begin{equation}\label{eq:IC2}
+  A_g^2 \cdot \Pr(g \mid \pi_2)
+    + A(\emptyset) \cdot \Pr(b \mid \pi_2)
+  \geq
+  A_g^1 \cdot \Pr(g \mid \pi_1)
+    + A(\emptyset) \cdot \Pr(b \mid \pi_1).
+\end{equation}
+
+\begin{remark}[How $A(\emptyset)$ changes IC]
+Rewrite IC$_1$ \eqref{eq:IC1} as:
+\[
+  A_g^1 \Pr(g \mid \pi_1) - A_g^2 \Pr(g \mid \pi_2)
+  \geq A(\emptyset)
+    \left[\Pr(b \mid \pi_2) - \Pr(b \mid \pi_1)\right].
+\]
+Since $\Pr(b \mid \pi) = 1 - \Pr(g \mid \pi)$, the
+right-hand side equals
+$A(\emptyset)[\Pr(g \mid \pi_1) - \Pr(g \mid \pi_2)]$.
+
+If experiment $\pi_1$ is more likely to produce $g$ than
+$\pi_2$ (i.e., $\Pr(g \mid \pi_1) > \Pr(g \mid \pi_2)$),
+then raising $A(\emptyset)$ \textbf{tightens} IC$_1$: the big
+type's ``insurance'' from silence is greater when using the
+experiment more likely to produce $b$ (which is $\pi_2$),
+making deviation to option~2 more attractive.
+
+Conversely, if $\pi_1$ produces $g$ less often than $\pi_2$,
+raising $A(\emptyset)$ \textbf{relaxes} IC$_1$. This
+interaction between $A(\emptyset)$ and experiment choice is
+absent from Min.
+\end{remark}
+
+
+% ------------------------------------------------------------
+\subsection{FDA's Posterior under Silence (Consistency)}
+\label{sec:consistency}
+% ------------------------------------------------------------
+
+The FDA's committed $A(\emptyset)$ must be consistent with
+Bayesian beliefs in equilibrium. If the FDA commits to
+$A(\emptyset) > 0$, then in equilibrium both types hide bad
+results. The silence posterior is
+\eqref{eq:post_silence}:
+\begin{equation}\label{eq:consistency}
+  \mu(G \mid \emptyset)
+  = \frac{p \left[t(1-y_1) + (1-t)(1-y_2)\right]}
+         {p \left[t(1-y_1) + (1-t)(1-y_2)\right]
+          + (1-p)\left[t \, x_1 + (1-t) x_2\right]}.
+\end{equation}
+
+By Lemma~\ref{lem:silence_bound}, this posterior is always
+below $1/2$. So from an ex post perspective, the FDA should
+reject. But the FDA is committing \emph{ex ante}---before
+seeing the firm's choice. This is the same logic as Min's
+commitment to $A_b^i > 0$: the FDA sacrifices ex post
+optimality to improve ex ante screening.
+
+The FDA's expected cost of $A(\emptyset) > 0$ is:
+\begin{equation}\label{eq:fda_cost_silence}
+  \text{Cost} = A(\emptyset) \cdot \Pr(\emptyset)
+    \cdot \left[1 - \mu(G \mid \emptyset)\right],
+\end{equation}
+which is the probability of approving a bad drug through the
+silence channel.
+
+
+% ============================================================
+\subsection{FDA's Optimization Problem}
+\label{sec:fda_problem}
+% ============================================================
+
+The FDA maximizes its expected payoff over the menu
+$\mathcal{M} = \{(\pi_1, A_g^1), (\pi_2, A_g^2);
+A(\emptyset)\}$, subject to IC constraints and feasibility.
+
+The FDA's expected payoff from type $\theta_i$ choosing option
+$(\pi_i, A_g^i)$ and hiding bad results (disclose $g$, hide
+$b$). The FDA gets payoff 1 for a correct decision and 0
+otherwise:
+
+\begin{itemize}
+  \item \textbf{State $G$, outcome $g$} (prob $p \, y_i$):
+    firm discloses, FDA approves with prob $A_g^i$.
+    FDA payoff: $A_g^i \cdot 1 + (1-A_g^i) \cdot 0 = A_g^i$.
+  \item \textbf{State $G$, outcome $b$} (prob $p(1-y_i)$):
+    firm silent, FDA approves with prob $A(\emptyset)$.
+    FDA payoff: $A(\emptyset) \cdot 1 + (1-A(\emptyset))
+    \cdot 0 = A(\emptyset)$.
+    (Correct to approve since state is $G$.)
+  \item \textbf{State $B$, outcome $g$} (prob $(1-p)(1-x_i)$):
+    firm discloses, FDA approves with prob $A_g^i$.
+    FDA payoff: $A_g^i \cdot 0 + (1-A_g^i) \cdot 1
+    = 1 - A_g^i$.
+    (Incorrect to approve since state is $B$.)
+  \item \textbf{State $B$, outcome $b$} (prob $(1-p) x_i$):
+    firm silent, FDA approves with prob $A(\emptyset)$.
+    FDA payoff: $A(\emptyset) \cdot 0 + (1-A(\emptyset))
+    \cdot 1 = 1 - A(\emptyset)$.
+    (Correct to reject since state is $B$.)
+\end{itemize}
+
+Therefore:
+\begin{equation}\label{eq:EU_P}
+\begin{aligned}
+  EU^P_i
+  &= p \, y_i \, A_g^i
+     + p(1-y_i) \, A(\emptyset)
+     + (1-p)(1-x_i)(1 - A_g^i)
+     + (1-p) \, x_i \, (1 - A(\emptyset)).
+\end{aligned}
+\end{equation}
+
+Simplifying:
+\begin{equation}\label{eq:EU_P_simple}
+\begin{aligned}
+  EU^P_i
+  &= p \, y_i \, A_g^i
+     + p(1-y_i) \, A(\emptyset)
+     + (1-p)(1-x_i) - (1-p)(1-x_i) A_g^i
+     + (1-p) x_i - (1-p) x_i \, A(\emptyset) \\
+  &= (1-p) + \left[p \, y_i - (1-p)(1-x_i)\right] A_g^i
+     + \left[p(1-y_i) - (1-p) x_i\right] A(\emptyset).
+\end{aligned}
+\end{equation}
+
+Define, for each experiment $\pi_i = (x_i, y_i)$:
+\begin{align}
+  \Delta_g(\pi_i)
+    &:= p \, y_i - (1-p)(1-x_i),
+    \label{eq:delta_g_def} \\
+  \Delta_b(\pi_i)
+    &:= p(1-y_i) - (1-p) x_i.
+    \label{eq:delta_b_def}
+\end{align}
+Then:
+\begin{equation}\label{eq:EU_P_compact}
+  EU^P_i = (1-p) + \Delta_g(\pi_i) \, A_g^i
+           + \Delta_b(\pi_i) \, A(\emptyset).
+\end{equation}
+
+\begin{remark}[Interpretation of $\Delta_g$ and $\Delta_b$]
+$\Delta_g(\pi_i) \geq 0$ iff the experiment is convincing
+\eqref{eq:convincing}: a good result is more likely under $G$
+than under $B$ (weighted by priors). For convincing experiments,
+$A_g^i > 0$ helps the FDA.
+
+$\Delta_b(\pi_i) < 0$ always (by Lemma~\ref{lem:bad_news}):
+a bad result is more likely under $B$ than under $G$.
+So $A(\emptyset) > 0$ \textbf{hurts} the FDA---it means
+approving when the evidence (silence = hidden bad result)
+points toward $B$.
+
+This is exactly like Min's tradeoff with $A_b^i$: the FDA
+sometimes commits to costly actions ($A_b > 0$ in Min,
+$A(\emptyset) > 0$ here) to improve screening.
+\end{remark}
+
+The FDA's overall problem is:
+\begin{equation}\label{eq:fda_max}
+  \max_{\substack{\pi_1, \pi_2, A_g^1, A_g^2, A(\emptyset)}}
+  \; t \cdot EU^P_1 + (1-t) \cdot EU^P_2
+\end{equation}
+subject to:
+\begin{enumerate}
+  \item $\pi_i \in S_i$ for $i = 1, 2$,
+  \item $A_g^1, A_g^2, A(\emptyset) \in [0, 1]$,
+  \item IC constraints \eqref{eq:IC1} and \eqref{eq:IC2}.
+\end{enumerate}
+
+\begin{remark}[Comparison with Min's problem]
+Min's FDA problem has the same structure but with separate
+$A_b^1, A_b^2$ instead of a shared $A(\emptyset)$. Min has
+6 choice variables ($\pi_1, \pi_2, A_g^1, A_g^2, A_b^1,
+A_b^2$); I have 5 ($\pi_1, \pi_2, A_g^1, A_g^2, A(\emptyset)$).
+The reduction from 6 to 5 is exactly the pooling constraint:
+$A_b^1 = A_b^2 = A(\emptyset)$.
+
+If the pooling constraint is not binding (i.e., the optimal
+$A_b^1 = A_b^2$ in Min's problem), then my model's solution
+coincides with Min's. If the constraint is binding, my model
+produces genuinely different results.
+\end{remark}
+
+
+% ============================================================
+\section{Benchmark: Ex Post Optimality}
+\label{sec:benchmark}
+% ============================================================
+
+As a benchmark, consider the case where the FDA plays ex post
+optimally---it sets $A(\emptyset) = 0$ because silence is bad
+news (Lemma~\ref{lem:silence_bound}).
+
+\begin{proposition}[Benchmark: trivial cherry-picking]
+\label{prop:benchmark}
+If the FDA responds ex post optimally to each observation,
+then $A(\emptyset) = 0$, the firm's disclosure choice is
+payoff-irrelevant, and the equilibrium is identical to Min
+(2023).
+\end{proposition}
+
+\begin{proof}
+With $A(\emptyset) = 0$, the firm's payoff is
+$A_g^i \cdot \Pr(g \mid \pi_i)$ regardless of disclosure
+behavior. This is exactly Min's firm payoff with $A_b^i = 0$.
+\end{proof}
+
+This confirms the advisor's observation: the Feb~27 result is
+trivial because it only considers ex post optimal FDA behavior.
+The interesting question is whether the FDA benefits from
+\emph{committing} to $A(\emptyset) > 0$.
+
+
+% ============================================================
+\section{When Does Positive $A(\emptyset)$ Help the FDA?}
+\label{sec:positive_A}
+% ============================================================
+
+\subsection{The Effect of $A(\emptyset)$ on Experiment Choice}
+
+Raising $A(\emptyset)$ has two effects on the firm's
+experiment choice:
+
+\paragraph{Direct effect (bad for FDA):}
+For a fixed experiment $\pi_i$, a higher $A(\emptyset)$
+increases the firm's payoff through the $A(\emptyset) \cdot
+\Pr(b \mid \pi_i)$ term. The firm gets approved more often
+even with bad results. This is costly for the FDA because
+$\Delta_b < 0$.
+
+\paragraph{Screening effect (the real channel):}
+$A(\emptyset)$ changes which \emph{menu option} each type
+prefers. The firm's payoff from option $i$ is:
+\[
+  EU^A_i = A_g^i \cdot \Pr(g \mid \pi_i)
+         + A(\emptyset) \cdot \Pr(b \mid \pi_i)
+         = A(\emptyset)
+           + (A_g^i - A(\emptyset)) \cdot \Pr(g \mid \pi_i).
+\]
+A higher $A(\emptyset)$ compresses the payoff difference
+between options with high vs.\ low $\Pr(g \mid \pi_i)$. This
+can change the big type's preference over which option to
+select, altering the binding IC constraint and therefore the
+FDA's optimal menu design.
+
+\begin{lemma}[Experiment choice]\label{lem:exp_choice}
+For a given menu option $(A_g^i, A(\emptyset))$ with
+$A_g^i > A(\emptyset)$, the firm's optimal experiment within
+$S_i$ solves:
+\[
+  \max_{\pi \in S_i} \; (A_g^i - A(\emptyset))
+    \cdot \Pr(g \mid \pi) + A(\emptyset).
+\]
+Since $A(\emptyset)$ is a constant, this reduces to:
+\[
+  \max_{\pi \in S_i} \; \Pr(g \mid \pi)
+  = \max_{(x,y) \in S_i} \; py + (1-p)(1-x).
+\]
+The optimal experiment does \textbf{not} depend on
+$A(\emptyset)$ (given $A_g^i > A(\emptyset)$).
+\end{lemma}
+
+\begin{remark}[Within-option neutrality---same as Min]
+The firm's optimal experiment within a given menu option does
+not depend on $A(\emptyset)$: the firm always maximizes
+$\Pr(g \mid \pi)$. This is \textbf{identical to Min (2023)},
+where the firm's optimal experiment within a menu option does
+not depend on $A_b^i$ either (since
+$EU^A_{\text{Min}} = A_b^i + (A_g^i - A_b^i) \Pr(g|\pi)$,
+and the firm maximizes $\Pr(g|\pi)$ regardless of $A_b^i$).
+
+In both Min and this model, the interesting effects of the
+``bad-outcome approval probability'' ($A_b^i$ in Min,
+$A(\emptyset)$ here) operate through the
+\textbf{screening channel}: they affect which menu option each
+type prefers (IC constraints), and therefore which experiment
+each type ends up conducting in equilibrium. The difference is
+that Min can set $A_b^1 \neq A_b^2$ to screen types
+independently, while here $A(\emptyset)$ is a single pooled
+instrument affecting both types simultaneously.
+\end{remark}
+
+
+% ------------------------------------------------------------
+\subsection{The Screening Tradeoff}
+\label{sec:screening_tradeoff}
+% ------------------------------------------------------------
+
+The FDA's core tradeoff with $A(\emptyset)$ operates through
+IC constraints:
+
+\paragraph{Experiment assignment.}
+Following Min, consider assigning $\pi_1 \in S_1 \setminus S_2$
+(big type does an experiment small type cannot) and
+$\pi_2 \in S_2$ (small type's experiment). Then IC$_2$ is
+automatic (small type cannot deviate), and only IC$_1$ binds.
+
+IC$_1$ becomes:
+\begin{equation}\label{eq:IC1_expanded}
+  A_g^1 \Pr(g \mid \pi_1) + A(\emptyset) \Pr(b \mid \pi_1)
+  \geq
+  A_g^2 \Pr(g \mid \pi_2) + A(\emptyset) \Pr(b \mid \pi_2).
+\end{equation}
+
+Rearranging:
+\begin{equation}\label{eq:IC1_rearranged}
+  A_g^1 \Pr(g \mid \pi_1) - A_g^2 \Pr(g \mid \pi_2)
+  \geq A(\emptyset) \left[\Pr(b \mid \pi_2)
+    - \Pr(b \mid \pi_1)\right].
+\end{equation}
+
+\paragraph{Case 1:}
+$\Pr(g \mid \pi_1) > \Pr(g \mid \pi_2)$ (equivalently,
+$\Pr(b \mid \pi_2) > \Pr(b \mid \pi_1)$). The big type's
+experiment produces good results more often. Then the RHS
+of \eqref{eq:IC1_rearranged} is positive when
+$A(\emptyset) > 0$: raising $A(\emptyset)$
+\textbf{tightens} IC$_1$.
+
+Intuition: when $A(\emptyset) > 0$, the big type gets
+insurance against bad results. Since the small type's
+experiment produces bad results more often, deviating to the
+small type's option gives the big type \emph{more} insurance
+payoffs, making deviation more attractive. The FDA must then
+distort $A_g^1$ or $A_g^2$ more to maintain IC, which is
+costly.
+
+\paragraph{Case 2:}
+$\Pr(g \mid \pi_1) < \Pr(g \mid \pi_2)$. The big type's
+assigned experiment is less likely to produce good results
+(perhaps because it is more informative/stringent). Then
+raising $A(\emptyset)$ \textbf{relaxes} IC$_1$.
+
+Intuition: the big type's experiment produces bad results
+more often, so the big type benefits more from the silence
+insurance. This makes the big type less tempted to deviate to
+the small type's option.
+
+\medskip
+In Min (2023), the FDA can handle these cases by independently
+adjusting $A_b^1$ and $A_b^2$. Here, the FDA has only one
+instrument $A(\emptyset)$ affecting both IC constraints
+simultaneously. This is the source of genuinely new results.
+
+
+% ============================================================
+\section{Discussion}
+\label{sec:discussion}
+% ============================================================
+
+\subsection{Connection to Herresthal (2022)}
+
+Herresthal (2022) studies hidden testing and selective
+disclosure in a sequential-testing model. Her key result is
+that hidden testing can yield a strict Pareto improvement over
+observable testing when the conflict of interest between the
+agent and DM is large. The mechanism is that hidden testing
+encourages the agent to acquire \emph{more} information (since
+bad results can be concealed), and the extra information
+sometimes reveals that the product is bad---benefiting both
+parties.
+
+My model has an analogous mechanism operating through
+experiment choice rather than testing duration. When
+$A(\emptyset) > 0$, the firm is less afraid of bad results
+and may be willing to accept a more informative experiment
+assignment from the FDA (one with higher $x$ and $y$). This
+can benefit both the firm (higher expected approval) and the
+FDA (more informative evidence when disclosed).
+
+The key difference is that Herresthal compares two regimes
+(observable vs.\ hidden testing), while I study optimal
+mechanism design within the hidden-disclosure regime,
+following Min's screening framework.
+
+\subsection{Policy Implications}
+
+\paragraph{Pre-registration as shrinking the gap between
+  regimes.}
+Mandatory trial pre-registration (e.g., ClinicalTrials.gov)
+effectively moves the model toward Min: the FDA observes
+$\pi$ even under silence, so
+$A(\emptyset) \to A(\pi, \emptyset)$ becomes
+experiment-specific. This breaks the pooling constraint and
+allows more tailored screening. The model predicts that
+pre-registration is most valuable when firm types are similar
+(small $S_1 \setminus S_2$), and least valuable---or even
+harmful---when types are very different.
+
+\paragraph{Audit as an intermediate regime.}
+If the FDA can audit silent firms with probability $\alpha$
+(discovering $\pi$ and $j$), the model interpolates between
+the full-pooling regime ($\alpha = 0$, my model) and full
+transparency ($\alpha = 1$, Min). Optimal audit intensity
+balances the benefit of screening precision against the cost
+of discouraging informative experiment choices.
+
+\paragraph{Empirical prediction.}
+The model predicts that in therapeutic areas with high type
+heterogeneity (e.g., large vs.\ small firms, complex vs.\
+simple trials), stricter disclosure enforcement may lead to
+\emph{less} informative experiments---firms choose ``safer''
+endpoints with lower informativeness to avoid the risk of
+visible failure. This is consistent with the finding that
+transparency mandates reduce innovative trial investment
+(MSOM/INFORMS, 2023).
+
+
+% ============================================================
+\section{Next Steps}
+\label{sec:next_steps}
+% ============================================================
+
+\begin{enumerate}
+  \item \textbf{Characterize optimal $A(\emptyset)$.}
+    Solve the FDA's problem \eqref{eq:fda_max} for specific
+    feasible-set structures (e.g., linear or circular $S_i$
+    boundaries) and characterize when the optimal
+    $A(\emptyset) > 0$.
+
+  \item \textbf{Compare with Min's solution.}
+    Show formally when the pooling constraint
+    ($A_b^1 = A_b^2 = A(\emptyset)$) is binding, i.e., when
+    Min's optimal $A_b^1 \neq A_b^2$ and the disclosure model
+    produces different results.
+
+  \item \textbf{Welfare comparison.}
+    Compare the FDA's payoff under (a) full transparency
+    (Min), (b) hidden disclosure with optimal $A(\emptyset)$
+    (this model), and (c) hidden disclosure with ex post
+    optimal FDA ($A(\emptyset) = 0$, the trivial case).
+
+  \item \textbf{Incorporate Herresthal-type results.}
+    Show conditions under which the firm's experiment choice
+    under hidden disclosure with optimal commitment is more
+    informative than under full transparency, yielding a
+    potential Pareto improvement.
+\end{enumerate}
+
+
+\end{document}

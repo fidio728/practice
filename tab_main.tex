@@ -1,0 +1,27 @@
+\begin{table}[t]
+\centering
+\begin{threeparttable}
+\caption{Crawler-access restriction and abnormal filing-window illiquidity}
+\label{tab:main}
+\small
+\begin{tabular}{lcc}
+\toprule
+ & \multicolumn{2}{c}{Borusyak et al.\ (2024)} \\
+\cmidrule(lr){2-3}
+ & (1) & (2) \\
+\midrule
+Crawler block $\times$ Post & $0.0134^{***}$ & $0.0140^{***}$ \\
+                            & (0.0052)       & (0.0051) \\
+Pre-trend $p$ (12 period)   & 0.48           & 0.52 \\
+\midrule
+Controls         & No   & Yes \\
+Firm FE          & Yes  & Yes \\
+Filing-month FE  & Yes  & Yes \\
+Observations     & 25{,}516 & 25{,}516 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item \textit{Notes.} The dependent variable is the abnormal filing-window Amihud illiquidity (Eq.~\ref{eq:twfe}): the log difference between the $[-1,+1]$ trading-day event window and the $[-60,-10]$ local benchmark. We report the \citet{BorusyakJaravelSpiess2024} imputation estimator as our primary specification, without (column~1) and with (column~2) the control set, each with a 12-period pre-trend test; 580 treated firms and 25{,}516 firm-filings. The control set (log assets, leverage, ROA, market-to-book, tangibility, and analyst coverage, winsorized and within-sample demeaned) barely moves the estimate, because the dependent variable is already an abnormal, within-event difference that nets out slow-moving firm characteristics. The transparent two-way fixed-effects benchmark is very close ($+0.0109$ to $+0.0111$, $p<0.05$) and is reported in the robustness section (Table~\ref{tab:twfe_robustness}); the level form and a window-by-window decomposition are also there (Table~\ref{tab:eventspec}). Standard errors clustered by firm in parentheses. $^{*}$, $^{**}$, $^{***}$ denote significance at the 10\%, 5\%, and 1\% levels.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

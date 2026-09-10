@@ -1,0 +1,1270 @@
+\documentclass[a4paper,11pt]{ctexart}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,longtable,array,threeparttable}
+\usepackage[round,authoryear]{natbib}
+\usepackage{setspace}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{xcolor}
+\definecolor{linkblue}{RGB}{0,51,102}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=linkblue,urlcolor=linkblue]{hyperref}
+\linespread{1.25}
+\setlength{\parskip}{0.35em}
+\setlength{\emergencystretch}{2em}
+\hyphenpenalty=50
+\tolerance=1500
+\captionsetup{font=small,labelfont=bf}
+\setlist{nosep,leftmargin=2em}
+\ctexset{section/format=\Large\bfseries, subsection/format=\large\bfseries}
+\renewcommand{\bibname}{参考文献}
+\renewcommand{\refname}{参考文献}
+\title{\textbf{“Where Prices Learn”：可发现性冲击与价格学习的研究设计\\及其与 Essay 1 的重合审判}\\[0.6em]\large 研究设计备忘录}
+\author{Xueyang Liu\\\small Universitat Ramon Llull}
+\date{2026 年 9 月 7 日}
+\begin{document}
+\maketitle
+\begin{center}\small
+\begin{tabular}{p{0.9\textwidth}}
+\toprule
+\textbf{阅读说明}\quad 本备忘录只讨论研究设计与文献定位，不报告任何 Where Prices Learn 的实证结果；凡涉及 Essay 1 的既有数字，均来自作者的内部审计记录，并在脚注标注日期。引用采用作者—年份格式，参考文献表只收录正文引用且经核验的条目。本稿由 AI 辅助起草并经多轮对抗性审阅，最终判断由作者负责。\\
+\bottomrule
+\end{tabular}
+\end{center}
+\newpage
+\tableofcontents
+\newpage
+% ===== sec01_summary =====
+\section{一页结论}\label{sec:01-summary}
+
+Where Prices Learn（下称 WPL）问：一家公司把自己从开放网络的搜索发现层移除之后，股价在两次法定披露之间学得是否更慢，价格发现是否转移到申报事件上，价格所知内容的期限构成是否改变（第\ref{sec:03-rq}节）。Essay 1 问的是交易有没有变贵。屏蔽不删除信息，只切断“被找到”这一层；反事实是同一家公司、同一份申报、同一个日历（第\ref{sec:03-cf}节）。
+
+重合按第\ref{sec:10-overlap}节的矩阵逐行判定：treatment、cohort 与样本、事件锚完全重合，BJS 估计量与 pretrend gate 原样继承，不重合的只有主因变量与理论 spine\citep{davilaparlatore2021,dugastfoucault2018,grossmanstiglitz1980}。
+
+裁决照第\ref{sec:13-verdict}节。最低配立即并入 Essay 1 机制章：A 组速度指标、申报窗口方差份额与 block/unblock 对称性检验。强版本不足以独立成篇，除非三个条件同时成立：(A) 有实测的 first stage，且 Class S 与 Class T 的对比在可见度与结果两层同时通过；(B) block/unblock 不对称被确立为新的 estimand；(C) 预测矩阵事前登记，且至少一个 B 组或 D 组指标族作为主要结果。真正独立版本以更换识别来源为前提，首选第\ref{sec:11-independent}节的平台侧到达冲击路径，次选同节的实测 SERP first stage 路径。
+
+\begin{table}[htbp]
+\centering
+\caption{三种版本一览}\label{tab:01-versions}
+\begin{threeparttable}
+\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{4.4cm}@{}}
+\toprule
+版本 & 独立性 & 识别来源 & 主要风险 \\
+\midrule
+最低配 & $-$，并入 & Essay 1 的 staggered 屏蔽事件 & 薄交易机械污染 \\
+强版本 & $?$，待 (A)(B)(C) & 同上，加预注册矩阵与不对称检验 & B 组功效弱；识别层与 Essay 1 共享 \\
+真正独立 & $+$，以换识别来源为前提 & 平台侧到达冲击；实测 SERP first stage（均见第\ref{sec:11-independent}节） & 找不到合格冲击；Disallow $\neq$ deindex，first stage 近零 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item 注：$+$/$-$/$?$ 为独立性判定符号，不含估计结果。各版本的完整要素对照见表\ref{tab:11-versions}，反驳边界见第\ref{sec:12-boundary}节。
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+升降规则见表\ref{tab:13-decision-rule}，压成三个 gate，都在结果出来之前可判定。
+
+第一，first stage gate。token 按厂商文档重编为 Class S/T/N；回溯式的 Common Crawl 合规性路线已于 2026-06-15 判定失败，first stage 只能来自前瞻 SERP 试点。判定要两层同时通过：第一阶段 Class T 系数的 95\% 置信区间排除 Class S 点估计的一半，reduced form 上同样成立。未通过，强版本降为最低配，机制章的“可发现性”改写为“命名”。
+
+第二，登记 gate。unblock 有独立 pretrend gate，不对称方向按第\ref{sec:08-asymmetry}节表注 (a) 待定\citep{merton1987,chennoronhasingal2004}；每族登记一个 primary，B 组因期限轴登记两个（$\delta_{k=1}$ 与 $\delta_{k=3}$），登记处是第\ref{sec:06-inference}节，至少一个 B 组或 D 组指标族进主要结果\citep{baiphilipponsavov2016}。A 组若在薄交易修正后反号，速度类全部退出。
+
+第三，冲击搜寻 gate。一年内找到一个公司不能自选、pretrend 通过的平台侧到达冲击，符号以 \citet{gaohuang2020} 镜像事前锁定，独立版本即启动；找不到则执行 SERP 前瞻试点作 first-stage 补件，WPL 保持并入。
+\clearpage
+
+% ===== sec02_essay1 =====
+\section{Essay 1 当前设计的精确还原}\label{sec:02-essay1}
+
+以下还原 Essay 1 截至 2026-09-07 的处理、样本、估计量与结果状态。数字引自项目内部审计记录，日期见脚注。
+
+\subsection{处理变量与构念}\label{sec:02-treatment}
+
+处理对象是美国上市公司（CRSP/Compustat 匹配）网站根目录 \texttt{robots.txt} 的 2016--2026 年月度面板，由 Wayback Machine 与 Common Crawl 快照重建；处理事件是发现型爬虫 \texttt{Disallow} 规则的首次出现。Family B（robots-directive）只看 \texttt{robots.txt} 结构本身：\texttt{robots\_spec} 指对 23 个 discovery bot 中任一具名 bot 的 \texttt{Disallow}，2026-05-29 起为 headline 构念；\texttt{robots\_any} 含通配符，是最粗口径。Family A（sitemap-block，把规则套到公司 sitemap 的 URL 上）同日因 Wayback 路径时间戳漂移降为稳健性。\footnote{内部审计记录 2026-04-28、2026-05-29 与 2026-06-09。}
+
+canonical cohort 是 broad23 的 timestamp-recovered \texttt{first\_discovery\_block\_month}，与 search16 在 98.7\% 的公司上同月；narrow17 剔除 6 个 SaaS bot 后剩 891 家处理公司，主结果保留。构念构成经三方独立复核：样本内 217 家处理公司，84 家 genuine open$\to$blocked（38.7\%）、133 家 naming-on-wildcard（61.3\%，含 12 家 truly-inert），对照 13,022 家 clean-never；六成事件只在已生效的通配符封锁上追加具名规则，爬虫访问状态未变，G-gate 的“未识别”由此而来。按 RFC 9309 的逐 bot 求值与 Class S/T 拆分（第\ref{sec:08-selection}节），现有处理变量建于这套分类之前。AI-search 类 bot 在 2026-08-18 的实时扫描中只有约 82--85 个 host 被具名，AI 子样本功效不足。\footnote{内部审计记录 2026-05-19、2026-06-03、2026-08-18 与 2026-09-07。}
+
+\subsection{样本与面板构建}\label{sec:02-sample}
+
+月度状态用 EOM latest-interpretable 规则：从当月最晚快照向前走取第一个可解释候选，404/410 记 allow-all 哨兵，uninterpretable 与 gap 一律缺失。天真的“最晚一次抓取”会把 41.5\% 的 host-month 判为不可解释；稳健性口径为 r2、r4、r5。时点纪律：首次屏蔽月须来自 timestamp-recovered 时间戳，status-only、status-before-timestamp、future-treated 公司与屏蔽当月的申报事件剔除，对照只用 clean-never。把左删失公司首次事件放在面板起点的旧 egen 派生 cohort 已于 2026-05-17 撤回。\footnote{内部审计记录 2026-04-28、2026-05-17 与 2026-05-19。}
+
+市场样本按 CRSP 过滤：EXCHD $\in\{1,2,3\}$，SHRCD $\in\{10,11\}$，滞后价格 $\geq 1$ 美元。2026-06-11 的过滤瀑布显示，headline 对借自 \citet{changljungqvisttseng2023} 的股份代码宇宙口径与公司层面 5 美元过滤都稳健（$+0.0335$，$p=.003$）；借用的只是该文的样本过滤口径。剔除全部金融业会移走 43 家 SIC 6799 壳公司，系数变弱且 pretrend 走坏，须披露。\footnote{内部审计记录 2026-04-28 与 2026-06-11。}
+
+因变量是申报窗口的 abnormal Amihud \citep{amihud2002,goyenkoholdentrzcinka2009}：
+\begin{equation}\label{eq:02-aim}
+AIM_{i,d}=\frac{|r_{i,d}|}{DVOL_{i,d}}\times 10^{6},\qquad
+y_{i,f}=\ln\bigl(1+\overline{AIM}_{i,[0,+5]}\bigr)-\ln\bigl(1+\overline{AIM}_{i,[-30,-6]}\bigr),
+\end{equation}
+其中 $f$ 是一次 10-K/10-Q 申报，day 0 为申报日或其后第一个交易日，基准窗 $[-30,-6]$ 由不与相邻申报重叠导出。winsor 1/99；控制变量为滞后一季的预定 Compustat 变量，去均值后缺失填 0 并加指示。2026-06-12 起的机制分析改用 $[-1,+1]$ 与 $[-60,-10]$，函数形式不变。\footnote{内部审计记录 2026-05-28、2026-05-31 与 2026-06-12。}
+
+\subsection{估计量与识别}\label{sec:02-estimator}
+
+TWFE 对照方程为
+\begin{equation}\label{eq:02-twfe}
+y_{i,f}=\beta\,\mathrm{Post}_{i,f}+\alpha_i+\delta_{m(f)}+\gamma' X_{i,q(f)-1}+\varepsilon_{i,f},
+\end{equation}
+$\alpha_i$、$\delta_{m(f)}$ 分别为公司与申报日历月固定效应；主估计量是 \citet{borusyakjaravelspiess2024} 的 imputation：
+\begin{align}
+\hat y_{i,f}(0)&=\hat\alpha_i+\hat\delta_{m(f)}+\hat\gamma' X_{i,q(f)-1},\label{eq:02-bjs-impute}\\
+\hat\tau_{\mathrm{ATT}}&=\frac{1}{N_1}\sum_{\mathrm{Post}_{i,f}=1}\bigl(y_{i,f}-\hat y_{i,f}(0)\bigr).\label{eq:02-bjs-att}
+\end{align}
+Stata 实现为 \texttt{did\_imputation}，选项 \texttt{maxit(5000)}、\texttt{tol(1e-5)}；两向聚类 \texttt{cluster(gvkey\_n ym)}，折叠为公司-月后进入 BJS 时按公司聚类；每个设定报告 n\_treated\_firms 与 n\_treated\_lag。\footnote{内部审计记录 2026-05-06、2026-05-19、2026-06-01 与 2026-06-03。}
+
+预注册阈值两条：clean pretrend $\equiv$ BJS $\mathrm{pre\_p}\geq 0.10$ 且 12 期 lead 无单调漂移；effect present $\equiv$ BJS $p<0.05$、TWFE $p<0.10$ 且两者同为正。csdid 在稀疏的季度事件面板上不可用 \citep{callawaysantanna2021}；另有内部记录显示替代估计量与 BJS 不一致，本轮未定位到原文，不转录其方向与量级 \textbf{[需核验]}。分组变量一律预定，用 $t-1$ 或屏蔽前均值。\footnote{内部审计记录 2026-05-20、2026-06-01、2026-06-03 与 2026-06-09。}
+
+\subsection{事件锚}\label{sec:02-anchor}
+
+primary anchor 是 10-K/10-Q 提交日的 $[0,+5]$ 窗口，$[+6,+30]$ 为时序安慰剂：4 个基准窗口 $\times$ 6 个事件窗口的组合里，$[0,+5]$ 系数保留 81\%--100\% 且显著，$[+6,+30]$ 始终为 null。导师于 2026-05-28 要求按 \citet{liramesh2009} 的逻辑改以 earnings announcement 为主锚；2026-06-07 的两锚全扫描把公告锚下的全线 null 读作 placebo-by-anchor，申报锚下只剩机械相关的 volatility/price-impact 簇。同一篇的并发/非并发拆分把效应定位在与盈余公告并发的申报，属事件期行为分组，不能作因果读，方向不利，必须披露。\footnote{内部审计记录 2026-05-28、2026-06-03、2026-06-07 与 2026-06-08。}
+
+\subsection{结果层级}\label{sec:02-ledger}
+
+逐条结果、口径、记录日期与状态见表\ref{tab:02-ledger}。
+
+{\small
+\begin{longtable}{p{0.27\textwidth}p{0.36\textwidth}p{0.11\textwidth}p{0.16\textwidth}}
+\caption{Essay 1 结果台账（按内部审计记录，后者覆盖前者；状态词只有成立、更正、退休、未识别、诊断性五个）}\label{tab:02-ledger}\\
+\toprule
+结果 & 口径 & 记录日期 & 状态 \\
+\midrule
+\endfirsthead
+\multicolumn{4}{l}{表\ref{tab:02-ledger}（续）}\\
+\toprule
+结果 & 口径 & 记录日期 & 状态 \\
+\midrule
+\endhead
+\midrule
+\multicolumn{4}{r}{续下页}\\
+\endfoot
+\bottomrule
+\endlastfoot
+Headline：broad23，filing $[0,+5]$，BJS $+0.0193$（$p=.0002$） & firm-MAX \texttt{in\_sample} 泄漏修复后的面板；winsor 1/99；对照 clean-never & 2026-06-03 & 成立（当前口径，全文 headline 锚） \\
+\texttt{robots\_spec}，filing $[0,+5]$，BJS $+0.0233$（$p=.011$） & 修复面板权威重跑 & 2026-06-03 & 未通过预注册规则（TWFE 未达阈值）；诊断性 \\
+月度 Amihud 水平效应（2026-06-08 修正版） & TWFE $+0.0202$（n.s.）、BJS $+0.0233$；12 期 pretrend 被拒 & 2026-06-08 & 诊断性 \\
+月度 Amihud 水平效应（早期版本） & TWFE 与 BJS 均 null；BJS 拒绝平行趋势 & 2026-05-20 & 更正（已被 2026-06-08 版覆盖） \\
+Headline 旧版（泄漏前面板） & 决策规则 v2 文本仍引用；量级只以区间形式在正文口径说明中转述 & 2026-05-29；2026-06-03 & 更正（不得作 headline） \\
+\texttt{robots\_any} 切换稳健性 gate & 申报窗口吸收式 BJS $+0.0179$（$p=.038$）；剔除 359 家 ever-reverter 后 $+0.0251$（$p=0.137$）；dCDH 季度网格 placebo 干净，$Av_{\mathrm{tot}}=-0.016$，95\% CI $[-0.045,+0.012]$ & 2026-06-05 & 未识别（功效受限，不读作零效应） \\
+“封锁抬高平均 Amihud” & rank、ln-ratio、winsor 5/95 下消失或反号；仅剩尾部/分位框架 & 2026-06-08 & 退休 \\
+Amihud 分解 & $|r|$ 与 $DVOL$ 同升；thin-day wedge BJS $+0.038$（$p=.048$）；avar $+0.121$ & 2026-06-12 & 成立 \\
+事件特异性 & abnormal 差分的上升在算术上来自 local baseline $[-60,-10]$ 的下降，申报窗口水平持平；恒等式残差 $10^{-9}$ & 2026-06-13 & 诊断性 \\
+报价价差 & 4 个 spread proxy，5,099 家，7 个设定全 null & 2026-05-18 & 成立（null） \\
+coverage 分解 & covered $\approx 0$；uncovered $+0.17$ 至 $+0.37$；效应全在新上市/微型股 & 2026-06-09 & 成立（须披露组成） \\
+X-Y grid & 7 个 access cut $+0.013$ 至 $+0.019$；BH-q $=.092$；安慰剂干净；covered 组全 null & 2026-06-10 & 成立（FDR 10\%） \\
+matched-DiD“杀死”\texttt{robots\_any} & 对滞后因变量匹配，RTM 过度控制 & 2026-06-09 & 退休（检验无效） \\
+Refinitiv 1,954 家 kill-test & uncovered $=$ 低机构持股，支持机制 & 2026-06-11 & 成立 \\
+G-gate：genuine open$\to$blocked，$n\approx 84$ & $\tau=+0.045$，$p=.18$；量级跨子集稳定 & 2026-06-03 & 未识别（功效） \\
+EDGAR 机器访问（水平/窗口/cohort 口径） & 事件 TWFE：10-K access $-11\%$ 至 $-18\%$；月度 BJS null & 2026-05-19 & 成立（旧口径） \\
+EDGAR 机器访问（abnormal 口径） & 与 AIM 同构的 $\ln(1+\cdot)$ 差分，gate exact，27,691 obs；periodic/10-K/10-Q/8-K 全部 null & 2026-06-14 & 成立（当前口径，null） \\
+IBES Detail 1,599 家；Summary 4,166 家 & 分析师更新速度与信息环境均 null & 2026-05-18；2026-05-20 & 成立（null） \\
+PEAD & DVP-faithful 14 个设定 null；不得写成“降低 PEAD” & 2026-05-28 & 成立（null） \\
+10-K 对 10-Q & did2s 差异 $-0.010$（$p=.77$）；10-Q 子样本 $+0.053$ 有效 & 2026-06-01 & 成立（子样本） \\
+earnings-announcement 锚 & 两锚全扫描：EA 锚全部 DV 为 null；6/99 名义显著 $\approx$ 偶然率 & 2026-06-07 & 成立（null） \\
+Li--Ramesh 并发拆分 & 效应集中于并发申报，纯申报臂消失；事件期分组 & 2026-06-08 & 诊断性（方向不利） \\
+月度 EDGAR 替代 headline；申报月 DDD & 旧 cohort 含左删失公司；加性 FE 季节性偏误 & 2026-05-17 & 退休 \\
+高事前 Amihud“最强机制” & \texttt{in\_sample} 泄漏产物 & 2026-06-03 & 退休 \\
+Cloudflare 供应商变异 & 时点太晚、bot 家族错位、非 \texttt{robots.txt} 文本冲击；模板波只作诊断 & 2026-06-11 & 退休（非 IV） \\
+unblock 事件研究 & 816 个 reverter 中 48\% 之后再次封锁；样本内 734 家处理公司有 359 家（48.9\%）为 ever-reverter；处理不可吸收 & 2026-06-10 & 退休（仅描述） \\
+AI 特异性安慰剂 & AI 臂 null 且 underpowered；论文不做 search-vs-training 对比 & 2026-06-15 & 未识别 \\
+\end{longtable}
+}
+
+两个 headline 版本来自不同面板：$+0.045$ 在 2026-06-03 修复 \texttt{in\_sample} 泄漏之前，$+0.0233$ 在其后。全文统一为“filing-window $[0,+5]$ 的 BJS 估计落在 $+0.02$ 至 $+0.05$ log 点之间，最新口径约 $+0.02$”，并以 broad23 的 $+0.0193$ 为锚；按第\ref{sec:02-estimator}节的规则，\texttt{robots\_spec} 那一行只记为诊断性。\footnote{内部审计记录 2026-06-03 与 2026-06-08。}
+
+\subsection{机制叙事}\label{sec:02-mechanism}
+
+机制章的设计规则是“moderator $\times$ treatment 作用于同一因变量”：
+\begin{equation}\label{eq:02-channel}
+y_{i,f}=\beta\,\mathrm{Post}_{i,f}+\theta\,(\mathrm{Post}_{i,f}\times Z_i^{\mathrm{pre}})+\alpha_i+\delta_{m(f)}+\varepsilon_{i,f},
+\end{equation}
+$Z_i^{\mathrm{pre}}$ 为屏蔽前测得的公司特征，渠道作为因变量的回归只是辅助。价差全线 null 排除了 \citet{glostenmilgrom1985} 式的报价渠道，Amihud 上升而价差不动把归宿推向 \citet{kyle1985} 的价格冲击与深度；效应集中在 10-Q，记录的表述是低注意力、薄传播的季度申报。IBES 与 PEAD 的 null 把分析师排除在机制之外。\footnote{内部审计记录 2026-05-18、2026-05-29 与 2026-06-01。}
+
+EDGAR 访问有两个口径并列：2026-05-19 的事件 TWFE 给出 10-K 访问下降 11\% 至 18\%、月度 BJS null；2026-06-14 与 AIM 同构的 abnormal 口径重跑后四类访问全部 null。abnormal 口径是当前口径，合并表述为“无补偿性 EDGAR 替代渠道”。\footnote{内部审计记录 2026-05-19 与 2026-06-14。}
+
+2026-06-12 的分解推翻了“价格冲击升、成交量不变”的旧读法，记录停在“更大分歧加薄交易日脆弱性”。翌日的事件特异性分解把读法锁死为“相对于下降中的局部基准，申报日恶化”。中介 horse race 里公司年龄在每个联合设定中都显著为负，分析师数、机构持股、规模、申报复杂度都吸收不掉，申报包字节数处处为 null，机器处理成本的叙事得不到支持。\footnote{内部审计记录 2026-06-12 与 2026-06-13。}
+
+\subsection{异质性}\label{sec:02-hetero}
+
+covered 与 uncovered 实为上市年份分割：IO moderator 需要 2020 年 13F，uncovered 中 89.7\% 在 2021-01 之后才进入 CRSP。covered 效应约为零（$+0.0005$），204 家 uncovered 为 $+0.3596$（$p=.005$）；对称过滤的 kill-test 下效应全幅存活，剔除 SPAC 与低价壳后剩 124 家（$+0.2280$，$p=.017$），只留 103 家真实新上市公司仍有 $+0.3681$（$p=.028$）。Refinitiv kill-test 把 uncovered 落实为低机构持股，与 \citet{merton1987} 的认知论证一致；genuine 核心（$n\approx 84$）的 $\tau=+0.045$ 量级跨子集稳定，naming artifact 的解释不成立。\footnote{内部审计记录 2026-06-03、2026-06-09、2026-06-10 与 2026-06-11。}
+
+\subsection{Essay 1 不主张什么}\label{sec:02-notclaimed}
+
+这份清单供第\ref{sec:10-overlap}节的重合审判使用。Essay 1 没有任何价格信息含量的估计：delay、variance ratio、同步性、分期限信息含量都没有；PEAD 的 null 只针对漂移放大，未度量吸收速度。unblock 一侧没有因果估计，处理不可吸收，只剩描述性对称图。也没有 AI 特异性、月度流动性均值、申报窗口原始水平上升的主张。可见度 first stage 同样缺位：Common Crawl 路线 2026-06-13 启动、2026-06-15 判定 FAILED（4,366 个 canonical host），SERP 历史不可重建。genuine 核心的因果 headline 停在未识别。\footnote{内部审计记录 2026-06-15 与 2026-09-07。}
+\clearpage
+
+% ===== sec03_rq =====
+\section{Where Prices Learn 的独立研究问题与反事实}\label{sec:03-rq}
+
+研究问题：当一家公司把自己从开放网络的搜索发现层移除，它的股价在两次法定披露之间是否学得更慢，价格发现是否转移到强制申报事件上，价格所知内容的期限构成是否改变。两份独立提出的方案措辞几乎一致，都把 Essay 1 里作为副产品出现的 filing-window 集中现象（第\ref{sec:02-anchor}节）提升为问题本身。以下是预览：期限定义归第\ref{sec:05-horizons}节，估计量与登记的 primary 归第\ref{sec:06-estimands}节。
+
+\subsection{估计对象：价格信息含量与吸收速度}\label{sec:03-estimand}
+
+Essay 1 的估计对象是交易成本。WPL 的估计对象是价格本身的信息属性：价格是否包含关于未来基本面的信息，以及这些信息进入价格需要多长时间。令 $Y^{\mathrm{inf}}_{i,t}$ 为某一价格信息含量指标（定义见第\ref{sec:05-horizons}、\ref{sec:09-measures}节），$D_{i}$ 为屏蔽指示，$E_i$ 为首次屏蔽月，$h$ 为事件时间，则
+\begin{equation}\label{eq:03-estimand}
+\tau^{\mathrm{WPL}}_{h}
+= \mathbb{E}\!\left[\,Y^{\mathrm{inf}}_{i,t}(1)-Y^{\mathrm{inf}}_{i,t}(0)\;\middle|\;D_i=1,\ t-E_i=h\,\right],
+\end{equation}
+与 Essay 1 的 $\tau^{\mathrm{cost}}_h$ 共用 $D_i$ 与 $E_i$，$Y$ 属于另一个经济对象。
+
+估计对象不同本身不足以支撑独立成篇。\citet{davilaparlatore2021} 的不单调性（第\ref{sec:04-dp}节）保证 WPL 的答案不能从 Essay 1 的估计值推出，这是必要条件；充分条件要看反事实是否干净、问题是否落在文献的空位上。
+
+\subsection{反事实：同一家公司，同一份申报，同一个日历，只有能否被找到不同}\label{sec:03-cf}
+
+屏蔽爬虫不删除任何信息。10-K 与 10-Q 仍按原日程提交到 EDGAR。robots.txt 里的一行 Disallow 只切断一层：公司信息能否经由搜索引擎的索引被投资者\emph{找到}。反事实因此是同一家公司、同一批披露文件、同一个申报日历，唯一差别在于信息是否停留在开放网络的可发现层内。
+
+同一条识别逻辑已有先例：\citet{engelbergparsons2011} 让同一条盈利公告在有无地方报纸覆盖之间变化，\citet{hubermanregev2001} 与 \citet{tetlock2011} 记录价格对早已公开的信息被重新传递作出反应。WPL 拆掉一条传递渠道，是这个逻辑的反向使用；\citet{gaohuang2020} 的 EDGAR 分阶段上线是正向版本，其总量方向的符号在 WPL 里应当翻转，对分布形状不给预测（第\ref{sec:06-estimands}节据此锁定预测符号）。
+
+边界在测量层：Disallow 不等于 deindex，历史 SERP 无法重建，处理变量是对可发现性的 intent-to-treat，留到第\ref{sec:11-versions}节处理。
+
+\subsection{基础设施问题，不是数量问题}\label{sec:03-infra}
+
+数据与价格效率的文献主线是数据\emph{数量}：\citet{goldsteinspattye2021,goldsteinspattye2025} 的大数据议程、\citet{zhu2019} 与 \citet{dessaintfoucaultfresard2024} 研究的替代数据到来，轴心都是“更多数据到来时会发生什么”，而 \citet{farboodietal2022} 记录的悖论是数据急剧增长而信息含量的提升只集中在大公司。
+
+WPL 把数据数量固定住，只动管道：屏蔽前后披露的字节数与 EDGAR 存量都不变，变化的是这些字节能否经搜索索引到达边际投资者。若信息含量随之改变，价格效率就还是数据基础设施的函数，而这正对准上述悖论中小公司的那一半；Essay 1 的效应恰好集中在小型、低机构覆盖公司（第\ref{sec:02-hetero}节）。
+
+\subsection{两条互不重合的期限轴}\label{sec:03-axes}
+
+“期限”在这个设计里有两个含义：按日历时间计量的吸收速度 \citep{houmoskowitz2005,lomackinlay1988}，与今天的价格对 $k$ 年后盈利的预测力 \citep{baiphilipponsavov2016}。两者的操作性定义、以及中期为何落在交界处，见第\ref{sec:05-axes}节。
+
+\subsection{设计回答的三个子问题}\label{sec:03-subq}
+
+研究问题拆成三个可分别证伪的子问题，各对应一组因变量。
+
+\begin{table}[htbp]
+\centering
+\caption{三个子问题、对应指标与事前预测符号}
+\label{tab:03-subq}
+\begin{threeparttable}
+\begin{tabular}{@{}p{3.6cm}p{4.6cm}cp{3.4cm}@{}}
+\toprule
+子问题 & 指标（组别） & 屏蔽后预测 & 详细定义 \\
+\midrule
+Q1 两次申报之间价格学习是否变慢 & Hou--Moskowitz $D_1$；$|VR(q)-1|$（A 组） & $+$ & 第\ref{sec:05-horizons}、\ref{sec:06-estimands}节 \\
+Q2 价格发现是否向计划事件再配置 & 申报窗口方差份额 $S$；有向收敛份额 $\Phi$（C 组） & $+$；$+$ & 第\ref{sec:07-reallocation}节 \\
+Q3 价格所知内容的期限构成是否改变 & BPS 分期限 $b_{k,t}\times \mathrm{SD}_t$；同步性 $\Psi$（B、D 组） & $k=1$：$0$ 或 $-$；$k\ge 2$：$0$ 或 $+$；$\Psi$ $?$ & 第\ref{sec:05-horizons}、\ref{sec:09-measures}节 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item 注：表中为设计预测符号，不含估计结果。Q3 中 $\Psi$ 的方向取决于 Peng--Xiong 类别学习是否发生，须与 A 组配对解读。$+$ 表示指标上升，对 $D_1$ 与 $|VR-1|$ 而言即效率下降。
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+三个答案的组合构成第\ref{sec:04-predictions}节预测矩阵里的一格。三者全部为零也是明确结论：搜索发现层不构成价格学习的边际渠道，Essay 1 的交易成本效应停留在交易层，这对第\ref{sec:13-verdict}节的裁决一样有用。
+\clearpage
+
+% ===== sec04_theory =====
+\section{理论模型与竞争机制}\label{sec:04-theory}
+
+\subsection{Dugast--Foucault (2018)：原始数据与加工信息}\label{sec:04-df}
+
+\citet{dugastfoucault2018} 区分 raw signal（便宜、快、精度低）与 processed signal（昂贵、慢、精度高）：raw 成本下降时，早期的低精度交易加快短期发现，却压缩 processed 信号的利润。WPL 是它的反向：屏蔽抬高 raw 成本，短期发现变慢，长期方向取决于挤出压力的松动能否转化为对 processed 信息的替代需求。若 processed 的生产本身依赖 raw 的可发现性，两类信号是互补品，屏蔽同时压低两者，外观上与 Grossman--Stiglitz 不可区分。A 组恶化是两种情形的共同前提，判别变量落在 B 组长期限。
+
+令 $\mu_r$、$\mu_p$ 为两类投机者的质量，$\pi_r$、$\pi_p$ 为对自身质量递减的预期利润。屏蔽把 raw 成本抬到 $c_r+\Delta$，自由进入要求
+\begin{equation}\label{eq:04-entry}
+\pi_r(\mu_r,\mu_p)=c_r+\Delta,\qquad \pi_p(\mu_r,\mu_p)=c_p .
+\end{equation}
+对 $\Delta$ 全微分，记 $D=\pi_r^{r}\pi_p^{p}-\pi_r^{p}\pi_p^{r}>0$，得
+\begin{equation}\label{eq:04-cs}
+\frac{d\mu_r}{d\Delta}=\frac{\pi_p^{p}}{D}<0,\qquad
+\frac{d\mu_p}{d\Delta}=-\frac{\pi_p^{r}}{D}.
+\end{equation}
+raw 交易者必然减少；processed 的方向由交叉项决定，$\pi_p^{r}<0$ 时替代成立，$\pi_p^{r}>0$ 时两类一起收缩，符号只能由数据给出。\citet{dugastfoucault2025} 把“用哪一类数据”变成均衡对象，式 \eqref{eq:04-cs} 的检验因此在均衡意义上良定义。
+
+\subsection{Grossman--Stiglitz (1980)：外延边际}\label{sec:04-gs}
+
+\citet{grossmanstiglitz1980} 只有一类信号，知情者比例 $\lambda$ 随信息成本上升而下降，没有期限结构，也没有替代对象。把屏蔽读成纯粹的成本冲击，预测是各期限同比例下沉：A 组变慢，B 组每一个 $k$ 都下降，D2 噪声份额上升。它是 DF 的对立假设，两者在 A 组上不可区分，在 B 组 $k\ge 2$ 上分道扬镳。
+
+\subsection{Peng--Xiong (2006)：类别学习与共动}\label{sec:04-px}
+
+\citet{pengxiong2006} 的投资者注意力有限，在市场、行业、公司三层之间分配；公司特有信息获取变贵时，注意力转向类别层面，个股收益随行业与市场共动，$R^2$ 上升。屏蔽是公司层面可发现性的冲击，预测 D1 的同步性 $\Psi=\ln\!\bigl(R^2/(1-R^2)\bigr)$ 上升，对 A 组没有要求。
+
+D1 上升而 A 不动是它的签名；两者同向恶化更可能是薄交易与 stale price 的机械污染（第\ref{sec:09-measures}节）。低 $R^2$ 也可能只是噪声 \citep{roll1988,morckyeungyu2000}，D1 必须与 A 组配对使用。
+
+\subsection{Foucault--Hombert--Roşu (2016)：速度分层}\label{sec:04-fhr}
+
+\citet{foucaulthombertrosu2016} 的知情投机者有速度优势，在价格尚未调整时对新闻交易。屏蔽制造速度断层：有 EDGAR 订阅或数据馈送的投资者速度不变，依赖搜索发现披露的投资者掉入慢层。预测带异质性：机构覆盖低的公司在 $[0,+5]$ 申报窗内吸收比率下降，机构覆盖高的公司什么也不发生，与 Essay 1 的模式相合（表 \ref{tab:02-ledger}）。
+
+\subsection{Kyle (1985) 与 Glosten--Milgrom (1985)：价格冲击上升而报价价差不动}\label{sec:04-kyle}
+
+两个模型共享逆向选择，落在不同的可观测量上。\citet{kyle1985} 的价格冲击 $\lambda=\sigma_v/(2\sigma_u)$ 随噪声交易标准差 $\sigma_u$ 的收缩而上升；\citet{glostenmilgrom1985} 的做市商按逐笔知情概率设定买卖价差。屏蔽切断由可发现性驱动、多为非知情的订单流，$\lambda$ 上升，而逐笔知情概率在报价层面若无可感知变化，价差不动。这一组合只有 Kyle 的深度渠道能解释，也正是 Essay 1 记录的模式（表 \ref{tab:02-ledger}）。对 WPL 更绕一层：$\sigma_u$ 下降抬高每笔交易的信息比重，D2 的私有相对份额可能上升，而进入价格的信息总量可以同时下降。
+
+\subsection{Merton (1987) 与 Chen--Noronha--Singal (2004)：进入边际与向下粘性}\label{sec:04-merton}
+
+\citet{merton1987} 的投资者只持有自己知道的股票，公司 $k$ 被比例 $q_k$ 的投资者知晓，不完全信息的影子成本与 $(1-q_k)/q_k$ 成正比。屏蔽作用于 $q_k$，问题是存量还是流量。\citet{chennoronhasingal2004} 的 S\&P 500 加入与剔除不对称给出答案：加入带来持久的价格上升，剔除却不完全反转，认知向下粘。
+
+损失落在新投资者的流入上，四条预测随之而来：既有持有者的份额不动\footnote{内部审计记录 2026-07-01（geoecon 项目）：$\Delta(\text{ownership\_share})$ 系数为零且不显著。样本与处理定义均不同于 Essay 1，此处只作读法参照。}；广度增长放慢，对应 \citet{chenhongstein2002,grullonkanatasweston2004,bodnarukostberg2009} 的认知渠道；异质性由 $(1-q)/q$ 给出，$q$ 低的微型、低机构持股公司损失最大；block 与 unblock 不对称，认知存量机制预测不对称，纯技术成本机制预测对称且即时，检验见第\ref{sec:08-asymmetry}节。仿 \citet{kadlecmcconnell1994} 的分解，WPL 把价格学习效应分成认知边际（广度）与流动性边际（Kyle-$\lambda$）。
+
+\subsection{互相证伪的预测}\label{sec:04-predictions}\label{sec:04-dp}
+
+\citet{davilaparlatore2021} 对方向不作预测，Essay 1 的正价格冲击因此不决定 WPL 的符号（第\ref{sec:03-estimand}节）；合并为一篇 market-quality 分解的要求留给第\ref{sec:12-referees}节。
+
+表 \ref{tab:04-predictions} 把七个模型映射到第\ref{sec:05-horizons}节定义的四组结果：A 的 $\downarrow$ 为吸收变慢，B 的 $\downarrow$ 为 BPS 信息含量下降，C 的 $\uparrow$ 为申报窗方差份额上升，D1 的 $\uparrow$ 为 $R^2$ 上升，D2 按 \citet{brogaardetal2022} 的三分量报告，问号为无预测。任何一行都可以被数据拒绝，末行是干净的否定。
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{理论模型对 A/B/C/D 四组结果的预测方向}
+\label{tab:04-predictions}
+\small
+\begin{tabular}{@{}lcccccl@{}}
+\toprule
+模型 & A 速度 & B 中期 $k=1$ & B 长期 $k\ge 2$ & C 申报窗份额 & D1 同步性 & D2 方差分解 \\
+\midrule
+DF 反向，替代成立 & $\downarrow$ & $0$ 或 $\downarrow$ & $0$ & $\uparrow$ & $0$ & 公共份额 $\downarrow$ \\
+DF 反向，强形式 & $\downarrow$ & $0$ 或 $\downarrow$ & $\uparrow$ & $\uparrow$ & $0$ & 私有相对份额 $\uparrow$ \\
+GS 外延边际 & $\downarrow$ & $\downarrow$ & $\downarrow$ & $?$ & $\uparrow$ & 噪声 $\uparrow$ \\
+PX 类别学习 & $0$ & $0$ & $0$ 或 $\downarrow$ & $0$ & $\uparrow$ & 公共份额 $\uparrow$ \\
+FHR 速度分层 & $\downarrow$\tnote{a} & $0$ & $0$ & $\uparrow$ & $0$ & $?$ \\
+Kyle 深度\tnote{b} & $?$ & $?$ & $?$ & $?$ & $?$ & 私有相对份额 $\uparrow$ \\
+Merton--CNS 进入边际\tnote{c} & 集中于高 $(1-q)/q$ & 同左 & 同左 & 同左 & 同左 & unblock 不反转 \\
+DP 2021 & \multicolumn{6}{l}{无方向预测；仅断言 WPL 符号独立于 Essay 1 符号} \\
+干净否定 & $0$ & $0$ & $0$ & $0$ & $0$ & $0$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item[a] 仅在 $[0,+5]$ 申报窗内、机构覆盖低的公司；$[+6,+30]$ 预测为 $0$。
+\item[b] Kyle 与 Glosten--Milgrom 的直接预测落在流动性变量上：price impact $\uparrow$，报价价差 $0$。对 A 至 C 组无方向预测。
+\item[c] Merton--CNS 只约束效应的分布：无论上面哪一行成立，效应按 $(1-q)/q$ 集中，且 block 与 unblock 不对称。
+\item \citet{gaohuang2020} 镜像：将 A、B 两组箭头翻转即为事前锁定的基准，C、D 两组无镜像。所有分组变量按 $t-1$ 或 pre-block 均值定义。
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+\clearpage
+
+% ===== sec05_horizons =====
+\section{短期、中期、长期 price informativeness 的定义}\label{sec:05-horizons}
+
+“价格信息含量”在文献里指两件不同的事，以下把两条轴分开，逐个期限给出操作性定义。
+
+\subsection{两条正交的轴}\label{sec:05-axes}
+
+轴一是吸收速度（speed of incorporation）：固定一条信息（例如一份 10-Q），问价格在日历时间上多快把它吃进去；记信息在 $\tau$ 到达，$P_{i,\tau-1}$ 为到达前价格，$H$ 为完全反应窗口，
+\begin{equation}\label{eq:05-absorption}
+\phi_i(h)=\frac{\mathbb{E}[P_{i,\tau+h}]-P_{i,\tau-1}}{\mathbb{E}[P_{i,\tau+H}]-P_{i,\tau-1}},\qquad 0\le h\le H .
+\end{equation}
+速度是 $\phi_i(h)$ 逼近 1 的快慢；Hou--Moskowitz 的 delay、Lo--MacKinlay 的方差比、事件窗吸收比率都是它的投影。
+
+轴二是预测期限（forecast horizon）：固定价格日期 $t$，问价格对 $k$ 期之后的基本面知道多少 \citep{baiphilipponsavov2016}：
+\begin{equation}\label{eq:05-bps}
+\frac{E_{i,t+k}}{A_{i,t}}=a_{k,t}+b_{k,t}\log\frac{M_{i,t}}{A_{i,t}}+c_{k,t}\frac{E_{i,t}}{A_{i,t}}+\text{行业 FE}+\varepsilon_{i,t+k},\qquad
+\mathcal{I}_{k,t}=b_{k,t}\times \mathrm{SD}_t\!\left[\log\frac{M_{i,t}}{A_{i,t}}\right],
+\end{equation}
+$k$ 以年计，$\mathcal{I}_{k,t}$ 与价格花多久形成无关。轴一固定基本面、拨动时钟，轴二固定时钟、拨动到期日，两条轴因此正交：Dugast--Foucault 的“短期/长期”以天和周计属轴一 \citep{dugastfoucault2018}，BPS 的 $k=1,\dots,5$ 属轴二。
+
+\subsection{短期：日与周}\label{sec:05-short}
+
+短期只属于轴一，测 $\phi_i(h)$ 在几天到几周的形状。事件窗吸收比率以 10-K/10-Q 的 EDGAR 提交日为 $\tau$ \citep{liramesh2009}，粗版为
+\begin{equation}\label{eq:05-ir}
+\mathrm{IR}_{i,f}=\frac{\lvert\mathrm{CAR}_{i}[0,+5]\rvert}{\lvert\mathrm{CAR}_{i}[0,+60]\rvert} .
+\end{equation}
+精版仿 \citet{dellavignapollet2009}，取 $[0,+5]$ 与 $[0,+60]$ 的 CAR 对标准化意外的系数比 $b_{\text{short}}/b_{\text{long}}$；粗版在反转时可超过 1，主分析只用精版。观测单位是公司-申报事件。
+
+Hou--Moskowitz delay 用周收益：
+\begin{equation}\label{eq:05-d1}
+r_{i,w}=\alpha_i+\beta_{i}\,r_{m,w}+\sum_{n=1}^{4}\delta_{i,n}\,r_{m,w-n}+\epsilon_{i,w},\qquad
+D1_i=1-\frac{R^2_{\text{restricted}}}{R^2_{\text{unrestricted}}},
+\end{equation}
+受约束模型令 $\delta_{i,1}=\dots=\delta_{i,4}=0$ \citep{houmoskowitz2005}。方差比 $\mathrm{VR}_i(q)=\mathrm{Var}[r_i(q)]/(q\,\mathrm{Var}[r_i(1)])$ 用日收益，$q=5$ 为主、$q=10,20$ 稳健，面板因变量取 $\lvert\mathrm{VR}_i(q)-1\rvert$ \citep{lomackinlay1988}。
+
+短期指标一致预测恶化，分不出机制；D1 与 VR 在薄交易微型股上被非交易日机械抬高，而处理组恰好集中在这类公司（第~\ref{sec:09-measures}~节）。
+
+\subsection{中期：季度到一年}\label{sec:05-mid}
+
+中期是两条轴的交界，对象是 BPS 的 $k=1$ 与它的季度版本（式~\eqref{eq:05-bps} 中的 $E_{i,t+k}$ 换成下一季度盈利）。在季度频率上，“这份 10-Q 吸收完了没有”与“$t$ 日价格预测得了下一季盈利吗”指向同一个观测：吸收若要花一个季度，对下一季盈利的预测力自然就低，慢的价格与无知的价格无法区分。\citet{ballbrown1968} 以来的漂移文献正落在这段窗口（Essay 1 的 PEAD 检验为 clean null，表~\ref{tab:02-ledger}）。中期因此是铰链，DF 与 GS 的符号预测不可分辨。
+
+\subsection{长期：两年到五年}\label{sec:05-long}
+
+长期只属于轴二，对象是式~\eqref{eq:05-bps} 中 $k=2,\dots,5$ 的 $\mathcal{I}_{k,t}$，以及 \citet{davilaparlatore2026} 的股票层估计量，后者是公司层结果，可直接进入 imputation 估计 \citep{borusyakjaravelspiess2024}。单位为公司-年。
+
+BPS 原式逐年做横截面回归，斜率 $b_{k,t}$ 按年份定义。放进 staggered 设计要把处理指示 $D_{i,t}$ 与 $\log(M/A)$ 交乘：
+\begin{equation}\label{eq:05-bps-did}
+\frac{E_{i,t+k}}{A_{i,t}}=b_{k}\log\frac{M_{i,t}}{A_{i,t}}+\delta_{k}\,D_{i,t}\log\frac{M_{i,t}}{A_{i,t}}+\gamma_{k}D_{i,t}+c_k\frac{E_{i,t}}{A_{i,t}}+\mu_i+\text{行业}\times\text{年 FE}+\varepsilon_{i,t+k},
+\end{equation}
+年份主效应已被行业$\times$年 FE 吸收。$\delta_k$ 是 B 组登记的 estimand，其两步 imputation 估计见第~\ref{sec:06-equations}~节 (d)。
+
+实现窗口是硬约束。面板覆盖 2016--2026，最后一个可见的完整财年通常是 2025，$k$ 期限的结果只对价格日期不晚于 $2025-k$ 的观测存在，cohort 对 $k=5$ 有贡献当且仅当屏蔽年份不晚于 2020。若每个 $k$ 都用全部可用观测，长期斜率由早期 cohort、短期斜率由全体 cohort 决定，两者之差不能读成期限效应。决策规则如下。
+\begin{enumerate}[label=(\roman*)]
+\item 所有 $k$ 使用同一固定 cohort 集合，以最大 $k$ 所允许的 cohort 为准做 balanced 估计；
+\item 每个 $k$ 报告 cohort 构成与 n\_treated\_firms；
+\item 2023--2026 日度面板只服务轴一，不参与轴二；
+\item 按第~\ref{sec:06-inference}~节登记的 primary，B 组只把 $\delta_{k=1}$ 与 $\delta_{k=3}$ 纳入判定，$k\ge 4$ 事前标为“数据到期前不识别”，$k=4,5$ 的估计只作图示。
+\end{enumerate}
+本节不断言任何 cohort 数目。\citet{dessaintfoucaultfresard2024} 的 horizon effect 是本设计的经验镜像。
+
+\begin{table}[htbp]
+\centering
+\caption{三个期限的操作性定义}\label{tab:05-horizons}
+\begin{threeparttable}
+\footnotesize
+\begin{tabular}{@{}p{1.8cm}p{3.4cm}p{2.2cm}p{3.4cm}p{3.0cm}@{}}
+\toprule
+期限 & 测量对象 & 观测单位 & 结果实现所需的最短处理后窗口 & 对应理论（第~\ref{sec:04-theory}~节） \\
+\midrule
+短期（轴一） & IR，式 \eqref{eq:05-ir}；D1，式 \eqref{eq:05-d1}；$\lvert\mathrm{VR}(q)-1\rvert$，$q=5$ 主、$q=10,20$ 稳健 & 公司-申报事件；公司-年 & IR：申报日后 60 个交易日；D1、VR：处理后一整年周/日收益 & DF raw 通道；FHR 速度分层；Kyle 深度 \\
+中期（交界） & BPS $k=1$ 的 $\delta_{k=1}$；下一季度盈利版本 & 公司-年；公司-季度 & 价格日期后一个财年或一个季度的已实现盈利 & DF 与 GS 均预测 0 或 $-$，不可分辨 \\
+长期（轴二） & 式 \eqref{eq:05-bps-did} 中 $k=2,\dots,5$ 的 $\delta_k$，判定只用 $\delta_{k=3}$；Dávila--Parlatore 股票层估计量 & 公司-年 & 价格日期后 $k$ 个财年的已实现盈利；$k\ge4$ 事前标为数据到期前不识别 & DF processed（$\delta_k\ge0$）；GS 外延边际（$\delta_k<0$）；DFF horizon effect \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item 注：DF = \citet{dugastfoucault2018}；GS = \citet{grossmanstiglitz1980}；FHR = \citet{foucaulthombertrosu2016}；DFF = \citet{dessaintfoucaultfresard2024}。表中只列符号与窗口定义，不含任何估计值。四个家族的 primary 以第~\ref{sec:06-inference}~节的登记为准。
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\subsection{为什么“期限结构旋转”必须写成 A 组对 B 组}\label{sec:05-rotation}
+
+“期限结构旋转”（短端下沉、长端抬起）要求两端落在同一根轴上，而 DF 的短端是以天和周计的发现速度，长端是式~\eqref{eq:05-bps-did} 的 $k$ 年斜率，横轴不连续。旋转因此拆成两条独立假设：$H_A$ 为 A 组指标恶化（IR 下降、$D1$ 上升、$\lvert\mathrm{VR}-1\rvert$ 上升）；$H_B$ 为登记的 $\delta_{k=3}$ 不为负（$\delta_{k=1}$ 落在中期，符号不可分辨）。与各模型的对应见表~\ref{tab:04-predictions}；$\delta_k$ 随 $k$ 的斜率受 cohort 约束，只作附属检验。
+\clearpage
+
+% ===== sec06_estimands =====
+\section{主要 estimand 与回归方程}\label{sec:06-estimands}
+
+\subsection{记号}\label{sec:06-notation}
+
+公司记 $i$，时间记 $t$：月度（$m$）用于与 Essay 1 共用的事件面板，年度（$y$）用于整年日收益或周收益的指标。$g_i$ 取 canonical cohort 的 first\_discovery\_block\_month（broad23 口径）\footnote{内部审计记录 2026-05-19。}，never-treated 记 $g_i=\infty$。
+\begin{equation}\label{eq:06-D}
+D_{it}=\mathbf{1}\{t\ge g_i\},\qquad h=t-g_i .
+\end{equation}
+年度指标把 $g_i$ 折算为首个完整暴露年 $g_i^{y}$（$g_i$ 落在一月取该年，否则取次年）；过渡年在 imputation 中整行剔除，TWFE 对照改用暴露月份占比。
+
+结果家族记 $Y^{A}$ 至 $Y^{D}$，对应第~\ref{sec:05-horizons}~节四组；多数因变量是 generated regressand，污染方向见第~\ref{sec:09-measures}~节，符号预测见第~\ref{sec:04-theory}~节。
+
+\subsection{交错设计与目标估计量}\label{sec:06-staggered}
+
+目标估计量是处理组在事件时间 $h$ 的平均处理效应
+\begin{equation}\label{eq:06-tau-h}
+\tau_h=\mathbb{E}\big[Y_{it}(1)-Y_{it}(0)\,\big|\,t-g_i=h,\ g_i<\infty\big],
+\end{equation}
+$Y_{it}(0)$ 是同一公司未屏蔽的反事实；$\bar\tau$ 为窗口 $h\in[0,H]$ 上按处理观测数等权的汇总。
+
+交错设计下 TWFE 把已处理观测当作对照，系数不再是任何 $\tau_h$ 的凸组合 \citep{bakerlarckerwang2022,sunabraham2021}。主估计量沿用 Essay 1 的 BJS imputation \citep{borusyakjaravelspiess2024}，构造见式~\eqref{eq:02-bjs-impute} 与~\eqref{eq:02-bjs-att}。\citet{callawaysantanna2021} 只作附录对照：$ATT(g,t)$ 要求基期 $g-1$ 有观测，而申报事件面板每家公司每季度只有一行\footnote{内部审计记录 2026-06-01。}。
+
+pretrend 回归：在未处理观测上把 $Y$ 对 lead 指示 $\mathbf{1}\{t-g_i=-\ell\}$（$\ell=1,\dots,L$）与同组固定效应回归，联合检验 $L$ 个 lead。gate 规则是月度面板 $L=12$、年度面板 $L=3$，联合 $p\ge0.10$ 且 lead 无单调漂移，两条同时满足才记 clean\footnote{内部审计记录 2026-05-20；阈值为项目内部约定。}。
+
+实现用 \texttt{did\_imputation}，选项见第~\ref{sec:06-stata}~节；\texttt{maxit(5000) tol(1e-5)} 放宽标准误的迭代上限，默认值加协变量后会报 “convergence of standard errors is not achieved”\footnote{内部审计记录 2026-06-01。}。
+
+\subsection{各家族的估计方程}\label{sec:06-equations}
+
+\paragraph{(a) Hou--Moskowitz delay。}
+按 \citet{houmoskowitz2005}，公司--年 $(i,y)$ 的周收益回归
+\begin{equation}\label{eq:06-hm-first}
+r_{i,w}=\alpha_{i}+\beta_{i}\,r_{M,w}+\sum_{n=1}^{4}\delta_{i,n}\,r_{M,w-n}+\epsilon_{i,w},\qquad w\in y,
+\end{equation}
+同式~\eqref{eq:05-d1}。其 $R^2$ 记 $R^2_{U}$，四个 $\delta_{i,n}$ 约束为零后记 $R^2_{R}$，则
+\begin{equation}\label{eq:06-D1}
+D1_{iy}=1-\frac{R^{2}_{R,iy}}{R^{2}_{U,iy}} .
+\end{equation}
+面板方程为
+\begin{equation}\label{eq:06-hm-panel}
+D1_{iy}=\alpha_i+\lambda_y+\tau\,D_{iy}+X_{i,y-1}'\gamma+\varepsilon_{iy},
+\end{equation}
+观测单位是公司--年，该年至少 40 个有效周收益，事件年取 $g_i^{y}$；聚类与 bootstrap 见第~\ref{sec:06-inference}~节。
+
+\paragraph{(b) 方差比。}
+按年用日收益计算 \citet{lomackinlay1988} 的
+\begin{equation}\label{eq:06-VR}
+VR_{iy}(q)=\frac{\operatorname{Var}\big[r_{i}(q)\big]}{q\cdot\operatorname{Var}\big[r_{i}(1)\big]},
+\end{equation}
+$r_i(q)$ 为 $q$ 日累积收益，方差用重叠窗口并作小样本修正。偏离方向不定，因变量取 $|VR_{iy}(q)-1|$；主指标锁定 $q=5$，$q=10$ 与 $q=20$ 作稳健性，面板方程同 (\ref{eq:06-hm-panel})。
+
+\paragraph{(c) 事件窗吸收比率与拥挤度。}
+事件 $e$ 是公司 $i$ 在 $t_e$ 的信息事件，$S_{ie}$ 为标准化意外（earnings 锚为 SUE，filing 锚见第~\ref{sec:07-ir}~节）。两锚各跑一次，主锚为 10-K/10-Q 申报日 \citep{liramesh2009}。粗版比率同式~\eqref{eq:05-ir}：
+\begin{equation}\label{eq:06-IR}
+IR_{ie}=\frac{\big|CAR_{ie}[0,+5]\big|}{\big|CAR_{ie}[0,+60]\big|} .
+\end{equation}
+分母近零时不稳定，粗版只报中位数。主分析用 \citet{dellavignapollet2009} 框架的回归版：第一步只用未处理事件（$D_{it_e}=0$，含 never-treated 公司的全部事件）估计
+\begin{equation}\label{eq:06-dvp-step1}
+CAR_{ie}[0,k]=a_k+b_k\,S_{ie}+\alpha_i+\lambda_{t_e}+\eta_{ie},\qquad k\in\{5,60\},
+\end{equation}
+外推固定效应与斜率得反事实 $\widehat{CAR}_{ie}(0)$。第二步把填补差分 $\hat\tau_{ie}[0,k]=CAR_{ie}[0,k]-\widehat{CAR}_{ie}[0,k](0)$ 对意外及其与拥挤度的交互回归：
+\begin{equation}\label{eq:06-dvp-step2}
+\hat\tau_{ie}[0,k]=b^{D}_{k}\,S_{ie}+b^{DC}_{k}\,S_{ie}\times\overline{Crowd}_i+\text{（低阶项）}+u_{ie} .
+\end{equation}
+$b^{D}_{k}$、$b^{DC}_{k}$ 是处理对每单位意外吸收量的改变。吸收统计量与处理差分为
+\begin{equation}\label{eq:06-absorption}
+\Lambda=\frac{b_5}{b_{60}},\qquad
+\Lambda^{D}=\frac{b_5+b_5^{D}}{b_{60}+b_{60}^{D}}-\frac{b_5}{b_{60}},
+\end{equation}
+观测单位是公司--事件。
+
+拥挤度沿用 \citet{hirshleiferlimteoh2009}。$\overline{Crowd}_i$ 是 $g_i$ 前所有公告日的同日公告家数均值（never-treated 用样本期前半段），标准化后进入式~\eqref{eq:06-dvp-step2}；事件当日实测违反预定调节变量规则，也可能与屏蔽决策同源。$b_k^{DC}$ 的事前符号见第~\ref{sec:04-theory}~节。
+
+对照的单方程版本：
+\begin{equation}\label{eq:06-dvp-reg}
+CAR_{ie}[0,k]=a_k+b_k\,S_{ie}+\phi_k D_{it_e}+b_k^{D}\,S_{ie}\times D_{it_e}+\alpha_i+\lambda_{t_e}+\eta_{ie},
+\end{equation}
+及其三重交互版本
+\begin{equation}\label{eq:06-hlt}
+CAR_{ie}[0,k]=\cdots+b_k^{D}\,S_{ie}\times D_{it_e}+b_k^{DC}\,S_{ie}\times D_{it_e}\times\overline{Crowd}_i+\text{（低阶项）}+\eta_{ie}.
+\end{equation}
+两式在交错处理下仍是 TWFE（第~\ref{sec:06-staggered}~节），$b^D_k$ 与 $b^{DC}_k$ 含负权重，只作对照，判定用 (\ref{eq:06-dvp-step1})--(\ref{eq:06-dvp-step2})。
+
+\paragraph{(d) Bai--Philippon--Savov 分期限信息含量。}
+\citet{baiphilipponsavov2016} 的原始设定是逐年截面回归
+\begin{equation}\label{eq:06-bps}
+\frac{E_{i,t+k}}{A_{i,t}}=a_{t}+b_{k,t}\,m_{i,t}+c_{k,t}\,\frac{E_{i,t}}{A_{i,t}}+\mu_{j(i),t}+\varepsilon_{i,t+k},\qquad m_{i,t}\equiv\log\frac{M_{i,t}}{A_{i,t}},
+\end{equation}
+$k=1,\dots,5$ 年，$\mu_{j,t}$ 为行业固定效应，信息含量统计量
+\begin{equation}\label{eq:06-bps-info}
+\mathcal{I}_{k,t}=b_{k,t}\times\operatorname{SD}_t\big[m_{i,t}\big]
+\end{equation}
+是市场层面的年度序列。
+
+B 组主 estimand 是式~\eqref{eq:05-bps-did} 的 $\delta_k$，两步同 (\ref{eq:06-dvp-step1})--(\ref{eq:06-dvp-step2})：先只用未处理公司--年估 $E_{i,t+k}/A_{i,t}=b_k m_{i,t}+c_k E_{i,t}/A_{i,t}+\mu_i+\mu_{j(i),t}+\varepsilon$ 得 $\hat y_{i,t+k}(0)$，再把 $\hat\tau_{it}=y_{i,t+k}-\hat y_{i,t+k}(0)$ 对 $m_{i,t}$ 回归，斜率即 $\delta_k$、截距即 $\gamma_k$。$m_{i,t}$ 可能受处理影响，须同时报告 $m_{i,t}$ 对 $D_{it}$ 的 BJS 估计，显著则 $\delta_k$ 只作条件斜率解读。$k$ 的可用范围见第~\ref{sec:05-long}~节。
+
+图示用 cohort 版本：$b_{k,c,t}-b_{k,0,t}$（分别只用 cohort $c$ 与 never-treated 公司估计）做 cohort--年事件研究，聚类于 cohort 并用 wild bootstrap。
+
+附录的贡献分解（$\tilde m_{i,t}$、$\tilde y_{i,t+k}$ 为对 (\ref{eq:06-bps}) 其余回归元正交化的残差）：
+\begin{equation}\label{eq:06-bps-contrib}
+b_{k,t}=\sum_{i}\xi_{i,t,k},\qquad
+\xi_{i,t,k}=\frac{\tilde m_{i,t}\,\tilde y_{i,t+k}}{\sum_{j}\tilde m_{j,t}^{2}} ,
+\end{equation}
+\begin{equation}\label{eq:06-bps-second}
+\xi_{i,t,k}\times N_t=\alpha_i+\lambda_t+\tau_k\,D_{it}+\varepsilon_{it},\qquad k=1,\dots,5 .
+\end{equation}
+式 (\ref{eq:06-bps-second}) 的 $\tau_k$ 不进判定：处理改变 $m_{i,t}$ 的水平即机械移动 $\xi$。
+
+\citet{davilaparlatore2026} 的公司层相对价格信息含量来自时序回归，不依赖截面斜率，用作 $Y^{B}$ 的交叉验证因变量时面板方程回到 (\ref{eq:06-hm-panel})；截面与时序方向一致，B 组结论才算稳。按 \citet{davilaparlatore2021} 的非单调性，Essay 1 的流动性符号推不出 B 组符号。
+
+\paragraph{(e) 同步性。}
+公司--年的日收益回归 $r_{i,d}=a+b\,r_{M,d}+c\,r_{J(i),d}+e_{i,d}$（$J(i)$ 为行业）取 $R^2_{iy}$，按 \citet{morckyeungyu2000} 作 logistic 变换
+\begin{equation}\label{eq:06-psi}
+\Psi_{iy}=\ln\frac{R^{2}_{iy}}{1-R^{2}_{iy}} ,
+\end{equation}
+面板方程同 (\ref{eq:06-hm-panel})。$\Psi$ 的符号有两读 \citep{roll1988}，故只与 A 组配对判读：$\Psi$ 上升且 A 组不动，才对应第~\ref{sec:04-theory}~节的类别学习预测。
+
+\paragraph{(f) 申报窗口方差份额。}
+$Y^{C}$ 主变量是申报窗口与窗口外的日均方差之比，收益为市场调整后的日对数收益 $\tilde r$：
+\begin{equation}\label{eq:06-var-share}
+S_{iy}=\frac{V^{W}_{iy}}{V^{N}_{iy}},\qquad
+V^{W}_{iy}=\frac{1}{|W_{iy}|}\sum_{d\in W_{iy}}\tilde r_{i,d}^{2},\qquad
+V^{N}_{iy}=\frac{1}{|N_{iy}|}\sum_{d\in N_{iy}}\tilde r_{i,d}^{2},
+\end{equation}
+$W_{iy}$ 是该年 10-K/10-Q 申报日 $[0,+5]$ 窗口的并集，$N_{iy}$ 为其余交易日；同式~\eqref{eq:07-share}，源出 \citet{beaver1968} 的公告期方差比，细节见第~\ref{sec:07-share}~节。面板方程同 (\ref{eq:06-hm-panel})，因变量取 $\ln S_{iy}$，并对 $\ln V^{W}_{iy}$ 与 $\ln V^{N}_{iy}$ 各跑一次，把份额变化拆成分子与分母两条路径。
+
+\paragraph{(g) 屏蔽与解除屏蔽。}
+对既屏蔽又解除的公司定义 $g_i^{on}$ 与 $g_i^{off}$，分别估 $\tau_h^{on}$、$\tau_h^{off}$ 并检验 $\tau_h^{off}=-\tau_h^{on}$。解除违反 imputation 的吸收性假定，故两条 BJS 序列分开估计，联合检验用堆叠 cluster bootstrap（第~\ref{sec:08-asymmetry}~节）。
+
+\subsection{推断惯例}\label{sec:06-inference}
+
+聚类。月度面板的 TWFE 对照两向聚类 \texttt{cluster(gvkey\_n ym)}；\texttt{did\_imputation} 的 \texttt{cluster()} 只接受单一变量，BJS 标准误聚类于公司\textbf{[需核验：2026-05-06 记录]}。年度面板 2016--2026 只有十来个年份簇，改按公司聚类并附 \texttt{boottest} 的 wild cluster bootstrap $p$ 值。两步估计一律用按公司的 cluster bootstrap，覆盖第一步填补的误差。
+
+尾部处理。连续因变量与控制变量按年做 1/99 winsorize，不 trim。A 组指标会被零收益日机械抬高，对策是把 pre-block 零收益日占比作为预定调节变量并设年内最低交易日数；剔除这些公司会同时剔掉效应。
+
+样本计数。每个设定同时报告 n\_treated\_firms 与 n\_treated\_lag。
+
+调节变量。异质性分组只用 $t-1$ 或 pre-block 均值，禁止事件期实测与行为变量；机械为零的分组不构成安慰剂\footnote{内部审计记录 2026-06-03。}。
+
+控制变量。Compustat 控制预定滞后一季（年度面板滞后一年），均值中心化，缺失置零并加缺失指示变量。
+
+Primary 登记。本小节是四个家族 primary 的唯一登记处，其余各节只引用：
+\begin{enumerate}[label=(\Alph*)]
+\item A 组：$D1_{iy}$，式~\eqref{eq:06-D1}；
+\item B 组：$\delta_k$，式~\eqref{eq:05-bps-did}，$k=1$ 与 $k=3$ 分别登记为 primary，$k\ge4$ 事前标为“数据到期前不识别”；
+\item C 组：$\ln S_{iy}$，式~\eqref{eq:06-var-share}，并强制同时报告 $\ln V^{W}_{iy}$ 与 $\ln V^{N}_{iy}$ 的分解；
+\item D 组：$\Psi_{iy}$，式~\eqref{eq:06-psi}。
+\end{enumerate}
+四个家族共五个 primary（B 组两个），其余指标为 secondary。多重检验的校正规则同样登记于此：四个 family primary 之间做 Benjamini--Hochberg 校正，secondary 在各自 family 内校正，只报告不进判定。预测矩阵的“模式”判定只看 primary。
+
+功效。每个 primary 在跑数据前给出 MDE 并写入预注册；MDE 大于理论上合理的效应量时，该家族登记为“unidentified”，不得读作“null”。
+
+\subsection{Stata 示例}\label{sec:06-stata}
+
+A 组 $D1$，公司--年面板（\texttt{g\_year} 为事件年，never-treated 缺失）：
+
+\begin{verbatim}
+* --- A-group: Hou-Moskowitz D1, firm-year panel, BJS imputation ---
+use "wpl_panel_firm_year.dta", clear
+isid gvkey_n fyear
+drop if transition_year == 1              // partially exposed year
+winsor2 d1, cuts(1 99) by(fyear) suffix(_w)
+
+did_imputation d1_w gvkey_n fyear g_year, ///
+    autosample cluster(gvkey_n)          ///
+    horizons(0/3) pretrends(3)           ///
+    maxit(5000) tol(1e-5)
+display "pretrend joint p = " e(pre_p)
+event_plot, default_look stub_lag(tau#) stub_lead(pre#) together
+
+* companion TWFE: firm-clustered only. 10-11 year clusters is far below
+* the threshold for a second cluster dimension, so use a wild bootstrap.
+gen byte D = (fyear >= g_year) & !missing(g_year)
+reghdfe d1_w D, absorb(gvkey_n fyear) vce(cluster gvkey_n)
+boottest D, cluster(gvkey_n) boottype(wild) reps(9999) seed(12345)
+quietly levelsof gvkey_n if D == 1, local(tr)
+display "n_treated_firms = " r(r)
+\end{verbatim}
+
+月度因变量换成 \texttt{ym} 与 \texttt{horizons(0/12) pretrends(12)}；协变量用 \texttt{controls()} 传入。
+\clearpage
+
+% ===== sec07_reallocation =====
+\section{Filing-window price discovery reallocation}\label{sec:07-reallocation}
+
+\subsection{两个信息入口}\label{sec:07-entries}
+
+上市公司的信息有两条路径进入价格。连续的一条挂在公司网站上，经搜索引擎索引后随时可被找到；定期的一条是 10-K 与 10-Q，EDGAR 副本不受公司 robots.txt 约束。屏蔽发现型爬虫只关闭第一条路径里“被找到”这一层\citep{hubermanregev2001,engelbergparsons2011}，效应因此可以只是把学习推向申报窗口，即表~\ref{tab:04-predictions} 中“C 份额上升 $=$ 架构性再配置”那一行。\citet{gaohuang2020} 的 EDGAR 上线动的是定期入口，屏蔽动的是连续入口，符号不能整体翻转过来用：上线预测总量的方向，屏蔽预测分布的形状。
+
+\subsection{度量一：申报窗口方差份额}\label{sec:07-share}
+
+窗口沿用 Essay 1 的 primary anchor（第~\ref{sec:02-anchor}~节）：以 EDGAR 接受日为第 0 个交易日，取交易日窗口 $[0,+5]$。\footnote{内部审计记录 2026-05-20、2026-05-28。} 对财年 $y$，$W_{iy}$ 为该年所有申报窗口的并集，$N_{iy}$ 为其余交易日。$\tilde r_{it}$ 记市场调整后的日对数收益，市场模型参数用屏蔽前一年估计，never-treated 公司用每一财年的前一年估计。天数标准化的份额为
+\begin{equation}\label{eq:07-share}
+S_{iy} \;=\; \frac{|W_{iy}|^{-1}\sum_{t\in W_{iy}} \tilde r_{it}^{\,2}}{|N_{iy}|^{-1}\sum_{t\in N_{iy}} \tilde r_{it}^{\,2}} \;\equiv\; \frac{V^{W}_{iy}}{V^{N}_{iy}} .
+\end{equation}
+信息若在日历时间上均匀到达，$S_{iy}=1$。该形式是 \citet{beaver1968} 的公告周方差比，微观结构版本见 \citet{leemucklowready1993} 与 \citet{krinskylee1996}。全文的方差份额以本式为唯一定义，天数加权的全年总方差记为 $\bar V_{iy}=(|W_{iy}|V^{W}_{iy}+|N_{iy}|V^{N}_{iy})/(|W_{iy}|+|N_{iy}|)$。
+
+估计方程为
+\begin{equation}\label{eq:07-did}
+\ln S_{iy} \;=\; \alpha_i + \lambda_y + \tau\, D_{iy} + X_{i,y-1}'\beta + \varepsilon_{iy},
+\end{equation}
+其中 $D_{iy}$ 为屏蔽状态指示变量，$X_{i,y-1}$ 为预定滞后控制；估计量、lead 期数与聚类按第~\ref{sec:06-staggered}~与~\ref{sec:06-inference}~节的登记执行，年度面板取 $L=3$。$\lambda_y$ 一并吸收 \citet{beavermcnicholswang2020} 记录的公告期反应长期增强。季度版本以单份申报为观测单位、折叠为公司-月后沿用 12 期 gate，分母换为申报前的非重叠基准窗口并报告多个基准。取对数把右偏的比值拉直。
+
+以申报窗口为锚的依据在第~\ref{sec:02-anchor}~节：公告锚下的因变量全部为 null，信号只落在 $[0,+5]$。屏蔽切断的是公司网站上围绕申报的拉取型材料的可发现性，EDGAR 副本不受影响，而推迟到申报才披露的项目最容易被忽略\citep{linekrasovteoh2020}。
+
+\subsection{度量二：向事后基本面的收敛路径}\label{sec:07-conv}
+
+方差份额只看二阶矩。第二个量问的是全年价格向事后基本面移动的总量中有多大比例落在申报窗口内。令 $d_{iy}=\operatorname{sign}(E_{iy}-E_{i,y-1})\in\{-1,+1\}$ 为随机游走预期下的盈利意外方向，取 \citet{ballbrown1968} 的分组，不依赖分析师覆盖。有向移动的窗口份额为
+\begin{equation}\label{eq:07-conv}
+\Phi_{iy} \;=\; \frac{\sum_{t\in W_{iy}} d_{iy}\,\tilde r_{it}}{\sum_{t\in W_{iy}\cup N_{iy}} d_{iy}\,\tilde r_{it}} .
+\end{equation}
+$\Phi\in[0,1]$ 时可读作阶梯份额，接近 1 是价格在申报日跳向基本面，接近 0 是申报前已走完；分子与分母异号会让 $\Phi$ 出界，这类事件-年单独报告比例。再配置预测 $\Phi$ 上升。
+
+缺陷比 $S$ 多：分母接近零时对分母做秩变换或对 $\Phi$ 取 1/99 winsor，不截断分母；以单年实现盈利作靶子在盈利质量差的公司上失效。处理若改变了盈利本身的可预测性，估计会把“盈利更难预测”读成“路径更阶梯”，排除办法是对 $|E_{iy}-E_{i,y-1}|$ 做同一个 DiD 并要求它为零。
+
+\subsection{度量三：申报日的吸收比率}\label{sec:07-ir}
+
+\citet{dellavignapollet2009} 的吸收比率 $IR=|CAR[0,+5]|/|CAR[0,+60]|$ 已在式~\eqref{eq:06-IR} 以申报日为主锚登记。$IR$ 的分母含窗口后的漂移，屏蔽若同时降低处理速度，漂移也变大，净方向不定，可检验的预测因此只有 $|CAR[0,+5]|$ 为正一条，$IR$ 记为待定。精版的分窗口系数比 $b_{short}/b_{long}$ 另需申报日专属的意外度量 $S_{ie}$，取该申报中未在此前盈余公告披露的 Compustat 季度项目标准化变动\citep{linekrasovteoh2020}，不可算的申报只报粗版。
+
+\subsection{预测、证伪与解释陷阱}\label{sec:07-trap}
+
+表~\ref{tab:07-predictions} 列出再配置假说下的预测符号与三个事前锁定的安慰剂。任何一个安慰剂显著，再配置解释就要让位：公告份额动，说明动的是注意力；Class T token 动，说明渠道在搜索之外。
+
+\begin{table}[htbp]
+\centering
+\caption{C 组预测符号（再配置假说）}
+\label{tab:07-predictions}
+\begin{threeparttable}
+\begin{tabular}{llc}
+\toprule
+量 & 定义 & 预测 \\
+\midrule
+$\ln S_{iy}$ & 申报窗口方差份额，式 \eqref{eq:07-share} & $+$ \\
+$\ln V^{W}_{iy}$ & 窗口内日均方差（分子） & $+$ \\
+$\ln V^{N}_{iy}$ & 窗口外日均方差（分母） & $-$ 或 $0$ \\
+$\ln \bar V_{iy}$ & 天数加权的全年总方差 & $0$ \\
+$\Phi_{iy}$ & 有向收敛的窗口份额，式 \eqref{eq:07-conv} & $+$ \\
+$|CAR[0,+5]|$ & 申报日绝对反应 & $+$ \\
+$IR$ & 申报日吸收比率 & $?$ \\
+\midrule
+盈利公告窗口份额 & 安慰剂：推送型信息 & $0$ \\
+Class T token 屏蔽 & 安慰剂：非搜索 token & $0$ \\
+$[+6,+30]$ 窗口份额 & 安慰剂：窗口外 & $0$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item 注：只列预测符号。$\bar V_{iy}=(|W_{iy}|V^{W}_{iy}+|N_{iy}|V^{N}_{iy})/(|W_{iy}|+|N_{iy}|)$。所有分组变量用 $t-1$ 或屏蔽前均值。
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+份额是比值，上升有两种来路。分子 $V^{W}$ 上升是窗口学习增加；分母 $V^{N}$ 下降则含混，噪声交易者退出同样压低窗口外方差\citep{peressschmidt2020}，而 Essay 1 的效应恰集中在低机构持股、噪声占比高的公司。对策沿用第~\ref{sec:02-mechanism}~节的分子分母分解：式~\eqref{eq:07-did} 拆成对 $\ln V^{W}$、$\ln V^{N}$ 与 $\ln \bar V_{iy}$ 的三条 BJS 估计。分子升、分母降、总量不动，读作再配置；分子不动、分母降、总量降，读作噪声退出或信息流失，需 \citet{brogaardetal2022} 的日内方差分解才能区分，属 D 组；分子分母同降，是 \citet{grossmanstiglitz1980} 的外延边际。同一节的事件特异性分解给出的先验对 C 组不利，Essay 1 的 abnormal 上升正落在“分子不动、分母降”这一格。
+
+薄交易是另一条机械通道：处理组恰是微型股，零收益日直接压低 $V^{N}$。预定样本限制取财年内非零收益日数门槛；更强的防线是把零收益日份额作因变量跑同一个 DiD，它若随处理上升，所有份额结果都要在剔除零收益日后重报。
+
+异质性按 \citet{merton1987} 的认知存量逻辑事前锁定：再配置应集中在屏蔽前机构持股低、覆盖少的公司，分组只用屏蔽前一期的持股与覆盖。效应若只在这类公司出现而在 covered 公司为零，就与 Essay 1 的 uncovered 集中模式同向（第~\ref{sec:10-overlap}~节）。
+\clearpage
+
+% ===== sec08_asymmetry =====
+\section{Block/unblock asymmetry}\label{sec:08-asymmetry}
+
+\subsection{面板里为什么有这一变异}\label{sec:08-why}
+
+Essay 1 把处理定义为 first\_discovery\_block\_month 这一吸收态，此后的解除不进入定义\footnote{内部审计记录 2026-05-19。canonical cohort 为 broad23 的首次屏蔽月，timestamp-recovered。}。代价：816 家解除过屏蔽的公司中 48\% 之后又重新屏蔽，样本内 734 家处理公司里 359 家（48.9\%）是 ever-reverter，吸收式定义下约 27\% 的事后公司-月已重新开放\footnote{内部审计记录 2026-06-10。}。
+
+\subsection{两个模型，一个可证伪的差别}\label{sec:08-models}
+
+技术成本模型里结果只取决于当期的可发现性状态，预测对称且即时：$\tau^{B}_h=-\tau^{U}_h$，两条都是平台形。
+
+认知存量模型（第~\ref{sec:04-merton}~节）里价格取决于知晓该股票的投资者比例 $q_i$\citep{merton1987}：屏蔽切断新投资者流入，效应是随流出侵蚀的斜坡；解除后按到达率重建，恢复慢且未必完全。事前只锁定不对称的存在与横截面梯度，不锁定 $|\tau^{U}|$ 与 $|\bar\tau^{B}|$ 的大小关系（方向见表~\ref{tab:08-predictions} 注 a）。判定核心是弹性 $(1-q)/q$，技术模型则预测幅度与恢复速度都与事前 $q$ 无关。
+
+\subsection{设定}\label{sec:08-setup}
+
+令 $Y_{it}$ 为 C 组的季度方差份额（第~\ref{sec:11-minimal}~节式~\eqref{eq:11-vshare}，折叠为公司-月）或 A 组的滚动 52 周 D1（按月滚动，重叠须披露，标准误按公司聚类）；年度指标 $D1_{iy}$、$|VR_{iy}-1|$ 与 $S_{iy}$ 只做 $h$ 以年计、$L=3$ 的版本。$E^{B}_i$、$E^{U}_i$ 为首次屏蔽月与首次解除月，按 Class S token 的有效访问状态定义（第~\ref{sec:08-selection}~小节）。控制组是 Class S 状态始终开放的公司（clean-never），左删失的始终屏蔽公司剔除，两条序列共用。
+
+\begin{align}
+Y_{it} &= \alpha_i + \lambda_t + \sum_{h=-L}^{H} \tau^{B}_h\, \mathbf{1}[t-E^{B}_i = h] + \varepsilon_{it},
+\qquad \text{样本：blockers} \cup \text{clean-never}, \label{eq:08-block}\\
+Y_{it} &= \alpha_i + \lambda_t + \sum_{h=-L}^{H} \tau^{U}_h\, \mathbf{1}[t-E^{U}_i = h] + \varepsilon_{it},
+\qquad \text{样本：unblockers} \cup \text{clean-never}. \label{eq:08-unblock}
+\end{align}
+
+式~\eqref{eq:08-unblock} 不能交给吸收式 staggered DiD：\texttt{did\_imputation} 要求每个单位只有一个事件日期、处理开启后不再关闭\citep{borusyakjaravelspiess2024}，而近半数解除者随后重新屏蔽。因此两条路线并报。(a) censor-at-reblock：unblocker 的事后窗口在再次屏蔽月截断，样本恢复吸收结构，式~\eqref{eq:08-unblock} 按 BJS imputation 估计；代价是大 $h$ 只由尚未重新屏蔽的公司识别，须逐 $h$ 报告 n\_treated\_firms 与截断比例。(b) dCDH 型估计量（\texttt{did\_multiplegt}）\textbf{[需核验]}：容纳 switch-on 与 switch-off，不需截断，代价是识别权重与异质性假定不同、稀疏网格功效更低。
+
+主设定取 (a)，(b) 平行报告，两条路线的 $\rho_h$ 符号一致才记为不对称成立；blocker 的事后窗口对称地在解除屏蔽月截断。未处理观测按 BJS 规则构造：式~\eqref{eq:08-block} 取 clean-never 全部月份与 blocker 的 $t<E^{B}_i$，式~\eqref{eq:08-unblock} 取 clean-never 全部月份与 unblocker 的 $E^{B}_i+S\le t<E^{U}_i$，$S$ 为“解除前”仍处稳定屏蔽态的最短时长（基准 $S\ge L+6$，6 与 12 个月作稳健性）。两条序列各自过 Essay 1 的 pretrend gate（$L$ 期 lead，pre\_p $\ge 0.10$ 且无单调漂移）。
+
+对称性检验分两层。第一层是水平：
+\begin{equation}
+H_0^{\mathrm{sym}}:\ \tau^{B}_h+\tau^{U}_h=0,\quad h=0,\dots,H \ \text{（联合）}. \label{eq:08-equality}
+\end{equation}
+两组估计通过共用的 $\lambda_t$ 相关，标准误不能相加：对两个样本做同一次按公司的重抽样（共享 clean-never 的抽样结果），同时重估两式，取 $\hat\tau^{B}_h+\hat\tau^{U}_h$ 的 cluster bootstrap 分布；日历月聚类单独报告。第二层是动态形状，定义屏蔽平台 $\bar\tau^{B}=\frac{1}{H_2-H_1+1}\sum_{h=H_1}^{H_2}\tau^{B}_h$ 与恢复比率
+\begin{equation}
+\rho_h=\frac{\tau^{U}_h}{-\bar\tau^{B}},\qquad h=0,\dots,H. \label{eq:08-recovery}
+\end{equation}
+技术模型预测 $\rho_h\approx 1$ 在有限 re-indexing 延迟后成立；认知存量模型预测 $\rho_h$ 随 $h$ 缓慢变动、$\rho_H\neq 1$，速度随事前 $q$ 递增。$q$ 的代理取事前持股广度\citep{chenhongstein2002} 与机构覆盖，两条序列都在 $E^{B}_i-1$ 测量：屏蔽期内的持股结构已是处理结果。
+
+\begin{table}[htbp]
+\centering
+\caption{Block/unblock 不对称：两个模型的预测符号（A 组 delay，数值越大学习越慢）}
+\label{tab:08-predictions}
+\begin{threeparttable}
+\begin{tabular}{lcc}
+\toprule
+量 & 技术成本模型 & 认知存量模型 \\
+\midrule
+$\tau^{B}_0$（冲击月） & $+$ & $0$ \\
+$\tau^{B}_h$，$h$ 大（平台） & $+$，平坦 & $+$，斜坡 \\
+$\tau^{U}_0$ & $-$ & $0$ \\
+$\tau^{U}_h$，$h$ 大 & $-$，$|\cdot|=|\bar\tau^{B}|$ & $-$，$|\cdot|\neq|\bar\tau^{B}|$（方向见注 a） \\
+$\tau^{B}_h+\tau^{U}_h$ & $0$ & $?$\tnote{a} \\
+$\rho_H$ & $1$ & $\neq 1$ \\
+$\partial\rho_h/\partial q_{\mathrm{pre}}$ & $0$ & $+$ \\
+$\partial\bar\tau^{B}/\partial q_{\mathrm{pre}}$ & $0$ & $-$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item[a] 认知存量模型只预测不等于零；方向取决于存量是棘轮式（\citet{chennoronhasingal2004}）还是流出侵蚀式。水平检验 \eqref{eq:08-equality} 因此只作拒绝对称之用，判定依赖最后两行。
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\subsection{选择问题与 RFC 9309 审计}\label{sec:08-selection}
+
+解除屏蔽常与网站迁移或 IR 页改版同时发生，后者改变可发现性的其他维度。用 Wayback 快照给每个 unblock 事件打标：robots.txt 大比例改写、sitemap URL 变更、域名或 CMS 签名变化任一命中记为 bundled，主估计剔除 bundled，含 bundled 的版本作对照。Cloudflare 模板波只作 cleaner-subset 诊断\footnote{内部审计记录 2026-06-11。}。
+
+第二种选择：公司解除屏蔽可能正因为察觉到屏蔽“咬”了自己，于是 $\mathbb{E}[\tau^{B}\mid \text{unblocker}]>\mathbb{E}[\tau^{B}\mid \text{stayer}]$，拿 pooled 的 $\bar\tau^{B}$ 与 unblocker 的 $\tau^{U}$ 相比会把异质性误读为不对称。补救是在 unblocker 子样本内重估式~\eqref{eq:08-block}；但按“日后解除屏蔽”分样本违反预定调节变量规则，配对版本只作诊断，headline 只用 $E^{B}_i-1$ 的变量。
+
+事件定义要过 RFC 9309 组匹配审计（第~\ref{sec:11-independent}~节路径 (i)），规则见第~\ref{sec:02-treatment}~节：文本 diff 与有效访问状态会背离，具名组的 Allow 可以解除通配符的 Disallow，故 $E^{B}_i$ 与 $E^{U}_i$ 都从逐 token 的有效访问状态序列 $s^{(b)}_{it}\in\{0,1\}$（$b\in$ Class S）定义。两处双向测量误差要记录：被屏蔽页面可作 URL-only 条目留在索引，cloaking 使历史状态与爬虫所见不一致；二者都带来“屏蔽慢、解除更慢”的机械不对称\textbf{[需核验]}，故判定依赖表~\ref{tab:08-predictions} 最后两行。
+
+\subsection{与 Essay 1 的关系}\label{sec:08-essay1}
+
+Essay 1 做过解除屏蔽这一侧，承载不了因果估计，台账（表~\ref{tab:02-ledger}）里没有 unblock 的 $\tau$。可逆性还向前咬了 robots\_any 家族的申报窗口结果一口：robots\_any 的申报窗口吸收式 BJS 为 $+0.0179$（$p=.038$），剔除 359 家 ever-reverter 后升到 $+0.0251$、$p=0.137$；dCDH 季度网格 placebo 干净，$Av_{tot}=-0.016$，95\% 区间 $[-0.045,+0.012]$ 覆盖吸收式点估计\footnote{内部审计记录 2026-06-05。}。该 gate 跑在 robots\_any 上，headline 锚定的 broad23/robots\_spec 未做同样的 reverter 剔除，表~\ref{tab:02-ledger} 里也没有以 robots\_any 为口径的 headline 行。锁定读法：计入可逆性后 robots\_any 的效应不再被稳健识别，区间宽到无法把一个小的正效应与零区分开，属功效不足，不能读作零效应。
+
+吸收式定义下后来解除的公司仍留在处理组，恢复期与别家的屏蔽期混在同一个 $h$ 上，长期动态系数因此向零偏。功效是另一侧约束：核心样本已 power-limited\footnote{内部审计记录 2026-06-03，G-gate n$\approx$84，判定为 unidentified，不读作无效应。}，unblocker 是其子集，故先逐 $h$ 报告 n\_treated\_firms 与最小可检出不对称，再决定 $\rho_H$ 是否值得检验。
+
+Essay 1 的调节变量证据无法区分“访问变贵”与“知晓存量流失”，两者对单向屏蔽的一阶预测相同，只有反向事件加上事前 $q$ 的横截面才能分开。归属见第~\ref{sec:11-versions}~节。
+\clearpage
+
+% ===== sec09_measures =====
+\section{各类 price-informativeness 指标的经济含义与相互冲突}\label{sec:09-measures}
+
+四组因变量来自四个文献传统，测的对象与被污染的方式都不同；处理组恰是对非交易与 stale price 最敏感的新上市小市值公司（第~\ref{sec:02-hetero}~节）。对象、数据需求、主要污染与薄市场偏差方向汇总于表~\ref{tab:09-measures}。
+
+\subsection{各指标的构造与专属读法}\label{sec:09-delay}
+
+\citet{houmoskowitz2005} 的 D1 由两条周度回归构成（同式~\eqref{eq:05-d1}）：
+\begin{equation}\label{eq:09-d1}
+r_{i,w} = \alpha_i + \beta_i r_{m,w} + \sum_{n=1}^{4} \delta_{i,n} r_{m,w-n} + \varepsilon_{i,w},
+\qquad
+D1_i = 1 - \frac{R^2_{\delta_{i,n}=0}}{R^2_{\text{unrestricted}}}.
+\end{equation}
+D1 测的是市场公共信息的吸收速度，屏蔽切断的却是公司页面的可发现性，两者之间隔着一个必须写明的假设：难以被找到会降低整体关注，从而拖慢对所有信息的反应。
+
+\citet{lomackinlay1988} 的方差比（同式~\eqref{eq:06-VR}）
+\begin{equation}\label{eq:09-vr}
+VR_i(q) = \frac{\operatorname{Var}[r_i(q)]}{q \cdot \operatorname{Var}[r_i(1)]}
+= 1 + 2\sum_{k=1}^{q-1}\Bigl(1-\frac{k}{q}\Bigr)\rho_{i,k}
+\end{equation}
+是自相关系数的加权和：$VR>1$ 为正自相关，信息分期进入价格；$VR<1$ 为负自相关，报价弹跳或反应过度。$|VR-1|$ 合并两个方向，丢掉的符号恰是区分两种机制的全部信息，主分析因此同时报告带符号的 $VR-1$。单只股票的正自相关来自价格的部分调整\textbf{[需核验]}。Essay 1 的 spread proxies 全部为 null（第~\ref{sec:02-mechanism}~节），bounce 通道被削弱，成交稀疏本身仍在。
+
+\citet{morckyeungyu2000} 的同步性由市场与行业两因子回归的拟合优度变换而来（同式~\eqref{eq:06-psi}）：
+\begin{equation}\label{eq:09-psi}
+r_{i,t} = \alpha_i + \beta_{i,m} r_{m,t} + \beta_{i,I} r_{I,t} + \varepsilon_{i,t},
+\qquad
+\Psi_i = \ln\!\left(\frac{R_i^2}{1-R_i^2}\right).
+\end{equation}
+低 $R^2$ 的读法在 MYY 与 \citet{roll1988} 之间有争议，WPL 取 \citet{pengxiong2006} 的类别学习，假设方向是 $R^2$ 上升（第~\ref{sec:04-px}~节）。薄交易把 $R^2$ 拉低，这是全部指标里唯一污染方向与假设方向相反的一个：$\Psi$ 上升比其他指标的同向结果更可信，$\Psi$ 不动则不能读作否定。
+
+\citet{baiphilipponsavov2016} 逐年估计横截面回归（同式~\eqref{eq:05-bps}）
+\begin{equation}\label{eq:09-bps}
+\frac{E_{i,t+k}}{A_{i,t}} = a_t + b_{k,t}\,\log\!\left(\frac{M_{i,t}}{A_{i,t}}\right) + c_{k,t}\,\frac{E_{i,t}}{A_{i,t}} + \text{行业FE} + \varepsilon_{i,t+k},
+\qquad
+\mathcal{I}_{k,t} = b_{k,t}\times \operatorname{SD}_t\!\left[\log\!\left(\tfrac{M_{i,t}}{A_{i,t}}\right)\right],
+\end{equation}
+即当期价格对 $k$ 年后盈利的预测能力。三种污染叠在一起。横截面粗糙：$b_{k,t}$ 一年一个，自由度按年计。存活偏差：$k$ 最长五年，微型股退市率高，最坏的结局被截掉，估计偏向“没有下降”。测量误差：年末价格噪声上升压低 $b_k$，方向与 Grossman--Stiglitz 的外延边际同号，B 组因此只能把机械叙事与 DF 替代分开，与 GS 分不开。后两条方向相反，净方向不定。\citet{davilaparlatore2026} 的股票层估计量把自由度还给公司层面，可作交叉验证，代价见表~\ref{tab:09-measures}。
+
+受 \citet{dellavignapollet2009} 启发的事件窗吸收比率，粗版为（同式~\eqref{eq:05-ir}）
+\begin{equation}\label{eq:09-ir}
+IR_{i,e} = \frac{|CAR_{i,e}[0,+5]|}{|CAR_{i,e}[0,+60]|},
+\end{equation}
+精版为分窗口回归系数之比 $b_{\text{short}}/b_{\text{long}}$，\citet{hirshleiferlimteoh2009} 的拥挤度交互沿用同一分母；这是 A 组里唯一锚定公司自身信息事件的指标。分母接近零时粗版爆炸，主分析只用精版，粗版报中位数。
+
+D 组的方差分解 \citep{brogaardetal2022} 要日内签名订单流，其失效方向与 D2 预测同号（表~\ref{tab:09-measures}）。
+
+\subsection{Amihud 作为对照}\label{sec:09-amihud}
+
+\citet{amihud2002} 的 $ILLIQ_{i,t} = \frac{1}{D}\sum_d |r_{i,d}|/\text{dvol}_{i,d}$ 是 \citet{kyle1985} 中 $\lambda$ 的低频代理，与信息含量无关，精度本身也有限 \citep{goyenkoholdentrzcinka2009}；Essay 1 的分解与厚尾修正见第~\ref{sec:02-mechanism}~节。
+
+它在 WPL 里是被剔除项，不能作为事后控制变量：屏蔽后的 Amihud 变化本身是处理的结果，条件化于它会吸收处理效应并引入选择偏差，与 predetermined-moderator 规则相悖。替代做法有二。以屏蔽前的 Amihud 水平作预定调节变量分层，若效应只出现在事前高 Amihud 组且两者的处理效应在公司层面高度相关，结论写作“不可与 Essay 1 分离”；或把两者放进同一 BJS 的 seemingly unrelated 结构，报告处理效应的相关。
+
+\subsection{冲突与判定规则}\label{sec:09-conflicts}
+
+五种情形下，一个真实变化会让两个指标给出相反的读数。
+
+\begin{itemize}[leftmargin=2em, itemsep=2pt]
+\item 交易变薄。D1 上升读作吸收变慢，$\Psi$ 下降在 MYY 读法下是公司特有信息增加，两个读数都是机械的。
+\item 交易停止。D1 与 $IR$ 恶化，$b_k$ 不动，因为 10-K 仍在 EDGAR（第~\ref{sec:03-cf}~节的反事实）。
+\item $VR$ 的两侧。慢吸收把 $VR$ 推到 1 以上，bounce 把它推到 1 以下；二者同时增强时 $|VR-1|$ 反而缩小，读作效率改善。
+\item 噪声与信息。$b_k$ 下降可以是信息减少，也可以是价格噪声上升造成的衰减；Brogaard 分解的噪声份额受同样污染，不能分辨。
+\item B 组内部。存活偏差把 $b_k$ 向上推，测量误差把它向下拉，同一样本可以给出零。
+\end{itemize}
+
+判定规则有三条。配对：每个指标与另一族的一个指标事前配对，见表~\ref{tab:09-measures}末列，原则是污染来源不同，例如 $IR$ 配 $b_1$。primary：每族登记一个 primary，B 组因期限轴登记两个（$\delta_{k=1}$ 与 $\delta_{k=3}$），登记处是第~\ref{sec:06-inference}~节，其余为 secondary 且不进预测矩阵。跨族一致：结果须跨族符号一致，单族内的显著不算发现；若跨族分歧恰好与表~\ref{tab:09-measures}的污染列一致，即 D1 上升、$\Psi$ 下降、噪声份额上升同时出现，结论写作“不可识别”。
+
+诊断把预测矩阵在两个 predetermined 子样本上重跑：处理前一年零收益日占比高于与低于中位数的公司（$t-1$ 分组，第~\ref{sec:02-estimator}~节）。效应只在高零收益组出现，机械污染的解释就占上风。
+
+\begin{longtable}{@{}p{2.3cm}p{2.5cm}p{2.0cm}p{2.9cm}p{2.7cm}p{1.9cm}@{}}
+\caption{各指标的对象、数据需求、主要污染与薄市场偏差方向}\label{tab:09-measures}\\
+\toprule
+指标 & 理论对象 & 数据需求 & 主要污染 & 薄市场偏差方向 & 配对 \\
+\midrule
+\endfirsthead
+\multicolumn{6}{l}{\small 表\ref{tab:09-measures}（续）}\\
+\toprule
+指标 & 理论对象 & 数据需求 & 主要污染 & 薄市场偏差方向 & 配对 \\
+\midrule
+\endhead
+\midrule
+\multicolumn{6}{r}{\small 续下页}\\
+\endfoot
+\bottomrule
+\multicolumn{6}{@{}p{14.3cm}@{}}{\small 注：偏差方向指处理使成交变稀时，指标在无真实信息变化下的机械移动方向，以及该移动相对 WPL 假设符号是假阳性还是假阴性。“配对”为事前锁定的跨族配对，原则是污染来源不同；四个 family primary 的登记处是第~\ref{sec:06-inference}~节。}\\
+\endlastfoot
+Hou--Moskowitz D1 & 市场公共信息的吸收速度（轴一） & CRSP 周收益 & 非同步交易使滞后市场收益获得解释力 & 向上；A↓假阳性 & $\Psi$ \\
+\addlinespace
+Lo--MacKinlay $|VR-1|$ & 偏离随机游走的距离 & CRSP 日收益 & bounce 给负自相关，部分调整给正自相关\textbf{[需核验]}；取绝对值丢失符号 & 主要经 $VR<1$ 一侧推高；来源不可辨 & $b_1$ \\
+\addlinespace
+$\Psi=\ln(R^2/(1-R^2))$ & 类别学习下的共动（Peng--Xiong）；MYY 与 Roll 读法相反 & CRSP 日收益、行业指数 & stale price 压低 $\beta$，bounce 抬高残差 & 向下；与假设反向，假阴性或反号 & D1 \\
+\addlinespace
+BPS $b_{k,t}$ & 价格对 $k$ 年后盈利的预测能力（轴二） & Compustat 年度，$E_{t+k}$ 至 $k=5$ & 横截面粗糙；存活偏差；年末价格噪声致衰减 & 不定：存活向上，衰减向下 & $IR$ \\
+\addlinespace
+Dávila--Parlatore 股票层估计量 & 相对信息含量，公司层面 & 长时间序列的价格与基本面 & 新上市公司序列过短 & 长序列缺失导致的样本选择 & BPS \\
+\addlinespace
+$IR$ 吸收比率 & 单个申报事件的吸收速度 & CRSP 日收益、申报日期 & 分母近零；$[0,+5]$ 受 stale price，$[+6,+60]$ 受反转与溢价 & 向下；A↓假阳性 & $b_1$ \\
+\addlinespace
+Brogaard 等方差份额 & 价格变动的信息与噪声构成 & TAQ 日内签名订单流 & 稀疏交易下 signing 失效，噪声份额机械上升 & 噪声向上、公共向下；D2 假阳性 & 申报窗口方差份额 \\
+\addlinespace
+Amihud $ILLIQ$（对照） & 每美元成交额的价格冲击，Kyle $\lambda$ 代理 & CRSP 日收益、成交额 & 厚尾；分子分母同动 & 向上；Essay 1 的对象本身 & 无，作被剔除项 \\
+\end{longtable}
+\clearpage
+
+% ===== sec10_overlap =====
+\section{与 Essay 1 的逐项重合矩阵}\label{sec:10-overlap}
+
+重合程度分三档：“完全”指同一对象或同一构造，“部分”指对象相同而读法不同、或对象不同而由同一原始序列构造，“无”指 Essay 1 中没有对应物。Essay 1 一侧严格取自第~\ref{sec:02-essay1}~节与表~\ref{tab:02-ledger}。
+
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{3.5cm}>{\raggedright\arraybackslash}p{3.5cm}>{\centering\arraybackslash}p{1.1cm}>{\raggedright\arraybackslash}p{3.7cm}@{}}
+\caption{WPL 与 Essay 1 的逐项重合矩阵}\label{tab:overlap-matrix}\\
+\toprule
+维度 & Essay 1（按第~\ref{sec:02-essay1}~节还原） & Where Prices Learn & 重合程度 & 说明 \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small 表~\ref{tab:overlap-matrix}（续）}\\
+\toprule
+维度 & Essay 1（按第~\ref{sec:02-essay1}~节还原） & Where Prices Learn & 重合程度 & 说明 \\
+\midrule
+\endhead
+\midrule
+\multicolumn{5}{r@{}}{\small 续下页}\\
+\endfoot
+\bottomrule
+\multicolumn{5}{@{}p{13.6cm}@{}}{\small 注：重合程度三档定义见正文。Essay 1 列只转述内部审计记录中的既有设计，数字与日期见表~\ref{tab:02-ledger}；WPL 列只转述本备忘录第~\ref{sec:03-rq}~至~\ref{sec:09-measures}~节的设计内容，不含任何 WPL 实证结果。}\\
+\endlastfoot
+treatment 变量 &
+robots\_spec（Family B：robots.txt 中对具名 bot 的 Disallow 指令）；canonical cohort 为 broad23，以 timestamp-recovered first\_discovery\_block\_month 定义首次屏蔽月；narrow17 为稳健性。 &
+同一批 staggered 屏蔽事件，同一 first\_discovery\_block\_month。真正独立版本（第~\ref{sec:11-independent}~节）才引入 Class S / Class T token 三分类作为 first stage。 &
+完全 &
+最低配与强版本的 treatment 与 Essay 1 逐字相同；S-vs-T 安慰剂只改变 treatment 的解释，不改变其构造。 \\
+\addlinespace
+cohort 与样本 &
+CRSP/Compustat 匹配的美国上市公司；EXCHD$\in\{1,2,3\}$、SHRCD$\in\{10,11\}$、L.PRC$\geq 1$；robots\_spec 样本内 N=217（84 genuine open$\to$blocked、133 naming-on-wildcard，后者含 12 truly-inert）对 13,022 clean-never。 &
+同一 cohort、同一过滤。A 组指标额外要求周收益序列完整与最低非零交易日数，处理组可能因此缩小。 &
+完全 &
+样本上唯一的差别是 WPL 因指标构造而被迫加严过滤，两者是子集关系。 \\
+\addlinespace
+时间尺度 &
+月度面板（2016--2026）为 diagnostic；日度面板（2023--2026）；主结果在 filing-window 的日度事件窗。 &
+轴一为日与周（D1 用周收益，VR 用日收益，事件窗用日收益）；轴二为年度预测期限（BPS $k=1,\dots,5$）。 &
+部分 &
+短期尺度与 Essay 1 的日度事件窗重合；年度预测期限轴在 Essay 1 中没有对应物。 \\
+\addlinespace
+事件锚 &
+filing-window $[0,+5]$（10-K/10-Q 提交日）为 primary anchor；earnings-announcement 锚在双锚全扫描中为 null。 &
+C 组申报窗口方差份额与 A 组事件窗吸收比率均以同一 10-K/10-Q 提交日为锚；$[0,+5]$ 为短窗，$[0,+60]$ 为长窗。 &
+完全 &
+同一锚、同一短窗；WPL 增加长窗 $[0,+60]$ 与全年分母。 \\
+\addlinespace
+主因变量 &
+申报窗口 abnormal Amihud 的差分（式~\eqref{eq:02-aim}：$[0,+5]$ 窗口均值减 $[-30,-6]$ 局部基准均值）\citep{amihud2002}。 &
+A 组：D1 \citep{houmoskowitz2005}、$|VR(q)-1|$ \citep{lomackinlay1988}、吸收比率；B 组：BPS 分期限信息含量 $b_{k,t}\times SD_t[\log(M/A)]$ \citep{baiphilipponsavov2016}。 &
+无 &
+estimand 族不同。\citet{davilaparlatore2021} 表明交易成本与信息含量无单调关系，因此 Essay 1 的结果不蕴含 WPL 的结果。但 A 组与 Amihud 由同一日度收益与成交量序列构造，机械相关性需在第~\ref{sec:09-measures}~节的框架下检验。 \\
+\addlinespace
+次级因变量 &
+spread proxies（全部 null）；EDGAR 机器访问（与 AIM 同构的 abnormal 口径下所有访问类型 null，无补偿性替代渠道）；IBES 与 PEAD 均为 clean null；Amihud 分解为 $|ret|$、dvol、avar 三项。 &
+C 组：申报窗口方差份额 \citep{beaver1968}；D 组：同步性 $\Psi$ \citep{morckyeungyu2000,roll1988} 与 BNPW 方差分解 \citep{brogaardetal2022}。 &
+部分 &
+Essay 1 的 avar 分项与 WPL 的 C 组都是对收益方差的切分，只是分母不同（事件窗对全年）。PEAD null 与 A 组吸收比率在经济含义上相邻。 \\
+\addlinespace
+机制叙事 &
+10-Q 集中（低注意力）为主要机制；spread null 排除 Glosten--Milgrom 报价渠道，Kyle-$\lambda$ 为归宿；disagreement 加 thin-day fragility；uncovered / 低机构持股为效应所在。 &
+屏蔽切断的是“被找到”这一层，“存在”不变 \citep{hubermanregev2001,engelbergparsons2011}；Dugast--Foucault 替代对 Grossman--Stiglitz 外延边际；Peng--Xiong 类别学习；Merton 认知向下粘性。 &
+部分 &
+Kyle 对 GM 的判定与 Merton 认知渠道两块为共享 \citep{kyle1985,glostenmilgrom1985,merton1987}。DF/GS/PX 三方竞赛在 Essay 1 中不存在。 \\
+\addlinespace
+理论 spine &
+RFC-9309 measurement panel 为 spine；流动性结果 underpowered，作为核心之一；不以某一理论模型为骨架。 &
+价格学习的期限结构：\citet{dugastfoucault2018} 反向、\citet{grossmanstiglitz1980} 外延边际、BPS 期限信息含量，三者互为可证伪对照。 &
+无 &
+Essay 1 的 spine 是一个测量对象，WPL 的 spine 是一组竞争理论；两者在微观基础上都借用 Kyle 深度渠道，那停在机制层。 \\
+\addlinespace
+识别装置（含 unblock、Gao--Huang 镜像） &
+BJS imputation \citep{borusyakjaravelspiess2024} 加 12 期 pretrend gate，TWFE 对照，选项与聚类见第~\ref{sec:02-estimator}~节；G-gate 为 power-limited；Cloudflare 不是 IV；unblock 只有描述性对称图，无因果估计；无镜像基准。 &
+同一 BJS 与 pretrend gate，estimand 不同；新增 block/unblock 不对称检验 \citep{chennoronhasingal2004}；以 \citet{gaohuang2020} 的 EDGAR 分批上线为符号事前锁定的镜像；S-vs-T 安慰剂仅在真正独立版本中出现。 &
+部分 &
+估计器、事件、聚类与 gate 全部相同；unblock 与镜像是附加检验，只有 S-vs-T first stage 才算新的识别来源。 \\
+\addlinespace
+异质性分组 &
+new/micro 与 uncovered（低机构持股）；predetermined-moderator 规则（$t-1$ 或 pre-block 均值）；10-Q 对 10-K（差异 n.s.）。 &
+Merton 的 $(1-q)/q$ 认知异质性，代理变量同样是机构持股与 breadth；拥挤度交互 \citep{hirshleiferlimteoh2009}；薄交易与 stale-price 分层作为内部效度检验。 &
+部分 &
+uncovered 分组与 $(1-q)/q$ 在数据上是同一变量的两种理论读法；拥挤度交互与 stale-price 分层为新增。 \\
+\addlinespace
+贡献声明 &
+公司层 robots.txt 十年面板 \textbf{[需核验]}；屏蔽发现型 bot 后 filing-window price impact 上升，口径与区间见第~\ref{sec:02-ledger}~节；效应集中于 uncovered 公司。 &
+可发现性是价格信息含量的独立维度；识别的是信息结构在速度轴与期限轴上的重组，不涉及水平的整体升降；预测矩阵（表~\ref{tab:04-predictions}）给出七种可区分的结果模式。 &
+部分 &
+两者都建立在“屏蔽爬虫的市场后果”之上；贡献是否独立取决于 B 组能否与 A 组分离，两组同向变动则退化为 market-quality decomposition。 \\
+\addlinespace
+目标文献社区 &
+市场微观结构与流动性；披露与流动性 \citep{diamondverrecchia1991,balakrishnanetal2014}；公司网站作为披露渠道 \citep{boullandbourveaubreuer2026}。 &
+price informativeness \citep{baiphilipponsavov2016,davilaparlatore2026,farboodietal2022}；data abundance \citep{dugastfoucault2018,dugastfoucault2025,goldsteinspattye2021}；媒体与注意力 \citep{engelbergparsons2011,peress2014}。 &
+部分 &
+两篇都要在“数据与市场”对话中定位，读者群重叠；informativeness 的审稿人期待理论对照与期限结构，liquidity 的审稿人期待微观结构机制。 \\
+\end{longtable}
+
+\subsection{逐行判定}\label{sec:10-rowwise}
+
+十二行中三行“完全”、七行“部分”、两行“无”，权重并不相等。审稿人最先看三行“完全”：treatment、cohort 与事件锚一致，处理组公司、处理时点与事件日历就完全一致，差别只能来自因变量与理论。2026-09-01 外部裁决正是这么概括的：同一事件的 market-quality decomposition（第~\ref{sec:12-referees}~节回应）。
+
+七行“部分”分三层。构造层（时间尺度、次级因变量、异质性分组）共用同一日度序列、同一收益方差、同一机构持股变量，问题出在可信性：A 组与 Amihud 的机械相关会让审稿人怀疑 WPL 只是 Essay 1 的代数变换。继承层（机制叙事、识别装置）把 Kyle 对 GM 的判定、Merton 认知渠道、BJS 与 pretrend gate 整套搬来，新增的 unblock 不对称与镜像提高可证伪性，检验的仍是同一批事件。定位层（贡献声明、目标文献）最有弹性，也最依赖尚未得到的结果。
+
+两行“无”承载了 WPL 全部的独立性主张：主因变量换掉 estimand 族（第~\ref{sec:03-estimand}~节），理论 spine 换成三方理论竞赛，七种可区分模式全靠这两行。共享集中在处理、样本、锚点与估计器四处，独立性通常由这四处决定，写作层面无法修补。
+
+\subsection{独立成篇的必要条件与逐项打分}\label{sec:10-conditions}
+
+评审惯例对“独立成篇”通常要求四个条件\textbf{[需核验]}。
+
+\begin{enumerate}[leftmargin=2em, itemsep=2pt]
+\item 独立的研究问题：去掉另一篇，本篇的问题仍成立且值得回答。\textbf{满足。}“价格还学不学得到东西、什么时候学、学的是哪类东西”不依赖“交易变贵了吗”的答案（第~\ref{sec:03-cf}~节）；Essay 1 的 headline 归零，WPL 的问题仍在。
+
+\item 独立的理论：本篇的假设由不同于另一篇的模型推出，预测在符号或形状上可分离。\textbf{满足}，条件是 B 组真正实施为分期限的 BPS 估计：\citet{dugastfoucault2018} 反向、\citet{grossmanstiglitz1980} 外延边际与 \citet{pengxiong2006} 类别学习在 Essay 1 中都不存在。B 组退化为单一信息含量指标，这一条即失守。
+
+\item 不是同一事件的下游结果：本篇的因变量不能只是另一篇因变量所在的市场质量向量中的另一个分量。\textbf{部分满足。}A、C、D 三组都由 Essay 1 用过的日度收益与成交量序列构造，只有 B 组的年度期限信息含量用未来盈利对当期估值的回归，脱离该向量；这一条完全押在 B 组上。
+
+\item 独立的识别来源：本篇至少有一个另一篇没有的变异来源或 first stage，两篇的内部效度不共享同一个失败点。\textbf{最低配与强版本均不满足}：同一批屏蔽事件、同一 BJS、同一 pretrend gate，unblock 不对称与镜像只是附加检验；新的变异来源只来自真正独立版本的 Class S 对 Class T 三分类与前瞻试点的 SERP 可见度变化（第~\ref{sec:11-independent}~节）。
+\end{enumerate}
+
+两条满足、一条部分满足、一条取决于版本，裁决见第~\ref{sec:13-verdict}~节。杠杆两根：B 组的完整实施决定第三条，真正独立版本的 first stage 决定第四条。
+\clearpage
+
+% ===== sec11_versions =====
+\section{三种版本：最低配、强版本、真正独立版本}\label{sec:11-versions}
+
+三种版本的分野在识别来源。前两种沿用 Essay 1 的 staggered 屏蔽事件，只换 estimand；第三种换掉 treatment，或把 robots.txt 状态降为预定的调节变量。成本只给定性排序。
+
+\subsection{最低配：并入 Essay 1 的机制与效率扩展}\label{sec:11-minimal}
+
+最低配把 WPL 压缩成 Essay 1 的第二个结果族，命名为 price discovery timing，四个指标进入。第一是事件窗吸收比率：
+\begin{equation}\label{eq:11-ir}
+IR_{i,f}=\frac{\left|CAR_{i}[0,+5]\right|}{\left|CAR_{i}[0,+60]\right|},\qquad
+IR^{\text{fine}}_{i,f}=\frac{\hat b_{\text{short}}}{\hat b_{\text{long}}},
+\end{equation}
+$f$ 索引 10-K/10-Q 申报事件，构造同式~\eqref{eq:06-IR}\citep{dellavignapollet2009}；两版共用同一个长窗分母，净方向按第~\ref{sec:07-ir}~节记为待定，只作 secondary，A 组的判定由登记的 $D1_{iy}$ 承担。第二是拥挤度交互，取屏蔽前均值 $\overline{Crowd}_i$（never-treated 公司用样本期前半段），以满足第~\ref{sec:06-inference}~节的 predetermined-moderator 规则\citep{hirshleiferlimteoh2009}。
+
+第三是方差份额的季度版本。这里不选 BPS：$b_{k,t}$ 是逐年的横截面系数，公司层面的面板变量要另造\citep{baiphilipponsavov2016}。
+\begin{equation}\label{eq:11-vshare}
+S^{q}_{i,q}=\frac{|W_{i,q}|^{-1}\sum_{d\in W_{i,q}}\tilde r_{i,d}^{2}}{|N_{i,\mathrm{year}(q)}|^{-1}\sum_{d\in N_{i,\mathrm{year}(q)}}\tilde r_{i,d}^{2}},
+\end{equation}
+$W_{i,q}$ 为季度 $q$ 内各申报窗口 $[0,+5]$ 的并集，$\tilde r$ 为市场调整后的日对数收益；与式~\eqref{eq:06-var-share} 的差别只在分母取整个财年的窗口外交易日，让四个季度共用一个基准\citep{beaver1968}。第四是 block/unblock 不对称：撤销 Disallow 的事件编码为 unblock cohort，检验 $H_0:\tau_{\text{block}}+\tau_{\text{unblock}}=0$，方向的待定登记见表~\ref{tab:08-predictions} 注 (a)\citep{merton1987,chennoronhasingal2004}。
+
+估计方程与 Essay 1 相同：
+\begin{equation}\label{eq:11-min}
+Y_{i,f}=\alpha_i+\lambda_{t(f)}+\tau_1 D_{i,t(f)}+\tau_2\, D_{i,t(f)}\times \overline{Crowd}_i+\gamma' X_{i,q-1}+\varepsilon_{i,f},
+\end{equation}
+$Y$ 依次取 $IR$ 与 $S^{q}$，$\tau_1$ 由 did\_imputation 估计。$\tau_2$ 需另行估计：did\_imputation 只给填补差分的加权均值，不估计 $D\times Z$ 的斜率，故改用两步，先在未处理观测上外推 $\hat Y_{i,f}(0)$，再把处理观测的填补差分对标准化的 $\overline{Crowd}_i$ 回归，标准误用 cluster bootstrap 覆盖两步\citep{borusyakjaravelspiess2024}。
+
+它给 Essay 1 添加的是时点：price impact 上升之外，价格学习还向申报窗口集中\citep{kyle1985}。代价是第~\ref{sec:09-measures}~节的机械污染，需按 pre-block 交易频率分层并过滤零成交日。
+
+\subsection{强版本：同一处理下独立成篇的最强形态}\label{sec:11-strong}
+
+强版本的 spine 是第~\ref{sec:04-theory}~节的理论竞赛，A/B/C/D 四组全部进入，预测矩阵在数据打开前锁定，符号基准取 Gao--Huang 镜像\citep{gaohuang2020}。每族登记一个 primary，B 组因期限轴登记两个（$\delta_{k=1}$ 与 $\delta_{k=3}$）；多重检验按第~\ref{sec:06-inference}~节的登记执行，四个 primary 之间做 BH 校正，secondary 在 family 内校正。
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{强版本的 family primaries 与事前锁定的预测符号}\label{tab:11-primaries}
+\small
+\begin{tabular}{llccc}
+\toprule
+Family & Primary & DF 反向 & GS 外延边际 & Peng--Xiong \\
+\midrule
+A 速度 & $D1_{iy}$，式~\eqref{eq:06-D1} & $+$ & $+$ & $0$ \\
+B 中期 & $\delta_{k=1}$，式~\eqref{eq:05-bps-did} & $0$ 或 $-$ & $-$ & $0$ \\
+B 长期 & $\delta_{k=3}$，式~\eqref{eq:05-bps-did} & $0$ 或 $+$ & $-$ & $0$ 或 $-$ \\
+C 再配置 & $\ln S_{iy}$，式~\eqref{eq:06-var-share} & $+$ & $?$ & $0$ \\
+D 构成 & $\Psi_{iy}$，式~\eqref{eq:06-psi} & $0$ & $+$ & $+$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item 注：表中为设计预测符号，不含估计结果。$D1$ 与 $\Psi$ 数值越大分别表示吸收越慢、共动越强，与表~\ref{tab:04-predictions} 的箭头一一对应。C 组强制同时报告 $\ln V^{W}_{iy}$ 与 $\ln V^{N}_{iy}$ 的分解，$k\ge4$ 事前标为数据到期前不识别。四个 family primary 的登记处是第~\ref{sec:06-inference}~节，本表只作转录；$IR^{\text{fine}}$ 与季度 $S^{q}_{i,q}$ 在强版本内降为 secondary。DF 反向指 \citet{dugastfoucault2018} 的 raw 数据变贵，GS 指 \citet{grossmanstiglitz1980}，Peng--Xiong 指 \citet{pengxiong2006}，其识别以 A 组不动为前提。B 组按 \citet{baiphilipponsavov2016}，交叉验证用 \citet{davilaparlatore2026}；$\Psi$ 来自 \citet{morckyeungyu2000}，解读须与 A 组配对\citep{roll1988}。
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+强版本在 estimand 层面拉得开，在识别层面拉不开。DF 与 GS 对长期信息含量给出相反预测，B 组结果无法从 Essay 1 的符号推出，“全部不动”也是被接受的结果；而 treatment、样本、事件锚与估计器全部共享。新增工作与最大风险都落在 B 组：分期限系数是横截面对象，要在 broad23 canonical cohort（narrow17 作稳健性）上做出 $k=1$ 与 $k=3$ 的对比，需股票层估计量作替代，其在微型股上的稳定性尚未验证。
+
+\subsection{真正独立版本：换识别来源或换 treatment}\label{sec:11-independent}
+
+独立的条件只有一条：审稿人读完识别一节，不能把它归结为 Essay 1 的同一批事件。三条路线的要素对照见表~\ref{tab:11-versions}，独立程度按 (i)、(ii)、(iii) 递增。
+
+\paragraph{(i) 测得的可见度 first stage。}treatment 从“robots.txt 文本被改写”变为“核实的可发现性损失”，识别来自 token 三分类：Class S 的 Disallow 应当改变搜索可见度，Class T 按厂商文档为零效应。回溯路线已经试过并且失败，以 Common Crawl 的 CCBot 合规性做历史 first stage 的方案 2026-06-13 启动、2026-06-15 判定失败，规模 4{,}366 个 canonical host（1{,}431 处理、2{,}935 clean-never）\footnote{内部审计记录 2026-06-15。}。重心整个落到前瞻试点：12 条冻结查询、周度 SERP 抓取、$[-8,+26]$ 周窗口、3:1 匹配对照。
+\begin{align}
+V_{i,w}&=\pi_S\, S_{i,w}+\pi_T\, T_{i,w}+\alpha_i+\lambda_w+u_{i,w},\label{eq:11-fs}\\
+Y_{i,w}&=\beta_S\, S_{i,w}+\beta_T\, T_{i,w}+\alpha_i+\lambda_w+e_{i,w}.\label{eq:11-ss}
+\end{align}
+工具只取 $S_{i,w}$，$T_{i,w}$ 在两式中都只作安慰剂读数。判定要两层同时通过：$\pi_T$ 的 95\% CI 排除 $\pi_S/2$，$\beta_T$ 的 95\% CI 排除 $\beta_S/2$；任一层失败，(i) 退回强版本。Essay 1 的交易层机制是一条不经 SERP 的通道，排除限制因此只支持把 $\beta_S/\pi_S$ 读作 ITT 的 first-stage 缩放。\citet{stice2023} 是最近的先例，区别在 first stage 由测量给出。
+
+\paragraph{(ii) 外生传播冲击，可发现性作预定调节变量。}识别来自与公司无关的信息供给冲击，robots.txt 降为 $t-1$ 期的状态变量，\citet{kellyljungqvist2012} 与 \citet{balakrishnanetal2014} 的券商关闭是模板。
+\begin{equation}\label{eq:11-mod}
+Y_{i,t}=\beta_1\,\text{Shock}_{i,t}+\beta_2\,\text{Shock}_{i,t}\times \text{Blocked}_{i,t-1}+\alpha_i+\lambda_t+\varepsilon_{i,t}.
+\end{equation}
+此版本下 WPL 不再需要 staggered DID，与 \citet{changljungqvisttseng2023} 的区分点是结果变量落在价格上。新增数据是冲击事件表，2016 年之后的券商关闭事件是否足够多、\citet{peress2014} 式的报纸罢工在样本期内是否存在，均\textbf{[需核验]}。
+
+\paragraph{(iii) Gao--Huang 式到达冲击的反向运用。}要找一个可发现性的到达事件：某个搜索或索引服务在特定时点开始覆盖某类公司页面，公司不能拒绝\citep{gaohuang2020}。WPL 由此成为双向检验，两个方向上的 B 组结果共同判定 DF 与 GS；候选事件\textbf{[需核验]}。暴露度若由公司自身的网站结构决定，识别就退回 Essay 1 的选择问题。
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{三种版本的要素对照}\label{tab:11-versions}
+\footnotesize
+\begin{tabular}{>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{2.4cm}}
+\toprule
+ & 最低配 & 强版本 & 独立 (i) & 独立 (ii) & 独立 (iii) \\
+\midrule
+研究问题 & 屏蔽后价格学习是否向申报窗口集中、吸收是否变慢 & 屏蔽是否引发 DF 替代、GS 下沉或类别学习 & 核实的可发现性损失是否改变价格学习 & 外生信息供给冲击下，不可发现的公司是否恶化更多 & 可发现性到达与屏蔽是否对称 \\
+识别来源 & Essay 1 的 staggered 屏蔽事件 & 同上 & S-vs-T token 对比加新测的 first stage & 券商关闭型外生冲击，robots.txt 为 $t-1$ 调节变量 & 不由公司选择的到达事件 \\
+主 estimand & 式~\eqref{eq:11-min} 的 $\tau_1$、$\tau_2$ 与不对称检验 & 四个 family primary 的 BJS 系数 & 式~\eqref{eq:11-ss} 的 $\beta_S$ 及其与 $\pi_S$ 之比 & 式~\eqref{eq:11-mod} 的 $\beta_2$ & 到达事件的 BJS 系数及其与屏蔽系数的对比 \\
+Essay 1 保留 & 全部，本族为附加结果 & 全部，两篇共享事件 & 全部 ITT，另得 first stage & 全部，robots.txt 降为状态变量 & 全部 \\
+最小新增数据 & 申报日历、unblock 事件解析 & B 组与 D 组的构造 & 前瞻 SERP 抓取（Common Crawl 回溯路线已失败） & 冲击事件表 & 到达事件日期与暴露度 \\
+最大风险 & 薄交易机械污染 & B 组功效与识别层共享 & Disallow $\neq$ deindex，first stage 近零 & 共同支撑太薄 & 找不到外生且有暴露差异的事件 \\
+工作量排序 & 最低 & 中 & 中高 & 中 & 不确定 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item 工作量只给定性排序。独立 (iii) 的工作量取决于是否存在可用的到达事件，在事件确定前无法排序。
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+采纳哪一版取决于第~\ref{sec:12-referees}~节的模拟审稿，裁决见第~\ref{sec:13-verdict}~节。约束只有一条：若并入，最低配就是并入的全部，强版本的 B 组与 D 组不应以附录形式塞进 Essay 1，那只会把 salami-slicing 指控换成 kitchen-sink 指控。
+\clearpage
+
+% ===== sec12_referees =====
+\section{模拟审稿人：为何要求合并，如何反驳}\label{sec:12-referees}
+
+第\ref{sec:10-overlap}节的矩阵与第\ref{sec:11-versions}节的三种版本在这里交给虚拟审稿人。每条反对意见之后是反驳与所需证据，证据一律前瞻。
+
+\subsection{方法论审稿人}\label{sec:12-methodology}
+
+\begin{enumerate}[label=M\arabic*., leftmargin=*, itemsep=4pt]
+\item \textbf{处理与队列完全共享。}同一个 broad23 队列、同一套 imputation、同一个 filing-window $[0,+5]$\citep{borusyakjaravelspiess2024}。\emph{反驳}：强版本只能承认继承，赌注押在结果模式对 Essay 1 系数的非单调上\citep{davilaparlatore2021}；可检验的反驳来自 token 三分类，Class T 的 95\% 置信区间排除 Class S 点估计的一半。
+
+\item \textbf{薄市场对 A 组指标的机械污染。}delay、VR 与 $R^2$ 都是收益序列的函数\citep{houmoskowitz2005,lomackinlay1988,morckyeungyu2000,goyenkoholdentrzcinka2009}，而 Essay 1 的效应集中在 new/micro、低机构持股的公司\footnote{内部审计记录 2026-06-09、2026-06-11。}。\emph{反驳}：机械上限与预定 moderator 见第\ref{sec:09-conflicts}节。年末价格噪声只把 $b_k$ 向 GS 的方向衰减，B 组因此能把机械叙事与 DF 替代分开；A 组在处理公司上与 stale price 不可分离。
+
+\item \textbf{年度结果上的 pretrend 与期限混淆。}$b_{k,t}$ 是逐年横截面斜率，十年面板放不下 12 期 pretrend gate，$k=5$ 又只有早期事件能观测\citep{bakerlarckerwang2022,sunabraham2021}。\emph{反驳}：固定队列的阶梯规则见第\ref{sec:05-long}节 (i)--(iii)，$k\ge 4$ 事前登记为“数据到期前不识别”，判定只用 $\delta_{k=1}$ 与 $\delta_{k=3}$。
+
+\item \textbf{大因变量电池的多重检验。}四组指标乘期限、窗口与事件锚，检验数轻易过百，而 Essay 1 的两锚全扫描里显著个数与偶然率相当\footnote{内部审计记录 2026-06-07。}。\emph{反驳}：矩阵按联合模式判定。每族登记一个 primary，B 组因期限轴登记两个（$\delta_{k=1}$ 与 $\delta_{k=3}$），登记处是第\ref{sec:06-inference}节，校正按同一处执行，其余指标进附录。
+
+\item \textbf{RFC 9309 与处理编码。}“最具体组”规则让具名指令可以使通配符失效，而 Essay 1 的编码在 first stage 之前没有做 token 分类，Disallow 也不等于 deindex\footnote{内部审计记录 2026-09-07。}。\emph{反驳}：强版本内无解，出路是第\ref{sec:11-independent}节 (i) 的实测 SERP first stage。
+\end{enumerate}
+
+\subsection{领域审稿人}\label{sec:12-domain}
+
+\begin{enumerate}[label=D\arabic*., leftmargin=*, itemsep=4pt]
+\item \textbf{EDGAR 传播已被占位。}\citet{gaohuang2020} 与 \citet{changljungqvisttseng2023} 已用 EDGAR 分批上线做过传播技术与分析师行为，何况 Essay 1 的 EDGAR 机器访问结果在做同一件事。\emph{反驳}：事件 TWFE 下 form-10K 访问为 $-11\%$ 至 $-18\%$，但与 AIM 同构的 abnormal 口径下 periodic、10-K、10-Q、8-K 全部为 null，当前锁定的表述是“无补偿性替代渠道”\footnote{内部审计记录 2026-05-19 与 2026-06-14。}。镜像只提供事前锁定的符号基准（第\ref{sec:07-entries}节），冲击沿用 \citet{engelbergparsons2011} 的逻辑，贡献落在分期限信息含量上。
+
+\item \textbf{机器获取已被占位。}\citet{stice2023}、\citet{jager2020} 与 \citet{pungaliyawang2022} 分别看 Google 的信息供给与 EDGAR 机器下载，WPL 只是把供给侧换成公司自己的 robots.txt。\emph{反驳}：那三篇的作用点在 EDGAR 端与结果页，WPL 的冲击落在公司网站这一层，而 \citet{boullandbourveaubreuer2026} 已确立网站是独立的披露渠道；要真正分开，须显示效应经由 Class S。
+
+\item \textbf{事实与理论都已被占位。}\citet{farboodietal2022} 已记录小公司信息含量停滞，\citet{dugastfoucault2018,dugastfoucault2025} 给出理论，而 DF 的预测关于数据变多。\emph{反驳}：DF 反向要写成“替代是否发生”的假设，与 \citet{grossmanstiglitz1980} 互为可证伪对照，负向数据冲击的少数模板之一是 \citet{peress2014} 的报纸罢工；所需证据仍是 token 分类。
+
+\item \textbf{什么是新的。}已知冲击加已知指标，等于第二张因变量表。\emph{反驳}：两处不在 Essay 1 也不在上列文献里。申报窗口再配置把 \citet{beaver1968} 与 \citet{liramesh2009} 的窗口方差比放到可发现性冲击下；block/unblock 不对称用 \citet{chennoronhasingal2004} 与 \citet{merton1987} 的认知向下粘性区分认知存量与技术成本机制，\citet{davilaparlatore2026} 的股票层估计量作交叉验证。两者必须进主结果。
+\end{enumerate}
+
+\subsection{魔鬼代言人}\label{sec:12-devil}
+
+不打分，只找最弱处，替编辑起草那封“建议并入第一篇”的信。
+
+\begin{enumerate}[label=A\arabic*., leftmargin=*, itemsep=4pt]
+\item \textbf{同一冲击、同一公司、同一窗口，结果是同一对象的分解。}Essay 1 的 Amihud 分解已报告 $|r|$ 与 $\mathit{dvol}$ 同升、avar 上升\footnote{内部审计记录 2026-06-12。}；C 组的 $S_{iy}$（式~\eqref{eq:07-share}）分子里是同一窗口的同一个 $|r|$。\emph{反驳}：份额是相对量，Essay 1 未按方差份额形式报告窗口外。事件特异性分解显示 abnormal 差分的上升在算术上来自局部基准窗口的下降\footnote{内部审计记录 2026-06-13。}，对应第\ref{sec:07-trap}节的分子不动、分母降一格：C 组必须显示 $\ln V^{W}_{iy}$ 上升，$\ln V^{N}_{iy}$ 单独报告，并报告屏蔽前 A 组、C 组与 Amihud 的相关。A 组共享收益序列这一点无法反驳。
+
+\item \textbf{\citet{davilaparlatore2021} 必要不充分。}任何流动性论文都可以引这篇，再加一张信息含量表。\emph{反驳}：同意，没有任何数据能把“估计对象不同”变成充分条件，充分性由问题本身给出。
+
+\item \textbf{无论落在矩阵哪一格，都不需要第二篇。}只有 B 组的模式是新的，而 B 组恰是识别最弱的一组（M3）。\emph{反驳}：这条恰好给出独立成篇的条件，B 组必须是主结果；所需证据是 $\delta_{k=1}$ 在固定队列上的估计与其 pretrend。
+
+\item \textbf{更简单的叙事。}薄交易的小公司变得更薄，所有指标机械跟随。\emph{反驳}：机械叙事对 B 组的预测是经由价格噪声的向下衰减，与 GS 同向；能把两者分开的只有 B 组长期不动或上升，若 B 组与 A 组同时下降，两个解释都未被排除。
+
+\item \textbf{预测矩阵是叙事保险。}每格都有故事：A 降 B 平是 DF，A 降 B 降是 GS，A 平 $R^2$ 升是 \citet{pengxiong2006}。\emph{反驳}：矩阵有两个可拒绝格，“全部不动”与“A 不动而 B 动”，两格都要在数据前锁定。S-vs-T 安慰剂失败则全部格子失去意义，与 M5 同源。
+\end{enumerate}
+
+\subsection{反驳的边界}\label{sec:12-boundary}
+
+表~\ref{tab:12-boundary} 把十四条反对意见按“哪个版本能答”分列，版本含义沿用第\ref{sec:11-versions}节。
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{反对意见与可答版本}\label{tab:12-boundary}
+\begin{tabular}{@{}lp{4.6cm}cccp{4.2cm}@{}}
+\toprule
+编号 & 反对意见 & 最低配 & 强版本 & 独立版本 & 备注 \\
+\midrule
+M1 & 共享处理与队列 & 否 & 部分 & 可 & 强版本只能靠矩阵非单调 \\
+M2 & 薄市场机械污染 & 否 & 部分 & 部分 & 处理公司上 A 组不可分离 \\
+M3 & 年度 pretrend 与期限混淆 & 否 & 部分 & 部分 & $k\ge 4$ 等数据到期 \\
+M4 & 多重检验 & 否 & 可 & 可 & 预注册主指标 \\
+M5 & RFC 9309 编码 & 否 & 否 & 可 & \\
+D1 & Gao--Huang 镜像 & 否 & 部分 & 可 & 条件于 B 组模式 \\
+D2 & 机器获取文献 & 否 & 否 & 可 & 需 Class S 渠道 \\
+D3 & DF 反向对称性 & 否 & 否 & 部分 & 模型对称性是理论问题 \\
+D4 & 什么是新的 & 否 & 可 & 可 & C 组与不对称为主结果 \\
+A1 & 同一对象的分解 & 否 & 部分 & 部分 & A 组永远共享收益序列 \\
+A2 & DP2021 必要不充分 & 否 & 否 & 否 & 论证问题，非证据问题 \\
+A3 & 哪一格都不需要第二篇 & 否 & 部分 & 可 & B 组须为主结果 \\
+A4 & 简单叙事 & 否 & 部分 & 部分 & B 组只与 DF 可分，与 GS 同向衰减 \\
+A5 & 矩阵是叙事保险 & 否 & 部分 & 可 & 安慰剂失败则全盘失效 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item “可”指该版本内有一条可执行的反驳且其证据可以被观测到；“部分”指反驳成立但覆盖不全或依赖尚未识别的 B 组；“否”指该版本内无反驳。表中不含任何估计结果。
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+强版本能完整回答的只有 M4 与 D4，其余每一条都经过 B 组，而 B 组正是 M3 指出的识别最弱处。独立版本多答出的六条共用同一个机制：first stage 把处理变量从“robots.txt 里出现某个名字”变成“搜索可见度被切断”，代价见第\ref{sec:11-independent}节。答不了的三条半是 M3 的日历约束、M2 在处理公司上的结构约束，以及 A2 与 D3 的论证部分；第\ref{sec:13-verdict}节的裁决必须带着它们走。
+\clearpage
+
+% ===== sec13_verdict =====
+\section{最终裁决}\label{sec:13-verdict}
+
+裁决按第~\ref{sec:11-versions}~节的三种版本分层，依据是第~\ref{sec:10-overlap}~节的重合矩阵、第~\ref{sec:12-referees}~节的模拟审稿，以及作者本人的排序：论文集的连贯性立在共享的经济摩擦上。这一条最重，它意味着同一批 robots.txt 事件换一组因变量再跑一遍不能算第二篇。
+
+\paragraph{最低配版本：立即并入 Essay 1。}
+内容是 A 组速度指标、filing-window 方差份额与 block/unblock 对称性检验。重合按第~\ref{sec:10-overlap}~节逐项成立，新的只有被解释变量与 unblock 这一半变异，模拟审稿人 market-quality decomposition 的概括准确。它的位置是机制章的一个小节：price impact 上升之后，价格对信息的吸收是否也变慢\citep{davilaparlatore2021}。
+
+\paragraph{强版本：不足以独立成篇，除非三个条件同时成立。}
+\begin{enumerate}[label=(\Alph*),leftmargin=2em]
+\item 有实测的 first stage，且 Class S 与 Class T 的对比在可见度与结果两层同时通过：第一阶段 Class T 系数的 95\% 置信区间排除 Class S 点估计的一半，reduced form 上同样成立。
+\item block/unblock 不对称升格为独立的 estimand：unblock 事件有独立的 pretrend gate，不对称参数有事前登记的内容，方向按表~\ref{tab:08-predictions} 注 (a) 登记为待定\citep{merton1987,chennoronhasingal2004}。
+\item 预测矩阵事前登记，且至少一个 B 组或 D 组的指标族作为主要结果\citep{baiphilipponsavov2016,morckyeungyu2000,brogaardetal2022}。只有速度类结果的论文仍然是 Essay 1 的延长线。
+\end{enumerate}
+三条缺一不可：(A) 解决处理是什么，(B) 解决估计什么，(C) 解决论文讲什么。缺 (A)，第~\ref{sec:12-referees}~节的审稿意见无法回应；缺 (C)，第~\ref{sec:09-measures}~节的 stale price 污染会吞掉主要结果。
+
+\paragraph{真正独立版本：以更换识别来源为前提。}
+推荐路径 (iii)，次选路径 (i)。路径 (iii) 把冲击从内容持有方挪到发现方，处理来自公司不能自选的平台侧可发现性变动，符号以 Gao--Huang 镜像事前锁定\citep{gaohuang2020}；它优先的理由是同时切断与 Essay 1 的处理重合和样本重合，而共享的摩擦原封不动。路径 (i) 是第~\ref{sec:11-independent}~节的前瞻试点；回溯式的 Common Crawl 合规性 first stage 已判定失败，它只剩前瞻一条路，更适合作 (iii) 的 first-stage 补件。路径 (ii) 不作推荐，共同支撑过薄，须先核验样本期内的券商关闭事件数才能转为备选。
+
+\paragraph{改变裁决的条件。}
+裁决按表~\ref{tab:13-decision-rule} 升降，不按结果的显著性升降。触发条件在结果出来之前可判定。
+
+\begin{table}[htbp]
+\centering
+\caption{裁决的升降规则}
+\label{tab:13-decision-rule}
+\begin{threeparttable}
+\begin{tabular}{@{}p{0.42\linewidth}p{0.5\linewidth}@{}}
+\toprule
+事前可判定的触发条件 & 对裁决的作用 \\
+\midrule
+(A)(B)(C) 在数据接触前全部登记，且 (A) 通过 & 强版本升为独立章节 \\
+(A) 未通过：Class T 与 Class S 估计不可区分 & 强版本降为最低配；Essay 1 机制章的“可发现性”表述改为“命名” \\
+路径 (iii) 找到一个公司不能自选的平台侧到达冲击，且其 pretrend 通过 & 真正独立版本启动；最低配仍并入 Essay 1 \\
+路径 (iii) 一年内找不到合格冲击 & 执行路径 (i) 作为 first stage 补件；WPL 保持并入状态 \\
+A 组指标在薄交易修正后与修正前符号相反 & 全部速度类结果退出主要结果 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item 注：表中每一行都不依赖 B 组或 D 组的估计值。任何以“结果显著”为条件的升级都被排除，以免裁决本身成为 specification search。
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+收束：最低配并入，强版本待 (A)(B)(C)，独立版本换冲击。共享摩擦是论文集的线，共享处理不是。
+\clearpage
+\clearpage
+\begin{thebibliography}{99}
+\setlength{\itemsep}{0.3em}
+\bibitem[Amihud(2002)]{amihud2002} Amihud, Y. (2002). Illiquidity and stock returns: Cross-section and time-series effects. Journal of Financial Markets, 5(1), 31–56.
+\bibitem[Bai et al.(2016)]{baiphilipponsavov2016} Bai, J., Philippon, T., \& Savov, A. (2016). Have financial markets become more informative? Journal of Financial Economics, 122(3), 625–654.
+\bibitem[Baker et al.(2022)]{bakerlarckerwang2022} Baker, A. C., Larcker, D. F., \& Wang, C. C. Y. (2022). How much should we trust staggered difference-in-differences estimates? Journal of Financial Economics, 144(2), 370–395.
+\bibitem[Balakrishnan et al.(2014)]{balakrishnanetal2014} Balakrishnan, K., Billings, M. B., Kelly, B., \& Ljungqvist, A. (2014). Shaping liquidity: On the causal effects of voluntary disclosure. Journal of Finance, 69(5), 2237–2278.
+\bibitem[Ball and Brown(1968)]{ballbrown1968} Ball, R., \& Brown, P. (1968). An empirical evaluation of accounting income numbers. Journal of Accounting Research, 6(2), 159–178.
+\bibitem[Beaver(1968)]{beaver1968} Beaver, W. H. (1968). The information content of annual earnings announcements. Journal of Accounting Research, 6 (Supplement), 67–92.
+\bibitem[Beaver et al.(2020)]{beavermcnicholswang2020} Beaver, W. H., McNichols, M. F., \& Wang, Z. Z. (2020). Increased market response to earnings announcements in the 21st century: An empirical investigation. Journal of Accounting and Economics, 69(1), 101244.
+\bibitem[Bodnaruk and Ostberg(2009)]{bodnarukostberg2009} Bodnaruk, A., \& Ostberg, P. (2009). Does investor recognition predict returns? Journal of Financial Economics, 91(2), 208–226.
+\bibitem[Borusyak et al.(2024)]{borusyakjaravelspiess2024} Borusyak, K., Jaravel, X., \& Spiess, J. (2024). Revisiting event-study designs: Robust and efficient estimation. Review of Economic Studies, 91(6), 3253–3285.
+\bibitem[Boulland et al.(2026)]{boullandbourveaubreuer2026} Boulland, R., Bourveau, T., \& Breuer, M. (2026). Company websites: A new measure of disclosure. Journal of Accounting Research, 64(1), 81–125.
+\bibitem[Brogaard et al.(2022)]{brogaardetal2022} Brogaard, J., Nguyen, T. H., Putniņš, T. J., \& Wu, E. (2022). What moves stock prices? The roles of news, noise, and information. Review of Financial Studies, 35(9), 4341–4386.
+\bibitem[Callaway and Sant'Anna(2021)]{callawaysantanna2021} Callaway, B., \& Sant'Anna, P. H. C. (2021). Difference-in-differences with multiple time periods. Journal of Econometrics, 225(2), 200–230.
+\bibitem[Chang et al.(2023)]{changljungqvisttseng2023} Chang, Y.-C., Ljungqvist, A., \& Tseng, K. (2023). Do corporate disclosures constrain strategic analyst behavior? Review of Financial Studies, 36(8), 3163–3212.
+\bibitem[Chen et al.(2002)]{chenhongstein2002} Chen, J., Hong, H., \& Stein, J. C. (2002). Breadth of ownership and stock returns. Journal of Financial Economics, 66(2–3), 171–205.
+\bibitem[Chen et al.(2004)]{chennoronhasingal2004} Chen, H., Noronha, G., \& Singal, V. (2004). The price response to S\&P 500 index additions and deletions: Evidence of asymmetry and a new explanation. Journal of Finance, 59(4), 1901–1930.
+\bibitem[DellaVigna and Pollet(2009)]{dellavignapollet2009} DellaVigna, S., \& Pollet, J. M. (2009). Investor inattention and Friday earnings announcements. Journal of Finance, 64(2), 709–749.
+\bibitem[Dessaint et al.(2024)]{dessaintfoucaultfresard2024} Dessaint, O., Foucault, T., \& Frésard, L. (2024). Does alternative data improve financial forecasting? The horizon effect. Journal of Finance, 79(3), 2237–2287.
+\bibitem[Diamond and Verrecchia(1991)]{diamondverrecchia1991} Diamond, D. W., \& Verrecchia, R. E. (1991). Disclosure, liquidity, and the cost of capital. Journal of Finance, 46(4), 1325–1359.
+\bibitem[Dugast and Foucault(2018)]{dugastfoucault2018} Dugast, J., \& Foucault, T. (2018). Data abundance and asset price informativeness. Journal of Financial Economics, 130(2), 367–391.
+\bibitem[Dugast and Foucault(2025)]{dugastfoucault2025} Dugast, J., \& Foucault, T. (2025). Equilibrium data mining and data abundance. Journal of Finance, 80(1), 211–258.
+\bibitem[Dávila and Parlatore(2021)]{davilaparlatore2021} Dávila, E., \& Parlatore, C. (2021). Trading costs and informational efficiency. Journal of Finance, https://doi.org/10.1111/jofi.13008.
+\bibitem[Dávila and Parlatore(2026)]{davilaparlatore2026} Dávila, E., \& Parlatore, C. (2026). Identifying price informativeness. Review of Financial Studies, 39(5), 1267–1309.
+\bibitem[Engelberg and Parsons(2011)]{engelbergparsons2011} Engelberg, J. E., \& Parsons, C. A. (2011). The causal impact of media in financial markets. Journal of Finance, 66(1), 67–97.
+\bibitem[Farboodi et al.(2022)]{farboodietal2022} Farboodi, M., Matray, A., Veldkamp, L., \& Venkateswaran, V. (2022). Where has all the data gone? Review of Financial Studies, 35(7), 3101–3138.
+\bibitem[Foucault et al.(2016)]{foucaulthombertrosu2016} Foucault, T., Hombert, J., \& Roşu, I. (2016). News trading and speed. Journal of Finance, 71(1), 335–382.
+\bibitem[Gao and Huang(2020)]{gaohuang2020} Gao, M., \& Huang, J. (2020). Informing the market: The effect of modern information technologies on information production. Review of Financial Studies, 33(4), 1367–1411.
+\bibitem[Glosten and Milgrom(1985)]{glostenmilgrom1985} Glosten, L. R., \& Milgrom, P. R. (1985). Bid, ask and transaction prices in a specialist market with heterogeneously informed traders. Journal of Financial Economics, 14(1), 71–100.
+\bibitem[Goldstein et al.(2021)]{goldsteinspattye2021} Goldstein, I., Spatt, C. S., \& Ye, M. (2021). Big data in finance. Review of Financial Studies, 34(7), 3213–3225.
+\bibitem[Goldstein et al.(2025)]{goldsteinspattye2025} Goldstein, I., Spatt, C. S., \& Ye, M. (2025). The next chapter of big data in finance. Review of Financial Studies, 38(3), 605 ff.
+\bibitem[Goyenko et al.(2009)]{goyenkoholdentrzcinka2009} Goyenko, R. Y., Holden, C. W., \& Trzcinka, C. A. (2009). Do liquidity measures measure liquidity? Journal of Financial Economics, 92(2), 153–181.
+\bibitem[Grossman and Stiglitz(1980)]{grossmanstiglitz1980} Grossman, S. J., \& Stiglitz, J. E. (1980). On the impossibility of informationally efficient markets. American Economic Review, 70(3), 393–408.
+\bibitem[Grullon et al.(2004)]{grullonkanatasweston2004} Grullon, G., Kanatas, G., \& Weston, J. P. (2004). Advertising, breadth of ownership, and liquidity. Review of Financial Studies, 17(2), 439–461.
+\bibitem[Hirshleifer et al.(2009)]{hirshleiferlimteoh2009} Hirshleifer, D., Lim, S. S., \& Teoh, S. H. (2009). Driven to distraction: Extraneous events and underreaction to earnings news. Journal of Finance, 64(5), 2289–2325.
+\bibitem[Hou and Moskowitz(2005)]{houmoskowitz2005} Hou, K., \& Moskowitz, T. J. (2005). Market frictions, price delay, and the cross-section of expected returns. Review of Financial Studies, 18(3), 981–1020.
+\bibitem[Huberman and Regev(2001)]{hubermanregev2001} Huberman, G., \& Regev, T. (2001). Contagious speculation and a cure for cancer: A nonevent that made stock prices soar. Journal of Finance, 56(1), 387–396.
+\bibitem[Jäger(2020)]{jager2020} Jäger, I. (2020). The impact of automated information acquisition on the stock market. SSRN Working Paper No. 3671538.
+\bibitem[Kadlec and McConnell(1994)]{kadlecmcconnell1994} Kadlec, G. B., \& McConnell, J. J. (1994). The effect of market segmentation and illiquidity on asset prices: Evidence from exchange listings. Journal of Finance, 49(2), 611–636.
+\bibitem[Kelly and Ljungqvist(2012)]{kellyljungqvist2012} Kelly, B., \& Ljungqvist, A. (2012). Testing asymmetric-information asset pricing models. Review of Financial Studies, 25(5), 1366–1413.
+\bibitem[Krinsky and Lee(1996)]{krinskylee1996} Krinsky, I., \& Lee, J. (1996). Earnings announcements and the components of the bid-ask spread. Journal of Finance, 51(4), 1523–1535.
+\bibitem[Kyle(1985)]{kyle1985} Kyle, A. S. (1985). Continuous auctions and insider trading. Econometrica, 53(6), 1315–1335.
+\bibitem[Lee et al.(1993)]{leemucklowready1993} Lee, C. M. C., Mucklow, B., \& Ready, M. J. (1993). Spreads, depths, and the impact of earnings information: An intraday analysis. Review of Financial Studies, 6(2), 345–374.
+\bibitem[Li and Ramesh(2009)]{liramesh2009} Li, E. X., \& Ramesh, K. (2009). Market reaction surrounding the filing of periodic SEC reports. The Accounting Review, 84(4), 1171–1208.
+\bibitem[Li et al.(2020)]{linekrasovteoh2020} Li, Y., Nekrasov, A., \& Teoh, S. H. (2020). Opportunity knocks but once: Delayed disclosure of financial items in earnings announcements and neglect of earnings news. Review of Accounting Studies, 25(1), 159–200.
+\bibitem[Lo and MacKinlay(1988)]{lomackinlay1988} Lo, A. W., \& MacKinlay, A. C. (1988). Stock market prices do not follow random walks: Evidence from a simple specification test. Review of Financial Studies, 1(1), 41–66.
+\bibitem[Merton(1987)]{merton1987} Merton, R. C. (1987). A simple model of capital market equilibrium with incomplete information. Journal of Finance, 42(3), 483–510.
+\bibitem[Morck et al.(2000)]{morckyeungyu2000} Morck, R., Yeung, B., \& Yu, W. (2000). The information content of stock markets: Why do emerging markets have synchronous stock price movements? Journal of Financial Economics, 58(1–2), 215–260.
+\bibitem[Peng and Xiong(2006)]{pengxiong2006} Peng, L., \& Xiong, W. (2006). Investor attention, overconfidence and category learning. Journal of Financial Economics, 80(3), 563–602.
+\bibitem[Peress(2014)]{peress2014} Peress, J. (2014). The media and the diffusion of information in financial markets: Evidence from newspaper strikes. Journal of Finance, 69(5), 2007–2043.
+\bibitem[Peress and Schmidt(2020)]{peressschmidt2020} Peress, J., \& Schmidt, D. (2020). Glued to the TV: Distracted noise traders and stock market liquidity. Journal of Finance, 75(2), 1083–1133.
+\bibitem[Pungaliya and Wang(2022)]{pungaliyawang2022} Pungaliya, R. S., \& Wang, Y. (2022). Machine invasion: Automation in information acquisition and the cross-section of stock returns. Journal of Financial Markets, https://doi.org/10.1016/j.finmar.2022.100788.
+\bibitem[Roll(1988)]{roll1988} Roll, R. (1988). R$^2$. Journal of Finance, 43(3), 541–566.
+\bibitem[Stice(2023)]{stice2023} Stice, H. (2023). The supply of information and price formation: Evidence from Google's search engine. Contemporary Accounting Research, 40(3), 1999–2031.
+\bibitem[Sun and Abraham(2021)]{sunabraham2021} Sun, L., \& Abraham, S. (2021). Estimating dynamic treatment effects in event studies with heterogeneous treatment effects. Journal of Econometrics, 225(2), 175–199.
+\bibitem[Tetlock(2011)]{tetlock2011} Tetlock, P. C. (2011). All the news that's fit to reprint: Do investors react to stale information? Review of Financial Studies, 24(5), 1481–1512.
+\bibitem[Zhu(2019)]{zhu2019} Zhu, C. (2019). Big data as a governance mechanism. Review of Financial Studies, 32(5), 2021–2061.
+\end{thebibliography}
+
+\end{document}

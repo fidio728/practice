@@ -180,14 +180,19 @@ BUCKET_QUARTERS_SPOT = ("2018-12-31", "2020-03-31", "2022-12-31")  # fig_ab spot
 # 2020Q4: Canada +9.74% under V0 (a dropped row coming back).
 # Neither was in the old spot lists, which is exactly why the old summaries
 # could not support a full-sample claim.
-ANOMALY_QUARTERS = ("2017-12-31", "2020-12-31")
+# 2017Q4 and 2020Q4 are HOLDER-country anomalies (PL, CA); the US-held
+# ranking family filters investor_country='US' and can never move on them,
+# so its rows at those quarters are structurally zero. 2016Q4 and 2018Q2 are
+# the quarters where the US-held EU book actually moves (V3 -0.068%, -0.123%),
+# so the checked-by-name set must contain both families' real extremes.
+ANOMALY_QUARTERS = ("2016-12-31", "2017-12-31", "2018-06-30", "2020-12-31")
 
 VERSIONS = ("v0", "v1", "v2", "v3")
 
 
 def connect() -> duckdb.DuckDBPyConnection:
     con = duckdb.connect()
-    con.execute("SET memory_limit='12GB'")
+    con.execute("SET memory_limit='8GB'")
     con.execute("SET threads=4")
     con.execute("SET preserve_insertion_order=false")
     tmp = Path("E:/duckdb_tmp")
@@ -386,8 +391,13 @@ def _argmax_row(g: pd.DataFrame, val_col: str, label_cols: list[str]) -> dict:
         out.update({f"argmax_{c}": "" for c in label_cols})
         return out
     i = a.idxmax()
-    out = {f"max_abs_{val_col}": float(a.loc[i])}
-    out.update({f"argmax_{c}": g.loc[i, c] for c in label_cols})
+    mx = float(a.loc[i])
+    out = {f"max_abs_{val_col}": mx}
+    # A zero maximum has no attaining row. Returning the first row of the group
+    # produces a real-looking country/bucket label for a non-event, which is
+    # exactly the string a write-up would quote. Blank it instead.
+    out.update({f"argmax_{c}": (g.loc[i, c] if mx != 0.0 else "")
+                for c in label_cols})
     return out
 
 

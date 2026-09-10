@@ -1,0 +1,22 @@
+\begin{table}[t]
+\centering
+\begin{threeparttable}
+\caption{Event-specificity: the headline effect is benchmark-relative}
+\label{tab:eventspec}
+\small
+\begin{tabular}{lcccc}
+\toprule
+ & \multicolumn{2}{c}{Abn.\ Amihud (log)} & \multicolumn{2}{c}{Abn.\ Amihud (level)} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Window & Coef. & Pre-trend $p$ & Coef. & Pre-trend $p$ \\
+\midrule
+Filing-window level $[-1,+1]$    & $-0.008$        & 0.004 & $-0.018$        & 0.004 \\
+Benchmark level $[-60,-10]$      & $-0.025^{**}$   & 0.24  & $-0.066^{***}$  & 0.22  \\
+Abnormal (difference; headline)  & $+0.013^{**}$   & 0.48  & $+0.039^{***}$  & 0.38  \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item \textit{Notes.} Each cell is a \citet{BorusyakJaravelSpiess2024} estimate of Crawler block $\times$ Post on the indicated quantity (firm and filing-month fixed effects; 580 treated firms), with its 12-period pre-trend $p$. The filing-window absolute level does \emph{not} rise and fails its own pre-trend ($p\approx0.004$); the local benchmark level declines with a clean pre-trend; by construction the abnormal difference equals the filing level minus the benchmark level. Only the difference (the headline) is pre-trend-clean, which is why we build on it: the positive headline is a benchmark-relative effect---disclosure windows do not share in the firm's improving local liquidity---not an absolute rise in filing-window illiquidity.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

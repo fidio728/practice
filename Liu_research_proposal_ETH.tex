@@ -1,0 +1,300 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{natbib}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{url}
+
+\setstretch{1.15}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{8pt plus 1pt}
+
+\bibliographystyle{chicago}
+
+\title{\vspace{-1cm}Website Access Rules and Visibility in AI-Powered Search}
+\author{Xueyang Liu \\ ESADE Business School (Universitat Ramon Llull) \\ \texttt{xueyang.liu@esade.edu}}
+\date{April 2026 --- Research Proposal}
+
+\begin{document}
+
+\maketitle
+
+\vspace{-0.5cm}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Introduction}
+
+How investors acquire information about firms affects prices, the cost of
+capital, and managerial discipline. Investors do not absorb every disclosure
+on their own. They pay costs to search for information and to process it, and
+these costs depend on the technology available to them. When EDGAR moved
+corporate filings online, the cost of accessing regulatory disclosures fell,
+and outsiders produced more information about firms \citep{gao2020informativeness,
+goldstein2023edgar}. New technologies for finding information about firms
+can change which firms investors notice and which they overlook.
+
+This paper studies one such shift. AI-powered search systems, such as ChatGPT
+Search and Perplexity, have become a common starting point for investors who
+want information about a firm. A user types a question and the system returns
+an answer drawing on web sources it has retrieved. Retail investors, and
+analysts covering small firms, increasingly use these tools instead of
+traditional search engines. A firm that the system frequently cites is more
+visible to these investors than a firm it rarely mentions.
+
+What such a system can say about a firm depends on what it can read. Some
+firms restrict the AI systems that crawl their websites, either deliberately
+or by inheriting a website template. When an investor asks an AI assistant
+about these firms, the firms appear less often in the response and at lower
+positions among cited sources. This is a form of information friction that
+does not show up in disclosure data. A firm can meet every disclosure rule
+and still be hard for investors to find through this channel.
+
+I construct a dataset that flags firms whose web policies block AI search
+systems. In a controlled experiment, these firms are cited less often, and
+at lower positions, in answers produced by ChatGPT Search, Perplexity, and
+Claude. For investors who use AI search, lower visibility raises the cost of
+acquiring information about these firms. I then test whether this higher
+cost shows up in standard measures of the firm's information environment.
+
+The paper relates to several literatures. Work on the technology of information
+acquisition \citep{da2011search, drake2012investor, gao2020informativeness}
+shows that investors respond to the cost of finding information, and we add a
+margin of cost variation that does not depend on a firm's disclosure choices.
+Research on corporate websites as a disclosure channel
+\citep{boulland2025website} treats website content as the relevant variable.
+I show that website configuration matters as well, even when content is held
+fixed. I also connect to recent work on the rise of AI crawlers and the data
+commons \citep{longpre2024consent, cui2025robots} by tracing one
+configuration choice through to investor outcomes.
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Institutional setting}
+
+Three technical objects govern what an AI search system can read on a firm's
+website.
+
+\textbf{The \texttt{robots.txt} file.} A file at the root of the firm's
+domain (\texttt{example.com/robots.txt}) that specifies which automated
+agents (``crawlers'') can access which paths of the site. It is governed by
+RFC~9309, which defines per-crawler groups of \texttt{User-agent},
+\texttt{Allow}, and \texttt{Disallow} directives, with longest-prefix
+matching and \texttt{Allow}-wins-on-tie. The file is unilaterally set by the
+firm and publicly observable.
+
+\textbf{The XML sitemap.} A list of URLs that the firm declares as
+discoverable by search engines, defined by the Sitemaps protocol jointly
+endorsed by Google, Yahoo, and Microsoft.\footnote{\url{https://www.sitemaps.org/}}
+A firm that lists a URL in its sitemap is publicly signaling that page as
+intended for crawler discovery.
+
+\textbf{AI search crawlers.} Automated agents operated by AI companies to
+retrieve web pages for inclusion in AI-generated answers. I focus on the
+three crawlers whose downstream products have the largest consumer market
+share and the most transparent citation behavior: OAI-SearchBot (ChatGPT
+Search), PerplexityBot (Perplexity AI), and Claude-SearchBot (Claude). By
+each vendor's own documentation, a site blocked for one of these crawlers
+``will not appear in search answers'' produced by the corresponding product.
+
+The treatment of interest is the overlap between these three objects. A
+firm's sitemap declares certain URLs as discoverable, while its
+\texttt{robots.txt} simultaneously prevents AI search crawlers from reaching
+those same URLs. The firm's declared content is therefore public in principle,
+but the AI systems routing a growing share of investor queries cannot read it.
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Data and measurement}
+
+\subsection{Sample construction}
+
+I start from the universe of U.S.~public firms in Compustat Fundamentals
+Annual, and I extend the sample to include firms that exited between 2021
+and 2025 to address survivorship concerns. For each firm, I clean the
+\texttt{weburl} field, extract a canonical host (preserving subdomains, since
+\texttt{robots.txt} is a host-level protocol), and identify 4{,}350 unique
+hosts across approximately 9{,}500 firms with observable websites. Duplicate
+hosts (e.g., 358 iShares ETFs all pointing to \texttt{www.ishares.com})
+receive identical robots-level treatment and are handled via firm-level
+sample flags.
+
+\subsection{Crawler permissions}
+
+For each host I fetch \texttt{robots.txt} and parse it under RFC~9309, and
+for each of sixty-two documented AI crawlers (three consumer search crawlers,
+the remaining thirteen AI search crawlers documented by Known Agents, and
+additional sets of training and user-triggered crawlers)\footnote{I use the
+taxonomy published by \url{https://knownagents.com/} and restrict the main
+analysis to consumer-facing AI search crawlers with measurable downstream
+products.} I compute two bot-level indicators: (i) whether the bot is
+root-blocked (\texttt{Disallow: /}); and (ii) whether the bot has a
+bot-specific \texttt{User-agent} rule, as distinct from inheriting a wildcard
+(\texttt{User-agent: *}) rule. This distinction matters because roughly
+ninety-nine percent of the access rules that apply to AI crawlers in my
+sample come from generic wildcard rules that are likely to have been written
+without AI in mind.
+
+\subsection{The main treatment: sitemap--robots overlap}
+
+For each host, I fetch the XML sitemaps declared in \texttt{robots.txt}
+(resolving sitemap indexes recursively up to two levels, with gzip support
+and a cap of 200{,}000 URLs per host). I then evaluate each sitemap URL
+against each search crawler's applicable rules. The main treatment variable,
+\texttt{search\_sitemap\_block}, is equal to one if at least one sitemap URL
+is blocked for at least one of the three consumer search crawlers, zero if
+the firm's sitemap URLs are observed and none are blocked, and missing if
+overlap cannot be evaluated (fetch error, or no sitemap data).
+
+This measure captures a directly observable conflict: the firm has listed
+pages for search-engine discovery, yet its own access rules simultaneously
+prevent AI search crawlers from reaching those pages. Under this definition,
+one hundred thirty-seven firms (4.9\%) of the 2{,}796 non-fund firms with
+evaluable sitemap data are classified as treated, versus forty-five percent
+under a looser ``any search bot has any rule'' definition. The sitemap
+overlap definition is tighter because it requires the restricted pages to
+lie within the firm's own declared content, not merely within a generic
+administrative path.
+
+\subsection{Validation of the measurement}
+
+I audit the content of the sitemap URLs used by treated firms. Using a
+keyword classification adapted from \citet{boulland2025website}, less than
+0.1\% of the sitemap URLs in the treated sample are technical or
+administrative pages (e.g., \texttt{/login}, \texttt{/admin}). The remainder
+are public content categories including product and service pages, news and
+press releases, investor relations, and ``about the company'' pages. The
+overlap therefore captures restrictions on economically meaningful content,
+not incidental restrictions on backend paths.
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Preliminary evidence: experimental audit}
+
+I validate the mechanism through a controlled experimental audit of AI
+search citation behavior. Starting from the non-fund, Tier-2-evaluable
+sample, I construct thirty matched pairs by exact matching within
+SIC-2 $\times$ size-tercile cells: each pair contains one treated firm and
+one matched control. For each of the sixty firms I then issue five
+standardized natural-language queries covering the main information needs an
+investor might have (what the firm does, financials, investor relations,
+leadership, recent news). The queries are issued to three AI search
+systems: ChatGPT Search, Perplexity AI, and Claude. I record, for each
+firm$\times$query$\times$platform observation, whether the firm's official
+website appears among the inline citations, its rank among unique cited
+domains, and the full list of cited sources.
+
+The audit is automated through the platforms' APIs wherever possible. The
+Claude audit uses Anthropic's \texttt{web\_search} tool via a browser-side
+artifact interface, which executes grounded queries with structured citation
+output. The Perplexity audit uses Perplexity's Sonar API. The ChatGPT audit
+is run manually given the absence of a publicly available ChatGPT Search API
+at the time of writing. Pooling across platforms, treated firms are cited in
+AI-generated answers about eight to eleven percentage points less often than
+matched controls, and appear at lower positions among cited sources when
+they are cited at all. The direction is consistent across platforms, and the
+magnitude is largest for OpenAI (which has the highest consumer market
+share and the highest webmaster awareness of its crawler) and smallest for
+Claude (both figures are lower).
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Identification strategy}
+
+The experimental audit validates the mechanism but does not identify the
+effect of blocking on the firm's broader information environment. For that I
+plan a staggered difference-in-differences design using firm-level variation
+in the timing of policy changes.
+
+I extend the cross-sectional measure into a monthly panel for 2021--2025
+using snapshots of \texttt{robots.txt} and corresponding sitemaps retrieved
+from the Wayback Machine's CDX API. This produces a firm-month panel of
+approximately 600{,}000 observations. Preliminary panel statistics identify
+about 2{,}600 firms that experienced at least one change in their AI
+search-blocking status between 2021 and 2025. These ``switcher'' firms
+provide identifying variation.
+
+I will estimate the effect of sitemap--robots overlap on standard measures
+of the firm's information environment (analyst forecast dispersion, analyst
+coverage, bid-ask spread, Amihud illiquidity) using the heterogeneous-effect
+estimator of \citet{callaway2021difference}. The staggered design addresses
+selection on time-invariant firm characteristics; matching on observable
+firm fundamentals addresses selection on observables at baseline.
+
+As a placebo test, I exploit a variable I construct in the same step of the
+pipeline: blocking of traditional search crawlers (Googlebot, Bingbot,
+Baiduspider). Since a firm that blocks Googlebot essentially removes itself
+from Google Search and would therefore face non-trivial costs in other
+channels, meaningful variation in traditional-search blocking is rare. If
+the estimated effects were driven by something other than the AI search
+channel, I would expect similar coefficients on traditional-search blocking;
+finding zero effects there would be consistent with the AI-search
+interpretation.
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Expected contributions and next steps}
+
+The project contributes a new firm-level measure of AI search visibility
+constructed from the technical configuration of corporate websites, rather
+than from disclosure content. The measure captures a form of information
+friction that does not appear in standard disclosure data and that firms may
+inherit unintentionally from default website templates. It complements
+existing work on corporate websites as a disclosure channel
+\citep{boulland2025website} by showing that configuration matters independent
+of content, and it adds to the literature on the technology of information
+acquisition \citep{gao2020informativeness, goldstein2023edgar} a margin of
+cost variation that does not arise from firms' disclosure decisions.
+
+The data construction pipeline is complete for the March 2026 cross-section.
+The monthly panel is expected to finish in May 2026, after which I will
+estimate the staggered difference-in-differences specifications and audit
+robustness to alternative bot sets and outcome variables. A first full draft
+of the paper is targeted for the end of May 2026.
+
+% ════════════════════════════════════════════════════════════════════════════
+\begin{thebibliography}{99}
+
+\bibitem[Boulland et al.(2025)]{boulland2025website}
+Boulland, R., Bourveau, T., \& Breuer, M. (2025). Corporate websites: A new
+measurement frontier in accounting research. \textit{Journal of Accounting
+Research}, 63(2), 545--589.
+
+\bibitem[Callaway and Sant'Anna(2021)]{callaway2021difference}
+Callaway, B., \& Sant'Anna, P.~H.~C. (2021). Difference-in-differences with
+multiple time periods. \textit{Journal of Econometrics}, 225(2), 200--230.
+
+\bibitem[Cui et al.(2025)]{cui2025robots}
+Cui, T., Yang, Z., Liu, Y., Wang, X., \& Zhao, B.~Y. (2025). Robots.txt and
+the governance of large language model crawlers. In \textit{Proceedings of
+the 2025 ACM SIGSAC Conference on Computer and Communications Security}
+(CCS '25).
+
+\bibitem[Da et al.(2011)]{da2011search}
+Da, Z., Engelberg, J., \& Gao, P. (2011). In search of attention.
+\textit{The Journal of Finance}, 66(5), 1461--1499.
+
+\bibitem[Drake et al.(2012)]{drake2012investor}
+Drake, M.~S., Roulstone, D.~T., \& Thornock, J.~R. (2012). Investor
+information demand: Evidence from Google searches around earnings
+announcements. \textit{Journal of Accounting Research}, 50(4), 1001--1040.
+
+\bibitem[Gao and Huang(2020)]{gao2020informativeness}
+Gao, M., \& Huang, J. (2020). Informing the market: The effect of modern
+information technologies on information production. \textit{The Review of
+Financial Studies}, 33(4), 1865--1898.
+
+\bibitem[Goldstein et al.(2023)]{goldstein2023edgar}
+Goldstein, I., Yang, S., \& Zuo, L. (2023). The real effects of modern
+information technologies: Evidence from the EDGAR implementation.
+\textit{Journal of Accounting Research}, 61(5), 1699--1733.
+
+\bibitem[Longpre et al.(2024)]{longpre2024consent}
+Longpre, S., Mahari, R., Lee, A., et al.\ (2024). Consent in crisis: The
+rapid decline of the AI data commons. \textit{Advances in Neural Information
+Processing Systems}, 37.
+
+\end{thebibliography}
+
+\end{document}

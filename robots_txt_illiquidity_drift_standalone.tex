@@ -1,0 +1,468 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{threeparttable}
+\usepackage{caption}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{hyperref}
+
+\newcommand{\TableNote}[1]{%
+    \par\vspace{0.35em}
+    \begin{minipage}{0.96\textwidth}
+    \footnotesize\emph{Notes.} #1
+    \end{minipage}
+}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\title{Robots.txt Restrictions, Filing-Window Illiquidity, and Drift}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Robots.txt Restrictions, Filing-Window Illiquidity, and Drift}
+\label{sec:robots_txt_illiquidity_drift}
+
+\subsection{Treatment Definitions}
+\label{subsec:robots_treatment}
+
+I construct treatment directly from archived \texttt{robots.txt} rules.
+For each firm-month, I identify whether at least one observed corporate
+host restricts crawler access through a \texttt{Disallow} rule.  The
+baseline treatment family is intentionally about search-bot access in
+general, rather than a single AI product.  The main variable is
+\textit{SearchBotSpec}: it turns on when a firm adopts a bot-specific
+\texttt{User-agent} group that blocks at least one search-oriented crawler.
+I require an observed clean-to-block transition: treated firms must have
+at least one valid pre-treatment month in which the relevant crawler group
+is not blocked.  Firms already blocked at the beginning of the panel are
+excluded as left-censored.  Firms with valid robots.txt observations that
+never block the relevant crawler group form the clean-never control group.
+
+For firm \(i\), let \(G_i^{SB}\) denote the first month in which a
+search-bot-specific block is observed.  For filing event \(e\) in month
+\(m(e)\), the treatment indicator is
+\[
+    \text{SearchBotSpec}_{i,e}
+    =
+    \mathbf{1}\{m(e)>G_i^{SB}\}.
+\]
+The strict inequality is deliberate: the first blocking month itself is
+not treated as post.  Filing-window regressions also exclude filings in
+the first blocking month.
+
+Table~\ref{tab:robots_treatment_definitions} defines the treatment
+variables used below.  The key distinction is between \textit{SearchBotSpec}
+and \textit{BotSpec}.  \textit{SearchBotSpec} is limited to the search-bot
+side of the crawler taxonomy, while \textit{BotSpec} uses a broader
+tracked crawler set.  Both require bot-specific \texttt{User-agent} rules.
+By contrast, the wildcard variables isolate restrictions inherited from
+\texttt{User-agent: *}; these are broader site policies rather than
+bot-specific targeting.
+
+\begin{table}[!htbp]
+\centering
+\caption{Robots.txt Treatment Definitions}
+\label{tab:robots_treatment_definitions}
+\begin{threeparttable}
+\small
+\begin{tabular}{llp{8.1cm}}
+\toprule
+Variable & Label & Definition \\
+\midrule
+\textit{SearchBotSpec} &
+Search-bot-specific block &
+Firm adopts a bot-specific \texttt{User-agent} rule that blocks at least
+one search-oriented crawler.  This is the main general search-bot
+treatment. \\
+\textit{BotSpec} &
+Broader bot-specific block &
+Firm adopts a bot-specific \texttt{User-agent} rule that blocks at least
+one crawler in the broader tracked crawler set.  This is a broader
+bot-specific robustness variable and is not limited to the search-bot side. \\
+\textit{RobotsAny} &
+Any robots.txt restriction &
+Firm blocks at least one tracked crawler through any robots.txt rule,
+including bot-specific rules, wildcard rules, root blocks, and non-root
+path blocks. \\
+\textit{SearchBotWild} &
+Search-bot wildcard-only block &
+Firm blocks at least one search-oriented crawler only through
+\texttt{User-agent: *}, with no search-bot-specific rule. \\
+\textit{RobotsWild} &
+Broad wildcard-only block &
+Firm blocks at least one tracked crawler only through wildcard rules,
+with no bot-specific rule across the tracked crawler set. \\
+\textit{RootSpec} &
+Full-site bot-specific block &
+Firm adopts a bot-specific rule with \texttt{Disallow: /}, restricting
+the full site for the targeted crawler. \\
+\bottomrule
+\end{tabular}
+\TableNote{Treated firms must exhibit an observed clean-to-block transition
+within the robots.txt panel. Left-censored and future-treated firms are
+excluded. Clean-never firms are retained as controls. Wildcard-only means
+that the relevant blocking rule is inherited from \texttt{User-agent: *},
+not from a bot-specific group.}
+\end{threeparttable}
+\end{table}
+
+\subsection{Filing-Window Illiquidity}
+\label{subsec:robots_amihud}
+
+I measure filing-window illiquidity using Amihud's price-impact measure,
+following \citet{Amihud2002}.  For stock \(i\) on trading day \(d\),
+\[
+    \text{ILLIQ}_{i,d}
+    =
+    10^6 \times
+    \frac{|R_{i,d}|}{\text{DollarVolume}_{i,d}},
+\]
+where \(R_{i,d}\) is the daily return and dollar volume is price times
+share volume.  For filing event \(e\), let \(W\) denote an event window
+such as \([0,+5]\), and let \(B=[-30,-6]\) denote the main pre-filing
+benchmark window.  The abnormal Amihud outcome is
+\[
+    Y_{i,e}(W)
+    =
+    \frac{1}{|D_{i,e}(W)|}
+    \sum_{d\in D_{i,e}(W)}
+    \text{ILLIQ}_{i,d}
+    -
+    \frac{1}{|D_{i,e}(B)|}
+    \sum_{d\in D_{i,e}(B)}
+    \text{ILLIQ}_{i,d},
+\]
+where \(D_{i,e}(W)\) is the set of trading days for firm \(i\) in event
+window \(W\).  The main event windows are \([0,+1]\), \([0,+3]\),
+\([0,+5]\), \([-5,+5]\), \([+6,+30]\), and \([0,+30]\).  The estimating
+equation absorbs firm and filing-month fixed effects.  I report both a
+two-way fixed effects companion estimate and an imputation DID estimate
+following \citet{BorusyakJaravelSpiess2024}.
+
+\begin{table}[!htbp]
+\centering
+\caption{Filing-Window Amihud Illiquidity: Main \([0,+5]\) Window}
+\label{tab:robots_amihud_main}
+\begin{threeparttable}
+\scriptsize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrrrrr}
+\toprule
+Treatment &
+\multicolumn{4}{c}{BJS imputation DID} &
+\multicolumn{6}{c}{TWFE companion} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-11}
+& Est. & \(p\) & Pretrend \(p\) & \(N\)
+& Est. & \(p\) & \(N\) & Firms & FE & Within \(R^2\) \\
+\midrule
+SearchBotSpec & 0.054 & 0.006 & 0.535 & 68,289
+              & 0.057 & 0.049 & 69,529 & 4,351 & Firm, month & 0.0001 \\
+BotSpec       & 0.045 & 0.001 & 0.416 & 66,387
+              & 0.046 & 0.033 & 67,693 & 4,242 & Firm, month & 0.0001 \\
+RobotsAny     & 0.025 & 0.110 & 0.985 & 29,178
+              & 0.019 & 0.213 & 30,881 & 1,947 & Firm, month & 0.0001 \\
+SearchBotWild & 0.023 & 0.155 & 0.946 & 29,762
+              & 0.016 & 0.336 & 31,411 & 1,979 & Firm, month & 0.0001 \\
+RobotsWild    & 0.022 & 0.148 & 0.969 & 31,225
+              & 0.015 & 0.350 & 32,872 & 2,067 & Firm, month & 0.0000 \\
+RootSpec      & 0.050 & 0.007 & 0.152 & 67,973
+              & 0.050 & 0.096 & 69,224 & 4,333 & Firm, month & 0.0000 \\
+\bottomrule
+\end{tabular}}
+\TableNote{The dependent variable is abnormal average Amihud illiquidity
+in the \([0,+5]\) filing window. BJS estimates use imputation DID with
+firm clustering and 12-month pretrend tests. TWFE estimates absorb firm
+and filing-month fixed effects with firm-clustered standard errors; the
+last column reports the corresponding within-\(R^2\).}
+\end{threeparttable}
+\end{table}
+
+Table~\ref{tab:robots_amihud_main} focuses on \([0,+5]\), the main
+filing-window horizon.  The search-bot-specific treatment produces a
+positive and statistically significant increase in illiquidity.  The
+broader \textit{RobotsAny} treatment is attenuated, and wildcard-only
+restrictions are not statistically significant in the main window.  This
+pattern is consistent with the interpretation that the strongest effect
+comes from explicit bot-specific access restrictions rather than generic
+site-wide crawler policies.
+
+Table~\ref{tab:robots_amihud_windows} reports the event-window pattern
+for the two bot-specific treatments using the TWFE companion estimator,
+which provides a conventional within-\(R^2\).  The estimates are
+concentrated in the filing window, while the delayed windows
+\([+6,+30]\) and \([0,+30]\) are null.
+
+\begin{table}[!htbp]
+\centering
+\caption{TWFE Event-Window Dynamics for Bot-Specific Robots.txt Treatments}
+\label{tab:robots_amihud_windows}
+\begin{threeparttable}
+\scriptsize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrrrr}
+\toprule
+Treatment & Window & TWFE Est. & \(p\) & \(N\) & Firms & Fixed effects & Within \(R^2\) \\
+\midrule
+SearchBotSpec & \([0,+1]\)   &  0.076 & 0.021 & 69,296 & 4,351 & Firm, month & 0.0001 \\
+SearchBotSpec & \([0,+3]\)   &  0.055 & 0.055 & 68,427 & 4,351 & Firm, month & 0.0001 \\
+SearchBotSpec & \([0,+5]\)   &  0.057 & 0.049 & 69,529 & 4,351 & Firm, month & 0.0001 \\
+SearchBotSpec & \([-5,+5]\)  &  0.048 & 0.057 & 69,559 & 4,351 & Firm, month & 0.0001 \\
+SearchBotSpec & \([+6,+30]\) & -0.032 & 0.234 & 69,300 & 4,351 & Firm, month & 0.0000 \\
+SearchBotSpec & \([0,+30]\)  & -0.017 & 0.447 & 69,385 & 4,351 & Firm, month & 0.0000 \\
+\midrule
+BotSpec & \([0,+1]\)   &  0.061 & 0.010 & 67,464 & 4,242 & Firm, month & 0.0001 \\
+BotSpec & \([0,+3]\)   &  0.044 & 0.037 & 66,629 & 4,242 & Firm, month & 0.0001 \\
+BotSpec & \([0,+5]\)   &  0.046 & 0.033 & 67,693 & 4,242 & Firm, month & 0.0001 \\
+BotSpec & \([-5,+5]\)  &  0.038 & 0.041 & 67,723 & 4,242 & Firm, month & 0.0001 \\
+BotSpec & \([+6,+30]\) & -0.019 & 0.330 & 67,464 & 4,242 & Firm, month & 0.0000 \\
+BotSpec & \([0,+30]\)  & -0.008 & 0.647 & 67,549 & 4,242 & Firm, month & 0.0000 \\
+\bottomrule
+\end{tabular}}
+\TableNote{This table reports TWFE companion estimates so that each window
+has a conventional within-\(R^2\). The specification absorbs firm and
+filing-month fixed effects and clusters standard errors by firm. The BJS
+imputation estimates in the main \([0,+5]\) window are reported in
+Table~\ref{tab:robots_amihud_main}; the BJS all-window pattern is
+qualitatively the same.}
+\end{threeparttable}
+\end{table}
+
+\begin{table}[!htbp]
+\centering
+\caption{Pre-Filing Benchmark Robustness for Abnormal Amihud}
+\label{tab:amihud_benchmark_robustness}
+\begin{threeparttable}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+Pre-filing benchmark &
+\([0,+5]\) Est. & \(p\) & \(N\) & \(R^2\) &
+\([+6,+30]\) Est. & \(p\) & \(N\) & \(R^2\) &
+Fixed effects \\
+\midrule
+\([-30,-6]\)  & 0.057 & 0.049 & 69,529 & 0.0001 & -0.032 & 0.234 & 69,300 & 0.0000 & Firm, month \\
+\([-45,-6]\)  & 0.051 & 0.080 & 69,532 & 0.0001 & -0.025 & 0.395 & 69,304 & 0.0000 & Firm, month \\
+\([-60,-6]\)  & 0.054 & 0.112 & 69,532 & 0.0001 & -0.024 & 0.403 & 69,304 & 0.0000 & Firm, month \\
+\([-60,-16]\) & 0.037 & 0.259 & 69,341 & 0.0000 & -0.036 & 0.255 & 69,111 & 0.0000 & Firm, month \\
+\bottomrule
+\end{tabular}}
+\TableNote{The table varies the pre-filing benchmark used to construct
+abnormal Amihud for the \textit{SearchBotSpec} treatment. The first row
+uses the main \([-30,-6]\) benchmark; the remaining rows move the benchmark
+farther from the filing date. The delayed-window placebo remains
+insignificant across all benchmark definitions. \(R^2\) is the within-\(R^2\)
+from the corresponding TWFE specification.}
+\end{threeparttable}
+\end{table}
+
+\subsection{Post-Earnings-Announcement Drift}
+\label{subsec:robots_pead}
+
+I also test whether robots.txt restrictions amplify
+post-earnings-announcement drift.  This test is motivated by three related
+strands of the PEAD literature.  \citet{DellaVignaPollet2009} motivate
+investor inattention tests around earnings announcements.  I follow this
+logic by using announcement-date windows and post-announcement drift
+windows.  \citet{HirshleiferLimTeoh2009} study distraction and delayed
+reaction to earnings news using analyst forecast errors and drift windows;
+I therefore use paper-specific earnings-surprise measures and ask whether
+the slope of post-announcement returns with respect to surprise becomes
+steeper after robots.txt treatment.  \citet{Martineau2022} shows that PEAD has largely
+declined in recent samples, especially outside microcaps.  I therefore
+first run a Martineau-style baseline power check and then test treatment
+interactions only in baseline-alive PEAD cells.
+
+\begin{table}[!htbp]
+\centering
+\caption{How the PEAD Literature Maps to the Drift Tests}
+\label{tab:pead_literature_map}
+\begin{threeparttable}
+\small
+\begin{tabular}{p{3.2cm}p{4.8cm}p{6.5cm}}
+\toprule
+Paper & Relevant idea & Implementation here \\
+\midrule
+\citet{DellaVignaPollet2009} &
+Investor inattention around earnings announcements. &
+Use earnings-announcement dates and separate immediate announcement
+windows from post-announcement drift windows. \\
+\citet{HirshleiferLimTeoh2009} &
+Distraction can weaken immediate reaction and amplify delayed drift. &
+Estimate whether the surprise-return slope changes after robots.txt
+treatment; use analyst forecast error and random-walk SUE surprise ranks. \\
+\citet{Martineau2022} &
+Modern PEAD is weak outside microcaps. &
+Run a baseline PEAD power check by microcap status and test treatment
+interactions only in cells where baseline drift remains detectable. \\
+\bottomrule
+\end{tabular}
+\end{threeparttable}
+\end{table}
+
+Formally, I estimate
+\[
+    BHAR_{i,q,w}
+    =
+    \beta\,\text{Surprise}_{i,q}
+    +
+    \alpha\,\text{PostTreat}_{i,q}
+    +
+    \gamma\,
+    \text{Surprise}_{i,q}\times \text{PostTreat}_{i,q}
+    +
+    \mu_i+\tau_q+\varepsilon_{i,q,w}.
+\]
+The coefficient of interest is \(\gamma\).  A positive \(\gamma\) would
+imply that robots.txt restrictions amplify drift by steepening the
+relation between earnings surprise and post-announcement abnormal returns.
+
+\begin{table}[!htbp]
+\centering
+\caption{HLT-Style PEAD Interaction Tests}
+\label{tab:robots_pead_hlt}
+\begin{threeparttable}
+\scriptsize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrr}
+\toprule
+Treatment & \([0,+1]\) & \([+2,+61]\) & \(N\) & Treated firms & Fixed effects & Within \(R^2\) \\
+\midrule
+SearchBotSpec & \(+0.34\) \((0.717)\) & \(-1.00\) \((0.747)\) & 23,807 & 64  & Firm, month & 0.0126 \\
+BotSpec       & \(+0.34\) \((0.660)\) & \(-1.65\) \((0.450)\) & 23,131 & 105 & Firm, month & 0.0111 \\
+RobotsAny     & \(-0.48\) \((0.198)\) & \(-0.09\) \((0.934)\) & 11,156 & 388 & Firm, month & 0.0148 \\
+Broad discovery & \(+0.04\) \((0.939)\) & \(-2.77^{*}\) \((0.063)\) & 22,327 & 173 & Firm, month & 0.0129 \\
+\bottomrule
+\end{tabular}}
+\TableNote{This table follows the HLT-style analyst forecast error
+construction: continuous winsorized forecast error scaled by the
+quarter-end price. Each cell reports \(\hat{\gamma}\) multiplied by the
+headline \(p90-p10\) forecast-error scale, in percentage points; firm-clustered
+\(p\)-values are in parentheses. The prediction of delayed diffusion is
+weak immediate-window response and positive drift-window amplification.
+\(^{*}\) denotes \(p<0.10\).}
+\end{threeparttable}
+\end{table}
+
+\begin{table}[!htbp]
+\centering
+\caption{DVP-Style PEAD Interaction Tests}
+\label{tab:robots_pead_dvp}
+\begin{threeparttable}
+\scriptsize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrrr}
+\toprule
+Surprise form & Treatment & \([0,+1]\) & \([+2,+61]\) & \(N\) & Treated firms & Within \(R^2\) \\
+\midrule
+Continuous FE & SearchBotSpec & \(+3.47\) \((0.006)\) & \(-1.72\) \((0.370)\) & 18,127 & 52  & 0.0123 \\
+Continuous FE & BotSpec       & \(+1.61\) \((0.144)\) & \(-2.27\) \((0.172)\) & 17,552 & 82  & 0.0113 \\
+Continuous FE & RobotsAny     & \(-0.60\) \((0.164)\) & \(-1.80\) \((0.108)\) & 8,750  & 321 & 0.0112 \\
+Continuous FE & Broad discovery & \(+1.40\) \((0.021)\) & \(-0.33\) \((0.772)\) & 16,891 & 156 & 0.0120 \\
+\midrule
+Sign-split FE & SearchBotSpec & \(+1.93\) \((0.560)\) & \(-3.75\) \((0.404)\) & 18,127 & 52  & 0.0107 \\
+Sign-split FE & BotSpec       & \(-1.31\) \((0.583)\) & \(-2.93\) \((0.387)\) & 17,552 & 82  & 0.0100 \\
+Sign-split FE & RobotsAny     & \(-0.91\) \((0.426)\) & \(-1.22\) \((0.628)\) & 8,750  & 321 & 0.0102 \\
+Sign-split FE & Broad discovery & \(+3.13^{*}\) \((0.071)\) & \(-4.51^{*}\) \((0.056)\) & 16,891 & 156 & 0.0106 \\
+\bottomrule
+\end{tabular}}
+\TableNote{This table follows the DVP-style construction: forecasts are
+drawn from the 30 calendar days before the announcement and scaled by the
+price five trading days before the announcement. The continuous rows use
+the winsorized forecast error; the sign-split rows use the DVP eleven-bin
+forecast-error rank. Reported effects are implied percentage-point changes
+in the high-minus-low surprise response; firm-clustered \(p\)-values are in
+parentheses. All specifications absorb firm and announcement-month fixed
+effects. \(^{*}\) denotes \(p<0.10\).}
+\end{threeparttable}
+\end{table}
+
+\begin{table}[!htbp]
+\centering
+\caption{Martineau-Style Baseline-Alive PEAD Cells}
+\label{tab:robots_pead_martineau}
+\begin{threeparttable}
+\scriptsize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Treatment
+& SUE micro \([+2,+5]\)
+& SUE micro \([+6,+15]\)
+& SUE micro \([+2,+60]\)
+& FE full \([+2,+60]\)
+& FE micro \([+2,+60]\)
+& \(N\) & Treated firms & \(R^2\) \\
+\midrule
+SearchBotSpec & \(+5.26\) \((0.360)\) & \(+4.52\) \((0.125)\) & \(+0.69\) \((0.887)\) & \(-1.98\) \((0.712)\) & \(+1.93\) \((0.823)\) & 31,418 & 93  & 0.0007 \\
+BotSpec       & \(+5.41\) \((0.287)\) & \(+3.65\) \((0.172)\) & \(-1.28\) \((0.785)\) & \(-2.08\) \((0.607)\) & \(-0.87\) \((0.907)\) & 30,734 & 116 & 0.0007 \\
+RobotsAny     & \(+1.44^{*}\) \((0.059)\) & \(+0.67\) \((0.465)\) & \(+2.83\) \((0.248)\) & \(-0.41\) \((0.840)\) & \(-0.70\) \((0.842)\) & 14,456 & 416 & 0.0006 \\
+Broad discovery & \(+4.49\) \((0.186)\) & \(-0.11\) \((0.942)\) & \(-1.39\) \((0.706)\) & \(-2.82\) \((0.226)\) & \(-2.57\) \((0.655)\) & 31,029 & 144 & 0.0007 \\
+\bottomrule
+\end{tabular}}
+\TableNote{This table follows the Martineau-style design. Surprise ranks
+are lagged-quarter empirical deciles; the displayed cells are the
+baseline-alive PEAD cells selected by the Martineau power check. Each cell
+reports \(\hat{\gamma}\times 9\), the implied \(D10-D1\) drift-spread change
+after treatment, in percentage points. Firm-clustered \(p\)-values are in
+parentheses. All specifications absorb firm and announcement-quarter fixed
+effects. \(^{*}\) denotes \(p<0.10\); no cell reaches \(p<0.05\).}
+\end{threeparttable}
+\end{table}
+
+The drift results do not support a delayed-earnings-news channel.  Even in
+the microcap cells where baseline PEAD remains alive, robots.txt
+restrictions do not robustly amplify post-announcement drift.  The only
+marginal estimate appears for the broadest \textit{RobotsAny} treatment in
+the short \([+2,+5]\) window, and it does not persist over the cumulative
+\([+2,+60]\) drift window.  For the broad discovery treatment that produces
+the filing-window Amihud effect, the drift-window interactions are null or
+negative.  These findings suggest that the main effect operates through a
+filing-window liquidity or price-impact channel, rather than through
+delayed earnings-news diffusion.
+
+\newpage
+\begin{thebibliography}{99}
+
+\bibitem[Amihud(2002)]{Amihud2002}
+Amihud, Yakov. 2002.
+Illiquidity and stock returns: Cross-section and time-series effects.
+\textit{Journal of Financial Markets} 5(1): 31--56.
+
+\bibitem[Borusyak et~al.(2024)]{BorusyakJaravelSpiess2024}
+Borusyak, Kirill, Xavier Jaravel, and Jann Spiess. 2024.
+Revisiting event-study designs: Robust and efficient estimation.
+\textit{Review of Economic Studies} 91(6): 3253--3285.
+
+\bibitem[DellaVigna and Pollet(2009)]{DellaVignaPollet2009}
+DellaVigna, Stefano, and Joshua M. Pollet. 2009.
+Investor inattention and Friday earnings announcements.
+\textit{Journal of Finance} 64(2): 709--749.
+
+\bibitem[Hirshleifer et~al.(2009)]{HirshleiferLimTeoh2009}
+Hirshleifer, David, Sonya Seongyeon Lim, and Siew Hong Teoh. 2009.
+Driven to distraction: Extraneous events and underreaction to earnings news.
+\textit{Journal of Finance} 64(5): 2289--2325.
+
+\bibitem[Martineau(2022)]{Martineau2022}
+Martineau, Charles. 2022.
+Rest in peace post-earnings announcement drift.
+\textit{Critical Finance Review} 11(3--4): 613--646.
+
+\end{thebibliography}
+
+\end{document}
