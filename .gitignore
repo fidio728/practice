@@ -1,0 +1,24 @@
+# Temp / scratch
+tmp/
+__pycache__/
+*.pyc
+.claude/settings.local.json
+
+# Run and build byproducts
+*.log
+*.aux
+*.toc
+*.snm
+*.nav
+*.out
+*.stackdump
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# Smoke-test scratch data
+_tmp_*
+*_tmp.dta
+
+# Scan/crawl progress state (rebuildable)
+*_progress.json

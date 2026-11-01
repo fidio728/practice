@@ -1,0 +1,504 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=blue]{hyperref}
+
+\captionsetup{font=small, labelfont=bf, justification=raggedright,
+              singlelinecheck=false}
+
+
+\graphicspath{{plots/}{./}}
+
+
+\newcommand{\figab}[1]{%
+  \IfFileExists{plots/#1_paper.pdf}%
+    {\includegraphics[width=\textwidth]{#1_paper.pdf}}%
+    {\IfFileExists{#1_paper.pdf}%
+      {\includegraphics[width=\textwidth]{#1_paper.pdf}}%
+      {\includegraphics[width=\textwidth]{#1.pdf}}}}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Plots and Explanations}\\[6pt]
+{\normalsize August 21, 2026}
+\end{center}
+
+\bigskip
+
+\noindent
+This note presents the descriptive results behind our research question: when
+tensions between the United States and China rise, do US institutional
+investors reallocate away from firms whose supply chains run through China?
+Figures~\ref{fig:roll} through~\ref{fig:vw} track US holdings of European
+firms sorted by the firms' own exposure to China. Figures~\ref{fig:cagg}
+through~\ref{fig:cew} repeat the sort at the country level, using the three
+exposure measures defined below. Figures~\ref{fig:b2} and~\ref{fig:b3} turn
+the question around and ask whether firms held by US investors cut their China
+ties pre-emptively. An important distinction:
+a gap that opens between exposed and unexposed firms can reflect investors
+trading, or it can reflect the set of firms classified as exposed changing
+over time. The figures are paired so that the two explanations can be told
+apart.
+
+Here are the findings. Figure~\ref{fig:roll} appears to show US investors
+moving heavily into China-linked European firms over two decades, and out of
+firms without those ties. That appearance is an artefact of how the data were
+collected: the set of firms counted as China-linked grows roughly sixfold as
+the relationship records fill in. Compare each firm only with itself and the
+two groups end up in essentially the same place (Figure~\ref{fig:fixed}). At
+the country level there is no single answer: whether high-exposure countries
+gained or lost US portfolio share depends on which of the three exposure
+measures does the ranking, and two of them point in opposite directions
+(Section 3). Firms held by US investors, meanwhile, did not cut their China
+ties as tensions rose. Their supply-chain links to China grew about twice as
+fast as those of firms with no US owners (Section 4).
+
+\section*{1. Data and measurement}
+
+\textbf{Holdings.} Institutional equity holdings come from FactSet Ownership.
+The sample is European firms held by US-domiciled institutions, quarterly. The
+holdings data begin in 1999 Quarter 1; the supply-chain relationship data that classify
+firms begin later, so each figure is plotted over the full span its own
+construction supports, and the
+spans therefore differ across figures. For every fund we keep its last
+complete report inside each calendar quarter and stamp it to quarter end. Dollar values are deflated by the
+US CPI and expressed in 2020 dollars. When we report a group of firms' share
+of the US portfolio, the denominator is the value of all equity positions
+held by the same US institutions worldwide, not only their European
+positions, so the share reads as the weight of that group in the investors'
+overall book.
+
+\textbf{Supply-chain exposure.} Firm-to-firm relationships come from FactSet
+Revere, which records customer and supplier links between companies. We
+define a firm's exposure to China as
+\begin{equation*}
+s_{i,t} \;=\;
+\frac{\text{active links of firm } i \text{ to Chinese customers or suppliers in quarter } t}
+     {\text{active links of firm } i \text{ to customers or suppliers anywhere in quarter } t},
+\end{equation*}
+counting only relationships recorded as active. A firm covered by the
+relationship data but with no active link has $s_{i,t}=0$; a firm outside the
+relationship data has no exposure value and is left unclassified rather than
+treated as a zero.
+
+Here, we report two kinds of exposure.  On the extensive margin, a firm either has a Chinese counterparty or it does
+not. So we can measure whether a firm is entangled with China at
+all.  On the intensive margin, a firm that already has Chinese
+counterparties may have more or fewer of them, so we can see the variation.  We therefore report both rather than choosing one:
+Figures~\ref{fig:roll} and~\ref{fig:fixed} sort firms on the extensive margin,
+Figures~\ref{fig:ew} and~\ref{fig:vw} sort them on the intensive margin among
+firms that have any Chinese counterparty, and all three country-level measures
+below are continuous in $s_{i,t}$ and so carry both.
+
+\textbf{Country-level exposure.} We aggregate firm exposure to the country
+level in three ways, which differ in whose links count and how firms are
+weighted. The \emph{aggregate} measure divides the total number of China
+links of all firms in a country by the total number of their links to any
+counterparty, so firms with many relationships dominate. The
+\emph{value-weighted} measure averages the firm-level shares $s_{i,t}$ using
+market capitalization as weights. It is computable only where market value is
+observed, and that coverage is neither flat nor monotone: about 71 percent of
+firm-quarters in 2003, a peak 90 percent in 2007, then a decline to 43
+percent by 2023. The measure tilts toward larger listed firms. The
+\emph{equal-weighted} measure averages $s_{i,t}$ with equal weights, so small firms count as much as large ones. The three measures answer slightly different questions, and we show all three because, as
+Section 3 documents, the answer to ``did US investors leave high-exposure
+countries'' turns out to depend on which one is used.
+
+\textbf{Tension.} The background series in every figure is the USA$|$China
+direction of a bilateral geopolitical-risk index built from newspaper text, in
+which the United States is the acting party and China the counterparty\footnote{The quarterly value is the level of
+the index in the closing month of each quarter. It is from \url{https://www.matteoiacoviello.com/ai_gpr.html}}. Each figure carries the index
+twice: once as a top panel with its own axis, and once as a grey silhouette
+behind the data panels. The index is low through 2017, apart from an
+isolated spike at the end of 2016 (8.2, against a 1999--2017 median of 0.9). It
+jumps to a new level with the 2018--2019 tariff rounds. It eases after that but
+stays well above its pre-2018 average through 2020--2021, falls back in 2022, and spikes again in 2023.
+
+\textbf{The reference date.} Two constructions in this note are
+anchored at 2017 Quarter 4, and the choice of that quarter is deliberate. The first US tariffs of the trade war arrive during 2018. The quarter ending 31 December 2017 is therefore the last clean quarter before the trade war.
+
+\textbf{The bottom panel of every figure.} Every figure carries a bottom panel
+reporting how many units lie behind each line, and the full history is
+plotted rather than a window we picked. Two artefacts show up there. First,
+the relationship data arrive in batches. In the rolling firm figures, the
+count of firms with no China link climbs from about 430 in 2003 to roughly
+6,600 by 2012, in discrete loads: jumps of 53 percent in 2007Q3, 96 percent in
+2008Q4, 48 percent in 2010Q4 and 53 percent in 2011Q1. Only after 2011Q1 does
+the count grow smoothly. Second, many US funds filed holdings semiannually in
+the early sample. Through 2004Q2, about 1,720 funds report in the first and
+third quarters against 4,620 in the second and fourth, with identical
+positions per filing (285 against 290), so the difference is who reported, not
+what was reported. Fund counts converge in 2004Q3, but odd-quarter filings
+stay thinner for several years (201 positions per fund against 280 in 2004,
+310 against 324 in 2006) and only match by 2008--2009. Quarter-to-quarter
+readings before 2009 are therefore uninformative, even where the annual
+pattern is sound. Neither artefact is a reason to hide the early data. Both
+are reasons to read each line against the counts below it.
+
+\textbf{Timing.} Whenever firms or countries are sorted into groups, the sort
+uses information dated $t-1$ and outcomes are measured at $t$, so group
+membership is always predetermined relative to the holdings it is paired
+with. Figure~\ref{fig:fixed} applies the same rule at both ends of each
+quarter: a firm contributes to a quarter's growth only if it sits in the same
+group at the start and the end of that quarter.
+
+\section*{2. US holdings sorted by firm-level exposure}
+
+Figure~\ref{fig:roll} splits European firms each quarter into those with no
+active China link and those with at least one, and follows US institutional
+holdings of the two groups, from 2003Q3, when firms can first be classified, to
+2023Q4. Read naively, the figure tells a dramatic story.
+Holdings of firms with China ties climb from under \$20 billion at the start to
+\$1.4 trillion in 2023, an index of 145 against a 2017 base of 100. Holdings of
+firms without ties move the other way, from a peak of \$1.01 trillion at the end
+of 2013 down to \$654 billion, an index of 73. The portfolio shares tell the same
+story. Measured against the US institutions' worldwide equity book, the tied group
+rises from under 1 to 8 percent while the untied group falls from a peak near 10
+percent to under 4 percent. The two lines cross around 2015. Taken at face value this would say US investors tilted
+\emph{toward} China-linked firms across two decades of rising tensions.
+
+The two groups, however, are not the same firms over time. In 2012 the
+China-linked group contains 145 firms; by 2023 it contains 858. The newcomers
+are largely not firms that began trading with China in the meantime. They are
+firms whose existing relationships entered the data late: Revere's coverage
+grows in the discrete loads documented above, and when a firm's links are
+finally recorded, the firm jumps from the no-ties line to the China-ties line.
+No money is traded when it jumps. Both lines move because the rosters change.
+
+Figure~\ref{fig:fixed} takes the jumps out. Each quarter, growth in each group
+is computed only over firms that are present in that quarter and the one
+before, and that sit in the same group at both dates. The quarterly growth
+rates are then chained into an index. A firm that enters the data, leaves it,
+or switches groups contributes nothing in the quarter it moves, so roster
+changes cannot move these lines by construction, and no reference date is
+involved in who gets compared; the 2017Q4 = 100 base only fixes where the two
+lines cross 100. The rotation does not survive. The chained index ends 2023 at
+105 for firms without China ties and 96 for firms with them, on matched
+samples of 8,445 and 769 firms. Of the 72-point gap in Figure~\ref{fig:roll},
+at most ten points can be about trading. The rest is the rosters, and we
+attach no interpretation to the ten points.
+
+Figures~\ref{fig:roll} and~\ref{fig:fixed} sort on the extensive margin alone,
+so by construction they are silent on whether investors respond to the depth of
+a firm's China exposure rather than its existence.
+Figures~\ref{fig:ew} and~\ref{fig:vw} supply that second margin. They drop the
+unexposed firms as a sorting dimension. Instead they split the firms that do have
+Chinese counterparties into quartiles of $s_{i,t-1}$, with cutpoints computed
+equal-weighted in Figure~\ref{fig:ew} and value-weighted in Figure~\ref{fig:vw},
+mirroring the two firm-level aggregation schemes of Section 1. The unexposed group
+is carried along as a reference line only. If US investors were shedding
+the most exposed names, the top-quartile line should sag after 2018. It does the
+opposite. Indexed to 2017, top-quartile holdings reach 252 in the equal-weighted
+sort and 188 in the value-weighted sort. The bases are small: those groups end the
+sample at \$122 billion and \$396 billion, 0.7 and 2.3 percent of the worldwide
+book.
+
+The two sorts disagree about whether the response is monotone in exposure, which
+is why the middle quartiles are reported numerically in the captions even though
+the figures draw only the extremes.
+Under the value-weighted cutpoints the end-of-sample index rises with exposure
+throughout: 102, 143, 164, 188 from the bottom quartile to the top. Under the
+equal-weighted cutpoints it does not: 52, 220, 282, 252, so the third quartile
+outgrows the fourth. We would not read a dose response into either pattern. What
+both sorts do agree on is the absence of the predicted one, since no quartile
+retreats after 2018. These are also rolling sorts, so reclassification
+contributes to all four lines.
+
+\begin{figure}[p]
+  \centering
+  \figab{fig_A_firm_zero_vs_positive}
+  \caption{\textbf{US holdings of European firms with and without China
+    ties.} This figure plots US institutional holdings of European firms,
+    split each quarter into firms with no active Chinese customer or supplier
+    relationship at the end of the previous quarter and firms with at least
+    one. The top panel shows the bilateral US--China tension index. The grey
+    silhouette in the lower panels repeats it. The lower panels give, for each
+    group, the real value of US institutional holdings (billions of 2020 dollars,
+    log scale), the same series indexed to 100 at end-2017, and the group's share
+    of all equity held by the same US institutions worldwide. End-2017 is the last
+    quarter before the 2018 tariff rounds. Firms not covered by the relationship
+    data in the prior quarter are unclassified, so the groups need not sum to the
+    total.
+    Two cautions. Membership is reassigned every quarter, and the count of
+    China-linked firms grows from 145 in 2012 to 858 in 2023 as the relationship
+    data deepen, so the widening gap partly reflects composition;
+    Figure~\ref{fig:fixed} removes it. The split is also on the
+    extensive margin alone. A firm that halves its Chinese suppliers, or replaces
+    one with a supplier elsewhere, stays in the same group here.
+    Figures~\ref{fig:ew} and~\ref{fig:vw} sort on the depth of exposure instead.}
+  \label{fig:roll}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \figab{fig_A_firm_zero_vs_positive_chained}
+  \caption{\textbf{The same comparison with the roster changes removed.} This
+    figure re-draws the contrast of Figure~\ref{fig:roll} as a chain-linked
+    matched-sample index. For each quarter, growth in each group is computed
+    only over firms present in both that quarter and the previous one and
+    classified in the same group at both dates; the quarterly growth rates are
+    then chained, and both lines are drawn at 100 in 2017Q4. That base is
+    presentation, not construction: it fixes where the lines cross 100, not
+    which firms are compared. A firm whose links enter the data, or that
+    switches groups, contributes nothing in the quarter it moves, so the
+    roster growth visible in Figure~\ref{fig:roll} cannot move these lines.
+    The bottom panel counts the matched firms behind each quarter's growth,
+    8,445 and 769 in 2023Q4. The 72-point rotation of Figure~\ref{fig:roll}
+    does not survive: the two groups end within ten points of each other, 105
+    against 96, and we attach no interpretation to the residual. The zigzag
+    before 2009 is the odd-quarter reporting gap described in Section 1, and
+    it thins the matched counts in those quarters too.}
+  \label{fig:fixed}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \figab{fig_A_firm_quartile_ew}
+  \caption{\textbf{US holdings by quartile of firm exposure, equal-weighted
+    sort.} This figure sorts European firms with a positive China link share into
+    quartiles of that share at the end of the previous quarter. Quartile cutpoints
+    give each firm equal weight. Plotted are US institutional holdings of
+    the lowest and the highest quartile, with the no-ties group as a reference.
+    Panels are as in Figure~\ref{fig:roll}:
+    tension index, real holdings (log scale), holdings indexed to 100 at
+    end-2017, and share of the US institutions' worldwide equity book. The
+    no-ties group is drawn separately rather than folded into the bottom
+    quartile because it is not the low tail of the same distribution. A bottom-quartile firm has a
+    China share that is measured and merely small. The no-ties line pools two
+    different things: firms with a positive supply-chain denominator and no Chinese
+    counterparty (4,276 firms in 2023Q4), and firms with no supply-chain links at
+    all (4,241, of which 2,926 have no recorded relationship of any type). The second kind is the larger part of that line
+    for most of the sample: pooled across quarters, 65 percent of no-ties
+    firm-quarters have no supply-chain link to measure. The two middle quartiles are
+    computed but not drawn, because four sequential blues on a log axis are not
+    separable by eye. Their end-of-sample index values are 220 for the second
+    quartile and 282 for the third, against 52 for the first and 252 for the
+    fourth, so the response is not monotone in exposure under these cutpoints:
+    the third quartile ends above the fourth.}
+  \label{fig:ew}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \figab{fig_A_firm_quartile_mcapw}
+  \caption{\textbf{US holdings by quartile of firm exposure, value-weighted
+    sort.} As Figure~\ref{fig:ew}, but quartile cutpoints weight firms by
+    market capitalization, and the whole sort, including the no-ties
+    reference group, is restricted to firms with observed market value at the
+    end of the previous quarter so that all lines describe one universe. This
+    restriction matters for interpretation, and coverage is neither flat nor
+    monotone: it runs near 70 percent of firm-quarters in 2003, rises to about
+    90 percent by 2007, then falls to 44 percent by the end of the sample. The
+    figure therefore conditions on coverage and tilts toward larger listed
+    firms. Under these cutpoints the end-of-sample index rises with exposure
+    throughout, 102, 143, 164 and 188 from the first quartile to the fourth,
+    which the equal-weighted sort of Figure~\ref{fig:ew} does not.}
+  \label{fig:vw}
+\end{figure}
+
+\section*{3. US holdings sorted by country-level exposure}
+
+Figures~\ref{fig:cagg}, \ref{fig:cvw}, and~\ref{fig:cew} move the sort to the
+country level. That is the unit of the companion country-by-quarter panel of
+28 countries; the main triple difference is estimated one level down, on firm
+by holder-group by quarter cells. Each quarter, countries are
+ranked on their exposure to China at the end of the previous quarter, using
+in turn the aggregate, value-weighted, and equal-weighted measures of
+Section 1, and split at the cross-country 25th and 75th percentiles into a
+bottom quartile, middle half, and top quartile. A country enters the ranking
+only in quarters where at least twenty of its firms can be classified.
+
+Two mechanical warnings apply to all three figures. First, the bottom-quartile
+group is economically tiny, about \$9 billion and five basis points of the
+worldwide book at the end of the sample, so its line carries little
+information. Second, group membership turns over at a low and
+roughly constant rate throughout: under the aggregate measure an
+average of 2.5 rankable countries change groups per quarter through 2016 and
+2.3 per quarter afterward, and the other two rankings are just as flat. What
+makes the early bottom-quartile line unreliable is not the volume of turnover
+but its leverage. That group holds only six or seven countries, so one large
+country crossing the 25th-percentile cut moves the line by hundreds of index
+points: when Spain displaces Greece in 2015Q2 the group's index goes from 119
+to 687 and back to 103 the next quarter. The early-sample swings are that, and
+should not be read as trading. The aggregate measure has a related fragility
+we have not yet fixed: its denominator is a link count with no floor, so a
+country with hundreds of firms but only a handful of recorded links can post
+an extreme exposure value. Poland enters the top quartile in four consecutive
+quarters of 2010 and 2011 on two recorded links. How to screen such cells is
+an open item, and the ranking below applies no link floor.
+
+The substantive result is that the three measures disagree, and the
+disagreement is itself the finding. Indexed to 100 at end-2017, holdings in
+top-quartile countries stand in 2023 at 141 under the aggregate ranking, 99
+under the value-weighted ranking, and 84 under the equal-weighted ranking.
+Under the aggregate measure, which is driven by the link counts of the
+largest, most connected firms, high-exposure countries also gain portfolio
+share (from about 4 percent in 2012 to 7.2 percent in 2023). Under the
+equal-weighted measure, which lets many small firms set a country's rank,
+high-exposure countries lose ground relative to the middle. A conclusion
+about whether US investors left high-exposure \emph{countries} therefore
+depends on how exposure is aggregated, which is why the regressions that
+follow this note use all three measures side by side rather than committing
+to one, and why no single descriptive figure should be read as the answer.
+
+\begin{figure}[p]
+  \centering
+  \figab{fig_A_country_m1_quartiles}
+  \caption{\textbf{US holdings by country exposure quartile, aggregate
+    measure.} This figure ranks countries each quarter on the aggregate
+    exposure measure at the end of the previous quarter, that is, total China
+    links of the country's firms over their total links to any counterparty. It
+    then splits them at the cross-country 25th and 75th percentiles. Panels show
+    the tension index, then for each group real US institutional holdings on a log
+    scale, holdings indexed to 100 at end-2017, and the group's share of the US
+    institutions' worldwide equity book. The log scale is necessary: the two
+    extreme groups differ by two orders of magnitude in size. Countries with fewer than twenty
+    classifiable firms in a quarter are excluded that quarter. Group
+    membership turns over at a similar rate throughout, two to three countries
+    per quarter, but the bottom quartile holds only six or seven countries, so
+    the large early swings of its line reflect single countries crossing a
+    percentile boundary, not trading.}
+  \label{fig:cagg}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \figab{fig_A_country_m2_quartiles}
+  \caption{\textbf{US holdings by country exposure quartile, value-weighted
+    measure.} As Figure~\ref{fig:cagg}, but countries are ranked on the
+    value-weighted measure: the average of firm-level China link shares
+    weighted by market capitalization. Because the measure requires market
+    value, it is computed on the covered subset of firms only, which shrinks
+    over time and skews toward larger listed companies; the ranking should be
+    read jointly with the aggregate and equal-weighted versions rather than
+    on its own.}
+  \label{fig:cvw}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \figab{fig_A_country_m3_quartiles}
+  \caption{\textbf{US holdings by country exposure quartile, equal-weighted
+    measure.} As Figure~\ref{fig:cagg}, but countries are ranked on the
+    equal-weighted measure: the simple average of firm-level China link
+    shares, one firm one vote. Firms with supply-chain links but none to China
+    enter this average as zeros, and they are not invisible to the aggregate
+    measure of Figure~\ref{fig:cagg} either: they supply about half its
+    denominator, 49 percent at the end of 2023 and 52 percent pooled over the
+    sample, so they pull that measure down rather than passing through it. The
+    firms invisible to the aggregate measure are those covered by the
+    relationship data with no active supply-chain link at all, which enter
+    neither its numerator nor its denominator; they are 44 percent of
+    classified firms at the end of 2023 and 61 percent pooled. The divergence
+    between the two rankings reflects that asymmetry together with how
+    concentrated China links are in a handful of highly connected firms.}
+  \label{fig:cew}
+\end{figure}
+
+\section*{4. Do firms with US investors cut their China links?}
+
+Government pressure could also work through firms rather than investors. A
+European firm that values its US shareholder base might cut its China ties
+pre-emptively, so as not to lose it. Figures~\ref{fig:b2} and~\ref{fig:b3}
+test for this by sorting firms on their US institutional ownership at the end
+of the previous quarter and following the growth of their China links. To
+keep the comparison honest, two rules apply. Growth is computed on a cohort fixed
+at $t-1$ and required to have measured link counts a year earlier and in the
+current quarter, so expanding data coverage cannot manufacture growth. Links are
+summed within each group before growth is taken, which keeps firms with zero links
+in the denominator.
+
+The hypothesis fails in a clean and instructive way. Firms with US investors add China links
+\emph{faster} than firms without them through most of the tension era. That holds
+in 18 of the 24 quarters from 2018 on, in every quarter of 2023, with an average
+year-over-year gap of about ten percentage points. The six exceptions are scattered
+and mostly small. The largest is a 5.7-point reversal in 2019Q4. At the end of the sample, year-over-year link
+growth is 24
+percent for US-held firms against 13 percent for firms with no US
+institutional ownership, and in the three-way split of Figure~\ref{fig:b3}
+the gradient is monotone, 24.5 percent for firms above the median US
+holding, 21.8 percent below the median, 12.7 percent with none. Intensity
+tells the same story: US-held firms above the median end the sample with 2.6
+China links per firm, against 0.23 below the median and 0.09 for firms with
+no US owners. One panel needs a warning. The total-links index shows the no-US group growing
+fastest from 2017 on. That group averages fewer than one link per ten firms, so a
+tiny base drives the line, not de-linking by US-held firms.
+The most US-held firms show no de-linking at any point after 2017: their
+year-over-year link growth never turns negative and their total China links
+rise from 1,245 to 3,411. The one line that falls is the below-median US-held
+group, whose links peak at 371 in 2020Q4 and are down to 257 by 2023Q1 before
+recovering to 302, still 29 percent above their 2017Q4 level. That bucket is
+re-sorted at each quarter's median, so firms crossing the median drain links
+out of it; the two US-held arms taken together never decline.
+
+\begin{figure}[p]
+  \centering
+  \figab{fig_B_link_growth_us2}
+  \caption{\textbf{Growth of China links, firms with versus without US
+    investors.} This figure sorts European firms on US institutional
+    ownership at the end of the previous quarter into firms with none and
+    firms with any, and plots the growth of their supply-chain links to
+    China. Five panels: the tension index; year-over-year growth in each group's
+    total China links; total links indexed to 100 at end-2017; China links per
+    firm; and the number of cohort firms in each group, on a log scale. Growth is
+    computed on a cohort fixed at the sort date and required to have measured links
+    a year earlier and currently, so expanding data coverage cannot generate
+    growth. Links are summed within the group before growth is taken, which keeps
+    firms with zero links in the denominator. The ownership grid is zero-filled, so every firm has a row in
+    every quarter and ``no US investors'' is a coded zero rather than a blank.
+    Coverage of the underlying filings is a separate matter: through 2008Q2 the
+    odd-quarter reporting gap described in Section~1 inflates the no-US bucket
+    in the June and December quarters, which sort on a March or September
+    holding, and 17 to 30 percent of that bucket held US money in both adjacent
+    quarters. From 2008Q3 the same check flags 0.1 percent, so across the
+    tension era ``no US investors'' is a measured zero and not missing
+    coverage.}
+  \label{fig:b2}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \figab{fig_B_link_growth_us3}
+  \caption{\textbf{Growth of China links by intensity of US ownership.} As
+    Figure~\ref{fig:b2}, but firms with US investors are further split at
+    each quarter's median US dollar holding into a below-median and an
+    above-median group. The split uses the dollar value of the position
+    rather than the ownership share. Market value, which the share requires, is
+    unobserved for a growing part of this figure's cohort as a whole, covering
+    89 percent of firm-quarters in 2007 but only 43 percent in 2023, and its
+    availability is size-correlated. That constraint does not bind on the firms
+    actually being split: among firm-quarters with a positive US position,
+    market value at the end of the previous quarter is observed for 98 percent,
+    so a share-based sort would have been feasible. What the dollar sort costs
+    is that it loads heavily on firm size, with a within-quarter rank
+    correlation near 0.9 between position value and market capitalization; a
+    share-based split would move about 13 percent of firm-quarters across the
+    median. We accept and note the trade-off. Link growth is fastest for the
+    most US-held firms at the end of the sample and from mid-2020 on, though
+    the below-median group grew faster through 2017 and 2018; nothing here
+    looks like pre-emptive de-linking.}
+  \label{fig:b3}
+\end{figure}
+
+\section*{5. Taking stock}
+
+Three descriptive facts come out of the nine figures. First, the apparent
+decade-long rotation of US portfolios toward China-linked European firms is
+composition: compare each firm only with itself and the two groups end the
+sample within a few percent of each other, a residual too small and too
+sensitive to construction for us to interpret. Second, at the country level the
+sign of the reallocation depends on how exposure is aggregated, so the
+question needs a regression design with all three measures, not a chart with
+one. Third, firms with US owners did not cut China ties as tensions rose;
+they added them faster than firms without US owners. None of this is
+evidence that US institutions ignored the tensions; it says that whatever
+response exists is small relative to the trends in the data and will have to
+be identified off sharper variation than raw levels, which is what the
+panel design this note accompanies is built to do.
+
+\end{document}

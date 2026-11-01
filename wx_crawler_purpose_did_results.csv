@@ -1,0 +1,43 @@
+spec,arm_pair,estimator,term,b,se,p,p_wild,n_obs,n_firms,n_both_arm,n_treat_t,n_treat_s,note
+MAIN_static,train_vs_search,LPM,Post#Training,.0112283426204682,.0012540034,7.6057627e-10,,875760,14596,33,425,38,headline cumulative-blocked
+MAIN_eventstudy,train_vs_search,eventstudy,es_em12,1.19927344883e-14,0,,,890470,14615,33,425,38,lead k=-12; structural zero
+MAIN_eventstudy,train_vs_search,eventstudy,es_em11,-3.83757576475e-14,0,,,890470,14615,33,425,38,lead k=-11; structural zero
+MAIN_eventstudy,train_vs_search,eventstudy,es_em10,-4.01314680507e-14,0,,,890470,14615,33,425,38,lead k=-10; structural zero
+MAIN_eventstudy,train_vs_search,eventstudy,es_em9,-2.77175007800e-14,0,,,890470,14615,33,425,38,lead k=-9; structural zero
+MAIN_eventstudy,train_vs_search,eventstudy,es_em8,-1.80132460876e-14,0,,,890470,14615,33,425,38,lead k=-8; structural zero
+MAIN_eventstudy,train_vs_search,eventstudy,es_em7,-9.12253092432e-14,0,,,890470,14615,33,425,38,lead k=-7; structural zero
+MAIN_eventstudy,train_vs_search,eventstudy,es_em6,-1.71623461726e-14,0,,,890470,14615,33,425,38,lead k=-6; structural zero
+MAIN_eventstudy,train_vs_search,eventstudy,es_em5,-7.65474361494e-15,0,,,890470,14615,33,425,38,lead k=-5; structural zero
+MAIN_eventstudy,train_vs_search,eventstudy,es_em4,-3.52357656422e-14,0,,,890470,14615,33,425,38,lead k=-4; structural zero
+MAIN_eventstudy,train_vs_search,eventstudy,es_em3,-8.54606599491e-14,0,,,890470,14615,33,425,38,lead k=-3; structural zero
+MAIN_eventstudy,train_vs_search,eventstudy,es_em2,-7.84888442056e-14,0,,,890470,14615,33,425,38,lead k=-2; structural zero
+MAIN_eventstudy,train_vs_search,eventstudy,es_ep0,.0017813099478469,0,,,890470,14615,33,425,38,lag k=+0
+MAIN_eventstudy,train_vs_search,eventstudy,es_ep1,.004179227185475,0,,,890470,14615,33,425,38,lag k=+1
+MAIN_eventstudy,train_vs_search,eventstudy,es_ep2,.0060290490544711,0,,,890470,14615,33,425,38,lag k=+2
+MAIN_eventstudy,train_vs_search,eventstudy,es_ep3,.0080844066867196,0,,,890470,14615,33,425,38,lag k=+3
+MAIN_eventstudy,train_vs_search,eventstudy,es_ep4,.0089065497397081,0,,,890470,14615,33,425,38,lag k=+4
+MAIN_eventstudy,train_vs_search,eventstudy,es_ep5,.0103453000821673,0,,,890470,14615,33,425,38,lag k=+5
+MAIN_eventstudy,train_vs_search,eventstudy,es_ep6,.0104138120032669,0,,,890470,14615,33,425,38,lag k=+6
+MAIN_eventstudy,train_vs_search,eventstudy,es_ep7,.0110304192929703,0,,,890470,14615,33,425,38,lag k=+7
+MAIN_eventstudy,train_vs_search,eventstudy,es_ep8,.0114414908194005,0,,,890470,14615,33,425,38,lag k=+8
+MAIN_eventstudy,train_vs_search,eventstudy,es_ep9,.0119210742668166,0,,,890470,14615,33,425,38,lag k=+9
+MAIN_eventstudy,train_vs_search,eventstudy,es_ep10,.0122636338722953,0,,,890470,14615,33,425,38,lag k=+10
+MAIN_eventstudy,train_vs_search,eventstudy,es_ep11,.0124006577144545,0,,,890470,14615,33,425,38,lag k=+11
+MAIN_eventstudy,train_vs_search,eventstudy,es_ep12,.0156614989102629,0,,,890470,14615,33,425,38,lag k=+12
+MAIN_eventstudy,train_vs_search,pretrend,testparm_leads,,,,,890470,,33,425,38,DEGENERATE: structural-zero pre-period (leads=0)
+MAIN_eventstudy,train_vs_search,lincom,avg_post_k>=0,.0095737253519889,0,,,890470,,33,425,38,mean of k>=0 lag interactions
+MAIN_hazard,train_vs_search,LPM-hazard,Post#Training,.0009092029834231,.00021230846,.00018491187,,869440,14596,33,425,38,new-onset hazard; sign must match C1
+MAIN_calendarFE,train_vs_search,LPM,Post#Training,.0125665286813711,.0013845909,2.4498394e-08,,583840,14596,33,425,38,calendar FE - biased toward train-first
+MAIN_balanced_e,train_vs_search,LPM,Post#Training,.0112283426204682,.0012540034,7.6057627e-10,,875760,14596,33,425,38,balanced e<=17
+BROAD_static,broadtrain_vs_search,LPM,Post#Training,.0052364195838271,.00092486129,4.0425821e-06,,875280,14588,169,456,179,robustness; pre-period contaminated
+BROAD_eventstudy,broadtrain_vs_search,pretrend,testparm_leads,,,,,889994,,169,456,179,expect FAIL - pre-2023-08 contamination
+PLACEBO_train_legacy,train_vs_legacy,LPM,Post#Training,.0006165534044453,.0012639256,.62923181,,876804,14142,40,425,456,PASS = null vs MAIN g; legacy=trad_search
+PLACEBO_train_legacy,train_vs_legacy,pretrend,testparm_leads,,,,,880108,,40,425,456,placebo pre-trend should be flat
+PLACEBO_search_legacy,search_vs_legacy,LPM,Post#Training,-.015005100439385,.0016973751,1.0009799e-09,,849600,14160,13,38,456,PASS = null vs MAIN g; AI slot=oai_search
+PLACEBO_search_legacy,search_vs_legacy,pretrend,testparm_leads,,,,,852330,,13,38,456,placebo pre-trend should be flat
+MODERATOR_rd_intensity,train_vs_search,LPM-DDD,Post#Train#rd_intensity,.000598715929729,.0012701403,.64089805,,471300,7855,32,320,37,SUGGESTIVE power-limited
+MODERATOR_rd_intensity,train_vs_search,LPM-DDD,Post#Train_main,.0148738718163702,.0016895981,1.0948110e-09,,471300,7855,32,320,37,main g on moderator subsample
+MODERATOR_intan_intensity,train_vs_search,LPM-DDD,Post#Train#intan_intensity,.0043869238493885,.001491086,.0063505364,,466920,7782,32,320,37,SUGGESTIVE power-limited
+MODERATOR_intan_intensity,train_vs_search,LPM-DDD,Post#Train_main,.0146684886130555,.001674788,1.2206001e-09,,466920,7782,32,320,37,main g on moderator subsample
+MODPLACEBO_rd_intensity,train_vs_legacy,LPM-DDD,Post#Train#rd_intensity,.0003303178508022,.0018848045,.86205828,,475850,7675,39,320,272,MODERATOR PLACEBO - must be null
+MODPLACEBO_intan_intensity,train_vs_legacy,LPM-DDD,Post#Train#intan_intensity,.0023647013291799,.0021082892,.27092138,,471448,7604,39,320,272,MODERATOR PLACEBO - must be null

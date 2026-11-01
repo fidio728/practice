@@ -1,0 +1,29 @@
+\begin{table}[t]
+\centering
+\begin{threeparttable}
+\caption{Summary statistics, by treatment group}
+\label{tab:summ}
+\small
+\begin{tabular}{lccccc}
+\toprule
+ & \multicolumn{2}{c}{Treated (restricting)} & \multicolumn{2}{c}{Control (never)} & \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Variable & Mean & SD & Mean & SD & Difference \\
+\midrule
+Abnormal Amihud (log)              & $-0.018$ & 0.241 & $-0.026$ & 0.287 & $+0.008$ \\
+Log assets                          & 7.07     & 2.38  & 7.32     & 2.27  & $-0.26^{**}$ \\
+Leverage                            & 0.285    & 0.394 & 0.268    & 0.323 & $+0.017$ \\
+Return on assets                    & $-0.144$ & 0.592 & $-0.107$ & 0.576 & $-0.037^{*}$ \\
+Market-to-book                      & 5.03     & 9.64  & 4.20     & 8.97  & $+0.83^{**}$ \\
+Tangibility                         & 0.380    & 0.399 & 0.449    & 0.450 & $-0.069^{***}$ \\
+Analyst coverage (\# estimates)     & 6.94     & 7.74  & 6.43     & 7.16  & $+0.51$ \\
+\midrule
+Firms                               & \multicolumn{2}{c}{735} & \multicolumn{2}{c}{1{,}212} & \\
+Filing events                       & \multicolumn{2}{c}{10{,}464} & \multicolumn{2}{c}{18{,}126} & \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item \textit{Notes.} Treated firms restrict at least one of the 31 crawlers (Table~\ref{tab:crawlers}) during 2021--2025; control firms never do. Means and standard deviations are over filing events in the analysis sample. The \emph{Difference} column reports the treated-minus-control difference in means; significance is from a regression of each variable on a treated indicator with standard errors clustered by firm, with $^{*}$, $^{**}$, and $^{***}$ denoting $p<0.10$, $0.05$, and $0.01$. The abnormal-Amihud dependent variable is the within-event $[-1,+1]$ minus $[-60,-10]$ log difference, shown unwinsorized. Treated and control firms differ on several observables (size, market-to-book, profitability, and tangibility), so we do not read the raw difference in the dependent variable---itself insignificant---as the treatment effect: identification comes from the staggered design with firm and month fixed effects and time-varying controls (Section~\ref{sec:strategy}), and the headline estimate is reported in Table~\ref{tab:main}. The estimation sample requires a valid filing-window observation and comprises 722 treated and 1{,}186 control firms (27{,}327 filing events).
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

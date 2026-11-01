@@ -1,0 +1,32 @@
+\begin{table}[t]
+\centering
+\begin{threeparttable}
+\caption{Channels ruled out}
+\label{tab:excl}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}llcc@{}}
+\toprule
+Channel / outcome & Estimator & Estimate (s.e.) & Pre-trend \\
+\midrule
+\multicolumn{4}{l}{\textit{Delayed price incorporation}}\\
+\quad Delayed $|$return$|$ share $[+2,+10]$ & Borusyak et al.\ & $-0.002$\ (0.005)   & 0.51 \\
+\quad Signed post-filing drift              & Borusyak et al.\ & $0.003$\ (0.003)    & 0.24 \\[3pt]
+\multicolumn{4}{l}{\textit{Posted spreads}}\\
+\quad Abnormal quoted spread                & Borusyak et al.\ & $-0.00002$\ (0.0001)& ---  \\
+\quad Corwin--Schultz spread                & Borusyak et al.\ & $0.00004$\ (0.0005) & 0.27 \\
+\quad Abdi--Ranaldo spread                  & Borusyak et al.\ & $-0.0005$\ (0.0008) & 0.14 \\[3pt]
+\multicolumn{4}{l}{\textit{Trading volume / substitution}}\\
+\quad Share volume $[0,+5]$                 & Borusyak et al.\ & $-0.019$\ (0.063)   & ---  \\
+\quad EDGAR access, periodic filings        & Borusyak et al.\ & $-0.033$\ (0.030)   & 0.31 \\
+\quad EDGAR access, 10-K                    & Borusyak et al.\ & $-0.022$\ (0.030)   & 0.79 \\[3pt]
+\multicolumn{4}{l}{\textit{AI-specificity}}\\
+\quad AI-crawler restriction (log)          & TWFE & $-0.005$\ (0.018)   & ---  \\
+\quad Non-AI placebo (log)                  & TWFE & $0.020^{**}$\ (0.009)& ---  \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item \textit{Notes.} Each row is a separate regression of the indicated outcome on Crawler block $\times$ Post, with the same firm and filing-month fixed effects (specifications described in the text). The imputation rows report the \citet{BorusyakJaravelSpiess2024} estimator with its 12-period pre-trend $p$; ``---'' indicates the pre-trend is not reported for that source (the spread and volume rows are from a broader cross-firm channel map on a different treatment definition). The AI-crawler rows restrict the treatment to firms naming AI-search crawlers (OpenAI, Anthropic, Perplexity, DuckDuckGo; expanded set adds You.com, Andi, Amazon); these arms are underpowered, while a non-AI placebo arm is itself significant, so the effect cannot be attributed to AI crawlers specifically. Standard errors in parentheses. $^{*}$, $^{**}$, $^{***}$ denote 10\%, 5\%, 1\%.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

@@ -1,0 +1,102 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage[margin=1in]{geometry}
+\usepackage{indentfirst}
+\usepackage{setspace}
+\onehalfspacing
+
+\title{Research Plan: Institutional Investor Channel of U.S.--China Geoeconomic Pressure}
+\author{}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section*{Overview}
+
+Following the JFE paper, the logic is to aggregate institutional holdings from the investor level to the country level, and then test whether U.S.\ institutions reallocate away from China-exposed third-country firms after U.S.--China geoeconomic pressure events.
+
+\section{Investor-level holdings}
+
+First, construct a measure of investor-level holdings. \emph{It is not yet confirmed whether this variable is already available in the dataset.}
+
+For each investor $h$, firm $i$, and time period $t$ (quarter, month, or year, depending on data availability), define the dollar value of holdings:
+\[
+I_{h,i,t} = \text{Shares}_{h,i,t} \times \text{Price}_{i,t}.
+\]
+Here $\text{Shares}_{h,i,t}$ denotes the number of shares investor $h$ holds in firm $i$ at $t$. The price can be either the average price during the period or the end-of-period price; the choice should follow data availability.
+
+\section{Country--firm aggregation}
+
+For each investor country $c$, firm $i$, and period $t$, aggregate across all institutions domiciled in (or ultimately managed from) country $c$:
+\[
+I_{i,c,t} = \sum_{h \in c} I_{h,i,t}.
+\]
+This measures how much institutions from country $c$ hold in firm $i$.
+
+\section{Country portfolio weight}
+
+For each country $c$, define firm $i$'s weight in country $c$'s aggregate institutional portfolio:
+\[
+w_{i,c,t} = \frac{I_{i,c,t}}{\sum_j I_{j,c,t}}.
+\]
+This shows how much country $c$'s institutional portfolio allocates to firm $i$.
+
+\section{Country ownership share}
+
+Define the fraction of firm $i$'s market capitalization owned by institutions from country $c$:
+\[
+\text{Ownership}_{i,c,t} = \frac{I_{i,c,t}}{\text{MarketCap}_{i,t}}.
+\]
+When $c = \text{US}$, this variable represents the U.S.\ institutional ownership share of firm $i$, i.e., how much of firm $i$ is owned by U.S.\ institutions.
+
+\section{Firm-level China exposure}
+
+A firm-level China exposure measure is needed. \emph{It is not yet confirmed whether such a ready-to-use variable exists in the dataset; if not, it should be built from supply-chain data.}
+
+Firms are then sorted into:
+\[
+\text{ChinaExposure}_i \in \{\text{High}, \text{Medium}, \text{Low}\}.
+\]
+
+\section{Main holdings test: within-firm-quarter comparison}
+
+Compare U.S.\ and non-U.S.\ investors holding the same third-country firm in the same period:
+\paragraph{Timing (revised 2026-08-21).} Both the China-exposure term and the geopolitical-pressure term enter lagged one quarter, with the holdings response measured at $t$, as directed by the advisors on 4 August 2026. Specifications carrying $\text{GeoPressure}_t$ are retained as timing diagnostics only. This document previously specified the contemporaneous term and has been corrected.
+
+\[
+\Delta I_{h,i,t}
+= \beta \cdot \text{US}_h \times \text{ChinaExposure}_{i,t-1} \times \text{GeoPressure}_{t-1}
++ \alpha_{i,t} + \alpha_{h} + \alpha_{c(h) \times t}
++ \varepsilon_{h,i,t},
+\]
+where $\alpha_{i,t}$, $\alpha_{h}$, and $\alpha_{c(h) \times t}$ denote firm--period, investor, and investor-country--period fixed effects, respectively. The coefficient $\beta$ identifies whether U.S.\ investors adjust their holdings differently from non-U.S.\ investors in the same firm and period, given the firm's China exposure and the level of geopressure.
+
+\emph{Caveat: U.S.\ investors may systematically hold larger, more liquid, or more U.S.-connected European firms. Propensity-score matching of the investor sample may be needed before estimation.}
+
+\section{Portfolio share test}
+
+Recall the country portfolio weight $w_{i,c,t}$ constructed in Section 3. For each China-exposure portfolio $p$ in country $c$'s aggregate portfolio, define:
+\[
+\text{PortfolioShare}_{c,p,t} = \sum_{i \in p} w_{i,c,t}.
+\]
+Then test whether U.S.\ institutions shift their portfolio weight away from high-China-exposure firms as geopressure rises:
+\[
+\text{PortfolioShare}_{c,p,t}
+= \beta_p \cdot \text{US}_c \times \text{GeoPressure}_{t-1}
++ \alpha_c + \alpha_t + \varepsilon_{c,p,t}.
+\]
+Expected: $\beta_p < 0$ for the high-China-exposure portfolio.
+
+\section{Asset-pricing test}
+
+Test whether U.S.\ institutional ownership amplifies the stock-price response to geopressure events $e$:
+\[
+\text{CAR}_{i,e}
+= \beta \cdot \text{ChinaExposure}_{i,t-1} \times \text{Ownership}_{i,\text{US},t-1}
++ \alpha_{c(i) \times e} + \alpha_e + \alpha_i
++ \varepsilon_{i,e}.
+\]
+Expected: $\beta < 0$. China-exposed firms with higher U.S.\ institutional ownership should experience more negative abnormal returns around U.S.--China geoeconomic pressure events.
+
+\end{document}

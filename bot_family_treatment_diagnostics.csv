@@ -1,0 +1,7 @@
+family,bots,has_valid,canon_treated,left_censored,clean_never,first_nonmissing
+core_ai_search,Claude-SearchBot;OAI-SearchBot;PerplexityBot,14615,179,6,14430,185
+broad_ai_discovery,Anomura;Applebot;Claude-SearchBot;OAI-SearchBot;PerplexityBot;PetalBot,14615,955,54,13606,1009
+training_llm_core,CCBot;ClaudeBot;GPTBot;Google-Extended,14615,456,27,14132,483
+traditional_search,Baiduspider;DuckDuckBot;Googlebot;SeznamBot;YandexBot;Yeti;bingbot,14615,456,455,13704,911
+oai_search,OAI-SearchBot,14615,38,0,14577,38
+gptbot,GPTBot,14615,425,19,14171,444

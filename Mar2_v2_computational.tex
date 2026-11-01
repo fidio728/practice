@@ -1,0 +1,351 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\geometry{margin=1in}
+\onehalfspacing
+
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+
+\title{Cherry-Picking under Screening:\\
+  Computational Supplement}
+\author{Xueyang}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This supplement accompanies the theory paper.
+The main analytical results cover two regimes:
+(i) without participation constraint,
+$A(\emptyset) = 0$ always (Theorem~1);
+(ii) with participation constraint in the simple case
+($\pi_1 \notin S_2$, $\mathrm{IC}_1$ slack),
+$A(\emptyset) = \alpha^* > 0$ when
+$c \in (h_2, c^*)$ (Theorem~2).
+The theory leaves open the general case where IC and IR
+interact simultaneously. This supplement develops
+computational methods to: (1) solve the general problem
+numerically, (2) map the welfare cost of pooling across
+parameter space, and (3) extend to a dynamic setting.
+\end{abstract}
+
+
+% ============================================================
+\section{The General Optimization Problem}
+\label{sec:general}
+% ============================================================
+
+When $\pi_1 \in S_2$ (both types can access both
+experiments), IC$_1$ and IC$_2$ both matter, and IR may
+bind simultaneously with IC. The FDA's problem becomes:
+
+\begin{align}
+  \max_{\substack{(x_1,y_1),(x_2,y_2),\\
+    A_g^1, A_g^2, \alpha}}
+  \quad & V = t \left[\mathbb{1}_1 \cdot EU_1^P
+    + (1-\mathbb{1}_1)(1-p)\right]
+    + (1-t)\left[\mathbb{1}_2 \cdot EU_2^P
+    + (1-\mathbb{1}_2)(1-p)\right]
+  \nonumber \\
+  \text{s.t.} \quad
+  & (x_i, y_i) \in S_i, \quad i = 1,2,
+  \nonumber \\
+  & A_g^1, A_g^2, \alpha \in [0, 1], \quad
+    A_g^i \geq \alpha,
+  \nonumber \\
+  & \text{IC}_1: \; A_g^1 h_1 + \alpha(1-h_1)
+    \geq A_g^2 h_2 + \alpha(1-h_2),
+  \label{eq:full_problem} \\
+  & \text{IC}_2: \; A_g^2 h_2 + \alpha(1-h_2)
+    \geq A_g^1 h_1 + \alpha(1-h_1)
+    \quad (\text{if } \pi_1 \in S_2),
+  \nonumber \\
+  & \text{IR}_i: \; A_g^i h_i + \alpha(1-h_i)
+    \geq c, \quad i = 1,2.
+  \nonumber
+\end{align}
+
+This is a mixed-integer nonlinear program (the
+$\mathbb{1}_i$ indicators make it discontinuous). In
+practice, solve it by enumerating the four participation
+cases (\{both, only 1, only 2, neither\}) and solving
+a continuous NLP for each, then comparing.
+
+
+\subsection{Parameterizing Feasible Sets}
+
+Following Min (2023), use linear upper boundaries:
+\[
+  \bar{S}_i(x) = a_i - b_i x, \qquad
+  S_i = \{(x,y) : y \geq 1-x, \;
+    y \leq a_i - b_i x\}.
+\]
+Parameters: $(a_1, b_1, a_2, b_2)$ with
+$a_1 > a_2$ (big type has more capable experiments).
+
+Each continuous subproblem is a 5-dimensional constrained
+optimization, solvable with \texttt{scipy.optimize.minimize}
+(SLSQP method) or \texttt{cvxpy} for the
+linear-in-$\alpha$ structure.
+
+
+% ============================================================
+\section{Newsvendor Interpretation}
+\label{sec:newsvendor}
+% ============================================================
+
+The FDA's choice of $\alpha$ (equivalently, whether to
+induce type~2's participation) has a critical-ratio
+structure connecting to Session~1.
+
+\paragraph{Setup.}
+The FDA faces two costs when choosing $\alpha$:
+
+\begin{itemize}
+  \item \textbf{Overage cost} (setting $\alpha$ too high):
+    bad drugs approved through the silence channel.
+    Per unit of $\alpha$:
+    \[
+      c_o := |t \, \Delta_b(\pi_1)
+        + (1-t) \, \Delta_b(\pi_2)| > 0.
+    \]
+  \item \textbf{Underage cost} (setting $\alpha$ too low):
+    losing type~2's participation. The discrete value of
+    type~2's participation is:
+    \[
+      c_u := (1-t)[\Delta_g(\pi_2)
+        + \Delta_b(\pi_2) \alpha^*].
+    \]
+\end{itemize}
+
+The FDA sets $\alpha = \alpha^*$ iff
+$c_u > c_o \cdot \alpha^*$, i.e., the participation value
+exceeds the silence-channel cost.
+
+In the classical newsvendor, the optimal order quantity is
+where $F(Q^*) = c_u/(c_u + c_o)$. Here, because $V$ is
+\emph{linear} in $\alpha$ (piecewise), the ``demand
+distribution'' is degenerate and the optimum is at a
+corner: either $\alpha = 0$ or $\alpha = \alpha^*$.
+
+\paragraph{Extension: convex political cost.}
+If the FDA faces a convex cost of deviating from ex post
+optimality---e.g., $C(\alpha) = \gamma \alpha^2$---the
+problem admits an interior solution:
+\[
+  \alpha^{**}
+  = \arg\max_\alpha \; V(\alpha) - \gamma \alpha^2.
+\]
+With quadratic cost, the first-order condition gives a
+closed-form solution analogous to the newsvendor critical
+ratio, and the FDA's optimal $\alpha$ varies smoothly
+with $\gamma$.
+
+
+% ============================================================
+\section{Monte Carlo Simulation}
+\label{sec:monte_carlo}
+% ============================================================
+
+Monte Carlo methods (Session~4) are used for three purposes.
+
+\subsection{Welfare Estimation}
+
+For a given mechanism $\mathcal{M}$ and parameter
+configuration:
+
+\begin{algorithmic}[1]
+\FOR{$k = 1, \ldots, N$}
+  \STATE Draw drug quality:
+    $\omega_k \sim \text{Bernoulli}(p)$
+  \STATE Draw firm type:
+    $\theta_k \sim \text{Bernoulli}(t)$
+  \STATE \textbf{Participation:}
+    compute $EU^A_{\theta_k}$; if $< c$, record
+    FDA payoff $= \mathbb{1}[\omega_k = B]$ and skip
+  \STATE Draw trial outcome $j_k$ from experiment
+    $\pi_{\theta_k}$
+  \STATE \textbf{Disclosure:} if $j_k = g$, disclose;
+    if $j_k = b$, submit without evidence
+  \STATE \textbf{FDA decision:} approve with prob
+    $A_g^{\theta_k}$ (if disclosed) or $\alpha$
+    (if no evidence)
+  \STATE Record: FDA payoff $= \mathbb{1}[$decision
+    matches $\omega_k]$
+\ENDFOR
+\STATE $\widehat{V} = N^{-1} \sum_k \text{payoff}_k$
+\end{algorithmic}
+
+Since the model has finite types and binary outcomes, the
+exact expected payoff can be computed analytically (8 cells:
+quality $\times$ type $\times$ outcome). Monte Carlo is
+primarily useful for:
+
+\begin{itemize}
+  \item \textbf{Dynamic extension} (Section~\ref{sec:mdp}):
+    where analytical solutions are unavailable.
+  \item \textbf{Tail risk estimation}: probability of
+    $\geq k$ bad approvals in $T$ periods.
+  \item \textbf{Sensitivity analysis}: mapping $V$ as a
+    function of $(p, t, c, a_1, b_1, a_2, b_2)$ when
+    exact optimization is too slow for the full grid.
+\end{itemize}
+
+
+% ============================================================
+\section{Parallel Parameter Sweep}
+\label{sec:parallel}
+% ============================================================
+
+The welfare comparison (Corollary~3 in the theory paper)
+requires solving the optimization across a parameter grid
+(Session~5).
+
+\subsection{Parameter Space}
+
+\begin{itemize}
+  \item $p \in \{0.05, 0.10, \ldots, 0.45\}$
+    \hfill (9 values)
+  \item $t \in \{0.1, 0.2, \ldots, 0.9\}$
+    \hfill (9 values)
+  \item $c \in \{0.1, 0.15, \ldots, 0.9\}$
+    \hfill (17 values)
+  \item $(a_1, b_1, a_2, b_2)$: grid over feasible set
+    parameters
+\end{itemize}
+
+Total grid points: $9 \times 9 \times 17 = 1377$ (for
+fixed feasible sets). Each requires solving 4 continuous
+NLPs (one per participation case).
+
+\subsection{Implementation}
+
+Grid points are \textbf{embarrassingly parallel}: no data
+dependencies. Use Python \texttt{multiprocessing.Pool}:
+
+\begin{enumerate}
+  \item \textbf{Worker function}: takes
+    $(p, t, c, a_1, b_1, a_2, b_2)$, solves the
+    optimization for both my model and Min's model,
+    returns $(V_{\text{mine}}, V_{\text{Min}},
+    \alpha^*, \pi_1^*, \pi_2^*)$.
+
+  \item \textbf{Distribute}: \texttt{pool.map(worker,
+    grid\_points)} across $C$ CPU cores.
+
+  \item \textbf{Aggregate}: collect results into a
+    DataFrame. Compute welfare cost
+    $\Delta V = V_{\text{Min}} - V_{\text{mine}}$
+    at each grid point.
+\end{enumerate}
+
+\subsection{Outputs}
+
+\begin{itemize}
+  \item \textbf{Heatmap}: $\Delta V(p, t)$ for fixed
+    $c$ and feasible sets. Identifies parameter regions
+    where cherry-picking is most costly.
+  \item \textbf{Threshold surface}: $c^*(p, t)$ as a
+    function of prior and type distribution.
+  \item \textbf{Regime map}: which participation regime
+    (both, only type~1, neither) is optimal at each
+    grid point.
+\end{itemize}
+
+Speedup: $C = 8$ cores, ideal $8\times$. With
+$T_1 \approx 0.1$s per grid point, total wall time
+$\approx 1377 \times 0.1 / 8 \approx 17$s. Connects to
+Amdahl's law (Session~5).
+
+
+% ============================================================
+\section{MDP Extension: Dynamic Regulation}
+\label{sec:mdp}
+% ============================================================
+
+Embed the static model in a repeated setting (Sessions~2--3).
+
+\paragraph{State:}
+$s_t = (n_t^G, n_t^B)$: FDA's running count of
+correct/incorrect approvals (reputation).
+
+\paragraph{Action:}
+$a_t = \alpha_t \in [0, 1]$: the commitment level for
+period $t$.
+
+\paragraph{Transition:}
+Given $\alpha_t$, the static mechanism plays out.
+The FDA observes the drug's true quality ex post with
+some probability (post-market surveillance), updating
+$(n_t^G, n_t^B)$.
+
+\paragraph{Reward:}
+\[
+  r_t = EU^P(\alpha_t)
+  - \gamma \cdot \mathbb{1}[\text{bad drug approved}],
+\]
+where $\gamma > 0$ captures reputational cost.
+
+\paragraph{Bellman equation:}
+\begin{equation}\label{eq:bellman}
+  W(s) = \max_{\alpha \in [0,1]}
+  \left\{
+    r(s, \alpha)
+    + \beta \sum_{s'} P(s' \mid s, \alpha) W(s')
+  \right\}.
+\end{equation}
+
+Solve by \textbf{value iteration} on discretized
+state/action spaces. The transition probabilities
+$P(s'|s,\alpha)$ come from the static model's equilibrium
+(which participation regime, which experiments, which
+approval events occur).
+
+No closed-form solution is available because the
+static equilibrium depends on $\alpha$, which depends on
+the state through the reputation cost.
+
+
+% ============================================================
+\section{Summary of Course Connections}
+\label{sec:summary}
+% ============================================================
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{l|c|l}
+\textbf{Course Topic} & \textbf{Session}
+  & \textbf{Application in This Paper} \\ \hline
+Newsvendor / EOQ & 1
+  & Critical ratio for $\alpha^*$ decision
+    (Section~\ref{sec:newsvendor}) \\
+MDP (analytical) & 2
+  & Bellman equation for dynamic regulation
+    (Section~\ref{sec:mdp}) \\
+MDP (numerical) & 3
+  & Value iteration for discretized MDP \\
+Monte Carlo & 4
+  & Welfare estimation and tail risk
+    (Section~\ref{sec:monte_carlo}) \\
+Parallel methods & 5
+  & Parameter sweep across grid
+    (Section~\ref{sec:parallel}) \\
+\end{tabular}
+\end{center}
+
+Multi-armed bandits (Session~6) and deep RL (Session~7):
+if the FDA does not know the type distribution $t$ and
+must learn through repeated interactions, the problem
+becomes a bandit/RL problem. This is a possible extension
+but is not developed here.
+
+
+\end{document}

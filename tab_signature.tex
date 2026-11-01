@@ -1,0 +1,32 @@
+\begin{table}[t]
+\centering
+\begin{threeparttable}
+\caption{The price-impact signature: return variance and trading volume}
+\label{tab:signature}
+\small
+\begin{tabular}{lcc}
+\toprule
+ & \multicolumn{2}{c}{Borusyak et al.\ (2024)} \\
+\cmidrule(lr){2-3}
+ & (1) & (2) \\
+\midrule
+\textit{Abnormal return variance} & & \\
+\quad Crawler block $\times$ Post & $0.121^{**}$ & $0.111^{**}$ \\
+                                  & (0.050)      & (0.050) \\
+\quad Pre-trend $p$ (12 period)   & 0.52         & 0.53 \\[4pt]
+\textit{Abnormal dollar volume}   & & \\
+\quad Crawler block $\times$ Post & $0.061^{**}$ & $0.054^{**}$ \\
+                                  & (0.026)      & (0.026) \\
+\quad Pre-trend $p$ (12 period)   & 0.83         & 0.83 \\
+\midrule
+Controls         & No       & Yes \\
+Firm FE          & Yes      & Yes \\
+Filing-month FE  & Yes      & Yes \\
+Observations     & 25{,}516 & 25{,}516 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item \textit{Notes.} Each panel reports the \citet{BorusyakJaravelSpiess2024} imputation estimate of the effect of crawler restriction on an abnormal filing-window outcome, without (column~1) and with (column~2) the control set, each with a 12-period pre-trend test. Each outcome is an abnormal within-event difference in the same form as the headline (Table~\ref{tab:main}): the log of the event-window average over days $[-1,+1]$ minus the log of the local-benchmark average over days $[-60,-10]$. Return variance uses the mean squared market-adjusted daily return; dollar volume uses mean daily dollar volume. The two-way fixed-effects benchmark is similar (return variance $+0.099$, $p=0.02$; dollar volume $+0.026$, $p=0.20$, the latter positive but not significant). The third leg of the signature, posted and proxy spreads, is null and reported in Table~\ref{tab:excl}. The control set, fixed effects, and estimation sample match Table~\ref{tab:main}. Standard errors clustered by firm in parentheses. $^{*}$, $^{**}$, $^{***}$ denote significance at the 10\%, 5\%, and 1\% levels.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

@@ -1,0 +1,441 @@
+firm,ticker,domain,date,cap_group,sector,bot,bot_type,root_block,path_block,has_specific_rule,status_code
+Apple,AAPL,apple.com,2026-03-20,mega,Tech,OAI-SearchBot,retrieval,0,1,0,200
+Apple,AAPL,apple.com,2026-03-20,mega,Tech,Claude-SearchBot,retrieval,0,1,0,200
+Apple,AAPL,apple.com,2026-03-20,mega,Tech,ChatGPT-User,retrieval,0,1,0,200
+Apple,AAPL,apple.com,2026-03-20,mega,Tech,GPTBot,training,0,1,0,200
+Apple,AAPL,apple.com,2026-03-20,mega,Tech,ClaudeBot,training,0,1,0,200
+Apple,AAPL,apple.com,2026-03-20,mega,Tech,Google-Extended,training,0,1,0,200
+Apple,AAPL,apple.com,2026-03-20,mega,Tech,CCBot,training,0,1,0,200
+Apple,AAPL,apple.com,2026-03-20,mega,Tech,Googlebot,control,0,1,0,200
+Microsoft,MSFT,microsoft.com,2026-03-20,mega,Tech,OAI-SearchBot,retrieval,0,1,0,200
+Microsoft,MSFT,microsoft.com,2026-03-20,mega,Tech,Claude-SearchBot,retrieval,0,1,0,200
+Microsoft,MSFT,microsoft.com,2026-03-20,mega,Tech,ChatGPT-User,retrieval,0,1,0,200
+Microsoft,MSFT,microsoft.com,2026-03-20,mega,Tech,GPTBot,training,0,1,0,200
+Microsoft,MSFT,microsoft.com,2026-03-20,mega,Tech,ClaudeBot,training,0,1,0,200
+Microsoft,MSFT,microsoft.com,2026-03-20,mega,Tech,Google-Extended,training,0,1,0,200
+Microsoft,MSFT,microsoft.com,2026-03-20,mega,Tech,CCBot,training,0,1,0,200
+Microsoft,MSFT,microsoft.com,2026-03-20,mega,Tech,Googlebot,control,0,1,0,200
+NVIDIA,NVDA,nvidianews.nvidia.com,2026-03-20,mega,Tech,OAI-SearchBot,retrieval,0,1,0,200
+NVIDIA,NVDA,nvidianews.nvidia.com,2026-03-20,mega,Tech,Claude-SearchBot,retrieval,0,1,0,200
+NVIDIA,NVDA,nvidianews.nvidia.com,2026-03-20,mega,Tech,ChatGPT-User,retrieval,0,1,0,200
+NVIDIA,NVDA,nvidianews.nvidia.com,2026-03-20,mega,Tech,GPTBot,training,0,1,0,200
+NVIDIA,NVDA,nvidianews.nvidia.com,2026-03-20,mega,Tech,ClaudeBot,training,0,1,0,200
+NVIDIA,NVDA,nvidianews.nvidia.com,2026-03-20,mega,Tech,Google-Extended,training,0,1,0,200
+NVIDIA,NVDA,nvidianews.nvidia.com,2026-03-20,mega,Tech,CCBot,training,0,1,0,200
+NVIDIA,NVDA,nvidianews.nvidia.com,2026-03-20,mega,Tech,Googlebot,control,0,1,0,200
+Amazon,AMZN,aboutamazon.com,2026-03-20,mega,Tech,OAI-SearchBot,retrieval,0,0,0,200
+Amazon,AMZN,aboutamazon.com,2026-03-20,mega,Tech,Claude-SearchBot,retrieval,0,0,0,200
+Amazon,AMZN,aboutamazon.com,2026-03-20,mega,Tech,ChatGPT-User,retrieval,0,0,0,200
+Amazon,AMZN,aboutamazon.com,2026-03-20,mega,Tech,GPTBot,training,0,0,0,200
+Amazon,AMZN,aboutamazon.com,2026-03-20,mega,Tech,ClaudeBot,training,0,0,0,200
+Amazon,AMZN,aboutamazon.com,2026-03-20,mega,Tech,Google-Extended,training,0,0,0,200
+Amazon,AMZN,aboutamazon.com,2026-03-20,mega,Tech,CCBot,training,0,0,0,200
+Amazon,AMZN,aboutamazon.com,2026-03-20,mega,Tech,Googlebot,control,0,0,0,200
+Alphabet,GOOGL,blog.google,2026-03-20,mega,Tech,OAI-SearchBot,retrieval,0,1,0,200
+Alphabet,GOOGL,blog.google,2026-03-20,mega,Tech,Claude-SearchBot,retrieval,0,1,0,200
+Alphabet,GOOGL,blog.google,2026-03-20,mega,Tech,ChatGPT-User,retrieval,0,1,0,200
+Alphabet,GOOGL,blog.google,2026-03-20,mega,Tech,GPTBot,training,0,1,0,200
+Alphabet,GOOGL,blog.google,2026-03-20,mega,Tech,ClaudeBot,training,0,1,0,200
+Alphabet,GOOGL,blog.google,2026-03-20,mega,Tech,Google-Extended,training,0,1,0,200
+Alphabet,GOOGL,blog.google,2026-03-20,mega,Tech,CCBot,training,0,1,0,200
+Alphabet,GOOGL,blog.google,2026-03-20,mega,Tech,Googlebot,control,0,1,0,200
+Meta,META,about.meta.com,2026-03-20,mega,Tech,OAI-SearchBot,retrieval,0,1,0,200
+Meta,META,about.meta.com,2026-03-20,mega,Tech,Claude-SearchBot,retrieval,0,1,0,200
+Meta,META,about.meta.com,2026-03-20,mega,Tech,ChatGPT-User,retrieval,0,1,0,200
+Meta,META,about.meta.com,2026-03-20,mega,Tech,GPTBot,training,1,0,1,200
+Meta,META,about.meta.com,2026-03-20,mega,Tech,ClaudeBot,training,1,0,1,200
+Meta,META,about.meta.com,2026-03-20,mega,Tech,Google-Extended,training,1,0,1,200
+Meta,META,about.meta.com,2026-03-20,mega,Tech,CCBot,training,0,1,0,200
+Meta,META,about.meta.com,2026-03-20,mega,Tech,Googlebot,control,0,1,0,200
+Tesla,TSLA,ir.tesla.com,2026-03-20,mega,Auto,OAI-SearchBot,retrieval,0,1,0,200
+Tesla,TSLA,ir.tesla.com,2026-03-20,mega,Auto,Claude-SearchBot,retrieval,0,1,0,200
+Tesla,TSLA,ir.tesla.com,2026-03-20,mega,Auto,ChatGPT-User,retrieval,0,1,0,200
+Tesla,TSLA,ir.tesla.com,2026-03-20,mega,Auto,GPTBot,training,0,1,0,200
+Tesla,TSLA,ir.tesla.com,2026-03-20,mega,Auto,ClaudeBot,training,0,1,0,200
+Tesla,TSLA,ir.tesla.com,2026-03-20,mega,Auto,Google-Extended,training,0,1,0,200
+Tesla,TSLA,ir.tesla.com,2026-03-20,mega,Auto,CCBot,training,0,1,0,200
+Tesla,TSLA,ir.tesla.com,2026-03-20,mega,Auto,Googlebot,control,0,1,0,200
+Berkshire Hathaway,BRK.B,berkshirehathaway.com,2026-03-20,mega,Finance,OAI-SearchBot,retrieval,0,0,0,404
+Berkshire Hathaway,BRK.B,berkshirehathaway.com,2026-03-20,mega,Finance,Claude-SearchBot,retrieval,0,0,0,404
+Berkshire Hathaway,BRK.B,berkshirehathaway.com,2026-03-20,mega,Finance,ChatGPT-User,retrieval,0,0,0,404
+Berkshire Hathaway,BRK.B,berkshirehathaway.com,2026-03-20,mega,Finance,GPTBot,training,0,0,0,404
+Berkshire Hathaway,BRK.B,berkshirehathaway.com,2026-03-20,mega,Finance,ClaudeBot,training,0,0,0,404
+Berkshire Hathaway,BRK.B,berkshirehathaway.com,2026-03-20,mega,Finance,Google-Extended,training,0,0,0,404
+Berkshire Hathaway,BRK.B,berkshirehathaway.com,2026-03-20,mega,Finance,CCBot,training,0,0,0,404
+Berkshire Hathaway,BRK.B,berkshirehathaway.com,2026-03-20,mega,Finance,Googlebot,control,0,0,0,404
+Broadcom,AVGO,broadcom.com,2026-03-20,mega,Tech,OAI-SearchBot,retrieval,0,1,0,200
+Broadcom,AVGO,broadcom.com,2026-03-20,mega,Tech,Claude-SearchBot,retrieval,0,1,0,200
+Broadcom,AVGO,broadcom.com,2026-03-20,mega,Tech,ChatGPT-User,retrieval,0,1,0,200
+Broadcom,AVGO,broadcom.com,2026-03-20,mega,Tech,GPTBot,training,0,1,0,200
+Broadcom,AVGO,broadcom.com,2026-03-20,mega,Tech,ClaudeBot,training,0,1,0,200
+Broadcom,AVGO,broadcom.com,2026-03-20,mega,Tech,Google-Extended,training,0,1,0,200
+Broadcom,AVGO,broadcom.com,2026-03-20,mega,Tech,CCBot,training,0,1,0,200
+Broadcom,AVGO,broadcom.com,2026-03-20,mega,Tech,Googlebot,control,0,1,0,200
+JPMorgan,JPM,jpmorganchase.com,2026-03-20,mega,Finance,OAI-SearchBot,retrieval,0,1,0,200
+JPMorgan,JPM,jpmorganchase.com,2026-03-20,mega,Finance,Claude-SearchBot,retrieval,0,1,0,200
+JPMorgan,JPM,jpmorganchase.com,2026-03-20,mega,Finance,ChatGPT-User,retrieval,0,1,0,200
+JPMorgan,JPM,jpmorganchase.com,2026-03-20,mega,Finance,GPTBot,training,0,1,0,200
+JPMorgan,JPM,jpmorganchase.com,2026-03-20,mega,Finance,ClaudeBot,training,0,1,0,200
+JPMorgan,JPM,jpmorganchase.com,2026-03-20,mega,Finance,Google-Extended,training,0,1,0,200
+JPMorgan,JPM,jpmorganchase.com,2026-03-20,mega,Finance,CCBot,training,0,1,0,200
+JPMorgan,JPM,jpmorganchase.com,2026-03-20,mega,Finance,Googlebot,control,0,1,0,200
+Walmart,WMT,corporate.walmart.com,2026-03-20,large,Retail,OAI-SearchBot,retrieval,0,1,1,200
+Walmart,WMT,corporate.walmart.com,2026-03-20,large,Retail,Claude-SearchBot,retrieval,0,1,1,200
+Walmart,WMT,corporate.walmart.com,2026-03-20,large,Retail,ChatGPT-User,retrieval,0,1,0,200
+Walmart,WMT,corporate.walmart.com,2026-03-20,large,Retail,GPTBot,training,0,1,0,200
+Walmart,WMT,corporate.walmart.com,2026-03-20,large,Retail,ClaudeBot,training,0,1,1,200
+Walmart,WMT,corporate.walmart.com,2026-03-20,large,Retail,Google-Extended,training,0,1,0,200
+Walmart,WMT,corporate.walmart.com,2026-03-20,large,Retail,CCBot,training,0,1,0,200
+Walmart,WMT,corporate.walmart.com,2026-03-20,large,Retail,Googlebot,control,0,1,0,200
+Visa,V,visa.com,2026-03-20,large,Finance,OAI-SearchBot,retrieval,0,0,0,200
+Visa,V,visa.com,2026-03-20,large,Finance,Claude-SearchBot,retrieval,0,0,0,200
+Visa,V,visa.com,2026-03-20,large,Finance,ChatGPT-User,retrieval,0,0,0,200
+Visa,V,visa.com,2026-03-20,large,Finance,GPTBot,training,0,0,0,200
+Visa,V,visa.com,2026-03-20,large,Finance,ClaudeBot,training,0,0,0,200
+Visa,V,visa.com,2026-03-20,large,Finance,Google-Extended,training,0,0,0,200
+Visa,V,visa.com,2026-03-20,large,Finance,CCBot,training,0,0,0,200
+Visa,V,visa.com,2026-03-20,large,Finance,Googlebot,control,0,0,0,200
+Johnson & Johnson,JNJ,jnj.com,2026-03-20,large,Healthcare,OAI-SearchBot,retrieval,0,0,0,200
+Johnson & Johnson,JNJ,jnj.com,2026-03-20,large,Healthcare,Claude-SearchBot,retrieval,0,0,0,200
+Johnson & Johnson,JNJ,jnj.com,2026-03-20,large,Healthcare,ChatGPT-User,retrieval,0,0,0,200
+Johnson & Johnson,JNJ,jnj.com,2026-03-20,large,Healthcare,GPTBot,training,0,0,0,200
+Johnson & Johnson,JNJ,jnj.com,2026-03-20,large,Healthcare,ClaudeBot,training,0,0,0,200
+Johnson & Johnson,JNJ,jnj.com,2026-03-20,large,Healthcare,Google-Extended,training,0,0,0,200
+Johnson & Johnson,JNJ,jnj.com,2026-03-20,large,Healthcare,CCBot,training,0,0,0,200
+Johnson & Johnson,JNJ,jnj.com,2026-03-20,large,Healthcare,Googlebot,control,0,0,0,200
+Procter & Gamble,PG,us.pg.com,2026-03-20,large,Consumer,OAI-SearchBot,retrieval,0,1,0,200
+Procter & Gamble,PG,us.pg.com,2026-03-20,large,Consumer,Claude-SearchBot,retrieval,0,1,0,200
+Procter & Gamble,PG,us.pg.com,2026-03-20,large,Consumer,ChatGPT-User,retrieval,0,1,0,200
+Procter & Gamble,PG,us.pg.com,2026-03-20,large,Consumer,GPTBot,training,0,1,0,200
+Procter & Gamble,PG,us.pg.com,2026-03-20,large,Consumer,ClaudeBot,training,0,1,0,200
+Procter & Gamble,PG,us.pg.com,2026-03-20,large,Consumer,Google-Extended,training,0,1,0,200
+Procter & Gamble,PG,us.pg.com,2026-03-20,large,Consumer,CCBot,training,0,1,0,200
+Procter & Gamble,PG,us.pg.com,2026-03-20,large,Consumer,Googlebot,control,0,1,0,200
+Mastercard,MA,mastercard.com,2026-03-20,large,Finance,OAI-SearchBot,retrieval,NA,NA,NA,403
+Mastercard,MA,mastercard.com,2026-03-20,large,Finance,Claude-SearchBot,retrieval,NA,NA,NA,403
+Mastercard,MA,mastercard.com,2026-03-20,large,Finance,ChatGPT-User,retrieval,NA,NA,NA,403
+Mastercard,MA,mastercard.com,2026-03-20,large,Finance,GPTBot,training,NA,NA,NA,403
+Mastercard,MA,mastercard.com,2026-03-20,large,Finance,ClaudeBot,training,NA,NA,NA,403
+Mastercard,MA,mastercard.com,2026-03-20,large,Finance,Google-Extended,training,NA,NA,NA,403
+Mastercard,MA,mastercard.com,2026-03-20,large,Finance,CCBot,training,NA,NA,NA,403
+Mastercard,MA,mastercard.com,2026-03-20,large,Finance,Googlebot,control,NA,NA,NA,403
+ExxonMobil,XOM,corporate.exxonmobil.com,2026-03-20,large,Energy,OAI-SearchBot,retrieval,0,1,0,200
+ExxonMobil,XOM,corporate.exxonmobil.com,2026-03-20,large,Energy,Claude-SearchBot,retrieval,0,1,0,200
+ExxonMobil,XOM,corporate.exxonmobil.com,2026-03-20,large,Energy,ChatGPT-User,retrieval,0,1,0,200
+ExxonMobil,XOM,corporate.exxonmobil.com,2026-03-20,large,Energy,GPTBot,training,0,1,0,200
+ExxonMobil,XOM,corporate.exxonmobil.com,2026-03-20,large,Energy,ClaudeBot,training,0,1,0,200
+ExxonMobil,XOM,corporate.exxonmobil.com,2026-03-20,large,Energy,Google-Extended,training,0,1,0,200
+ExxonMobil,XOM,corporate.exxonmobil.com,2026-03-20,large,Energy,CCBot,training,0,1,0,200
+ExxonMobil,XOM,corporate.exxonmobil.com,2026-03-20,large,Energy,Googlebot,control,0,1,0,200
+Costco,COST,costco.com,2026-03-20,large,Retail,OAI-SearchBot,retrieval,0,1,0,200
+Costco,COST,costco.com,2026-03-20,large,Retail,Claude-SearchBot,retrieval,0,1,0,200
+Costco,COST,costco.com,2026-03-20,large,Retail,ChatGPT-User,retrieval,0,1,0,200
+Costco,COST,costco.com,2026-03-20,large,Retail,GPTBot,training,0,1,0,200
+Costco,COST,costco.com,2026-03-20,large,Retail,ClaudeBot,training,0,1,0,200
+Costco,COST,costco.com,2026-03-20,large,Retail,Google-Extended,training,0,1,0,200
+Costco,COST,costco.com,2026-03-20,large,Retail,CCBot,training,0,1,0,200
+Costco,COST,costco.com,2026-03-20,large,Retail,Googlebot,control,0,1,0,200
+Pfizer,PFE,pfizer.com,2026-03-20,large,Healthcare,OAI-SearchBot,retrieval,0,1,0,200
+Pfizer,PFE,pfizer.com,2026-03-20,large,Healthcare,Claude-SearchBot,retrieval,0,1,0,200
+Pfizer,PFE,pfizer.com,2026-03-20,large,Healthcare,ChatGPT-User,retrieval,0,1,0,200
+Pfizer,PFE,pfizer.com,2026-03-20,large,Healthcare,GPTBot,training,0,1,0,200
+Pfizer,PFE,pfizer.com,2026-03-20,large,Healthcare,ClaudeBot,training,0,1,0,200
+Pfizer,PFE,pfizer.com,2026-03-20,large,Healthcare,Google-Extended,training,0,1,0,200
+Pfizer,PFE,pfizer.com,2026-03-20,large,Healthcare,CCBot,training,0,1,0,200
+Pfizer,PFE,pfizer.com,2026-03-20,large,Healthcare,Googlebot,control,0,1,0,200
+Goldman Sachs,GS,goldmansachs.com,2026-03-20,large,Finance,OAI-SearchBot,retrieval,0,1,0,200
+Goldman Sachs,GS,goldmansachs.com,2026-03-20,large,Finance,Claude-SearchBot,retrieval,0,1,0,200
+Goldman Sachs,GS,goldmansachs.com,2026-03-20,large,Finance,ChatGPT-User,retrieval,0,1,1,200
+Goldman Sachs,GS,goldmansachs.com,2026-03-20,large,Finance,GPTBot,training,0,1,1,200
+Goldman Sachs,GS,goldmansachs.com,2026-03-20,large,Finance,ClaudeBot,training,0,1,0,200
+Goldman Sachs,GS,goldmansachs.com,2026-03-20,large,Finance,Google-Extended,training,0,1,0,200
+Goldman Sachs,GS,goldmansachs.com,2026-03-20,large,Finance,CCBot,training,0,1,0,200
+Goldman Sachs,GS,goldmansachs.com,2026-03-20,large,Finance,Googlebot,control,0,1,0,200
+Netflix,NFLX,about.netflix.com,2026-03-20,large,Media,OAI-SearchBot,retrieval,0,1,0,200
+Netflix,NFLX,about.netflix.com,2026-03-20,large,Media,Claude-SearchBot,retrieval,0,1,0,200
+Netflix,NFLX,about.netflix.com,2026-03-20,large,Media,ChatGPT-User,retrieval,0,1,0,200
+Netflix,NFLX,about.netflix.com,2026-03-20,large,Media,GPTBot,training,0,1,0,200
+Netflix,NFLX,about.netflix.com,2026-03-20,large,Media,ClaudeBot,training,0,1,0,200
+Netflix,NFLX,about.netflix.com,2026-03-20,large,Media,Google-Extended,training,0,1,0,200
+Netflix,NFLX,about.netflix.com,2026-03-20,large,Media,CCBot,training,0,1,0,200
+Netflix,NFLX,about.netflix.com,2026-03-20,large,Media,Googlebot,control,0,1,0,200
+Adobe,ADBE,adobe.com,2026-03-20,large,Tech,OAI-SearchBot,retrieval,0,1,0,200
+Adobe,ADBE,adobe.com,2026-03-20,large,Tech,Claude-SearchBot,retrieval,0,1,0,200
+Adobe,ADBE,adobe.com,2026-03-20,large,Tech,ChatGPT-User,retrieval,0,1,0,200
+Adobe,ADBE,adobe.com,2026-03-20,large,Tech,GPTBot,training,0,1,0,200
+Adobe,ADBE,adobe.com,2026-03-20,large,Tech,ClaudeBot,training,0,1,0,200
+Adobe,ADBE,adobe.com,2026-03-20,large,Tech,Google-Extended,training,0,1,0,200
+Adobe,ADBE,adobe.com,2026-03-20,large,Tech,CCBot,training,0,1,0,200
+Adobe,ADBE,adobe.com,2026-03-20,large,Tech,Googlebot,control,0,1,1,200
+Salesforce,CRM,salesforce.com,2026-03-20,large,Tech,OAI-SearchBot,retrieval,0,1,0,200
+Salesforce,CRM,salesforce.com,2026-03-20,large,Tech,Claude-SearchBot,retrieval,0,1,0,200
+Salesforce,CRM,salesforce.com,2026-03-20,large,Tech,ChatGPT-User,retrieval,0,1,0,200
+Salesforce,CRM,salesforce.com,2026-03-20,large,Tech,GPTBot,training,0,1,0,200
+Salesforce,CRM,salesforce.com,2026-03-20,large,Tech,ClaudeBot,training,0,1,0,200
+Salesforce,CRM,salesforce.com,2026-03-20,large,Tech,Google-Extended,training,0,1,0,200
+Salesforce,CRM,salesforce.com,2026-03-20,large,Tech,CCBot,training,0,1,0,200
+Salesforce,CRM,salesforce.com,2026-03-20,large,Tech,Googlebot,control,0,1,0,200
+Chevron,CVX,chevron.com,2026-03-20,large,Energy,OAI-SearchBot,retrieval,0,1,0,200
+Chevron,CVX,chevron.com,2026-03-20,large,Energy,Claude-SearchBot,retrieval,0,1,0,200
+Chevron,CVX,chevron.com,2026-03-20,large,Energy,ChatGPT-User,retrieval,0,1,0,200
+Chevron,CVX,chevron.com,2026-03-20,large,Energy,GPTBot,training,0,1,0,200
+Chevron,CVX,chevron.com,2026-03-20,large,Energy,ClaudeBot,training,0,1,0,200
+Chevron,CVX,chevron.com,2026-03-20,large,Energy,Google-Extended,training,0,1,0,200
+Chevron,CVX,chevron.com,2026-03-20,large,Energy,CCBot,training,0,1,0,200
+Chevron,CVX,chevron.com,2026-03-20,large,Energy,Googlebot,control,0,1,0,200
+Merck,MRK,merck.com,2026-03-20,large,Healthcare,OAI-SearchBot,retrieval,0,1,0,200
+Merck,MRK,merck.com,2026-03-20,large,Healthcare,Claude-SearchBot,retrieval,0,1,0,200
+Merck,MRK,merck.com,2026-03-20,large,Healthcare,ChatGPT-User,retrieval,0,1,0,200
+Merck,MRK,merck.com,2026-03-20,large,Healthcare,GPTBot,training,0,1,0,200
+Merck,MRK,merck.com,2026-03-20,large,Healthcare,ClaudeBot,training,0,1,0,200
+Merck,MRK,merck.com,2026-03-20,large,Healthcare,Google-Extended,training,0,1,0,200
+Merck,MRK,merck.com,2026-03-20,large,Healthcare,CCBot,training,0,1,0,200
+Merck,MRK,merck.com,2026-03-20,large,Healthcare,Googlebot,control,0,1,0,200
+Bank of America,BAC,newsroom.bankofamerica.com,2026-03-20,large,Finance,OAI-SearchBot,retrieval,0,1,0,200
+Bank of America,BAC,newsroom.bankofamerica.com,2026-03-20,large,Finance,Claude-SearchBot,retrieval,0,1,0,200
+Bank of America,BAC,newsroom.bankofamerica.com,2026-03-20,large,Finance,ChatGPT-User,retrieval,0,1,0,200
+Bank of America,BAC,newsroom.bankofamerica.com,2026-03-20,large,Finance,GPTBot,training,0,1,0,200
+Bank of America,BAC,newsroom.bankofamerica.com,2026-03-20,large,Finance,ClaudeBot,training,0,1,0,200
+Bank of America,BAC,newsroom.bankofamerica.com,2026-03-20,large,Finance,Google-Extended,training,0,1,0,200
+Bank of America,BAC,newsroom.bankofamerica.com,2026-03-20,large,Finance,CCBot,training,0,1,0,200
+Bank of America,BAC,newsroom.bankofamerica.com,2026-03-20,large,Finance,Googlebot,control,0,1,0,200
+Dominos Pizza,DPZ,dominos.com,2026-03-20,mid,Consumer,OAI-SearchBot,retrieval,0,0,0,200
+Dominos Pizza,DPZ,dominos.com,2026-03-20,mid,Consumer,Claude-SearchBot,retrieval,0,0,0,200
+Dominos Pizza,DPZ,dominos.com,2026-03-20,mid,Consumer,ChatGPT-User,retrieval,0,0,0,200
+Dominos Pizza,DPZ,dominos.com,2026-03-20,mid,Consumer,GPTBot,training,0,0,0,200
+Dominos Pizza,DPZ,dominos.com,2026-03-20,mid,Consumer,ClaudeBot,training,0,0,0,200
+Dominos Pizza,DPZ,dominos.com,2026-03-20,mid,Consumer,Google-Extended,training,0,0,0,200
+Dominos Pizza,DPZ,dominos.com,2026-03-20,mid,Consumer,CCBot,training,0,0,0,200
+Dominos Pizza,DPZ,dominos.com,2026-03-20,mid,Consumer,Googlebot,control,0,0,0,200
+Zillow,Z,zillow.com,2026-03-20,mid,Tech,OAI-SearchBot,retrieval,0,1,0,200
+Zillow,Z,zillow.com,2026-03-20,mid,Tech,Claude-SearchBot,retrieval,0,1,0,200
+Zillow,Z,zillow.com,2026-03-20,mid,Tech,ChatGPT-User,retrieval,0,1,0,200
+Zillow,Z,zillow.com,2026-03-20,mid,Tech,GPTBot,training,0,1,0,200
+Zillow,Z,zillow.com,2026-03-20,mid,Tech,ClaudeBot,training,0,1,0,200
+Zillow,Z,zillow.com,2026-03-20,mid,Tech,Google-Extended,training,0,1,0,200
+Zillow,Z,zillow.com,2026-03-20,mid,Tech,CCBot,training,0,1,0,200
+Zillow,Z,zillow.com,2026-03-20,mid,Tech,Googlebot,control,0,1,0,200
+HubSpot,HUBS,hubspot.com,2026-03-20,mid,Tech,OAI-SearchBot,retrieval,0,1,0,200
+HubSpot,HUBS,hubspot.com,2026-03-20,mid,Tech,Claude-SearchBot,retrieval,0,1,0,200
+HubSpot,HUBS,hubspot.com,2026-03-20,mid,Tech,ChatGPT-User,retrieval,0,1,0,200
+HubSpot,HUBS,hubspot.com,2026-03-20,mid,Tech,GPTBot,training,0,1,0,200
+HubSpot,HUBS,hubspot.com,2026-03-20,mid,Tech,ClaudeBot,training,0,1,0,200
+HubSpot,HUBS,hubspot.com,2026-03-20,mid,Tech,Google-Extended,training,0,1,0,200
+HubSpot,HUBS,hubspot.com,2026-03-20,mid,Tech,CCBot,training,0,1,0,200
+HubSpot,HUBS,hubspot.com,2026-03-20,mid,Tech,Googlebot,control,0,1,0,200
+Etsy,ETSY,etsy.com,2026-03-20,mid,Retail,OAI-SearchBot,retrieval,0,1,0,200
+Etsy,ETSY,etsy.com,2026-03-20,mid,Retail,Claude-SearchBot,retrieval,0,1,0,200
+Etsy,ETSY,etsy.com,2026-03-20,mid,Retail,ChatGPT-User,retrieval,0,1,0,200
+Etsy,ETSY,etsy.com,2026-03-20,mid,Retail,GPTBot,training,0,1,0,200
+Etsy,ETSY,etsy.com,2026-03-20,mid,Retail,ClaudeBot,training,0,1,0,200
+Etsy,ETSY,etsy.com,2026-03-20,mid,Retail,Google-Extended,training,0,1,0,200
+Etsy,ETSY,etsy.com,2026-03-20,mid,Retail,CCBot,training,0,1,0,200
+Etsy,ETSY,etsy.com,2026-03-20,mid,Retail,Googlebot,control,0,1,0,200
+Roku,ROKU,roku.com,2026-03-20,mid,Tech,OAI-SearchBot,retrieval,0,1,0,200
+Roku,ROKU,roku.com,2026-03-20,mid,Tech,Claude-SearchBot,retrieval,0,1,0,200
+Roku,ROKU,roku.com,2026-03-20,mid,Tech,ChatGPT-User,retrieval,0,1,0,200
+Roku,ROKU,roku.com,2026-03-20,mid,Tech,GPTBot,training,0,1,0,200
+Roku,ROKU,roku.com,2026-03-20,mid,Tech,ClaudeBot,training,0,1,0,200
+Roku,ROKU,roku.com,2026-03-20,mid,Tech,Google-Extended,training,0,1,0,200
+Roku,ROKU,roku.com,2026-03-20,mid,Tech,CCBot,training,0,1,0,200
+Roku,ROKU,roku.com,2026-03-20,mid,Tech,Googlebot,control,0,1,0,200
+Carvana,CVNA,carvana.com,2026-03-20,mid,Auto,OAI-SearchBot,retrieval,NA,NA,NA,403
+Carvana,CVNA,carvana.com,2026-03-20,mid,Auto,Claude-SearchBot,retrieval,NA,NA,NA,403
+Carvana,CVNA,carvana.com,2026-03-20,mid,Auto,ChatGPT-User,retrieval,NA,NA,NA,403
+Carvana,CVNA,carvana.com,2026-03-20,mid,Auto,GPTBot,training,NA,NA,NA,403
+Carvana,CVNA,carvana.com,2026-03-20,mid,Auto,ClaudeBot,training,NA,NA,NA,403
+Carvana,CVNA,carvana.com,2026-03-20,mid,Auto,Google-Extended,training,NA,NA,NA,403
+Carvana,CVNA,carvana.com,2026-03-20,mid,Auto,CCBot,training,NA,NA,NA,403
+Carvana,CVNA,carvana.com,2026-03-20,mid,Auto,Googlebot,control,NA,NA,NA,403
+Cloudflare,NET,cloudflare.com,2026-03-20,mid,Tech,OAI-SearchBot,retrieval,0,1,0,200
+Cloudflare,NET,cloudflare.com,2026-03-20,mid,Tech,Claude-SearchBot,retrieval,0,1,0,200
+Cloudflare,NET,cloudflare.com,2026-03-20,mid,Tech,ChatGPT-User,retrieval,0,1,0,200
+Cloudflare,NET,cloudflare.com,2026-03-20,mid,Tech,GPTBot,training,0,1,0,200
+Cloudflare,NET,cloudflare.com,2026-03-20,mid,Tech,ClaudeBot,training,0,1,0,200
+Cloudflare,NET,cloudflare.com,2026-03-20,mid,Tech,Google-Extended,training,0,1,0,200
+Cloudflare,NET,cloudflare.com,2026-03-20,mid,Tech,CCBot,training,0,1,0,200
+Cloudflare,NET,cloudflare.com,2026-03-20,mid,Tech,Googlebot,control,0,1,0,200
+Ralph Lauren,RL,ralphlauren.com,2026-03-20,mid,Consumer,OAI-SearchBot,retrieval,0,1,0,200
+Ralph Lauren,RL,ralphlauren.com,2026-03-20,mid,Consumer,Claude-SearchBot,retrieval,0,1,0,200
+Ralph Lauren,RL,ralphlauren.com,2026-03-20,mid,Consumer,ChatGPT-User,retrieval,0,1,0,200
+Ralph Lauren,RL,ralphlauren.com,2026-03-20,mid,Consumer,GPTBot,training,0,1,0,200
+Ralph Lauren,RL,ralphlauren.com,2026-03-20,mid,Consumer,ClaudeBot,training,0,1,0,200
+Ralph Lauren,RL,ralphlauren.com,2026-03-20,mid,Consumer,Google-Extended,training,0,1,0,200
+Ralph Lauren,RL,ralphlauren.com,2026-03-20,mid,Consumer,CCBot,training,0,1,0,200
+Ralph Lauren,RL,ralphlauren.com,2026-03-20,mid,Consumer,Googlebot,control,0,1,0,200
+Hershey,HSY,thehersheycompany.com,2026-03-20,mid,Consumer,OAI-SearchBot,retrieval,0,0,0,404
+Hershey,HSY,thehersheycompany.com,2026-03-20,mid,Consumer,Claude-SearchBot,retrieval,0,0,0,404
+Hershey,HSY,thehersheycompany.com,2026-03-20,mid,Consumer,ChatGPT-User,retrieval,0,0,0,404
+Hershey,HSY,thehersheycompany.com,2026-03-20,mid,Consumer,GPTBot,training,0,0,0,404
+Hershey,HSY,thehersheycompany.com,2026-03-20,mid,Consumer,ClaudeBot,training,0,0,0,404
+Hershey,HSY,thehersheycompany.com,2026-03-20,mid,Consumer,Google-Extended,training,0,0,0,404
+Hershey,HSY,thehersheycompany.com,2026-03-20,mid,Consumer,CCBot,training,0,0,0,404
+Hershey,HSY,thehersheycompany.com,2026-03-20,mid,Consumer,Googlebot,control,0,0,0,404
+Williams-Sonoma,WSM,williams-sonomainc.com,2026-03-20,mid,Retail,OAI-SearchBot,retrieval,0,0,0,200
+Williams-Sonoma,WSM,williams-sonomainc.com,2026-03-20,mid,Retail,Claude-SearchBot,retrieval,0,0,0,200
+Williams-Sonoma,WSM,williams-sonomainc.com,2026-03-20,mid,Retail,ChatGPT-User,retrieval,0,0,0,200
+Williams-Sonoma,WSM,williams-sonomainc.com,2026-03-20,mid,Retail,GPTBot,training,0,0,0,200
+Williams-Sonoma,WSM,williams-sonomainc.com,2026-03-20,mid,Retail,ClaudeBot,training,0,0,0,200
+Williams-Sonoma,WSM,williams-sonomainc.com,2026-03-20,mid,Retail,Google-Extended,training,0,0,0,200
+Williams-Sonoma,WSM,williams-sonomainc.com,2026-03-20,mid,Retail,CCBot,training,0,0,0,200
+Williams-Sonoma,WSM,williams-sonomainc.com,2026-03-20,mid,Retail,Googlebot,control,0,0,0,200
+Cleveland-Cliffs,CLF,clevelandcliffs.com,2026-03-20,mid,Materials,OAI-SearchBot,retrieval,0,0,0,200
+Cleveland-Cliffs,CLF,clevelandcliffs.com,2026-03-20,mid,Materials,Claude-SearchBot,retrieval,0,0,0,200
+Cleveland-Cliffs,CLF,clevelandcliffs.com,2026-03-20,mid,Materials,ChatGPT-User,retrieval,0,0,0,200
+Cleveland-Cliffs,CLF,clevelandcliffs.com,2026-03-20,mid,Materials,GPTBot,training,0,0,0,200
+Cleveland-Cliffs,CLF,clevelandcliffs.com,2026-03-20,mid,Materials,ClaudeBot,training,0,0,0,200
+Cleveland-Cliffs,CLF,clevelandcliffs.com,2026-03-20,mid,Materials,Google-Extended,training,0,0,0,200
+Cleveland-Cliffs,CLF,clevelandcliffs.com,2026-03-20,mid,Materials,CCBot,training,0,0,0,200
+Cleveland-Cliffs,CLF,clevelandcliffs.com,2026-03-20,mid,Materials,Googlebot,control,0,0,0,200
+Textron,TXT,textron.com,2026-03-20,mid,Industrial,OAI-SearchBot,retrieval,0,1,0,200
+Textron,TXT,textron.com,2026-03-20,mid,Industrial,Claude-SearchBot,retrieval,0,1,0,200
+Textron,TXT,textron.com,2026-03-20,mid,Industrial,ChatGPT-User,retrieval,0,1,0,200
+Textron,TXT,textron.com,2026-03-20,mid,Industrial,GPTBot,training,0,1,0,200
+Textron,TXT,textron.com,2026-03-20,mid,Industrial,ClaudeBot,training,0,1,0,200
+Textron,TXT,textron.com,2026-03-20,mid,Industrial,Google-Extended,training,0,1,0,200
+Textron,TXT,textron.com,2026-03-20,mid,Industrial,CCBot,training,0,1,0,200
+Textron,TXT,textron.com,2026-03-20,mid,Industrial,Googlebot,control,0,1,0,200
+Leidos,LDOS,leidos.com,2026-03-20,mid,Defense,OAI-SearchBot,retrieval,0,1,0,200
+Leidos,LDOS,leidos.com,2026-03-20,mid,Defense,Claude-SearchBot,retrieval,0,1,0,200
+Leidos,LDOS,leidos.com,2026-03-20,mid,Defense,ChatGPT-User,retrieval,0,1,0,200
+Leidos,LDOS,leidos.com,2026-03-20,mid,Defense,GPTBot,training,0,1,0,200
+Leidos,LDOS,leidos.com,2026-03-20,mid,Defense,ClaudeBot,training,0,1,0,200
+Leidos,LDOS,leidos.com,2026-03-20,mid,Defense,Google-Extended,training,0,1,0,200
+Leidos,LDOS,leidos.com,2026-03-20,mid,Defense,CCBot,training,0,1,0,200
+Leidos,LDOS,leidos.com,2026-03-20,mid,Defense,Googlebot,control,0,1,0,200
+Expedia,EXPE,expediagroup.com,2026-03-20,mid,Travel,OAI-SearchBot,retrieval,0,0,0,200
+Expedia,EXPE,expediagroup.com,2026-03-20,mid,Travel,Claude-SearchBot,retrieval,0,0,0,200
+Expedia,EXPE,expediagroup.com,2026-03-20,mid,Travel,ChatGPT-User,retrieval,0,0,0,200
+Expedia,EXPE,expediagroup.com,2026-03-20,mid,Travel,GPTBot,training,0,0,0,200
+Expedia,EXPE,expediagroup.com,2026-03-20,mid,Travel,ClaudeBot,training,0,0,0,200
+Expedia,EXPE,expediagroup.com,2026-03-20,mid,Travel,Google-Extended,training,0,0,0,200
+Expedia,EXPE,expediagroup.com,2026-03-20,mid,Travel,CCBot,training,0,0,0,200
+Expedia,EXPE,expediagroup.com,2026-03-20,mid,Travel,Googlebot,control,0,0,0,200
+Tractor Supply,TSCO,tractorsupply.com,2026-03-20,mid,Retail,OAI-SearchBot,retrieval,NA,NA,NA,403
+Tractor Supply,TSCO,tractorsupply.com,2026-03-20,mid,Retail,Claude-SearchBot,retrieval,NA,NA,NA,403
+Tractor Supply,TSCO,tractorsupply.com,2026-03-20,mid,Retail,ChatGPT-User,retrieval,NA,NA,NA,403
+Tractor Supply,TSCO,tractorsupply.com,2026-03-20,mid,Retail,GPTBot,training,NA,NA,NA,403
+Tractor Supply,TSCO,tractorsupply.com,2026-03-20,mid,Retail,ClaudeBot,training,NA,NA,NA,403
+Tractor Supply,TSCO,tractorsupply.com,2026-03-20,mid,Retail,Google-Extended,training,NA,NA,NA,403
+Tractor Supply,TSCO,tractorsupply.com,2026-03-20,mid,Retail,CCBot,training,NA,NA,NA,403
+Tractor Supply,TSCO,tractorsupply.com,2026-03-20,mid,Retail,Googlebot,control,NA,NA,NA,403
+Chewy,CHWY,chewy.com,2026-03-20,small,Retail,OAI-SearchBot,retrieval,0,1,0,200
+Chewy,CHWY,chewy.com,2026-03-20,small,Retail,Claude-SearchBot,retrieval,0,1,0,200
+Chewy,CHWY,chewy.com,2026-03-20,small,Retail,ChatGPT-User,retrieval,0,1,0,200
+Chewy,CHWY,chewy.com,2026-03-20,small,Retail,GPTBot,training,0,1,0,200
+Chewy,CHWY,chewy.com,2026-03-20,small,Retail,ClaudeBot,training,0,1,0,200
+Chewy,CHWY,chewy.com,2026-03-20,small,Retail,Google-Extended,training,0,1,0,200
+Chewy,CHWY,chewy.com,2026-03-20,small,Retail,CCBot,training,0,1,0,200
+Chewy,CHWY,chewy.com,2026-03-20,small,Retail,Googlebot,control,0,1,0,200
+Shutterstock,SSTK,shutterstock.com,2026-03-20,small,Media,OAI-SearchBot,retrieval,1,0,1,200
+Shutterstock,SSTK,shutterstock.com,2026-03-20,small,Media,Claude-SearchBot,retrieval,0,1,0,200
+Shutterstock,SSTK,shutterstock.com,2026-03-20,small,Media,ChatGPT-User,retrieval,0,1,0,200
+Shutterstock,SSTK,shutterstock.com,2026-03-20,small,Media,GPTBot,training,1,0,1,200
+Shutterstock,SSTK,shutterstock.com,2026-03-20,small,Media,ClaudeBot,training,0,1,0,200
+Shutterstock,SSTK,shutterstock.com,2026-03-20,small,Media,Google-Extended,training,0,1,0,200
+Shutterstock,SSTK,shutterstock.com,2026-03-20,small,Media,CCBot,training,1,0,1,200
+Shutterstock,SSTK,shutterstock.com,2026-03-20,small,Media,Googlebot,control,0,1,0,200
+Coursera,COUR,coursera.org,2026-03-20,small,Education,OAI-SearchBot,retrieval,0,1,1,200
+Coursera,COUR,coursera.org,2026-03-20,small,Education,Claude-SearchBot,retrieval,0,1,0,200
+Coursera,COUR,coursera.org,2026-03-20,small,Education,ChatGPT-User,retrieval,0,1,1,200
+Coursera,COUR,coursera.org,2026-03-20,small,Education,GPTBot,training,0,1,1,200
+Coursera,COUR,coursera.org,2026-03-20,small,Education,ClaudeBot,training,0,1,1,200
+Coursera,COUR,coursera.org,2026-03-20,small,Education,Google-Extended,training,0,1,1,200
+Coursera,COUR,coursera.org,2026-03-20,small,Education,CCBot,training,0,1,1,200
+Coursera,COUR,coursera.org,2026-03-20,small,Education,Googlebot,control,0,1,0,200
+Lemonade,LMND,lemonade.com,2026-03-20,small,Insurance,OAI-SearchBot,retrieval,0,1,0,200
+Lemonade,LMND,lemonade.com,2026-03-20,small,Insurance,Claude-SearchBot,retrieval,0,1,0,200
+Lemonade,LMND,lemonade.com,2026-03-20,small,Insurance,ChatGPT-User,retrieval,0,1,0,200
+Lemonade,LMND,lemonade.com,2026-03-20,small,Insurance,GPTBot,training,0,1,0,200
+Lemonade,LMND,lemonade.com,2026-03-20,small,Insurance,ClaudeBot,training,0,1,0,200
+Lemonade,LMND,lemonade.com,2026-03-20,small,Insurance,Google-Extended,training,0,1,0,200
+Lemonade,LMND,lemonade.com,2026-03-20,small,Insurance,CCBot,training,0,1,0,200
+Lemonade,LMND,lemonade.com,2026-03-20,small,Insurance,Googlebot,control,0,1,0,200
+BigCommerce,BIGC,bigcommerce.com,2026-03-20,small,Tech,OAI-SearchBot,retrieval,0,1,0,200
+BigCommerce,BIGC,bigcommerce.com,2026-03-20,small,Tech,Claude-SearchBot,retrieval,0,1,0,200
+BigCommerce,BIGC,bigcommerce.com,2026-03-20,small,Tech,ChatGPT-User,retrieval,0,1,0,200
+BigCommerce,BIGC,bigcommerce.com,2026-03-20,small,Tech,GPTBot,training,0,1,0,200
+BigCommerce,BIGC,bigcommerce.com,2026-03-20,small,Tech,ClaudeBot,training,0,1,0,200
+BigCommerce,BIGC,bigcommerce.com,2026-03-20,small,Tech,Google-Extended,training,0,1,0,200
+BigCommerce,BIGC,bigcommerce.com,2026-03-20,small,Tech,CCBot,training,0,1,0,200
+BigCommerce,BIGC,bigcommerce.com,2026-03-20,small,Tech,Googlebot,control,0,1,0,200
+Weave Communications,WEAV,getweave.com,2026-03-20,small,Tech,OAI-SearchBot,retrieval,0,1,0,200
+Weave Communications,WEAV,getweave.com,2026-03-20,small,Tech,Claude-SearchBot,retrieval,0,1,0,200
+Weave Communications,WEAV,getweave.com,2026-03-20,small,Tech,ChatGPT-User,retrieval,0,1,0,200
+Weave Communications,WEAV,getweave.com,2026-03-20,small,Tech,GPTBot,training,0,1,0,200
+Weave Communications,WEAV,getweave.com,2026-03-20,small,Tech,ClaudeBot,training,0,1,0,200
+Weave Communications,WEAV,getweave.com,2026-03-20,small,Tech,Google-Extended,training,0,1,0,200
+Weave Communications,WEAV,getweave.com,2026-03-20,small,Tech,CCBot,training,0,1,0,200
+Weave Communications,WEAV,getweave.com,2026-03-20,small,Tech,Googlebot,control,0,1,0,200
+Couchbase,BASE,couchbase.com,2026-03-20,small,Tech,OAI-SearchBot,retrieval,NA,NA,NA,403
+Couchbase,BASE,couchbase.com,2026-03-20,small,Tech,Claude-SearchBot,retrieval,NA,NA,NA,403
+Couchbase,BASE,couchbase.com,2026-03-20,small,Tech,ChatGPT-User,retrieval,NA,NA,NA,403
+Couchbase,BASE,couchbase.com,2026-03-20,small,Tech,GPTBot,training,NA,NA,NA,403
+Couchbase,BASE,couchbase.com,2026-03-20,small,Tech,ClaudeBot,training,NA,NA,NA,403
+Couchbase,BASE,couchbase.com,2026-03-20,small,Tech,Google-Extended,training,NA,NA,NA,403
+Couchbase,BASE,couchbase.com,2026-03-20,small,Tech,CCBot,training,NA,NA,NA,403
+Couchbase,BASE,couchbase.com,2026-03-20,small,Tech,Googlebot,control,NA,NA,NA,403
+Dine Brands,DIN,dinebrands.com,2026-03-20,small,Consumer,OAI-SearchBot,retrieval,NA,NA,NA,403
+Dine Brands,DIN,dinebrands.com,2026-03-20,small,Consumer,Claude-SearchBot,retrieval,NA,NA,NA,403
+Dine Brands,DIN,dinebrands.com,2026-03-20,small,Consumer,ChatGPT-User,retrieval,NA,NA,NA,403
+Dine Brands,DIN,dinebrands.com,2026-03-20,small,Consumer,GPTBot,training,NA,NA,NA,403
+Dine Brands,DIN,dinebrands.com,2026-03-20,small,Consumer,ClaudeBot,training,NA,NA,NA,403
+Dine Brands,DIN,dinebrands.com,2026-03-20,small,Consumer,Google-Extended,training,NA,NA,NA,403
+Dine Brands,DIN,dinebrands.com,2026-03-20,small,Consumer,CCBot,training,NA,NA,NA,403
+Dine Brands,DIN,dinebrands.com,2026-03-20,small,Consumer,Googlebot,control,NA,NA,NA,403
+Quaker Chemical,KWR,quakerhoughton.com,2026-03-20,small,Materials,OAI-SearchBot,retrieval,0,1,0,200
+Quaker Chemical,KWR,quakerhoughton.com,2026-03-20,small,Materials,Claude-SearchBot,retrieval,0,1,0,200
+Quaker Chemical,KWR,quakerhoughton.com,2026-03-20,small,Materials,ChatGPT-User,retrieval,0,1,0,200
+Quaker Chemical,KWR,quakerhoughton.com,2026-03-20,small,Materials,GPTBot,training,0,1,0,200
+Quaker Chemical,KWR,quakerhoughton.com,2026-03-20,small,Materials,ClaudeBot,training,0,1,0,200
+Quaker Chemical,KWR,quakerhoughton.com,2026-03-20,small,Materials,Google-Extended,training,0,1,0,200
+Quaker Chemical,KWR,quakerhoughton.com,2026-03-20,small,Materials,CCBot,training,0,1,0,200
+Quaker Chemical,KWR,quakerhoughton.com,2026-03-20,small,Materials,Googlebot,control,0,1,0,200
+Donnelley Financial,DFIN,dfinsolutions.com,2026-03-20,small,Finance,OAI-SearchBot,retrieval,0,1,0,200
+Donnelley Financial,DFIN,dfinsolutions.com,2026-03-20,small,Finance,Claude-SearchBot,retrieval,0,1,0,200
+Donnelley Financial,DFIN,dfinsolutions.com,2026-03-20,small,Finance,ChatGPT-User,retrieval,0,1,0,200
+Donnelley Financial,DFIN,dfinsolutions.com,2026-03-20,small,Finance,GPTBot,training,0,1,0,200
+Donnelley Financial,DFIN,dfinsolutions.com,2026-03-20,small,Finance,ClaudeBot,training,0,1,0,200
+Donnelley Financial,DFIN,dfinsolutions.com,2026-03-20,small,Finance,Google-Extended,training,0,1,0,200
+Donnelley Financial,DFIN,dfinsolutions.com,2026-03-20,small,Finance,CCBot,training,0,1,0,200
+Donnelley Financial,DFIN,dfinsolutions.com,2026-03-20,small,Finance,Googlebot,control,0,1,0,200
+ScanSource,SCSC,scansource.com,2026-03-20,small,Tech,OAI-SearchBot,retrieval,0,1,0,200
+ScanSource,SCSC,scansource.com,2026-03-20,small,Tech,Claude-SearchBot,retrieval,0,1,0,200
+ScanSource,SCSC,scansource.com,2026-03-20,small,Tech,ChatGPT-User,retrieval,0,1,0,200
+ScanSource,SCSC,scansource.com,2026-03-20,small,Tech,GPTBot,training,0,1,0,200
+ScanSource,SCSC,scansource.com,2026-03-20,small,Tech,ClaudeBot,training,0,1,0,200
+ScanSource,SCSC,scansource.com,2026-03-20,small,Tech,Google-Extended,training,0,1,0,200
+ScanSource,SCSC,scansource.com,2026-03-20,small,Tech,CCBot,training,0,1,0,200
+ScanSource,SCSC,scansource.com,2026-03-20,small,Tech,Googlebot,control,0,0,1,200
+Xperi,XPER,xperi.com,2026-03-20,small,Tech,OAI-SearchBot,retrieval,0,0,0,200
+Xperi,XPER,xperi.com,2026-03-20,small,Tech,Claude-SearchBot,retrieval,0,0,0,200
+Xperi,XPER,xperi.com,2026-03-20,small,Tech,ChatGPT-User,retrieval,0,0,0,200
+Xperi,XPER,xperi.com,2026-03-20,small,Tech,GPTBot,training,0,0,0,200
+Xperi,XPER,xperi.com,2026-03-20,small,Tech,ClaudeBot,training,0,0,0,200
+Xperi,XPER,xperi.com,2026-03-20,small,Tech,Google-Extended,training,0,0,0,200
+Xperi,XPER,xperi.com,2026-03-20,small,Tech,CCBot,training,0,0,0,200
+Xperi,XPER,xperi.com,2026-03-20,small,Tech,Googlebot,control,0,0,0,200
+Duolingo,DUOL,duolingo.com,2026-03-20,small,Education,OAI-SearchBot,retrieval,0,1,0,200
+Duolingo,DUOL,duolingo.com,2026-03-20,small,Education,Claude-SearchBot,retrieval,0,1,0,200
+Duolingo,DUOL,duolingo.com,2026-03-20,small,Education,ChatGPT-User,retrieval,0,1,0,200
+Duolingo,DUOL,duolingo.com,2026-03-20,small,Education,GPTBot,training,0,1,0,200
+Duolingo,DUOL,duolingo.com,2026-03-20,small,Education,ClaudeBot,training,0,1,0,200
+Duolingo,DUOL,duolingo.com,2026-03-20,small,Education,Google-Extended,training,0,1,0,200
+Duolingo,DUOL,duolingo.com,2026-03-20,small,Education,CCBot,training,0,1,0,200
+Duolingo,DUOL,duolingo.com,2026-03-20,small,Education,Googlebot,control,0,1,0,200
+BioAtla,BCAB,bioatla.com,2026-03-20,small,Healthcare,OAI-SearchBot,retrieval,0,0,0,200
+BioAtla,BCAB,bioatla.com,2026-03-20,small,Healthcare,Claude-SearchBot,retrieval,0,0,0,200
+BioAtla,BCAB,bioatla.com,2026-03-20,small,Healthcare,ChatGPT-User,retrieval,0,0,0,200
+BioAtla,BCAB,bioatla.com,2026-03-20,small,Healthcare,GPTBot,training,0,0,0,200
+BioAtla,BCAB,bioatla.com,2026-03-20,small,Healthcare,ClaudeBot,training,0,0,0,200
+BioAtla,BCAB,bioatla.com,2026-03-20,small,Healthcare,Google-Extended,training,0,0,0,200
+BioAtla,BCAB,bioatla.com,2026-03-20,small,Healthcare,CCBot,training,0,0,0,200
+BioAtla,BCAB,bioatla.com,2026-03-20,small,Healthcare,Googlebot,control,0,0,0,200
+Veritone,VERI,veritone.com,2026-03-20,small,Tech,OAI-SearchBot,retrieval,0,0,0,200
+Veritone,VERI,veritone.com,2026-03-20,small,Tech,Claude-SearchBot,retrieval,0,0,0,200
+Veritone,VERI,veritone.com,2026-03-20,small,Tech,ChatGPT-User,retrieval,0,0,0,200
+Veritone,VERI,veritone.com,2026-03-20,small,Tech,GPTBot,training,0,0,0,200
+Veritone,VERI,veritone.com,2026-03-20,small,Tech,ClaudeBot,training,0,0,0,200
+Veritone,VERI,veritone.com,2026-03-20,small,Tech,Google-Extended,training,0,0,0,200
+Veritone,VERI,veritone.com,2026-03-20,small,Tech,CCBot,training,0,0,0,200
+Veritone,VERI,veritone.com,2026-03-20,small,Tech,Googlebot,control,0,0,0,200

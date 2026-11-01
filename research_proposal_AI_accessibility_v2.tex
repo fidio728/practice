@@ -1,0 +1,691 @@
+\documentclass[12pt,a4paper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{natbib}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{tabularx}
+
+% Title
+\title{\textbf{Do as I Say or Do as I Do? \\ AI Disclosure, AI Accessibility, and the Corporate Information Environment}\\
+\vspace{0.5cm}
+\large Research Proposal (v2)}
+
+\author{}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+% ============================================================
+\section{Introduction and Motivation}
+% ============================================================
+
+Firms increasingly talk about artificial intelligence. Voluntary AI-related disclosures in corporate annual reports have risen sharply since 2010 and accelerated after the launch of ChatGPT in late 2022.\footnote{This trend is documented in \citet{CaoLiuQiuZhao2024}, ``Information in Disclosing Emerging Technologies: Evidence from AI Disclosure,'' SSRN Working Paper, Abstract ID: 4987085. The paper uses textual analysis and LLMs to classify AI-related disclosures in 10-K filings. \textit{Status: working paper as of March 2026; not yet published in a peer-reviewed journal to the author's knowledge.}} At the same time, a growing literature documents that firms adapt the very \emph{language} of their filings to accommodate machine readers \citep{CaoJiangYangZhang2023} and that a measurable share of disclosure text is now AI-generated \citep{BlankespoorDeHaanLi2024}.
+
+Yet talking about AI and being open to AI are not the same thing. Every website operator can configure a \texttt{robots.txt} file---a publicly observable, machine-readable protocol---that specifies which automated crawlers may access its content.\footnote{The \texttt{robots.txt} protocol (formally, the Robots Exclusion Protocol) was proposed in 1994 and standardized as RFC~9309 in September 2022. A \texttt{robots.txt} file is placed at the root of a website (e.g., \texttt{https://example.com/robots.txt}) and contains directives of the form \texttt{User-agent: [bot name] / Disallow: [path]}. Web crawlers are expected---but not legally required---to obey these directives. See \url{https://www.rfc-editor.org/rfc/rfc9309}.} Crucially, AI companies now deploy \emph{multiple, functionally distinct} crawlers, each identifiable by a unique User-Agent string. This creates a granular choice set for firms. As of early 2026, the major AI crawlers fall into three categories:
+
+\begin{enumerate}[label=(\alph*)]
+    \item \textbf{Training crawlers} collect web content to train or fine-tune foundation models. Blocking these crawlers prevents a firm's content from entering future model weights, but does not affect whether current AI tools can retrieve the firm's information in real time. Examples:
+    \begin{itemize}
+        \item \textbf{GPTBot} (OpenAI, launched August 2023): ``used to crawl content that may be used in training our generative AI foundation models.''\footnote{OpenAI, ``GPTBot,'' \url{https://platform.openai.com/docs/bots/gptbot}. Full User-Agent string: \texttt{Mozilla/5.0 AppleWebKit/537.36 [...]; compatible; GPTBot/1.3; +https://openai.com/gptbot}.}
+        \item \textbf{ClaudeBot} (Anthropic): collects ``public web content that may be used to train and improve [Anthropic's] generative AI models.''\footnote{Anthropic, ``Does Anthropic crawl data from the web, and how can site owners block the crawler?'' \url{https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler}.}
+        \item \textbf{Google-Extended} (Google, launched September 2023): controls whether site content is used ``to improve Gemini Apps and Vertex AI generative APIs, including future versions of models that power those products.''\footnote{Google, ``Google-Extended,'' \url{https://developers.google.com/search/docs/crawling-indexing/overview-google-crawlers}. Notably, blocking Google-Extended has no effect on Google Search rankings or inclusion in AI Overviews, which rely on the standard Googlebot index.}
+    \end{itemize}
+
+    \item \textbf{Retrieval/search crawlers} fetch web content in real time to populate AI-powered search results and answer engines. Blocking these crawlers directly prevents a firm's website from appearing in AI-generated search answers---the channel most relevant to investor information acquisition. Examples:
+    \begin{itemize}
+        \item \textbf{OAI-SearchBot} (OpenAI, launched late 2024): ``used to surface websites in search results in ChatGPT's search features. Sites that are opted out of OAI-SearchBot will not be shown in ChatGPT search answers.''\footnote{OpenAI, ``OAI-SearchBot,'' \url{https://platform.openai.com/docs/bots/oai-searchbot}.}
+        \item \textbf{Claude-SearchBot} (Anthropic, launched 2025): ``crawls content to improve the quality and relevance of Claude's search results.''\footnote{Anthropic, ibid. Anthropic's documentation clarifies that each bot has its own \texttt{robots.txt} User-Agent token: blocking one does not block the others.}
+    \end{itemize}
+
+    \item \textbf{User-initiated crawlers} fetch a specific page when a user explicitly asks the AI assistant to read a URL. Examples include \textbf{ChatGPT-User} (OpenAI) and \textbf{Claude-User} (Anthropic).\footnote{OpenAI, ``ChatGPT-User,'' \url{https://platform.openai.com/docs/bots/chatgpt-user}; Anthropic, ibid.}
+\end{enumerate}
+
+\noindent This three-way taxonomy is essential for our research design. A firm that blocks GPTBot (training) but allows OAI-SearchBot (retrieval) is protecting its intellectual property from being absorbed into model weights, but still permits AI tools to surface its information to users---this is \emph{not} information management. Conversely, a firm that blocks OAI-SearchBot and Claude-SearchBot while allowing Googlebot (traditional search) is making a targeted choice to exclude its content from AI-mediated information channels---this \emph{is} information management, and it is the variation we exploit.
+
+Since OpenAI introduced GPTBot in August 2023, and especially since the retrieval-specific crawlers were separated in late 2024, firms face an increasingly explicit and granular choice: allow or block AI systems from reading and surfacing their voluntary web-based disclosures (investor relations pages, press releases, governance documents, sustainability reports). This choice is a \emph{revealed preference}---a concrete, costly action---rather than cheap talk embedded in a filing.
+
+\paragraph{Corporate websites vs.\ EDGAR: the voluntary information channel.} A natural objection is that AI crawlers can still access mandatory filings on the SEC's EDGAR system, which firms do not control. If 10-K and 10-Q filings remain freely available, does blocking the corporate website meaningfully raise information costs? We argue yes, for three reasons. First, corporate websites host a rich layer of \emph{voluntary} information that is absent from EDGAR: forward-looking strategy descriptions, product and pricing details, investor presentations, press releases (often posted before 8-K filing), executive biographies, ESG/sustainability reports, and blog content. This is the ``soft,'' qualitative information that contextualizes hard financial data. Second, AI-powered search tools---ChatGPT Search, Perplexity, Google AI Overviews---primarily index the open web, not EDGAR's full-text search system. Industry data show that ChatGPT's cited sources correlate 87\% with Bing's organic top-10 results, which heavily favor corporate domains for brand-specific queries; Wikipedia alone accounts for $\sim$22\% of training data for major AI models.\footnote{The Digital Bloom, ``2025 AI Visibility Report: How LLMs Choose What Sources to Mention,'' 2025. See also Search Atlas, ``Comparative Analysis of LLM Citation Behavior,'' 2025, which finds that brand search volume (0.334 correlation) is the strongest predictor of LLM citations. These are industry reports, not peer-reviewed publications; we plan to provide our own academic evidence via a source-tracing experiment (Section~\ref{sec:rq2}).} In practice, when an investor asks an AI assistant ``What is Company X's strategy?'', the response draws primarily from the corporate website, not from a 10-K filing on sec.gov. Third, \citet{LoughranMcDonald2017} document that human readership of EDGAR filings is surprisingly low---the average 10-K is requested only 28.4 times after filing---which means AI-powered search through the corporate website may already be a more important marginal information channel than EDGAR itself for many firms.
+
+Importantly, this distinction means that \texttt{robots.txt} blocking operates on a purely \emph{voluntary} information margin. Mandatory disclosures on EDGAR remain accessible to all; what firms gate-keep via \texttt{robots.txt} is the curated, supplementary narrative they choose to publish on their own domains. This makes the blocking decision a cleaner test of information management motives: the firm is not withholding legally required information, but rather restricting AI access to the information it \emph{voluntarily} provides above and beyond regulatory minimums.
+
+It is also important to distinguish the \textbf{bots that access EDGAR} from the \textbf{AI crawlers governed by \texttt{robots.txt}}. EDGAR bots are predominantly traditional financial data aggregators---Bloomberg terminals, FactSet scrapers, Refinitiv feeds, and academic researchers' automated scripts---that have been pulling structured filing data since the late 1990s \citep[see][for analysis of EDGAR server traffic]{LoughranMcDonald2017}. AI crawlers (GPTBot, ClaudeBot, OAI-SearchBot) are a fundamentally different technology: they do not merely extract tabular data but \emph{comprehend} unstructured text across the open web, synthesizing information from multiple sources into natural-language answers. The two populations occasionally overlap---an AI crawler could visit sec.gov---but the SEC rate-limits automated access aggressively and its \texttt{robots.txt} does not appear to specifically address AI crawlers by user-agent.\footnote{As of March 2026, the SEC's \texttt{robots.txt} blocks standard administrative paths (\texttt{/admin/}, \texttt{/search/}, \texttt{/user/}) but does not list GPTBot, ClaudeBot, or other AI-specific user-agents. The SEC does impose rate limits on all automated access; see \url{https://www.sec.gov/developer}.} The economic consequence is that a firm's \texttt{robots.txt} decision governs access to its \emph{corporate website}---not its SEC filings---making our variable a measure of voluntary information gatekeeping that is complementary to, not redundant with, EDGAR-based disclosure.
+
+This paper exploits the tension between these two dimensions. Some firms enthusiastically disclose AI initiatives in their 10-K filings while simultaneously blocking AI crawlers from accessing their corporate websites. We label this pattern \textbf{AI hypocrisy}---a parallel to the ``greenwashing'' phenomenon in the ESG literature, where firms' environmental claims diverge from their environmental actions. Our central premise is that the \emph{joint distribution} of AI disclosure (what firms say) and AI accessibility (what firms do) contains information that neither dimension alone provides.
+
+\medskip
+\noindent\textbf{Preview of the research design.} We proceed in three layers, ordered from proximal mechanism to distal market outcome:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Descriptive:} Who blocks AI, who does not, and how does blocking relate to AI disclosure? (Section~\ref{sec:rq1})
+    \item \textbf{Mechanism:} Does blocking AI crawlers reduce the quality and coverage of LLM-generated answers about the firm---a direct, near-end test of the information channel? (Section~\ref{sec:rq2})
+    \item \textbf{Market consequences:} Does the combination of AI disclosure and AI accessibility predict information asymmetry, analyst behavior, and price discovery? (Section~\ref{sec:rq3})
+\end{enumerate}
+
+This layered structure addresses a concern that jumping directly from \texttt{robots.txt} to bid-ask spreads leaves the mechanism underspecified.\footnote{We thank an anonymous reviewer for this suggestion. We agree that establishing the proximal information channel is essential before testing for capital market effects.}
+
+% ============================================================
+\section{Motivating Evidence: A Spot-Check of S\&P 500 Firms}
+\label{sec:spotcheck}
+% ============================================================
+
+Before developing the formal research design, we conduct a preliminary spot-check of \texttt{robots.txt} files from twelve major publicly traded firms (accessed March 2026). The goal is to establish that (i)~firms \emph{do} make differentiated AI crawler decisions, (ii)~the variation is not trivially ``block all'' or ``allow all,'' and (iii)~the training-vs.-retrieval distinction matters in practice. Table~\ref{tab:spotcheck} reports the results.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Spot-Check: AI Crawler Blocking by Selected S\&P 500 Firms (March 2026)}
+\label{tab:spotcheck}
+\begin{tabularx}{\textwidth}{p{2.2cm}p{1.4cm}p{1.4cm}p{1.4cm}p{1.4cm}X}
+\toprule
+\textbf{Firm} & \textbf{GPTBot} \newline (train) & \textbf{OAI-Search} \newline (retrieve) & \textbf{ClaudeBot} \newline (train) & \textbf{Claude-Search} \newline (retrieve) & \textbf{Pattern / Notes} \\
+\midrule
+Apple       & Allow & Allow & Allow & Allow & No AI-specific rules; default allow \\
+\addlinespace
+Microsoft   & Allow & Allow & Allow & Allow & No AI-specific rules \\
+\addlinespace
+JPMorgan    & Allow & Allow & Allow & Allow & No AI-specific rules \\
+\addlinespace
+BlackRock   & Allow & Allow & Allow & Allow & No AI-specific rules \\
+\addlinespace
+ExxonMobil  & Allow & Allow & Allow & Allow & No AI-specific rules \\
+\addlinespace
+Pfizer      & Allow & Allow & Allow & Allow & No AI-specific rules \\
+\addlinespace
+Amazon      & \textbf{Block} & \textbf{Block} & \textbf{Block} & \textbf{Block} & Pattern C; blocks all AI bots but allows Googlebot \\
+\addlinespace
+Meta        & \textbf{Block} & n/m & \textbf{Block} & n/m & Blocks training bots; retrieval bots not mentioned (default allow) $\approx$ Pattern B \\
+\addlinespace
+Goldman Sachs & \textbf{Partial} & n/m & n/m & n/m & Blocks GPTBot on \emph{specific paths} only (/research/, /insights/) \\
+\addlinespace
+Walmart (corp.) & n/m & \textbf{Allow} & \textbf{Block} & \textbf{Allow} & Blocks ClaudeBot (train) but explicitly allows retrieval bots $\approx$ Pattern B \\
+\addlinespace
+NVIDIA      & \textbf{Allow}\textsuperscript{$\dagger$} & \textbf{Allow}\textsuperscript{$\dagger$} & \textbf{Allow}\textsuperscript{$\dagger$} & \textbf{Allow}\textsuperscript{$\dagger$} & Allows AI bots \emph{only} on \texttt{*.llms.txt} and \texttt{*.md} files; blocks rest \\
+\addlinespace
+Tesla       & \multicolumn{4}{c}{\textit{HTTP 403 (server-level block)}} & Cannot be assessed via robots.txt \\
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}
+\small
+\item \textit{Notes}: ``n/m'' = not mentioned in robots.txt (defaults to the \texttt{User-agent: *} rule, which is Allow in all cases above). ``Partial'' = blocked on specific URL paths, not site-wide. $\dagger$ = NVIDIA provides a dedicated \texttt{llms.txt} file for AI consumption, allowing AI bots access only to this curated content. Data accessed 2026-03-11 via direct HTTP fetch of each firm's \texttt{/robots.txt} endpoint.
+\end{tablenotes}
+\end{table}
+
+\paragraph{Key observations.}
+\begin{enumerate}
+    \item \textbf{Most large firms currently allow AI access by default.} Six of twelve firms (Apple, Microsoft, JPMorgan, BlackRock, ExxonMobil, Pfizer) have no AI-specific \texttt{robots.txt} rules, meaning all crawlers---training and retrieval---are permitted under the default \texttt{User-agent: *} directive. This is consistent with the finding in \citet{Reitinger2025} that most websites outside the top 1\% do not actively manage AI crawler access.
+
+    \item \textbf{Firms that do block AI make differentiated choices.} Amazon blocks all AI bots (Pattern C). Meta blocks training bots but does not mention retrieval bots (Pattern B). Walmart's corporate site blocks ClaudeBot (training) while \emph{explicitly allowing} OAI-SearchBot and Claude-SearchBot (retrieval)---a textbook Pattern B case. This confirms that the training-vs.-retrieval distinction is empirically relevant and that firms do exercise granular control.
+
+    \item \textbf{Path-level and content-level variation exists.} Goldman Sachs blocks GPTBot only on its research and insights pages---not the entire site. NVIDIA allows AI bots but restricts them to a curated \texttt{llms.txt} file. These cases suggest that some firms manage AI access at a finer granularity than binary block/allow, motivating our continuous AIAccessIndex measure.
+
+    \item \textbf{Server-level blocking creates measurement challenges.} Tesla returns HTTP 403 regardless of \texttt{robots.txt}, indicating server-level AI blocking that is invisible in the \texttt{robots.txt} file itself. This motivates our ``actual fetch test'' supplement (Section~4.1).
+\end{enumerate}
+
+\noindent While this spot-check is illustrative rather than systematic (twelve firms, single point in time), it establishes that the variation our study exploits exists in practice and is non-trivial. The full-sample analysis will characterize the cross-sectional distribution and time-series dynamics across the Russell 3000.
+
+% ============================================================
+\section{Relation to Existing Literature}
+% ============================================================
+
+Table~\ref{tab:positioning} positions the paper relative to the closest existing work. We discuss each stream below.
+
+\begin{table}[htbp]
+\centering
+\caption{Positioning Relative to Existing Literature}
+\label{tab:positioning}
+\small
+\begin{tabularx}{\textwidth}{p{3.8cm}p{3.2cm}X}
+\toprule
+\textbf{Paper} & \textbf{What It Studies} & \textbf{How We Differ} \\
+\midrule
+\citet{CaoJiangYangZhang2023}, \emph{RFS} 36(9), pp.\ 3603--3642 & \emph{Demand side}: firms adapt disclosure \emph{language} when machines read (observed via web analytics/server logs) & \emph{Supply side}: we study whether firms \emph{block} AI from accessing information entirely via \texttt{robots.txt}---control mechanism vs.\ observation mechanism \\
+\addlinespace
+\citet{BlankespoorDeHaanLi2024}, SSRN \#4986017 & Firms use GenAI to \emph{write} filings & We study whether firms let AI \emph{read} their information---supply vs.\ demand of AI in disclosure \\
+\addlinespace
+\citet{ChenKellyWu2020}, \emph{JFE} 138(2), pp.\ 316--341 & Info channel removal (analyst exits) $\to$ hedge funds substitute $\to$ market efficiency & We study \emph{voluntary} info channel shutdown (AI blocking); mirror-image design with same outcome variables (price jump ratio, forecast dispersion) \\
+\addlinespace
+\citet{GaoHuang2020}, \emph{RFS} 33(4), pp.\ 1367--1411 & EDGAR implementation $\to$ more info production, more efficient markets & AI search is the next EDGAR---but firms can now \emph{opt out} via \texttt{robots.txt}; we study the consequences of opting out \\
+\addlinespace
+\citet{LoughranMcDonald2017}, \emph{JBF} 18(2), pp.\ 231--248 & Human readership of EDGAR filings is surprisingly low (28.4 requests per 10-K) & Low human readership makes AI-powered search a critical marginal info channel; blocking it has outsized effects \\
+\addlinespace
+\citet{BoullandBourveauBreuer2025}, \emph{JAR} (2025) & Corporate website size (bytes) as disclosure proxy; larger websites $\to$ lower bid-ask spreads & They measure website \emph{quantity}; we measure website \emph{accessibility}. Complementary: a large website is useless if AI cannot read it \\
+\addlinespace
+\citet{ArmstrongKonchitchkiZhang2025}, \emph{TAR} 100(6) & Digital traffic to corporate websites predicts revenue, profitability, and stock returns & Establishes that corporate website traffic contains real information content; blocking AI crawlers restricts a meaningful info channel \\
+\addlinespace
+\citet{GoldsteinYangZuo2023}, \emph{JAR} 61(5), pp.\ 1699--1733 & EDGAR implementation $\to$ more investment, lower cost of capital, better monitoring & Another ``info access technology'' shock. EDGAR = mandatory access expansion; \texttt{robots.txt} = voluntary access restriction \\
+\addlinespace
+\citet{Gomez2024}, \emph{TAR} 99(1), pp.\ 235--257 & EDGAR \emph{increased} info asymmetry between sophisticated and unsophisticated investors & AI blocking may similarly widen the gap: sophisticated investors find workarounds; retail investors relying on ChatGPT lose access \\
+\addlinespace
+\citet{BlankespoorDeHaanMarinovic2020}, \emph{JAE} 70(2--3) & Review: disclosures are not truly ``public''---accessing them is costly; processing costs shape investor behavior & AI search lowers processing costs; blocking AI raises them back. Provides the theoretical framing for our mechanism \\
+\addlinespace
+\citet{BlankespoorMillerWhite2014}, \emph{TAR} 89(1), pp.\ 79--112 & Twitter dissemination of firm news $\to$ lower bid-ask spreads, especially for less visible firms & AI search is a dissemination channel; blocking it = removing dissemination. Same economic logic applied to AI-mediated info flow \\
+\addlinespace
+\citet{CaoLiuQiuZhao2024}, SSRN \#4987085 & Information content of AI \emph{mentions} in 10-K & We contrast AI disclosure (cheap talk) with AI accessibility (revealed preference) \\
+\addlinespace
+\citet{Li2008}, \emph{JAE} 45(2--3), pp.\ 221--247 & \emph{Human} readability (Fog Index) of 10-K & We measure \emph{machine} accessibility---not readability of text, but whether machines can access it at all \\
+\addlinespace
+\citet{ChangHe2025}, SSRN \#5159436 & Legal liability of \texttt{robots.txt} & We study \emph{financial and informational} consequences, not legal ones \\
+\addlinespace
+\citet{Reitinger2025}, SSRN \#5555040 & \texttt{robots.txt} across general websites & We focus on \emph{publicly listed firms} and link to capital market outcomes \\
+\addlinespace
+SEC/XBRL/FDTA literature & Machine readability of \emph{mandatory} filings on EDGAR & We study AI accessibility of \emph{voluntary} web-based information that firms control \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Corporate Disclosure: What Firms Say}
+
+A large literature examines how disclosure content and readability affect information asymmetry. \citet{Li2008} introduced the Fog Index as a measure of 10-K readability.\footnote{Feng Li, ``Annual Report Readability, Current Earnings, and Earnings Persistence,'' \emph{Journal of Accounting and Economics}, Vol.~45, Nos.~2--3, 2008, pp.~221--247. \textit{Note: I have seen this paper cited with ``The Accounting Review'' as the journal in some secondary sources; the correct journal is the Journal of Accounting and Economics based on the original publication.}} More recently, \citet{CaoJiangYangZhang2023} show that firms strategically avoid words perceived as negative by NLP algorithms when machine readership is high. On the measurement side, \citet{BlankespoorDeHaanLi2024} use a commercial AI-detection tool to show that up to 4.5\% of new disclosure text was AI-generated by 2024. These papers focus on the content and style of disclosure---what firms \emph{choose to say} and \emph{how they say it}.
+
+We contribute an orthogonal dimension: whether firms allow AI to \emph{access} the information in the first place. A firm can write the most machine-friendly disclosure in the world, but if its website blocks GPTBot, LLM-based tools cannot incorporate that information. Importantly, \citet{CaoJiangYangZhang2023} use web analytics and server logs to \emph{observe} machine readership (a demand-side, passive measurement), whereas our \texttt{robots.txt} variable captures a firm's \emph{active decision} to permit or deny AI access (a supply-side, control mechanism). The two approaches are complementary: firms that detect high machine readership via analytics may respond by adjusting disclosure language \citep{CaoJiangYangZhang2023} \emph{or} by blocking AI crawlers altogether---a margin that has not been studied.
+
+\subsection{Corporate Disclosure: What Firms Do}
+
+The ESG literature provides a useful analogy. A large body of work documents ``greenwashing''---firms making environmental claims that diverge from their actual behavior. For example, \citet{DuchinGaoXu2025} (published in the \emph{Journal of Finance}, Vol.~80, No.~2, 2025) use pollution asset market data to distinguish genuine sustainability from greenwashing.\footnote{Ran Duchin, Janet Gao, and Qiping Xu, ``Sustainability or Greenwashing: Evidence from the Asset Market for Industrial Pollution,'' \emph{Journal of Finance}, Vol.~80, No.~2, April 2025.} Similarly, \citet{PariseRubin2025} document ``green window dressing'' in the \emph{Journal of Finance} (Vol.~80, No.~6, 2025).\footnote{Gianpaolo Parise and Mirco Rubin, ``Green Window Dressing,'' \emph{Journal of Finance}, Vol.~80, No.~6, December 2025.}
+
+Our concept of ``AI hypocrisy'' parallels greenwashing: firms that prominently disclose AI initiatives but block AI access may be engaging in \emph{AI washing}---using AI as a signaling buzzword without genuine openness. This say-do gap may itself be informative about managerial credibility.
+
+\subsection{Information Intermediation in the AI Era}
+
+The traditional information intermediation chain runs from firms to analysts to investors, with search engines facilitating discovery. LLMs introduce a new intermediary: investors increasingly query AI assistants about companies.\footnote{This is an emerging empirical observation. We are not aware of a published academic paper documenting the prevalence of LLM-mediated corporate information acquisition. We plan to provide descriptive evidence on this channel.} If a firm blocks AI crawlers, LLM-generated answers about that firm may be less accurate, less complete, or more stale---raising information costs for the marginal investor. This connects to \citet{Merton1987}'s investor recognition framework.\footnote{Robert C.~Merton, ``A Simple Model of Capital Market Equilibrium with Incomplete Information,'' \emph{Journal of Finance}, Vol.~42, No.~3, July 1987, pp.~483--510.}
+
+This channel has historical precedent. \citet{GaoHuang2020} show that the staggered introduction of EDGAR (1993--1996) increased information production by corporate outsiders and improved market efficiency---a new information \emph{technology} changed how information was produced and consumed. AI-powered search represents the next evolution of this process: it lowers the cost of synthesizing firm information from hours to seconds. But unlike EDGAR---where firms could not opt out of electronic dissemination---\texttt{robots.txt} gives firms the ability to \emph{actively gatekeep} the AI information channel. Crucially, \citet{LoughranMcDonald2017} document that human readership of EDGAR filings is surprisingly low (the average 10-K is requested only 28.4 times after filing), suggesting that AI-powered search may be an increasingly important \emph{marginal} channel for information acquisition---and blocking it may have outsized effects on investor information sets.
+
+Our empirical design is the \textbf{mirror image} of \citet{ChenKellyWu2020}, who study what happens when an information channel is \emph{exogenously removed}: after brokerage closures eliminate analyst coverage, the information environment becomes murky, sophisticated investors scale up information acquisition (EDGAR searches increase by 18.7\%), trade more aggressively, and partially restore market efficiency. We study what happens when firms \emph{voluntarily shut down} a new information channel by blocking AI crawlers. Both settings raise information processing costs; the key difference is that ours involves firm choice, which creates additional testable predictions---in particular, the trade-off between blocking competitors' AI-scale monitoring and raising information costs for all interested parties (investors, analysts, the public).
+
+\subsection{Disclosure Processing Costs and Information Technology}
+
+Our paper connects to a broader literature on how information technology and processing costs shape capital markets. \citet{BlankespoorDeHaanMarinovic2020} provide a comprehensive review arguing that corporate disclosures are \emph{not} truly ``public'' information as traditionally assumed---accessing and processing them is costly, and investors make active economic choices about which disclosures to consume. AI-powered search dramatically lowers these processing costs; firms that block AI crawlers raise them back. Our setting provides a clean test of this framework: the same information exists on the corporate website, but its processing cost depends on whether AI tools can access it.
+
+Empirical support for the importance of dissemination technology is substantial. \citet{BlankespoorMillerWhite2014} show that firms' use of Twitter to disseminate earnings news lowers bid-ask spreads, with effects concentrated among less visible firms---suggesting that each additional dissemination channel provides incremental value. \citet{GoldsteinYangZuo2023} find that the EDGAR implementation led to increased corporate investment, improved liquidity, and lower cost of equity capital---a new dissemination technology with real effects. \citet{Gomez2024} adds a nuance: while EDGAR reduced information asymmetry between managers and investors, it paradoxically \emph{increased} asymmetry between sophisticated and unsophisticated investors, because sophisticated investors were better positioned to exploit the newly available electronic filings. This finding is directly relevant to our setting: AI blocking may similarly widen the gap between sophisticated investors (who can deploy proprietary web-scraping tools that ignore \texttt{robots.txt}) and retail investors (who rely on ChatGPT or Perplexity for firm information).
+
+On the supply side, \citet{BoullandBourveauBreuer2025} propose corporate website size (in bytes) as a novel measure of voluntary disclosure, finding that larger websites are associated with lower bid-ask spreads and greater liquidity. Their measure captures disclosure \emph{quantity}; our \texttt{robots.txt} variable captures disclosure \emph{accessibility}. The two are complementary: a firm can have a large, information-rich website but render it invisible to AI tools by blocking retrieval crawlers. \citet{ArmstrongKonchitchkiZhang2025} show that digital traffic flows to corporate websites are contemporaneous and leading indicators of revenue and profitability, and contain information not fully reflected in stock prices---establishing that corporate website content is a non-trivial information source with real predictive power for firm fundamentals.
+
+% ============================================================
+\section{Research Questions}
+% ============================================================
+
+\subsection{RQ1: Who Blocks AI, and Does It Contradict What They Say?}
+\label{sec:rq1}
+
+\begin{itemize}
+    \item What firm characteristics predict AI-blocking behavior?
+    \item Do firms with high AI disclosure intensity differ in their AI accessibility?
+    \item What is the prevalence of ``AI hypocrisy'' (high AI disclosure $+$ low AI accessibility)?
+\end{itemize}
+
+\subsection{RQ2: Does AI Blocking Degrade LLM-Mediated Information?}
+\label{sec:rq2}
+
+This is the \textbf{proximal mechanism test}---establishing that blocking AI has a direct, measurable effect on the information channel before examining downstream market outcomes. We address two sub-questions:
+
+\paragraph{RQ2a: Where do AI search tools get firm information?} Before testing whether blocking degrades information quality, we first establish \emph{empirically} that AI search tools rely on corporate websites. We conduct a \textbf{source-tracing experiment}: for a random sample of Russell 3000 firms, we query AI search tools (ChatGPT Search, Perplexity, Claude Search) with standardized firm-level questions (e.g., ``What is [Firm]'s business strategy?'', ``Summarize [Firm]'s recent financial performance''). These tools cite their sources with URLs. We collect every cited URL and classify it by source type: corporate website, sec.gov/EDGAR, news outlet, Wikipedia, analyst report, or other. The resulting distribution provides a \emph{descriptive fact}: what fraction of AI-search citations for firm-level queries originate from corporate websites versus EDGAR? If corporate websites dominate---as industry data suggest\footnote{See footnote above on the 2025 AI Visibility Report and Search Atlas citation study.}---this validates that \texttt{robots.txt} blocking operates on a quantitatively important information channel.
+
+\paragraph{RQ2b: Does blocking reduce LLM answer quality?} We construct two categories of questions with verifiable ground-truth answers:
+
+\begin{itemize}
+    \item \textbf{Financial questions} (ground truth available on EDGAR): e.g., ``What was [Firm]'s revenue in FY2024?'', ``Who is [Firm]'s auditor?'' These answers are available in 10-K/10-Q filings on sec.gov, regardless of whether the firm blocks its corporate website.
+    \item \textbf{Strategic/qualitative questions} (ground truth primarily on corporate website): e.g., ``What are [Firm]'s main product lines?'', ``What is [Firm]'s sustainability strategy?'', ``What recent partnerships has [Firm] announced?'' These answers depend on content published on the firm's website---investor presentations, press releases, ESG reports---that is absent from EDGAR filings.
+\end{itemize}
+
+The financial questions serve as a built-in \textbf{placebo test}: if blocking the corporate website degrades answers to these questions as well, the effect is not website-specific and our mechanism is in question. If blocking degrades only strategic/qualitative answers while leaving financial answers unaffected, the mechanism is confirmed---\texttt{robots.txt} specifically restricts access to the voluntary information layer on corporate websites, not to mandatory EDGAR filings.
+
+\subsection{RQ3: What Are the Capital Market Consequences?}
+\label{sec:rq3}
+
+\begin{itemize}
+    \item \textbf{Analyst behavior:} Does AI blocking reduce analyst forecast accuracy? Does analyst forecast dispersion increase for AI-blocking firms---consistent with analysts losing an information-synthesis tool and disagreeing more about fundamentals?
+    \item \textbf{Information asymmetry:} Does AI accessibility (controlling for AI disclosure) predict bid-ask spreads, Amihud illiquidity, or PIN?
+    \item \textbf{Earnings announcement dynamics:} Does AI blocking increase post-earnings-announcement drift (PEAD)---consistent with underreaction due to higher information processing costs \citep[cf.][]{ChenKellyWu2020}? Does the price jump ratio (the share of total information revealed \emph{at} the announcement vs.\ pre-incorporated) increase for AI-blocking firms?
+    \item \textbf{Valuation:} Is AI blocking associated with lower Tobin's Q or higher cost of capital, consistent with the \citet{Merton1987} investor recognition channel?
+    \item \textbf{AI hypocrisy:} Is the say-do gap (high AI disclosure $+$ low AI accessibility) associated with larger information asymmetry than either dimension alone?
+\end{itemize}
+
+% ============================================================
+\section{Data and Variable Construction}
+% ============================================================
+
+\subsection{Primary Variable: AI Accessibility}
+
+For each firm $i$ at month $t$, we parse the \texttt{robots.txt} file from the firm's corporate website and record the blocking status for each individual crawler identified in Section~1. Our primary variable focuses on \textbf{retrieval/search crawlers}---the channel through which AI tools surface corporate information to investors:
+
+\begin{equation}
+\text{AIRetrievalBlock}_{i,t} = \begin{cases} 1 & \text{if robots.txt disallows at least one AI retrieval crawler} \\ 0 & \text{otherwise} \end{cases}
+\end{equation}
+
+\noindent where the retrieval crawlers are OAI-SearchBot (OpenAI) and Claude-SearchBot (Anthropic). This is our preferred measure because blocking retrieval crawlers directly prevents AI search tools from surfacing a firm's information---the mechanism most relevant to investor information acquisition. We separately construct:
+
+\begin{equation}
+\text{AITrainBlock}_{i,t} = \begin{cases} 1 & \text{if robots.txt disallows at least one AI training crawler} \\ 0 & \text{otherwise} \end{cases}
+\end{equation}
+
+\noindent where the training crawlers are GPTBot, ClaudeBot, and Google-Extended. We also construct a granular composite index over all AI crawlers (both training and retrieval):
+\begin{equation}
+\text{AIAccessIndex}_{i,t} = 1 - \frac{\text{Number of AI crawlers blocked}_{i,t}}{\text{Total AI crawlers checked}}
+\end{equation}
+
+\paragraph{Temporal coverage and piecewise proxy.} The retrieval-specific crawlers (OAI-SearchBot, Claude-SearchBot) were introduced in late 2024--2025. Because AIRetrievalBlock is undefined before these crawlers exist, we adopt a \textbf{piecewise definition}:
+
+\begin{equation}
+\text{AIRetrievalBlock}_{i,t} = \begin{cases}
+\text{Blocks OAI-SearchBot or Claude-SearchBot} & \text{if } t \geq \text{late 2024} \\[4pt]
+\text{Blocks GPTBot or ClaudeBot} & \text{if } t < \text{late 2024}
+\end{cases}
+\end{equation}
+
+\noindent \textit{Rationale}: Before the crawler split, GPTBot served both training and retrieval purposes; blocking it was the only available mechanism to restrict AI access of any kind. The piecewise definition thus proxies for ``the strongest available AI-access restriction at time $t$.'' We conduct three robustness checks to ensure results are not an artifact of this definitional shift: (i)~restrict Stages 1 and 3 to the \textbf{post-split period only} (late 2024 onward), where AIRetrievalBlock is precisely identified; (ii)~include a \textbf{period indicator} $\times$ AIRetrievalBlock interaction to test whether the coefficient differs across pre- and post-split subsamples; and (iii)~use the composite AIAccessIndex (which is consistently defined across both periods) as an alternative measure throughout.
+
+\paragraph{Distinguishing information management from IP protection.} The three-way crawler taxonomy (Section~1) enables a critical diagnostic test. Consider four blocking patterns:
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Blocking Patterns and Inferred Motives}
+\label{tab:blocking_patterns}
+\begin{tabularx}{\textwidth}{p{1.2cm}p{2.5cm}p{2.5cm}p{2.5cm}X}
+\toprule
+Pattern & Training bots & Retrieval bots & Googlebot & Likely motive \\
+\midrule
+A & Allow & \textbf{Block} & Allow & \textbf{Information management} \\
+B & \textbf{Block} & Allow & Allow & IP / training-data protection \\
+C & \textbf{Block} & \textbf{Block} & Allow & Mixed: both motives \\
+D & \textbf{Block} & \textbf{Block} & \textbf{Block} & Generic anti-crawling (noise) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\noindent Our paper's information management story is strongest for firms in Pattern A or C. Pattern B firms---blocking training crawlers but allowing retrieval---are protecting their IP, not controlling information flow. Pattern D firms are blocking all bots indiscriminately. In the regression analysis, we use Pattern D (generic blocking) as a control condition and report subsample results by pattern to demonstrate that our effects are driven by retrieval-specific blocking.
+
+\textit{Time-scope caveat}: Patterns A--D are fully observable only from late 2024 onward, when retrieval-specific crawlers (OAI-SearchBot, Claude-SearchBot) become distinguishable from training crawlers. For the pre-split period (August 2023--late 2024), Patterns A and B collapse into a single category because GPTBot served both functions. We therefore restrict pattern-based subsample analyses to the post-split period and report this limitation explicitly.
+
+\paragraph{Addressing measurement pollution.} A related concern is that \texttt{robots.txt} may not reflect a deliberate firm decision---it could reflect default settings of a CDN (e.g., Cloudflare), a third-party IR platform (e.g., Q4, Notified), or general bot-blocking.\footnote{This concern is particularly relevant for smaller firms that outsource web hosting and may not actively manage \texttt{robots.txt}.} We address this through:
+\begin{enumerate}
+    \item \textbf{The blocking pattern taxonomy above}: Pattern D (block everything) is flagged as noise. The informative variation comes from firms that selectively block AI retrieval crawlers while allowing traditional search crawlers (Patterns A and C).
+    \item \textbf{Actual fetch tests}: We supplement \texttt{robots.txt} with HTTP requests using AI-associated User-Agent strings, recording status codes (200, 403, 429, captcha redirects) to capture real accessibility beyond what robots.txt declares.
+    \item \textbf{IR platform controls}: We identify the IR platform provider for each firm (from website metadata) and include platform fixed effects to absorb default configurations.
+    \item \textbf{Website self-hosting indicator}: We control for whether the firm hosts its own website or uses a third-party platform, as self-hosted sites more clearly reflect firm-level decisions.
+\end{enumerate}
+
+\subsection{Secondary Variable: AI Disclosure}
+
+Following the approach in \citet{CaoLiuQiuZhao2024}, we measure AI disclosure using the frequency and context of AI-related keywords in annual 10-K filings. Specifically:
+\begin{equation}
+\text{AIDisclosure}_{i,t} = \frac{\text{Number of AI-related sentences in 10-K}_{i,t}}{\text{Total sentences in 10-K}_{i,t}}
+\end{equation}
+
+The AI keyword dictionary includes terms such as ``artificial intelligence,'' ``machine learning,'' ``deep learning,'' ``neural network,'' ``natural language processing,'' ``large language model,'' and related variants. We classify sentences rather than raw word counts to reduce false positives from incidental mentions.\footnote{For example, ``learning from past experience'' would not be counted, but ``deploying machine learning models to optimize supply chains'' would be. We plan to validate the keyword approach against an LLM-based classifier on a random subsample.}
+
+\paragraph{Frequency alignment.} The blocking variables (AIRetrievalBlock, AITrainBlock) are observed monthly; AIDisclosure is annual (from 10-K filings). For specifications that interact or jointly analyze these variables (Stages 1 and 3), we aggregate the blocking variables to \textbf{fiscal-year frequency} using the blocking status as of the fiscal year-end date. In robustness tests, we use (i) the modal blocking status during the fiscal year (majority of months), and (ii) $\text{FracBlocked}_{i,t} = \text{months blocked}/12$, a continuous annual measure of blocking intensity. The monthly panel is retained for Stage~2 (LLM accuracy tests), where higher-frequency variation in blocking status is directly informative. As an additional robustness check, we extract AI-related keywords from quarterly 10-Q filings to construct a quarterly AIDisclosure measure, enabling quarter $\times$ month panel estimation.
+
+\subsection{Interaction Variable: AI Hypocrisy}
+
+The key interaction captures the say-do gap. Our primary specification preserves the continuous variation in AI disclosure:
+\begin{equation}
+\text{AIHypocrisy}_{i,t} = \text{AIDisclosure}_{i,t} \times \text{AIRetrievalBlock}_{i,t}
+\end{equation}
+
+\noindent This is a continuous $\times$ binary interaction: among firms that block AI retrieval crawlers (AIRetrievalBlock $= 1$), those with higher disclosure intensity have a larger say-do gap---they talk enthusiastically about AI in filings but prevent AI tools from surfacing their information to investors. In a fully continuous specification, we also estimate:
+\begin{equation}
+\text{AIHypocrisy}^{C}_{i,t} = \text{AIDisclosure}_{i,t} \times (1 - \text{AIAccessIndex}_{i,t})
+\end{equation}
+
+\noindent which exploits the granularity of the AIAccessIndex (number of crawlers blocked). For \textbf{descriptive purposes only} (Stage~1 tables and figures), we also present a $2 \times 2$ classification (AIDisclosure above/below median $\times$ AIRetrievalBlock = 1/0) to illustrate the distribution of firms across quadrants. This binary classification is \emph{not} used in regression analysis to avoid information loss from discretization.
+
+\subsection{LLM Retrievability Variable (for RQ2)}
+
+To directly test the mechanism, we construct a measure of how well LLMs can answer questions about each firm:
+\begin{equation}
+\text{LLMAccuracy}_{i,t} = \frac{1}{Q}\sum_{q=1}^{Q} \text{Score}(a_{i,q,t}, \text{ground truth}_{i,q,t})
+\end{equation}
+
+\noindent where $a_{i,q,t}$ is an LLM's answer to question $q$ about firm $i$ at time $t$, and the score is evaluated against verifiable ground-truth facts (e.g., CEO name, recent acquisitions, number of employees, revenue segments). We query commercial LLM APIs with a standardized set of $Q$ factual questions per firm and score responses for accuracy, completeness, and recency.
+
+\subsection{Data Sources}
+
+\begin{itemize}
+    \item \textbf{Robots.txt panel}: Scraped monthly from corporate websites of Russell 3000 firms. For each firm-month, we record the blocking status of each individual crawler: GPTBot, ClaudeBot, Google-Extended (training); OAI-SearchBot, Claude-SearchBot (retrieval); ChatGPT-User, Claude-User (user-initiated); Googlebot, Bingbot (traditional search, as controls). Historical data from the Wayback Machine (\url{https://web.archive.org/}) for the period August 2023--present.
+    \item \textbf{10-K text}: SEC EDGAR full-text filings for AI keyword extraction.
+    \item \textbf{Firm financials}: Compustat via WRDS.
+    \item \textbf{Stock market data}: CRSP for returns, volume, bid-ask spreads.
+    \item \textbf{Analyst data}: I/B/E/S for coverage, forecast dispersion, earnings surprises.
+    \item \textbf{Institutional ownership}: Thomson Reuters 13F filings.
+    \item \textbf{LLM API responses}: Queried from commercial LLM providers (e.g., OpenAI, Anthropic) for the retrievability test.
+\end{itemize}
+
+\subsection{Sample Period}
+
+The panel begins in \textbf{August 2023} (GPTBot introduction). The staggered launches of ClaudeBot, Google-Extended, and other AI crawlers provide additional temporal variation.
+
+% ============================================================
+\section{Empirical Strategy}
+% ============================================================
+
+We structure the analysis in three sequential stages, each building on the prior.
+
+% ---- Stage 1 ----
+\subsection{Stage 1: Determinants and Descriptive Patterns (RQ1)}
+
+\paragraph{Cross-sectional determinants.}
+\begin{equation}
+\text{AIRetrievalBlock}_{i,t} = \alpha + \beta_1 \text{AIDisclosure}_{i,t-1} + \boldsymbol{\gamma}' \mathbf{X}_{i,t-1} + \eta_j + \delta_t + \varepsilon_{i,t}
+\end{equation}
+
+\noindent where $\mathbf{X}_{i,t-1}$ includes firm size, book-to-market, institutional ownership, analyst coverage, R\&D intensity, litigation risk, and information asymmetry proxies. $\eta_j$ and $\delta_t$ denote industry and time fixed effects. We estimate this equation separately for AIRetrievalBlock, AITrainBlock, and the composite AIAccessIndex. Comparing coefficients across these dependent variables reveals whether AI disclosure predicts information management (retrieval blocking), IP protection (training blocking), or both.
+
+The coefficient $\beta_1$ tests whether firms that talk more about AI are more or less likely to block AI retrieval---a first test of consistency. For descriptive illustration, we report a $2 \times 2$ classification (disclosure above/below median $\times$ block/allow) and examine the distribution of firms across quadrants.
+
+\paragraph{Addressing the ``legal/IT culture'' confound.} A natural concern is that firms blocking AI may simply have more conservative legal or IT departments, not a deliberate information management strategy. To address this:
+\begin{itemize}
+    \item We control for industry litigation risk (SIC-based historical lawsuit frequency).
+    \item We test whether the blocking decision correlates with other IT security proxies (e.g., data breach history, cybersecurity disclosure).
+    \item We examine the \emph{timing} of blocking---firms that block GPTBot within weeks of its announcement likely respond to media coverage (a strategic choice), while firms that block only after a CDN default change are less clearly strategic.
+\end{itemize}
+
+% ---- Stage 2 ----
+\subsection{Stage 2: Proximal Mechanism---LLM Information Quality (RQ2)}
+
+This stage tests the most direct channel: does blocking AI degrade the quality of LLM-generated information about a firm? We proceed in two parts.
+
+\paragraph{Stage 2a: Source-tracing experiment.} For a random sample of firms, we query AI search tools (ChatGPT Search, Perplexity, Claude Search) with standardized firm-level questions and collect all cited source URLs. We classify each URL by type (corporate website, sec.gov/EDGAR, news outlet, Wikipedia, other) and report the distribution. This establishes the descriptive fact that corporate websites are a primary source for AI-generated firm information, validating that \texttt{robots.txt} blocking operates on a quantitatively important channel.
+
+\paragraph{Stage 2b: LLM accuracy test with within-firm placebo.} We construct a panel of LLM answer quality at the firm $\times$ question-type $\times$ time level. For each firm, we pose two categories of questions (see Section~\ref{sec:rq2}): \emph{financial} questions (answers available on EDGAR regardless of blocking) and \emph{strategic/qualitative} questions (answers primarily available on the corporate website). We score each LLM response against verifiable ground truth on three dimensions:
+
+\begin{itemize}
+    \item \textbf{Accuracy}: does the answer match ground truth? (binary or continuous 0--1 scale)
+    \item \textbf{Completeness}: how many key facts are captured? (count-based, normalized)
+    \item \textbf{Hallucination rate}: does the response contain fabricated information? (binary)
+\end{itemize}
+
+\noindent We use a second LLM as a grader (e.g., GPT-4 grading GPT-3.5's answers against ground truth), a methodology now standard in NLP evaluation. The primary specification is a \textbf{triple-difference} design:
+
+\begin{equation}
+\text{Score}_{i,j,t} = \alpha_i + \mu_j + \delta_t + \beta_1 \text{AIRetrievalBlock}_{i,t} + \beta_2 \text{WebsiteQ}_{j} + \beta_3 (\text{AIRetrievalBlock}_{i,t} \times \text{WebsiteQ}_{j}) + \boldsymbol{\gamma}' \mathbf{X}_{i,t} + \varepsilon_{i,j,t}
+\label{eq:triple_diff}
+\end{equation}
+
+\noindent where $\text{Score}_{i,j,t}$ is the LLM accuracy score for firm $i$, question type $j$, at time $t$; $\text{WebsiteQ}_{j}$ is an indicator for strategic/qualitative questions whose answers depend on corporate website content; $\alpha_i$ are firm fixed effects; $\mu_j$ are question-type fixed effects; and $\delta_t$ are time fixed effects. The coefficient of interest is $\beta_3$: the \emph{differential} effect of AI blocking on website-dependent questions relative to EDGAR-available questions.
+
+This design provides three layers of identification:
+\begin{enumerate}
+    \item \textbf{Within-firm variation} (firm fixed effects): eliminates all time-invariant firm characteristics.
+    \item \textbf{Within-firm, across-question-type variation} ($\beta_3$): the financial questions serve as a built-in \emph{placebo}. If $\beta_3 < 0$ and $\beta_1 \approx 0$, blocking degrades answers to website-dependent questions while leaving EDGAR-available answers unaffected---confirming that the mechanism operates through the corporate website channel specifically.
+    \item \textbf{Before/after blocking} (for within-firm switchers): for firms that change their blocking status mid-sample, we compare LLM accuracy for the same firm, same questions, before and after the policy change.
+\end{enumerate}
+
+\paragraph{Why this test matters.} If blocking AI does not reduce LLM accuracy---for example, because LLMs have sufficient information from SEC EDGAR, news articles, and Wikipedia---then the downstream capital market effects should be muted. The placebo (financial questions) directly addresses this concern: it tests whether EDGAR availability is sufficient to offset the loss of corporate website access. Conversely, if blocking measurably degrades LLM answers to website-dependent questions while leaving financial answers intact, the mechanism is established and the EDGAR-availability objection is empirically refuted.
+
+\paragraph{Validation exercise.} We manually verify a random subsample of LLM answers against ground-truth data (e.g., latest 10-K, proxy statement, corporate website archived via the Wayback Machine). This validates the scoring methodology and provides an error baseline.
+
+% ---- Stage 3 ----
+\subsection{Stage 3: Capital Market Consequences (RQ3)}
+
+Conditional on Stage 2 establishing the mechanism, we test for market-level effects:
+
+\begin{equation}
+Y_{i,t} = \alpha_i + \beta_1 \text{AIRetrievalBlock}_{i,t} + \beta_2 \text{AIDisclosure}_{i,t} + \beta_3 (\text{AIRetrievalBlock} \times \text{AIDisclosure})_{i,t} + \boldsymbol{\gamma}' \mathbf{X}_{i,t} + \delta_t + \varepsilon_{i,t}
+\label{eq:main}
+\end{equation}
+
+\noindent where $Y_{i,t}$ includes:
+\begin{itemize}
+    \item \textbf{Analyst forecast accuracy}: absolute forecast error scaled by price, following the I/B/E/S literature. If AI blocking impairs the information environment, analysts may produce less precise forecasts.
+    \item \textbf{Analyst forecast dispersion}: standard deviation of analyst EPS forecasts. Higher dispersion indicates greater disagreement among analysts about fundamentals---a hallmark of murky information environments \citep{ChenKellyWu2020}.
+    \item \textbf{Post-earnings-announcement drift (PEAD)}: cumulative abnormal returns in the $[+2, +60]$ trading-day window after earnings announcements. Larger PEAD indicates investor underreaction---consistent with higher information processing costs slowing the incorporation of earnings news into prices.
+    \item \textbf{Price jump ratio}: CAR$[0,2]/$CAR$[-63,2]$ around earnings announcements \citep[following][]{ChenKellyWu2020}. A higher ratio indicates that more information is revealed \emph{at} the announcement (and less was pre-incorporated), signaling lower pre-announcement price efficiency.
+    \item \textbf{Bid-ask spread and Amihud illiquidity}: standard information asymmetry proxies.
+    \item \textbf{Tobin's Q / cost of capital}: valuations and implied cost of equity, testing the \citet{Merton1987} investor recognition channel.
+\end{itemize}
+
+The coefficient of interest is $\beta_3$, the interaction of AI disclosure and retrieval blocking. A positive $\beta_3$ (when $Y$ measures information asymmetry, dispersion, or PEAD) indicates that ``AI hypocrisy'' firms---those that talk about AI but block AI retrieval of their information---face higher information costs than their say-do consistency would predict. The analyst and earnings announcement outcomes follow directly from \citet{ChenKellyWu2020}: if removing an information channel (analyst exits) worsens these metrics, then voluntarily shutting down a new information channel (AI blocking) should produce analogous effects. In robustness tests, we replace AIRetrievalBlock with AITrainBlock; we expect a weaker $\beta_3$ because training blocking does not directly impede real-time information access.
+
+\paragraph{Identification strategies.}
+
+Our primary identification leverages the fact that AI crawlers did not exist before mid-2023---no firm could block GPTBot before August 2023 because it had not been launched. The sequential introduction of crawlers generates plausibly exogenous variation in the \emph{choice set} firms face.
+
+\begin{enumerate}
+    \item \textbf{Staggered DID using crawler introductions (primary).} The staggered launch of AI crawlers---GPTBot (August 2023), Google-Extended (September 2023), ClaudeBot (early 2024), OAI-SearchBot (late 2024), Claude-SearchBot (2025)---creates a multi-period treatment setting. Each new crawler forces a blocking decision; firms that block immediately upon a crawler's launch (``early blockers'') versus those that block later or never provide variation in treatment timing. The introduction of retrieval-specific crawlers in late 2024--2025 is especially valuable: it generates a \emph{within-firm, within-period} shock to the choice set, as firms that previously only faced a binary GPTBot decision must now decide separately on retrieval access. We implement the \citet{CallawayS2021} estimator to avoid negative weighting bias inherent in two-way fixed effects.\footnote{Brantly Callaway and Pedro H.C.~Sant'Anna, ``Difference-in-Differences with Multiple Time Periods,'' \emph{Journal of Econometrics}, Vol.~225, No.~2, December 2021, pp.~200--230.} The identifying assumption is that, absent the crawler launch, blocking and non-blocking firms would have followed parallel trends in outcome variables---testable via pre-trend analysis using the months before each crawler's introduction.
+
+    \item \textbf{Firm fixed effects + within-firm switchers.} Approximately 30\% of top-1000 websites changed their GPTBot policy between 2023 and 2025.\footnote{Based on aggregate trends reported in Paul Calvano, ``AI Bots and Robots.txt,'' August 21, 2025, \url{https://paulcalvano.com/2025-08-21-ai-bots-and-robots-txt/}. The exact figure for publicly traded firms will be established by our data collection.} Firm fixed effects absorb all time-invariant confounders; identification comes from within-firm switches in blocking status over time.
+
+    \item \textbf{Industry peer blocking rate as instrument.} We instrument a firm's own blocking decision with the leave-one-out average blocking rate among industry peers (same 2-digit SIC). The exclusion restriction is that peer IT policies affect a firm's own blocking behavior (through shared IT norms, vendor recommendations, or imitation) but do not directly affect the focal firm's information environment except through the firm's own blocking choice. This peer-effects IV is analogous to instruments used in the capital structure literature \citep[e.g.,][]{Leary2014}.\footnote{Mark T.~Leary and Michael R.~Roberts, ``Do Peer Firms Affect Corporate Financial Policy?'' \emph{Journal of Finance}, Vol.~69, No.~1, February 2014, pp.~139--178.}
+
+    \item \textbf{IR platform default changes (supplementary).} If a major IR platform provider (e.g., Q4, Notified) changes its default \texttt{robots.txt} template to block or allow AI crawlers, this generates additional exogenous variation for firms on that platform. We will actively search for such events; if identified, they provide a strong supplementary quasi-experiment.
+\end{enumerate}
+
+% ============================================================
+\section{Identification Challenges}
+% ============================================================
+
+We take the identification concerns seriously. Table~\ref{tab:identification} maps each challenge to a concrete response.
+
+\begin{table}[htbp]
+\centering
+\caption{Identification Challenges and Responses}
+\label{tab:identification}
+\small
+\begin{tabularx}{\textwidth}{p{3.5cm}X}
+\toprule
+\textbf{Challenge} & \textbf{Response} \\
+\midrule
+\textit{Endogeneity: firms that block AI may be inherently more opaque} & Firm fixed effects absorb time-invariant opacity. We exploit within-firm switches. We also control for traditional opacity proxies (10-K Fog Index, earnings quality). The ``AI hypocrisy'' design further mitigates this: among high-disclosers (presumably transparent firms), blocking is less likely driven by general opacity. \\
+\addlinespace
+\textit{Legal/IT culture confound: blocking reflects conservative IT policy, not information management} & We control for litigation risk, data breach history, and cybersecurity disclosure. Our three-way crawler taxonomy (Table~\ref{tab:blocking_patterns}) separates information management (retrieval blocking) from IP protection (training blocking) and generic anti-bot behavior (blocking Googlebot). Only retrieval blocking directly impedes AI-mediated information flow to investors. \\
+\addlinespace
+\textit{Measurement pollution: CDN defaults, third-party IR platforms} & IR platform fixed effects. Self-hosting indicator. Actual fetch tests supplement \texttt{robots.txt} parsing. The blocking pattern taxonomy (Table~\ref{tab:blocking_patterns}) flags generic anti-bot firms (Pattern D) as noise and isolates deliberate, AI-specific decisions. \\
+\addlinespace
+\textit{Mechanism gap: robots.txt $\to$ market outcomes is too big a jump} & Stage 2 (LLM accuracy test) establishes the proximal mechanism. We only interpret Stage 3 results conditional on Stage 2 evidence. \\
+\addlinespace
+\textit{AI disclosure is cheap talk and may be noisy} & We validate keyword counts against LLM-based classification. We also use \emph{within}-firm variation in disclosure intensity to reduce cross-sectional noise. \\
+\addlinespace
+\textit{EDGAR provides mandatory information regardless---does blocking really raise info costs?} & This is a feature, not a bug. EDGAR is equally accessible for all firms; our variable captures accessibility of \emph{voluntary, supplementary} information (IR pages, press releases, ESG reports, product details, strategy descriptions) that goes beyond mandatory filings. Critically, AI search tools primarily index the open web (corporate websites, news), not EDGAR's full-text search (Section~1). We address this objection empirically via the Stage~2b triple-difference design (Eq.~\ref{eq:triple_diff}): financial questions (EDGAR-available) serve as a built-in placebo. If blocking degrades only website-dependent answers, the mechanism is confirmed. The EDGAR bots documented in prior literature \citep{LoughranMcDonald2017, ChenKellyWu2020} are traditional financial data aggregators (Bloomberg, FactSet), not AI crawlers---the two bot populations are technologically and functionally distinct. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ============================================================
+\section{Expected Contributions}
+% ============================================================
+
+\begin{enumerate}
+    \item \textbf{A ``revealed preference'' measure of corporate AI openness.} Existing AI-and-disclosure research relies on what firms \emph{say} (keyword counts, sentiment). We introduce what firms \emph{do}---a binary, observable, costly action. This parallels the greenwashing literature's distinction between environmental claims and environmental actions.
+
+    \item \textbf{The say-do gap as a new information signal.} By combining AI disclosure with AI accessibility, we construct a measure of ``AI hypocrisy'' that captures managerial credibility. This contributes to the broader disclosure credibility literature.
+
+    \item \textbf{Proximal mechanism evidence.} Unlike papers that jump from a novel variable directly to market outcomes, we first establish the information channel (LLM accuracy degradation) before testing for capital market effects.
+
+    \item \textbf{Policy relevance.} The Financial Data Transparency Act of 2022 mandates machine-readable \emph{mandatory} filings. Our findings speak to whether machine accessibility of \emph{voluntary} information should also be a regulatory concern.
+
+    \item \textbf{Self-constructed novel variables with replicable data.} The paper's novel variables---AIRetrievalBlock, AITrainBlock, AIAccessIndex, AIDisclosure, AIHypocrisy, and LLMAccuracy---are constructed entirely from publicly available sources (\texttt{robots.txt} files, SEC EDGAR full-text filings, commercial LLM APIs) without proprietary data. Standard financial databases (Compustat, CRSP, I/B/E/S via WRDS; Thomson Reuters 13F) are used for control variables and outcome measures, consistent with typical empirical finance research. The novel variables themselves are fully replicable.
+\end{enumerate}
+
+% ============================================================
+\section{Response to Anticipated Concerns}
+\label{sec:response}
+% ============================================================
+
+We address several specific concerns that have been raised in preliminary feedback.
+
+\paragraph{``The 85\% EDGAR bot traffic figure is from 2018---can it be cited as current?''} Fair point. The 85\% figure comes from a 2018 SEC speech by Scott Bauguess.\footnote{Scott Bauguess, ``The Role of Machine Readability in an AI World,'' SEC Speech, May 3, 2018, \url{https://www.sec.gov/newsroom/speeches-statements/speech-bauguess-050318}.} We should not present this as 2025 data. In the revised version above, we have removed the ``as of 2025'' framing. We will investigate whether more recent EDGAR traffic data are publicly available; if not, we will cite the 2018 figure with proper temporal attribution.
+
+\paragraph{``Fetch failure may be technical, not strategic.''} This is a valid concern. A 403 error can result from Cloudflare protection, JavaScript-heavy rendering, rate limiting, or an explicit \texttt{robots.txt} disallow. Our multi-layered measurement approach (Section~4.1) addresses this by separating deliberate AI-specific blocking from generic technical barriers. The most informative variation is firms that allow Googlebot but block GPTBot---this cannot be attributed to general anti-bot infrastructure.
+
+\paragraph{``Platform-level blocking (like SSRN blocking API access) is different from firm-level.''} Correct. We restrict attention to corporate websites that firms themselves control. EDGAR filings are universally accessible and serve as a baseline. Our variable specifically captures the incremental information that firms choose to make (or not make) AI-accessible on their own domains.
+
+\paragraph{``Should RQ3 be in the paper at all, given the identification concerns?''} We include RQ3 as conditional on RQ2. If Stage 2 shows no effect of blocking on LLM information quality, we do not pursue Stage 3. If the mechanism is established, Stage 3 results with firm fixed effects and staggered DID provide suggestive (not necessarily causal) evidence of market consequences. We will be transparent about the strength of identification at each stage.
+
+% ============================================================
+\section{Preliminary Timeline}
+% ============================================================
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Phase} & \textbf{Activity} & \textbf{Months} \\
+\midrule
+1 & Scrape robots.txt for Russell 3000 (current + Wayback Machine) & 1--3 \\
+2 & Extract AI keywords from 10-K filings via EDGAR & 2--4 \\
+3 & Descriptive analysis: who blocks, AI hypocrisy prevalence & 4--5 \\
+4 & LLM accuracy test: query APIs, score answers & 5--7 \\
+5 & Merge with CRSP/Compustat/I/B/E/S; Stage 1 regressions & 7--9 \\
+6 & Stage 2: mechanism regressions (LLM accuracy) & 9--11 \\
+7 & Stage 3 (conditional): capital market outcome regressions & 11--13 \\
+8 & Paper writing, conference submissions (AFA/WFA/EFA) & 13--16 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================
+% References
+% ============================================================
+
+\newpage
+\begin{thebibliography}{99}
+
+\bibitem[Blankespoor et al.(2024)]{BlankespoorDeHaanLi2024}
+Blankespoor, E., deHaan, E., and Li, Q. (2024).
+\newblock Generative AI in Financial Reporting.
+\newblock \emph{SSRN Working Paper}, Abstract ID: 4986017.
+\newblock Available at: \url{https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4986017}.
+\newblock \textit{Status: Working paper as of March 2026. Not published in a peer-reviewed journal to the author's knowledge. Key finding cited: up to 4.5\% of new disclosure text AI-generated by 2024.}
+
+\bibitem[Blankespoor et al.(2020)]{BlankespoorDeHaanMarinovic2020}
+Blankespoor, E., deHaan, E., and Marinovic, I. (2020).
+\newblock Disclosure Processing Costs, Investors' Information Choice, and Equity Market Outcomes: A Review.
+\newblock \emph{Journal of Accounting and Economics}, 70(2--3).
+\newblock DOI: 10.1016/j.jacceco.2020.101344.
+\newblock \textit{Published. Key argument: disclosures are not truly ``public'' information---accessing and processing them is costly, and these costs shape investor behavior and market outcomes.}
+
+\bibitem[Blankespoor et al.(2014)]{BlankespoorMillerWhite2014}
+Blankespoor, E., Miller, G.S., and White, H.D. (2014).
+\newblock The Role of Dissemination in Market Liquidity: Evidence from Firms' Use of Twitter.
+\newblock \emph{The Accounting Review}, 89(1), 79--112.
+\newblock DOI: 10.2308/accr-50576.
+\newblock \textit{Published. Key finding: Twitter dissemination of firm-initiated news is associated with lower bid-ask spreads, especially for less visible firms.}
+
+\bibitem[Boulland et al.(2025)]{BoullandBourveauBreuer2025}
+Boulland, R., Bourveau, T., and Breuer, M. (2025).
+\newblock Company Websites: A New Measure of Disclosure.
+\newblock \emph{Journal of Accounting Research}.
+\newblock DOI: 10.1111/1475-679X.70007.
+\newblock \textit{Published. Key finding: corporate website size (in bytes) is a disclosure proxy associated with lower bid-ask spreads. 198,316 firm-quarter observations for 5,234 U.S.\ public firms, 1997--2020.}
+
+\bibitem[Armstrong et al.(2025)]{ArmstrongKonchitchkiZhang2025}
+Armstrong, C.S., Konchitchki, Y., and Zhang, B. (2025).
+\newblock Digital Traffic, Financial Performance, and Stock Valuation.
+\newblock \emph{The Accounting Review}, 100(6), 29.
+\newblock \textit{Published. Key finding: digital traffic flows to corporate websites are contemporaneous and leading indicators of revenue, profitability, and stock returns; the information is not fully reflected in analyst forecasts or historical financials.}
+
+\bibitem[Goldstein et al.(2023)]{GoldsteinYangZuo2023}
+Goldstein, I., Yang, S., and Zuo, L. (2023).
+\newblock The Real Effects of Modern Information Technologies: Evidence from the EDGAR Implementation.
+\newblock \emph{Journal of Accounting Research}, 61(5), 1699--1733.
+\newblock DOI: 10.1111/1475-679X.12496.
+\newblock \textit{Published. Key finding: EDGAR implementation led to increased corporate investment, improved stock liquidity, decreased cost of capital, and better operating performance.}
+
+\bibitem[Gomez(2024)]{Gomez2024}
+Gomez, E.A. (2024).
+\newblock The Effect of Mandatory Disclosure Dissemination on Information Asymmetry among Investors: Evidence from the Implementation of the EDGAR System.
+\newblock \emph{The Accounting Review}, 99(1), 235--257.
+\newblock DOI: 10.2308/TAR-2021-0392.
+\newblock \textit{Published. Key finding: EDGAR reduced manager--investor asymmetry but increased asymmetry between sophisticated and unsophisticated investors, especially for firms with less readable filings.}
+
+\bibitem[Chen et al.(2020)]{ChenKellyWu2020}
+Chen, Y., Kelly, B., and Wu, W. (2020).
+\newblock Sophisticated Investors and Market Efficiency: Evidence from a Natural Experiment.
+\newblock \emph{Journal of Financial Economics}, 138(2), 316--341.
+\newblock DOI: 10.1016/j.jfineco.2020.06.004.
+\newblock \textit{Published. Key finding: after exogenous analyst coverage reductions, hedge funds scale up information acquisition (EDGAR searches +18.7\%) and trade more aggressively; high hedge fund participation restores impaired market efficiency.}
+
+\bibitem[Callaway and Sant'Anna(2021)]{CallawayS2021}
+Callaway, B. and Sant'Anna, P.H.C. (2021).
+\newblock Difference-in-Differences with Multiple Time Periods.
+\newblock \emph{Journal of Econometrics}, 225(2), 200--230.
+\newblock \textit{Published.}
+
+\bibitem[Cao et al.(2023)]{CaoJiangYangZhang2023}
+Cao, S., Jiang, W., Yang, B., and Zhang, A.L. (2023).
+\newblock How to Talk When a Machine Is Listening: Corporate Disclosure in the Age of AI.
+\newblock \emph{Review of Financial Studies}, 36(9), 3603--3642.
+\newblock DOI: 10.1093/rfs/hhad021.
+\newblock \textit{Published. Originally circulated as NBER Working Paper No.~27950 (October 2020). Key finding cited: firms adjust filing language in response to AI readership.}
+
+\bibitem[Cao et al.(2024)]{CaoLiuQiuZhao2024}
+Cao, Y., Liu, M., Qiu, J., and Zhao, R. (2024).
+\newblock Information in Disclosing Emerging Technologies: Evidence from AI Disclosure.
+\newblock \emph{SSRN Working Paper}, Abstract ID: 4987085.
+\newblock Available at: \url{https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4987085}.
+\newblock \textit{Status: Working paper as of March 2026. Key finding cited: AI disclosure in 10-K filings has increased across all industry sectors since 2010.}
+
+\bibitem[Chang and He(2025)]{ChangHe2025}
+Chang, C.-Y. and He, X. (2025).
+\newblock The Liabilities of Robots.Txt.
+\newblock \emph{SSRN Working Paper}, Abstract ID: 5159436.
+\newblock Available at: \url{https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5159436}.
+\newblock \textit{Status: Working paper as of March 2026. A law article, not finance/accounting. Key argument cited: robots.txt may create unilateral contract or tortious liability.}
+
+\bibitem[Gao and Huang(2020)]{GaoHuang2020}
+Gao, M. and Huang, J. (2020).
+\newblock Informing the Market: The Effect of Modern Information Technologies on Information Production.
+\newblock \emph{Review of Financial Studies}, 33(4), 1367--1411.
+\newblock DOI: 10.1093/rfs/hhz100.
+\newblock \textit{Published. Key finding: staggered EDGAR implementation (1993--1996) increased information production by corporate outsiders; individual investor trades became more informative and analyst accuracy improved.}
+
+\bibitem[Duchin et al.(2025)]{DuchinGaoXu2025}
+Duchin, R., Gao, J., and Xu, Q. (2025).
+\newblock Sustainability or Greenwashing: Evidence from the Asset Market for Industrial Pollution.
+\newblock \emph{Journal of Finance}, 80(2).
+\newblock \textit{Published. Cited for the greenwashing analogy---distinguishing environmental claims from actions.}
+
+\bibitem[Leary and Roberts(2014)]{Leary2014}
+Leary, M.T. and Roberts, M.R. (2014).
+\newblock Do Peer Firms Affect Corporate Financial Policy?
+\newblock \emph{Journal of Finance}, 69(1), 139--178.
+\newblock \textit{Published. Cited for the peer-effects IV approach.}
+
+\bibitem[Loughran and McDonald(2017)]{LoughranMcDonald2017}
+Loughran, T. and McDonald, B. (2017).
+\newblock The Use of EDGAR Filings by Investors.
+\newblock \emph{Journal of Behavioral Finance}, 18(2), 231--248.
+\newblock DOI: 10.1080/15427560.2017.1308945.
+\newblock \textit{Published. Key finding: the average publicly traded firm's 10-K is requested only 28.4 times by investors immediately after filing, suggesting surprisingly low human readership of mandatory filings.}
+
+\bibitem[Li(2008)]{Li2008}
+Li, F. (2008).
+\newblock Annual Report Readability, Current Earnings, and Earnings Persistence.
+\newblock \emph{Journal of Accounting and Economics}, 45(2--3), 221--247.
+\newblock \textit{Published. Note: This paper is sometimes incorrectly cited as appearing in The Accounting Review. The correct journal is the Journal of Accounting and Economics, based on the original publication record.}
+
+\bibitem[Merton(1987)]{Merton1987}
+Merton, R.C. (1987).
+\newblock A Simple Model of Capital Market Equilibrium with Incomplete Information.
+\newblock \emph{Journal of Finance}, 42(3), 483--510.
+\newblock \textit{Published.}
+
+\bibitem[Parise and Rubin(2025)]{PariseRubin2025}
+Parise, G. and Rubin, M. (2025).
+\newblock Green Window Dressing.
+\newblock \emph{Journal of Finance}, 80(6).
+\newblock \textit{Published. Cited for the parallel between green window dressing and AI hypocrisy.}
+
+\bibitem[Reitinger(2025)]{Reitinger2025}
+Reitinger, N. (2025).
+\newblock Measured Failures of robots.txt: Legal and Empirical Insights for Regulating Robots.
+\newblock \emph{SSRN Working Paper}, Abstract ID: 5555040.
+\newblock Available at: \url{https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5555040}.
+\newblock \textit{Status: Working paper as of March 2026. Key finding cited: unless a site is in the top 1\% globally, robots.txt is rarely used to control AI crawlers.}
+
+\end{thebibliography}
+
+\end{document}

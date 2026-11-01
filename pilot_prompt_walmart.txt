@@ -1,0 +1,72 @@
+I need you to search the web and answer 5 questions about Walmart. This is for academic research on AI information retrieval. As-of date: March 20, 2026.
+
+CRITICAL INSTRUCTIONS -- follow exactly:
+
+1. Use web search for EVERY question. Do not rely on pre-trained knowledge. Search even if you think you know the answer.
+2. For every factual claim, cite the source URL in parentheses right after the claim.
+3. Prioritize high-quality sources: corporate websites, SEC filings, and major news outlets (Reuters, Bloomberg, CNBC, WSJ, FT). Use lower-quality SEO sites only as supplements, never as sole evidence.
+4. After EACH question, list the sources used for that specific question in a mini-table.
+5. After ALL questions, provide a combined source summary.
+6. If you attempted to access any URL but could not retrieve content, explicitly say so -- this is critically important for my research.
+7. For Q2 through Q5: if NONE of your sources come from Walmart's corporate website, you MUST explicitly explain WHY (e.g., "no relevant corporate page found," "attempted but could not access," "third-party sources were sufficient," etc.).
+
+For reference, Walmart's corporate website domains are: corporate.walmart.com, stock.walmart.com, tech.walmart.com
+
+---
+
+Q1 [Financial -- EDGAR-sufficient]:
+What was Walmart's total revenue, net income, and diluted EPS for its most recently reported fiscal quarter as of March 20, 2026? Provide exact numbers, the quarter/year, and the filing date.
+
+Sources used for Q1:
+| URL | Domain | Type (Corporate / SEC / Third-party) |
+
+---
+
+Q2 [AI Strategy -- Website-incremental]:
+What is Walmart's current AI strategy as of March 2026? List specific AI products, investments, partnerships, or initiatives announced in the past 12 months. Include announcement dates, dollar amounts, and named projects where available.
+NOTE: If no source from corporate.walmart.com is used, explain why.
+
+Sources used for Q2:
+| URL | Domain | Type (Corporate / SEC / Third-party) |
+
+---
+
+Q3 [ESG/Sustainability -- Website-incremental]:
+What are Walmart's most recent sustainability or ESG metrics as of March 2026? Provide specific numbers: Scope 1 and 2 greenhouse gas emissions (metric tons CO2e), percentage of energy from renewable sources, waste reduction metrics, water usage, and climate targets with deadlines.
+NOTE: If no source from corporate.walmart.com is used, explain why.
+
+Sources used for Q3:
+| URL | Domain | Type (Corporate / SEC / Third-party) |
+
+---
+
+Q4 [Recent News -- Website-exclusive]:
+What are the 3 most significant announcements, product launches, or corporate news items from Walmart in the last 30 days (February 18 to March 20, 2026)? Provide the exact date for each item.
+NOTE: If no source from corporate.walmart.com is used, explain why.
+
+Sources used for Q4:
+| URL | Domain | Type (Corporate / SEC / Third-party) |
+
+---
+
+Q5 [Product Detail -- Website-exclusive]:
+Describe Walmart's most recently launched product or service as of March 20, 2026. When exactly was it announced? What are its key features, target market, and pricing?
+NOTE: If no source from corporate.walmart.com is used, explain why.
+
+Sources used for Q5:
+| URL | Domain | Type (Corporate / SEC / Third-party) |
+
+---
+
+COMBINED SOURCE SUMMARY
+
+| # | Source URL | Domain | Type (Corporate / SEC / Third-party) | Used in Q# |
+|---|-----------|--------|--------------------------------------|------------|
+
+Summary statistics:
+- Total unique sources: ___
+- Corporate website sources (from corporate.walmart.com and subdomains): ___
+- SEC/EDGAR sources: ___
+- Third-party sources: ___
+- FAILED URLS: ___ (list every URL you attempted but could not retrieve. If none, write FAILED URLS: NONE)
+- Access denied messages: ___ (list any explicit "could not access" messages. If none, write: NONE)

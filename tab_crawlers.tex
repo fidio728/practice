@@ -1,0 +1,48 @@
+\begin{table}[p]
+\centering
+\begin{threeparttable}
+\caption{The 31 search and discovery crawlers in the treatment universe, with documented \texttt{robots.txt} compliance}
+\label{tab:crawlers}
+\footnotesize
+\begin{tabular}{lllc}
+\toprule
+Crawler & Operator & Respects? & Source \\
+\midrule
+360Spider        & Qihoo 360         & Yes      & O \\
+Amzn-SearchBot   & Amazon            & Yes      & O \\
+Andibot          & Andi              & Unknown  & --- \\
+Applebot         & Apple             & Yes      & L \\
+Baiduspider      & Baidu             & Yes      & C, O \\
+bingbot          & Microsoft Bing    & Yes      & C, O \\
+Claude-SearchBot & Anthropic         & Yes      & O \\
+coccocbot        & Coc Coc           & Yes      & O \\
+Daumoa           & Kakao (Daum)      & Unknown  & --- \\
+DuckAssistBot    & DuckDuckGo        & Yes      & O \\
+DuckDuckBot      & DuckDuckGo        & Yes      & C \\
+Gigabot          & Gigablast         & Unknown  & --- \\
+Googlebot        & Google            & Yes      & O \\
+Linespider       & LINE              & Yes      & O \\
+LinerBot         & Liner             & Unknown  & --- \\
+meta-webindexer  & Meta              & Yes      & O \\
+MojeekBot        & Mojeek            & Yes      & O \\
+Neevabot         & Neeva             & Unknown  & --- \\
+OAI-SearchBot    & OpenAI            & Yes      & O \\
+PerplexityBot    & Perplexity        & Disputed & C, T \\
+PetalBot         & Huawei (Petal)    & Yes      & O \\
+SeekportBot      & Seekport          & Yes      & O \\
+SeznamBot        & Seznam            & Yes      & O \\
+Sogou            & Sogou             & Yes      & O \\
+yacybot          & YaCy              & Yes      & O \\
+YandexBot        & Yandex            & Yes      & C, O \\
+Yeti             & Naver             & Yes      & C \\
+YisouSpider      & Shenma (Alibaba)  & No       & T \\
+YJ-Yahoo-Japan   & Yahoo!\ Japan     & Unknown  & --- \\
+YouBot           & You.com           & Yes      & C \\
+ZumBot           & Zum               & Unknown  & --- \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}\footnotesize
+\item \textit{Notes.} The treatment universe is these 31 user agents whose stated purpose is to crawl the open web for search, indexing, or answer/retrieval. A firm is coded as restricting a crawler in a month if its \texttt{robots.txt} disallows it at the site root or a sub-path, via a rule naming the crawler or an applicable \texttt{User-agent: *} wildcard. The list is presented without an AI-versus-traditional split; that distinction is examined only in Appendix~\ref{app:aiplacebo}. The \textit{Respects} column records whether the operator's crawler is documented to honor RFC~9309: ``Yes'' is a documented commitment; ``Disputed'' (PerplexityBot) is a commitment alongside third-party reports of non-compliance; ``No'' is a crawler reported not to honor the protocol; ``Unknown'' marks crawlers, several defunct or operated outside an English-language disclosure regime, for which we could not retrieve an operator statement. \textit{Source}: C $=$ Cui et al.\ (2025); L $=$ Liu et al.\ (2025); O $=$ operator documentation (retrieved 2026); T $=$ third-party measurement or directory reports. Twenty-two of the 31 crawlers are documented compliant; the robustness check of Appendix~\ref{app:compliant} restricts the treated group to firms whose restriction binds on at least one of them.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

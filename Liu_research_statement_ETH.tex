@@ -1,0 +1,80 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{parskip}
+
+\setstretch{1.10}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 1pt}
+
+\pagenumbering{gobble}
+
+\begin{document}
+
+\begin{center}
+  {\Large \textbf{Research Statement}} \\[3pt]
+  \textit{Xueyang Liu \,---\, ESADE Business School (Universitat Ramon Llull)} \\
+  \textit{Application: 1st Zurich Summer School in AI \& Applied Economics}
+\end{center}
+
+\vspace{4pt}
+
+I am a first-year PhD student in Management Sciences at ESADE Business School
+(Universitat Ramon Llull, Barcelona), supervised by Dr.\ Emanuele Rizzo. My
+research uses novel, AI-era sources of firm-level data to study how firms'
+web-level configurations shape investor information acquisition and capital
+market outcomes. The project I would bring to the summer school examines
+whether firms whose public websites restrict AI search crawlers become
+systematically less visible in AI-generated answers, and whether this reduced
+visibility translates into measurable changes in the firm's information
+environment.
+
+The project rests on an original dataset I have constructed from the technical
+configuration of corporate websites. For each of approximately 9{,}500 US
+public firms, I parse the website's \texttt{robots.txt} file according to
+RFC~9309 and match each declared sitemap URL against the firm's permissions
+for sixteen AI search crawlers, including OpenAI's OAI-SearchBot, Anthropic's
+Claude-SearchBot, and PerplexityBot. The resulting measure, sitemap--robots
+overlap, identifies firms whose own declarations of crawl-discoverable content
+conflict with their own access rules. This is a form of information friction
+that does not appear in standard disclosure data and that firms may inherit
+unintentionally from default website templates. I am now extending this
+cross-section into a monthly panel for 2021--2025 using the Wayback Machine,
+which will allow for a staggered difference-in-differences design around
+firm-level policy changes.
+
+To validate the mechanism, I am running a controlled experimental audit using
+the OpenAI, Perplexity, and Anthropic APIs. For a matched-pair sample of
+treated and control firms, I programmatically issue identical natural-language
+queries and record whether each firm's official website appears among the
+inline citations. Preliminary results from the ChatGPT and Claude pilots show
+a consistent reduction of eight to eleven percentage points in the probability
+of official-site citation for treated firms. I implemented the full pipeline
+in Python, including the RFC~9309-compliant \texttt{robots.txt} parser, a
+sitemap crawler with gzip and XML-index support, a Wayback Machine CDX
+client, and the automated LLM-API harness that runs the citation audit.
+
+The project fits the summer school's two core domains closely. On Topic~1
+(empirical research with AI tools), the sitemap--robots overlap is a
+measurement and dataset-construction exercise that applies an AI-era
+concept---crawler-level access rules---to the classic corporate-finance
+question of how information reaches investors. On Topic~2 (experiments and
+AI), the API-based citation audit is a behavioral experiment on LLM agents,
+in which the treatment varies whether the firm's content is accessible to the
+agent, and the outcome measures what the agent produces in response to user
+queries. The school's emphasis on identification, measurement, and inference
+is directly useful to both components of the project.
+
+I hope to use the week to sharpen the identification strategy for the panel
+analysis, learn how other applied economists are handling LLM-agent
+experiments, and receive feedback on the mapping from AI search visibility to
+downstream capital-market outcomes. I am also eager to discuss with other
+participants how AI-era measurement can be extended to other settings in
+which firms' digital footprints shape market outcomes.
+
+\end{document}

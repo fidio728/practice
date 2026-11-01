@@ -1,0 +1,218 @@
+%==============================================================================
+%  Robots.txt crawler-access restrictions and filing-window liquidity
+%  Built 2026-06-15 from the current rerun (v2_all_search; abnormal Amihud
+%  [-1,+1] vs [-60,-10]; TWFE + BJS). NUMBERS: paper_table_stats.csv,
+%  paper_summary_stats.csv, paper_hr_stats.csv, and the verified rev4 mechanism
+%  draft. Do NOT reuse the superseded search16/[0,+5]/+13.2 numbers.
+%
+%  COMPILE: pdflatex -> bibtex -> pdflatex x2  (uses newtxtext = Times).
+%  For LITERAL Times New Roman / Arial system fonts, compile with XeLaTeX and
+%  replace the font block with:
+%     \usepackage{fontspec}\setmainfont{Times New Roman}   % (Arial: \setmainfont{Arial})
+%==============================================================================
+\documentclass[12pt]{article}
+
+\usepackage[a4paper,top=1in,bottom=1in,left=1.25in,right=1.25in]{geometry}
+\usepackage{amsmath,amssymb}       % load BEFORE newtxmath
+\usepackage{newtxtext,newtxmath}   % Times-equivalent body + math, 12pt
+\usepackage{setspace}
+\usepackage{booktabs,threeparttable,tabularx,multirow,array}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{natbib}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{figs/}}
+\onehalfspacing                    % switch to \doublespacing for review copies
+\pagenumbering{arabic}
+
+\title{Robots.txt Crawler-Access Restrictions and the Liquidity of Disclosure Windows}
+\author{Xueyang Liu\thanks{Universitat Ram\'on Llull. Preliminary draft; please do not circulate.}}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent We study what happens to stock liquidity around mandatory disclosures when a firm restricts automated access to its website through its \texttt{robots.txt} file. Using a staggered difference-in-differences design over 2021--2025, we find that firms that block search and discovery crawlers experience a rise in \emph{abnormal} filing-window Amihud illiquidity---illiquidity in the $[-1,+1]$ trading-day window around 10-K and 10-Q filings, measured relative to a local non-event benchmark. The increase does not reflect lower trading participation or wider posted spreads; instead, filing windows exhibit a stronger return and volume response, and the Amihud increase loads on a thin-day price-impact ``wedge.'' The effect concentrates among younger firms and is accompanied, among firms with pre-existing analyst coverage, by suggestive evidence of greater analyst engagement. We find no evidence that the effect operates through delayed price incorporation, posted-spread widening, EDGAR substitution, or that it is specific to AI/LLM crawlers. The evidence is consistent with a depth / price-impact (Kyle, 1985) interpretation rather than a single identified channel.
+\end{abstract}
+
+%==============================================================================
+\section{Introduction}\label{sec:intro}
+%==============================================================================
+\textit{[TODO --- introduction to be written. Motivate the question (firms increasingly restrict automated access to their websites; mandatory disclosures are filed with the SEC but their dissemination and discovery increasingly run through machine intermediaries), state the research design (staggered DiD on crawler-blocking onset; abnormal filing-window Amihud illiquidity), preview the findings (positive abnormal-illiquidity effect; market signature; young-firm locus; chain of exclusions; depth/price-impact interpretation), and list contributions.]}
+
+%==============================================================================
+\section{Related Literature}\label{sec:lit}
+%==============================================================================
+\textit{[TODO --- literature review to be written. Connect to: market microstructure and illiquidity \citep{Amihud2002,Kyle1985}; the information content of disclosures \citep{Beaver1968,KimVerrecchia1994,LandsmanMaydew2002,LandsmanMaydewThornock2012}; the cost of accessing mandatory disclosures and the information environment \citep{ChangLjungqvistTseng2023}; and modern staggered difference-in-differences estimation \citep{BorusyakJaravelSpiess2024,deChaisemartinDHaultfoeuille2020}.]}
+
+%==============================================================================
+\section{Institutional Background: Robots.txt and Machine-Mediated Discovery}\label{sec:bg}
+%==============================================================================
+
+\subsection{The Robots Exclusion Protocol}\label{sec:bg_rfc}
+The Robots Exclusion Protocol, standardized as RFC~9309 \citep{RFC9309}, lets a website operator publish a \texttt{robots.txt} file specifying which automated clients (``crawlers,'' identified by a \emph{User-agent} token) may fetch which URL paths. A rule group beginning \texttt{User-agent: *} applies to all crawlers; a group naming a specific crawler applies only to it; and a \texttt{Disallow:} directive removes the listed path (\texttt{Disallow: /} removes the entire site). Compliance is voluntary but near-universal among the major search and discovery operators, so a \texttt{robots.txt} restriction is a meaningful constraint on how a firm's public web content---including the investor-relations pages that host and link disclosure materials---can be crawled, indexed, and surfaced by machine intermediaries.
+
+We track a fixed population of \textbf{31 search and discovery crawlers}, listed in Table~\ref{tab:crawlers}. These are the user agents whose stated purpose is to crawl the open web for search, indexing, or answer/retrieval surfaces. A firm is coded as restricting a crawler in a given month if its \texttt{robots.txt} disallows that crawler at the site root or on a sub-path, either through a rule group naming the crawler or through an applicable site-wide wildcard group (RFC~9309 longest-match, allow-on-tie). We treat all 31 crawlers symmetrically here; whether the effect differs across crawler types is examined in Section~\ref{sec:mech_notai}. For the research design, what matters is the restriction of automated, search-capable access.
+
+\input{tab_crawlers}
+
+\subsection{Why Do Firms Restrict Crawlers?}\label{sec:bg_why}
+Whether crawler restrictions can be treated as plausibly exogenous to a firm's liquidity depends on \emph{why} firms adopt them. Three descriptive facts, shown in Figures~\ref{fig:adoption}--\ref{fig:pathanatomy}, indicate that the typical restriction reflects content-agnostic site administration rather than a deliberate attempt to suppress investor information.
+
+First, adoption is \emph{blanket and gradual} rather than event-driven. Figure~\ref{fig:adoption} plots cumulative adoption among 14{,}615 trackable firms: the median first-restriction month is February~2021, and the ``blocks any crawler'' curve sits far above the ``specifically names a crawler'' curve throughout, so most adoption is site-wide rather than crawler-targeted.
+
+Second, restrictions are overwhelmingly implemented as site-wide wildcards. Figure~\ref{fig:wildcard} shows that of the 9{,}528 firms that restrict at least one crawler, \textbf{82.9\%} (7{,}902 firms) do so through a \texttt{User-agent: *} wildcard that applies to every crawler at once; explicit per-crawler naming is a small and uneven minority.
+
+Third, the path-specific restrictions that do exist land on \emph{site hygiene}, not investor content. Following the website path-category dictionaries of \citet{BoullandLee2023}, Figure~\ref{fig:pathanatomy} classifies the path-level restrictions of 2{,}171 treated firms: \textbf{2{,}396} target hygiene/operations paths (CMS admin, query-string parameters, file extensions, media assets, carts, careers), versus only \textbf{96} on investor-relevant content (investor relations, news/press, ESG, legal). The treatment therefore reflects broad machine-access restriction, not targeted removal of investor-relations content.
+
+Together these patterns motivate the identifying assumption: conditional on firm and time fixed effects, the timing of a crawler restriction is plausibly unrelated to contemporaneous shocks to the firm's disclosure-window liquidity. The residual threat is \emph{selection}---firms that restrict may differ from those that do not---which we address through the staggered design, pre-trend tests, and the robustness checks of Section~\ref{sec:results}.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.92\textwidth]{fig_s2_adoption.png}
+\caption{\textbf{Adoption of search/discovery crawler blocking, 2021--2025.} Cumulative share of 14{,}615 trackable firms that (i) restrict any of the 31 crawlers (including via a site-wide wildcard) and (ii) name at least one crawler specifically. Adoption is blanket and gradual; the median first-restriction month is February~2021.}
+\label{fig:adoption}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.92\textwidth]{fig_s2_wildcard_dominance.png}
+\caption{\textbf{Crawler blocking is blanket, not crawler-targeted.} Among the 9{,}528 firms restricting at least one crawler, 82.9\% (7{,}902) do so through a site-wide \texttt{User-agent: *} wildcard; specific per-crawler naming (dark bars) is a small minority and uneven across crawlers.}
+\label{fig:wildcard}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.92\textwidth]{fig_s2_path_anatomy.png}
+\caption{\textbf{Where path-specific restrictions land: site hygiene, not investor content.} Among 2{,}171 treated firms, path-level restrictions overwhelmingly target hygiene/operations paths (2{,}396) rather than investor-relevant content (96). Path categories follow \citet{BoullandLee2023}.}
+\label{fig:pathanatomy}
+\end{figure}
+
+%==============================================================================
+\section{Data and Sample}\label{sec:data}
+%==============================================================================
+
+\subsection{Sample and Sources}\label{sec:data_sample}
+The unit of observation is a firm filing event---a 10-K or 10-Q filed with the SEC over 2021--2025. We obtain filing dates from EDGAR, daily returns and dollar volume from CRSP, accounting fundamentals from Compustat, and analyst coverage from I/B/E/S. \texttt{robots.txt} histories are reconstructed monthly for each firm's web host. The estimation sample comprises \textbf{27{,}327} filing events from \textbf{1{,}908} firms---\textbf{722} crawler-restricting (treated) firms and \textbf{1{,}186} never-restricting (control) firms with a valid filing-window observation.
+
+\subsection{Independent Variable: Crawler-Access Restriction}\label{sec:data_iv}
+Let $\mathit{Block}_i$ equal one if firm $i$ ever restricts any of the 31 crawlers of Table~\ref{tab:crawlers} during the sample, and let $m^{\ast}_i$ denote firm $i$'s first-restriction month. The staggered treatment indicator for filing event $f$ of firm $i$ is
+\begin{equation}
+\bigl(\mathit{Block}\times\mathit{Post}\bigr)_{i,f}
+= \mathbf{1}\!\left[\,\mathit{Block}_i=1 \;\text{and}\; m(f) > m^{\ast}_i\,\right],
+\end{equation}
+where $m(f)$ is the filing's calendar month. We exclude the firm's filing in its first-restriction month itself (to avoid contaminating the onset), and we restrict the treated group to firms with a clean pre-restriction history (first restriction on or before 2025-06, the sample end). Control firms (``never-restricting'') never restrict any of the 31 crawlers.
+
+\subsection{Dependent Variable: Abnormal Filing-Window Illiquidity}\label{sec:data_dv}
+Our liquidity measure is the daily Amihud \citeyearpar{Amihud2002} illiquidity ratio. For firm $i$ on trading day $d$,
+\begin{equation}
+\mathit{AIM}_{i,d} \;=\; \frac{\lvert r_{i,d}\rvert}{\mathit{DolVol}_{i,d}}\times 10^{6},
+\end{equation}
+where $r_{i,d}$ is the daily return and $\mathit{DolVol}_{i,d}$ is daily dollar volume (price $\times$ share volume); days with non-positive dollar volume are set to missing. Higher $\mathit{AIM}$ means a given dollar of trading moves the price more, i.e.\ lower liquidity.
+
+We measure liquidity in the disclosure window \emph{relative to a local non-event benchmark}, following the abnormal-announcement-window methodology of \citet{Beaver1968}, \citet{LandsmanMaydew2002}, and \citet{LandsmanMaydewThornock2012}. With day $0$ defined as the first trading day on or after the filing date, the event window is $[-1,+1]$ trading days---the announcement-window convention of \citet{LandsmanMaydewThornock2012}---and the benchmark is the local non-event window $[-60,-10]$ trading days. Our primary outcome is the within-event abnormal log Amihud,
+\begin{equation}
+\mathit{AbnAIM}_{i,f}
+= \ln\!\Bigl(1+\overline{\mathit{AIM}}^{\,[-1,+1]}_{i,f}\Bigr)
+- \ln\!\Bigl(1+\overline{\mathit{AIM}}^{\,[-60,-10]}_{i,f}\Bigr),
+\end{equation}
+with a level variant $\mathit{AbnAIM}^{\mathrm{lev}}_{i,f}=\overline{\mathit{AIM}}^{\,[-1,+1]}_{i,f}-\overline{\mathit{AIM}}^{\,[-60,-10]}_{i,f}$. Differencing against the firm's own local window removes the firm's contemporaneous liquidity level, so the outcome isolates the \emph{abnormal} disclosure-window component. The $[-1,+1]$ event window follows \citet{LandsmanMaydewThornock2012}; the specific 50-day benchmark $[-60,-10]$ is chosen to sit close to the event yet avoid overlap with the disclosure window (and with the adjacent-quarter filing), and is not attributed to a particular study. We require at least 2 valid days in the event window and 30 in the benchmark, and winsorize the outcome at the 1st/99th percentiles within the estimation sample.
+
+\subsection{Controls}\label{sec:data_ctrl}
+Firm-level controls are log total assets, leverage, return on assets, market-to-book, asset tangibility, and analyst coverage ($\ln(1+\text{number of estimates})$), each winsorized at 1/99 and mean-centered within the estimation sample.
+
+\subsection{Descriptive Statistics}\label{sec:data_desc}
+Table~\ref{tab:summ} reports means and standard deviations by treatment group. Treated and control firms are broadly comparable; treated firms are slightly smaller (log assets 7.07 vs.\ 7.32) and carry marginally more analyst coverage. Both groups have a slightly negative average abnormal log Amihud, reflecting a generally improving liquidity trend over the sample; the treatment effect is identified from the treated-post differential, not the unconditional mean.
+
+\input{tab_summary}
+
+%==============================================================================
+\section{Empirical Strategy}\label{sec:strategy}
+%==============================================================================
+Our baseline is a staggered two-way fixed-effects (TWFE) difference-in-differences specification:
+\begin{equation}
+\mathit{AbnAIM}_{i,f}
+= \beta\,\bigl(\mathit{Block}\times\mathit{Post}\bigr)_{i,f}
++ \gamma'\mathbf{X}_{i,f}
++ \alpha_i + \delta_{m(f)} + \varepsilon_{i,f},
+\label{eq:twfe}
+\end{equation}
+where $\alpha_i$ are firm fixed effects, $\delta_{m(f)}$ are filing-month fixed effects, $\mathbf{X}$ collects the controls, and standard errors are clustered by firm. Because treatment onset is staggered, the TWFE estimator can be contaminated by heterogeneous-timing weights \citep{GoodmanBacon2021,deChaisemartinDHaultfoeuille2020}. We therefore report alongside it the imputation estimator of \citet{BorusyakJaravelSpiess2024} (``BJS''), which estimates fixed effects on untreated observations only and is robust to treatment-effect heterogeneity; the BJS specification also delivers a 12-period pre-trend test, which we report for every outcome. The de~Chaisemartin--D'Haultf\oe uille \citeyearpar{deChaisemartinDHaultfoeuille2024} estimator is used as a further robustness check. Because the outcome is already an abnormal (within-event difference) measure, it is pre-trend-clean even where the underlying levels are not (Section~\ref{sec:results}).
+
+%==============================================================================
+\section{Results}\label{sec:results}
+%==============================================================================
+Table~\ref{tab:main} reports the main effect. Restricting search and discovery crawlers raises abnormal filing-window illiquidity. In logs, the TWFE estimate is $+0.0109$ ($p=0.033$) without controls and $+0.0111$ ($p=0.029$) with controls; the BJS estimate is $+0.0134$ ($p=0.010$) with a clean pre-trend ($p=0.48$). In levels, the effect is $+0.033$ to $+0.035$ (TWFE, $p<0.05$) and $+0.039$ under BJS ($p=0.007$, pre-trend $p=0.38$). The two estimators agree closely, and the BJS pre-trends do not reject parallel trends, supporting a causal reading of the abnormal-window effect.
+
+We emphasize that this is an \emph{abnormal}, relative effect. As we show in the identification appendix, the filing-window illiquidity \emph{level} does not rise; rather, the firm's local benchmark Amihud declines after restriction while the disclosure window does not improve commensurately, so disclosure windows become relatively more liquidity-constrained than the local benchmark. We therefore describe the effect throughout as an increase in abnormal, benchmark-relative illiquidity, not as filing windows becoming illiquid in absolute terms.
+
+\input{tab_main}
+
+%==============================================================================
+\section{Why Does Abnormal Filing-Window Illiquidity Increase?}\label{sec:mech}
+%==============================================================================
+This section asks what the deterioration is and what it is not. We do not claim to identify a single mediating channel; rather, we document a market signature, locate where the effect is strongest, and rule out the leading alternatives.
+
+\subsection{Market Signature: A Stronger Information Response, Not Less Trading}\label{sec:mech_sig}
+Table~\ref{tab:decomp} decomposes the abnormal Amihud into its moving parts. Restriction is followed by higher abnormal return variance (AVAR $+0.121$, $p=0.015$) and higher absolute abnormal returns ($+0.054$, $p=0.025$), and by higher---not lower---dollar volume ($+0.061$, $p=0.020$), so the deterioration is not a collapse in trading participation. In the tradition of \citet{Beaver1968}, \citet{KimVerrecchia1994}, and \citet{LandsmanMaydewThornock2012}, rising return variance and volume around a disclosure indicate a stronger, more heterogeneously-interpreted information response.
+
+The key cell is the ratio-of-means Amihud, which captures a \emph{uniform} proportional shift in price impact per dollar: it is economically near zero and statistically insignificant ($-0.003$, $p=0.90$), providing no support for a uniform price-impact shift. The abnormal Amihud increase is instead carried by the dispersion ``wedge'' between the mean of daily ratios and the ratio of means ($+0.038$, $p=0.048$)---price discovery becomes \emph{lumpier}, with sharper price impact on thin-volume days. We treat the wedge as a corroborating but fragile cell (it only just clears the 5\% threshold), and anchor the signature on AVAR and the ratio-of-means null; we report dollar volume as decomposition accounting (it is the Amihud denominator and works against, not toward, the illiquidity rise).
+
+\input{tab_decomp}
+
+\subsection{Where the Effect Is Strongest: Younger Firms}\label{sec:mech_locus}
+Table~\ref{tab:locus} interacts the treatment with predetermined firm characteristics. The effect concentrates among \emph{younger} firms: the interaction of treatment with log firm age is negative and significant (log outcome $-0.019$, $p=0.031$; level $-0.056$, $p=0.025$) and survives joint controls for analyst coverage, EDGAR attention, and size, as well as separate horse races against institutional ownership, retail float, and filing-package size. We read age as a condition---an immature information environment---rather than as a separate causal channel: it is a cross-sectional moderator estimated by TWFE, with no parallel-trends test on the interaction, and the young-treated cell is thin.
+
+\input{tab_locus}
+
+\subsection{A Human-Intermediary Response Among Covered Firms}\label{sec:mech_analyst}
+Among firms with pre-existing analyst coverage we find suggestive---not conclusive---evidence of broader analyst engagement, and no evidence of analyst delay. The number of distinct analysts updating around filings rises ($+0.090$, $p=0.015$), with a pre-trend that only just clears our bar ($p=0.10$); the related analyst update-days measure is positive but its pre-trend falls just short ($p=0.099$), so we do not count it as a clean channel. Response speed, if anything, increases rather than slows ($-1.45$ days, $p=0.021$). This pattern is the opposite sign to \citet{ChangLjungqvistTseng2023}, who find that \emph{raising} the cost of accessing mandatory disclosures leads analysts to retreat; here, among already-covered firms, the more information-intensive filing window appears to draw somewhat \emph{more} human-intermediary engagement. Because this is estimated only on the analyst-covered subsample---which does not coincide with the young-firm locus---it cannot account for the headline effect, and we present it as a complementary observation, not a validated channel.
+
+\subsection{What the Effect Is \emph{Not}}\label{sec:mech_notai}
+Table~\ref{tab:excl} collects the excluded channels.
+
+\emph{Not delayed price incorporation.} A post-filing drift test over $[+2,+10]$ shows no delayed incorporation: the delayed-response share is a precise null (BJS $-0.002$, $p=0.73$, pre-trend $p=0.51$), and signed drift is null. We claim only this specific exclusion---the test bounds the $[+2,+10]$ drift, not slowing within $[-1,+1]$ or beyond $+10$.
+
+\emph{Not posted-spread widening or lower participation.} Posted quoted spreads and two low-frequency spread proxies \citep{CorwinSchultz2012,AbdiRanaldo2017} are null, and trading activity rises rather than falls (Section~\ref{sec:mech_sig}). The illiquidity is Amihud / price-impact, not a posted-spread channel.
+
+\emph{Not disclosure substitution.} Abnormal EDGAR access to the treated firms' filings, measured in the same abnormal form, is null across periodic, 10-K, and 8-K access (BJS $p>0.45$). Investors do not compensate by reading the filings directly; there is no substitution channel.
+
+\emph{Not AI/LLM-specific.} This is the only place we separate AI from traditional crawlers. The AI-search crawlers in our universe---OAI-SearchBot (OpenAI), Claude-SearchBot (Anthropic), PerplexityBot (Perplexity), and DuckAssistBot (DuckDuckGo), with an expanded set adding YouBot, Andibot, and Amzn-SearchBot---form a small subset of the 31. Restricting attention to firms that name these AI crawlers yields underpowered, insignificant estimates (e.g.\ AI-strict level $-0.06$, $p=0.30$), while a non-AI placebo arm of low-reliance traditional crawlers is itself significant ($+0.049$, $p=0.05$). Because most firms restrict every crawler at once through a wildcard (Figure~\ref{fig:wildcard}), the data cannot attribute the effect to AI crawlers specifically. We therefore describe the treatment as a restriction on \emph{machine-mediated discovery in general}, following restrictions on search-capable crawler access---not as an AI-driven effect.
+
+\emph{Not template churn or IR-page targeting.} The effect survives controls for the type of path restricted; firms whose restriction is a query-string/CMS-template pattern show, if anything, a weaker effect, and the result is broad across path types rather than concentrated in investor-content paths (consistent with Figure~\ref{fig:pathanatomy}).
+
+\input{tab_excl}
+
+\subsection{Interpretation}\label{sec:mech_interp}
+Assembling the pieces, the deterioration is best read as a depth / price-impact phenomenon in the spirit of \citet{Kyle1985}: a stronger, lumpier information response with sharper price impact on thin-volume days, concentrated where information environments are immature, with every adjacent alternative (delayed diffusion, analyst delay, spreads, volume, substitution, AI-specificity) excluded. Because no positive first-stage measure of discoverability validates (see Appendix), we state this as \emph{consistent with} a price-impact interpretation, not as a single identified mediator.
+
+%==============================================================================
+\section{Conclusion}\label{sec:concl}
+%==============================================================================
+\textit{[TODO --- conclusion to be written.]}
+
+%==============================================================================
+\appendix
+\section{Robustness and Identification}\label{app:rob}
+%==============================================================================
+\subsection{The headline is a benchmark-relative, pre-trend-clean effect}\label{app:eventspec}
+Because the outcome is a within-event difference between the filing window and a local benchmark, it is worth asking which leg moves. Table~\ref{tab:eventspec} regresses the two levels separately on the treatment. The filing-window absolute level does \emph{not} rise---it is slightly negative and fails its own parallel-trends test ($p\approx0.004$)---while the local benchmark level declines with a clean pre-trend. The positive headline is therefore the benchmark level falling faster than the filing window: disclosure windows do not share in the firm's broadly improving local liquidity. Only the abnormal difference (the headline) is pre-trend-clean (log $p=0.48$, level $p=0.38$), which is why we build inference on it and describe the effect throughout as benchmark-relative rather than as an absolute rise in filing-window illiquidity.
+
+\input{tab_eventspec}
+
+\subsection{The effect is not an earnings-announcement artifact}\label{app:earnings}
+Because periodic filings often accompany earnings announcements, a natural concern is that the filing-window effect is really an earnings-announcement effect. Table~\ref{tab:earnings} addresses this directly. The effect is not concentrated in filings that coincide with the earnings announcement (Panel~A): the concurrent cell, despite being the best-powered, is the weakest. When we drop all earnings-concurrent filings and re-estimate the headline on the non-concurrent subsample (Panel~B), the effect survives---TWFE $+0.0102$ ($p=0.029$), BJS $+0.0072$ ($p=0.043$) with a clean pre-trend---and adding an earnings-window indicator to the matched-sample headline does not absorb it (Panel~C). The effect is individually significant among the more frequent quarterly (10-Q) disclosures and not among annual (10-K) filings, but the two are not statistically distinguishable, so we read this as a frequency pattern, not a form-specific mechanism.
+
+\input{tab_earnings}
+
+\subsection{Heterogeneity-robust estimation}\label{app:did}
+Our primary defense against the staggered-timing biases of two-way fixed effects \citep{GoodmanBacon2021,deChaisemartinDHaultfoeuille2020} is the \citet{BorusyakJaravelSpiess2024} imputation estimator, reported alongside TWFE in every results table; its estimates track TWFE closely and its pre-trend tests do not reject parallel trends for the headline or the market-signature components. For the few-treated-cluster crawler-type arms of Section~\ref{sec:mech_notai}, we confirm inference with a wild-cluster bootstrap (Webb weights), under which the significant non-AI placebo arm survives. The \citet{deChaisemartinDHaultfoeuille2024} estimator is reported as a further check. \textit{[dCDH point estimates to be inserted from the rerun.]}
+
+\subsection{The Common-Crawl discoverability first stage does not validate}\label{app:cc}
+We attempted a direct first-stage test of whether restriction reduces a firm's machine-crawlable footprint, using monthly Common Crawl URL coverage. It does not validate, for two independent reasons. The static post-restriction coefficient has the \emph{wrong sign} (coverage rises: $+0.41$, $p=0.002$ in the cleanest stratum), and the event study shows a significant \emph{negative} pre-trend ($-0.25$, $p=0.008$), rejecting parallel trends. The diagnosis is a construct mismatch: Common Crawl's own crawler (CCBot) is not among the 31 treated crawlers, and only 184 of 7{,}258 firms (2.5\%) ever restrict CCBot, so restricting the treated crawlers does not mechanically reduce Common Crawl coverage. We report this for transparency and do not rely on it; the paper makes no claim to a validated positive first stage.
+
+\bibliographystyle{apalike}
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,1578 @@
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210101.zip
+ out=log20210101.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210102.zip
+ out=log20210102.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210103.zip
+ out=log20210103.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210104.zip
+ out=log20210104.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210105.zip
+ out=log20210105.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210106.zip
+ out=log20210106.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210107.zip
+ out=log20210107.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210108.zip
+ out=log20210108.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210109.zip
+ out=log20210109.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210110.zip
+ out=log20210110.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210111.zip
+ out=log20210111.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210112.zip
+ out=log20210112.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210113.zip
+ out=log20210113.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210114.zip
+ out=log20210114.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210115.zip
+ out=log20210115.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210116.zip
+ out=log20210116.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210117.zip
+ out=log20210117.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210118.zip
+ out=log20210118.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210119.zip
+ out=log20210119.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210120.zip
+ out=log20210120.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210121.zip
+ out=log20210121.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210122.zip
+ out=log20210122.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210123.zip
+ out=log20210123.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210124.zip
+ out=log20210124.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210125.zip
+ out=log20210125.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210126.zip
+ out=log20210126.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210127.zip
+ out=log20210127.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210128.zip
+ out=log20210128.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210129.zip
+ out=log20210129.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210130.zip
+ out=log20210130.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210131.zip
+ out=log20210131.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210201.zip
+ out=log20210201.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210202.zip
+ out=log20210202.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210203.zip
+ out=log20210203.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210204.zip
+ out=log20210204.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210205.zip
+ out=log20210205.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210206.zip
+ out=log20210206.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210207.zip
+ out=log20210207.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210208.zip
+ out=log20210208.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210209.zip
+ out=log20210209.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210210.zip
+ out=log20210210.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210211.zip
+ out=log20210211.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210212.zip
+ out=log20210212.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210213.zip
+ out=log20210213.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210214.zip
+ out=log20210214.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210215.zip
+ out=log20210215.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210216.zip
+ out=log20210216.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210217.zip
+ out=log20210217.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210218.zip
+ out=log20210218.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210219.zip
+ out=log20210219.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210220.zip
+ out=log20210220.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210221.zip
+ out=log20210221.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210222.zip
+ out=log20210222.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210223.zip
+ out=log20210223.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210224.zip
+ out=log20210224.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210225.zip
+ out=log20210225.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210226.zip
+ out=log20210226.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210227.zip
+ out=log20210227.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210228.zip
+ out=log20210228.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210301.zip
+ out=log20210301.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210302.zip
+ out=log20210302.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210303.zip
+ out=log20210303.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210304.zip
+ out=log20210304.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210305.zip
+ out=log20210305.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210306.zip
+ out=log20210306.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210307.zip
+ out=log20210307.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210308.zip
+ out=log20210308.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210309.zip
+ out=log20210309.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210310.zip
+ out=log20210310.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210311.zip
+ out=log20210311.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210312.zip
+ out=log20210312.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210313.zip
+ out=log20210313.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210314.zip
+ out=log20210314.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210315.zip
+ out=log20210315.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210316.zip
+ out=log20210316.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210317.zip
+ out=log20210317.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210318.zip
+ out=log20210318.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210319.zip
+ out=log20210319.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210320.zip
+ out=log20210320.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210321.zip
+ out=log20210321.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210322.zip
+ out=log20210322.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210323.zip
+ out=log20210323.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210324.zip
+ out=log20210324.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210325.zip
+ out=log20210325.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210326.zip
+ out=log20210326.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210327.zip
+ out=log20210327.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210328.zip
+ out=log20210328.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210329.zip
+ out=log20210329.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210330.zip
+ out=log20210330.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr1/log20210331.zip
+ out=log20210331.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210401.zip
+ out=log20210401.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210402.zip
+ out=log20210402.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210403.zip
+ out=log20210403.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210404.zip
+ out=log20210404.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210405.zip
+ out=log20210405.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210406.zip
+ out=log20210406.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210407.zip
+ out=log20210407.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210408.zip
+ out=log20210408.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210409.zip
+ out=log20210409.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210410.zip
+ out=log20210410.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210411.zip
+ out=log20210411.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210412.zip
+ out=log20210412.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210413.zip
+ out=log20210413.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210414.zip
+ out=log20210414.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210415.zip
+ out=log20210415.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210416.zip
+ out=log20210416.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210417.zip
+ out=log20210417.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210418.zip
+ out=log20210418.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210419.zip
+ out=log20210419.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210420.zip
+ out=log20210420.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210421.zip
+ out=log20210421.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210422.zip
+ out=log20210422.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210423.zip
+ out=log20210423.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210424.zip
+ out=log20210424.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210425.zip
+ out=log20210425.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210426.zip
+ out=log20210426.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210427.zip
+ out=log20210427.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210428.zip
+ out=log20210428.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210429.zip
+ out=log20210429.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210430.zip
+ out=log20210430.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210501.zip
+ out=log20210501.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210502.zip
+ out=log20210502.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210503.zip
+ out=log20210503.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210504.zip
+ out=log20210504.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210505.zip
+ out=log20210505.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210506.zip
+ out=log20210506.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210507.zip
+ out=log20210507.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210508.zip
+ out=log20210508.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210509.zip
+ out=log20210509.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210510.zip
+ out=log20210510.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210511.zip
+ out=log20210511.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210512.zip
+ out=log20210512.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210513.zip
+ out=log20210513.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210514.zip
+ out=log20210514.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210515.zip
+ out=log20210515.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210516.zip
+ out=log20210516.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210517.zip
+ out=log20210517.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210518.zip
+ out=log20210518.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210519.zip
+ out=log20210519.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210520.zip
+ out=log20210520.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210521.zip
+ out=log20210521.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210522.zip
+ out=log20210522.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210523.zip
+ out=log20210523.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210524.zip
+ out=log20210524.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210525.zip
+ out=log20210525.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210526.zip
+ out=log20210526.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210527.zip
+ out=log20210527.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210528.zip
+ out=log20210528.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210529.zip
+ out=log20210529.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210530.zip
+ out=log20210530.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210531.zip
+ out=log20210531.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210601.zip
+ out=log20210601.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210602.zip
+ out=log20210602.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210603.zip
+ out=log20210603.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210604.zip
+ out=log20210604.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210605.zip
+ out=log20210605.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210606.zip
+ out=log20210606.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210607.zip
+ out=log20210607.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210608.zip
+ out=log20210608.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210609.zip
+ out=log20210609.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210610.zip
+ out=log20210610.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210611.zip
+ out=log20210611.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210612.zip
+ out=log20210612.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210613.zip
+ out=log20210613.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210614.zip
+ out=log20210614.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210615.zip
+ out=log20210615.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210616.zip
+ out=log20210616.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210617.zip
+ out=log20210617.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210618.zip
+ out=log20210618.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210619.zip
+ out=log20210619.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210620.zip
+ out=log20210620.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210621.zip
+ out=log20210621.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210622.zip
+ out=log20210622.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210623.zip
+ out=log20210623.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210624.zip
+ out=log20210624.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210625.zip
+ out=log20210625.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210626.zip
+ out=log20210626.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210627.zip
+ out=log20210627.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210628.zip
+ out=log20210628.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210629.zip
+ out=log20210629.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr2/log20210630.zip
+ out=log20210630.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210701.zip
+ out=log20210701.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210702.zip
+ out=log20210702.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210703.zip
+ out=log20210703.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210704.zip
+ out=log20210704.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210705.zip
+ out=log20210705.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210706.zip
+ out=log20210706.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210707.zip
+ out=log20210707.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210708.zip
+ out=log20210708.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210709.zip
+ out=log20210709.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210710.zip
+ out=log20210710.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210711.zip
+ out=log20210711.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210712.zip
+ out=log20210712.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210713.zip
+ out=log20210713.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210714.zip
+ out=log20210714.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210715.zip
+ out=log20210715.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210716.zip
+ out=log20210716.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210717.zip
+ out=log20210717.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210718.zip
+ out=log20210718.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210719.zip
+ out=log20210719.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210720.zip
+ out=log20210720.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210721.zip
+ out=log20210721.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210722.zip
+ out=log20210722.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210723.zip
+ out=log20210723.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210724.zip
+ out=log20210724.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210725.zip
+ out=log20210725.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210726.zip
+ out=log20210726.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210727.zip
+ out=log20210727.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210728.zip
+ out=log20210728.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210729.zip
+ out=log20210729.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210730.zip
+ out=log20210730.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210731.zip
+ out=log20210731.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210801.zip
+ out=log20210801.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210802.zip
+ out=log20210802.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210803.zip
+ out=log20210803.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210804.zip
+ out=log20210804.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210805.zip
+ out=log20210805.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210806.zip
+ out=log20210806.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210807.zip
+ out=log20210807.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210808.zip
+ out=log20210808.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210809.zip
+ out=log20210809.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210810.zip
+ out=log20210810.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210811.zip
+ out=log20210811.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210812.zip
+ out=log20210812.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210813.zip
+ out=log20210813.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210814.zip
+ out=log20210814.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210815.zip
+ out=log20210815.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210816.zip
+ out=log20210816.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210817.zip
+ out=log20210817.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210818.zip
+ out=log20210818.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210819.zip
+ out=log20210819.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210820.zip
+ out=log20210820.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210821.zip
+ out=log20210821.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210822.zip
+ out=log20210822.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210823.zip
+ out=log20210823.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210824.zip
+ out=log20210824.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210825.zip
+ out=log20210825.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210826.zip
+ out=log20210826.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210827.zip
+ out=log20210827.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210828.zip
+ out=log20210828.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210829.zip
+ out=log20210829.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210830.zip
+ out=log20210830.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210831.zip
+ out=log20210831.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210901.zip
+ out=log20210901.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210902.zip
+ out=log20210902.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210903.zip
+ out=log20210903.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210904.zip
+ out=log20210904.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210905.zip
+ out=log20210905.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210906.zip
+ out=log20210906.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210907.zip
+ out=log20210907.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210908.zip
+ out=log20210908.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210909.zip
+ out=log20210909.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210910.zip
+ out=log20210910.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210911.zip
+ out=log20210911.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210912.zip
+ out=log20210912.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210913.zip
+ out=log20210913.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210914.zip
+ out=log20210914.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210915.zip
+ out=log20210915.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210916.zip
+ out=log20210916.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210917.zip
+ out=log20210917.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210918.zip
+ out=log20210918.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210919.zip
+ out=log20210919.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210920.zip
+ out=log20210920.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210921.zip
+ out=log20210921.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210922.zip
+ out=log20210922.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210923.zip
+ out=log20210923.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210924.zip
+ out=log20210924.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210925.zip
+ out=log20210925.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210926.zip
+ out=log20210926.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210927.zip
+ out=log20210927.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210928.zip
+ out=log20210928.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210929.zip
+ out=log20210929.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr3/log20210930.zip
+ out=log20210930.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211001.zip
+ out=log20211001.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211002.zip
+ out=log20211002.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211003.zip
+ out=log20211003.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211004.zip
+ out=log20211004.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211005.zip
+ out=log20211005.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211006.zip
+ out=log20211006.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211007.zip
+ out=log20211007.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211008.zip
+ out=log20211008.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211009.zip
+ out=log20211009.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211010.zip
+ out=log20211010.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211011.zip
+ out=log20211011.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211012.zip
+ out=log20211012.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211013.zip
+ out=log20211013.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211014.zip
+ out=log20211014.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211015.zip
+ out=log20211015.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211016.zip
+ out=log20211016.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211017.zip
+ out=log20211017.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211018.zip
+ out=log20211018.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211019.zip
+ out=log20211019.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211020.zip
+ out=log20211020.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211021.zip
+ out=log20211021.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211022.zip
+ out=log20211022.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211023.zip
+ out=log20211023.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211024.zip
+ out=log20211024.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211025.zip
+ out=log20211025.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211026.zip
+ out=log20211026.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211027.zip
+ out=log20211027.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211028.zip
+ out=log20211028.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211029.zip
+ out=log20211029.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211030.zip
+ out=log20211030.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211031.zip
+ out=log20211031.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211101.zip
+ out=log20211101.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211102.zip
+ out=log20211102.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211103.zip
+ out=log20211103.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211104.zip
+ out=log20211104.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211105.zip
+ out=log20211105.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211106.zip
+ out=log20211106.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211107.zip
+ out=log20211107.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211108.zip
+ out=log20211108.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211109.zip
+ out=log20211109.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211110.zip
+ out=log20211110.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211111.zip
+ out=log20211111.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211112.zip
+ out=log20211112.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211113.zip
+ out=log20211113.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211114.zip
+ out=log20211114.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211115.zip
+ out=log20211115.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211116.zip
+ out=log20211116.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211117.zip
+ out=log20211117.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211118.zip
+ out=log20211118.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211119.zip
+ out=log20211119.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211120.zip
+ out=log20211120.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211121.zip
+ out=log20211121.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211122.zip
+ out=log20211122.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211123.zip
+ out=log20211123.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211124.zip
+ out=log20211124.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211125.zip
+ out=log20211125.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211126.zip
+ out=log20211126.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211127.zip
+ out=log20211127.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211128.zip
+ out=log20211128.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211129.zip
+ out=log20211129.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211130.zip
+ out=log20211130.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211201.zip
+ out=log20211201.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211202.zip
+ out=log20211202.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211203.zip
+ out=log20211203.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211204.zip
+ out=log20211204.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211205.zip
+ out=log20211205.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211206.zip
+ out=log20211206.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211207.zip
+ out=log20211207.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211208.zip
+ out=log20211208.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211209.zip
+ out=log20211209.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211210.zip
+ out=log20211210.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211211.zip
+ out=log20211211.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211212.zip
+ out=log20211212.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211213.zip
+ out=log20211213.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211214.zip
+ out=log20211214.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211215.zip
+ out=log20211215.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211216.zip
+ out=log20211216.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211217.zip
+ out=log20211217.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211218.zip
+ out=log20211218.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211219.zip
+ out=log20211219.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211220.zip
+ out=log20211220.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211221.zip
+ out=log20211221.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211222.zip
+ out=log20211222.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211223.zip
+ out=log20211223.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211224.zip
+ out=log20211224.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211225.zip
+ out=log20211225.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211226.zip
+ out=log20211226.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211227.zip
+ out=log20211227.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211228.zip
+ out=log20211228.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211229.zip
+ out=log20211229.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211230.zip
+ out=log20211230.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2021/Qtr4/log20211231.zip
+ out=log20211231.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220101.zip
+ out=log20220101.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220102.zip
+ out=log20220102.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220103.zip
+ out=log20220103.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220104.zip
+ out=log20220104.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220105.zip
+ out=log20220105.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220106.zip
+ out=log20220106.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220107.zip
+ out=log20220107.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220108.zip
+ out=log20220108.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220109.zip
+ out=log20220109.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220110.zip
+ out=log20220110.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220111.zip
+ out=log20220111.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220112.zip
+ out=log20220112.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220113.zip
+ out=log20220113.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220114.zip
+ out=log20220114.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220115.zip
+ out=log20220115.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220116.zip
+ out=log20220116.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220117.zip
+ out=log20220117.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220118.zip
+ out=log20220118.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220119.zip
+ out=log20220119.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220120.zip
+ out=log20220120.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220121.zip
+ out=log20220121.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220122.zip
+ out=log20220122.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220123.zip
+ out=log20220123.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220124.zip
+ out=log20220124.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220125.zip
+ out=log20220125.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220126.zip
+ out=log20220126.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220127.zip
+ out=log20220127.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220128.zip
+ out=log20220128.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220129.zip
+ out=log20220129.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220130.zip
+ out=log20220130.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220131.zip
+ out=log20220131.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220201.zip
+ out=log20220201.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220202.zip
+ out=log20220202.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220203.zip
+ out=log20220203.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220204.zip
+ out=log20220204.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220205.zip
+ out=log20220205.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220206.zip
+ out=log20220206.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220207.zip
+ out=log20220207.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220208.zip
+ out=log20220208.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220209.zip
+ out=log20220209.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220210.zip
+ out=log20220210.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220211.zip
+ out=log20220211.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220212.zip
+ out=log20220212.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220213.zip
+ out=log20220213.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220214.zip
+ out=log20220214.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220215.zip
+ out=log20220215.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220216.zip
+ out=log20220216.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220217.zip
+ out=log20220217.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220218.zip
+ out=log20220218.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220219.zip
+ out=log20220219.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220220.zip
+ out=log20220220.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220221.zip
+ out=log20220221.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220222.zip
+ out=log20220222.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220223.zip
+ out=log20220223.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220224.zip
+ out=log20220224.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220225.zip
+ out=log20220225.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220226.zip
+ out=log20220226.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220227.zip
+ out=log20220227.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220228.zip
+ out=log20220228.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220301.zip
+ out=log20220301.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220302.zip
+ out=log20220302.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220303.zip
+ out=log20220303.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220304.zip
+ out=log20220304.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220305.zip
+ out=log20220305.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220306.zip
+ out=log20220306.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220307.zip
+ out=log20220307.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220308.zip
+ out=log20220308.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220309.zip
+ out=log20220309.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220310.zip
+ out=log20220310.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220311.zip
+ out=log20220311.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220312.zip
+ out=log20220312.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220313.zip
+ out=log20220313.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220314.zip
+ out=log20220314.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220315.zip
+ out=log20220315.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220316.zip
+ out=log20220316.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220317.zip
+ out=log20220317.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220318.zip
+ out=log20220318.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220319.zip
+ out=log20220319.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220320.zip
+ out=log20220320.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220321.zip
+ out=log20220321.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220322.zip
+ out=log20220322.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220323.zip
+ out=log20220323.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220324.zip
+ out=log20220324.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220325.zip
+ out=log20220325.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220326.zip
+ out=log20220326.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220327.zip
+ out=log20220327.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220328.zip
+ out=log20220328.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220329.zip
+ out=log20220329.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220330.zip
+ out=log20220330.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr1/log20220331.zip
+ out=log20220331.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220401.zip
+ out=log20220401.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220402.zip
+ out=log20220402.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220403.zip
+ out=log20220403.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220404.zip
+ out=log20220404.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220405.zip
+ out=log20220405.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220406.zip
+ out=log20220406.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220407.zip
+ out=log20220407.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220408.zip
+ out=log20220408.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220409.zip
+ out=log20220409.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220410.zip
+ out=log20220410.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220411.zip
+ out=log20220411.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220412.zip
+ out=log20220412.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220413.zip
+ out=log20220413.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220414.zip
+ out=log20220414.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220415.zip
+ out=log20220415.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220416.zip
+ out=log20220416.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220417.zip
+ out=log20220417.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220418.zip
+ out=log20220418.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220419.zip
+ out=log20220419.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220420.zip
+ out=log20220420.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220421.zip
+ out=log20220421.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220422.zip
+ out=log20220422.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220423.zip
+ out=log20220423.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220424.zip
+ out=log20220424.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220425.zip
+ out=log20220425.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220426.zip
+ out=log20220426.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220427.zip
+ out=log20220427.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220428.zip
+ out=log20220428.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220429.zip
+ out=log20220429.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220430.zip
+ out=log20220430.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220501.zip
+ out=log20220501.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220502.zip
+ out=log20220502.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220503.zip
+ out=log20220503.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220504.zip
+ out=log20220504.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220505.zip
+ out=log20220505.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220506.zip
+ out=log20220506.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220507.zip
+ out=log20220507.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220508.zip
+ out=log20220508.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220509.zip
+ out=log20220509.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220510.zip
+ out=log20220510.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220511.zip
+ out=log20220511.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220512.zip
+ out=log20220512.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220513.zip
+ out=log20220513.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220514.zip
+ out=log20220514.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220515.zip
+ out=log20220515.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220516.zip
+ out=log20220516.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220517.zip
+ out=log20220517.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220518.zip
+ out=log20220518.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220519.zip
+ out=log20220519.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220520.zip
+ out=log20220520.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220521.zip
+ out=log20220521.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220522.zip
+ out=log20220522.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220523.zip
+ out=log20220523.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220524.zip
+ out=log20220524.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220525.zip
+ out=log20220525.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220526.zip
+ out=log20220526.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220527.zip
+ out=log20220527.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220528.zip
+ out=log20220528.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220529.zip
+ out=log20220529.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220530.zip
+ out=log20220530.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220531.zip
+ out=log20220531.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220601.zip
+ out=log20220601.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220602.zip
+ out=log20220602.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220603.zip
+ out=log20220603.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220604.zip
+ out=log20220604.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220605.zip
+ out=log20220605.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220606.zip
+ out=log20220606.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220607.zip
+ out=log20220607.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220608.zip
+ out=log20220608.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220609.zip
+ out=log20220609.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220610.zip
+ out=log20220610.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220611.zip
+ out=log20220611.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220612.zip
+ out=log20220612.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220613.zip
+ out=log20220613.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220614.zip
+ out=log20220614.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220615.zip
+ out=log20220615.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220616.zip
+ out=log20220616.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220617.zip
+ out=log20220617.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220618.zip
+ out=log20220618.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220619.zip
+ out=log20220619.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220620.zip
+ out=log20220620.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220621.zip
+ out=log20220621.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220622.zip
+ out=log20220622.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220623.zip
+ out=log20220623.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220624.zip
+ out=log20220624.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220625.zip
+ out=log20220625.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220626.zip
+ out=log20220626.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220627.zip
+ out=log20220627.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220628.zip
+ out=log20220628.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220629.zip
+ out=log20220629.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr2/log20220630.zip
+ out=log20220630.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220701.zip
+ out=log20220701.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220702.zip
+ out=log20220702.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220703.zip
+ out=log20220703.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220704.zip
+ out=log20220704.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220705.zip
+ out=log20220705.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220706.zip
+ out=log20220706.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220707.zip
+ out=log20220707.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220708.zip
+ out=log20220708.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220709.zip
+ out=log20220709.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220710.zip
+ out=log20220710.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220711.zip
+ out=log20220711.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220712.zip
+ out=log20220712.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220713.zip
+ out=log20220713.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220714.zip
+ out=log20220714.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220715.zip
+ out=log20220715.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220716.zip
+ out=log20220716.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220717.zip
+ out=log20220717.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220718.zip
+ out=log20220718.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220719.zip
+ out=log20220719.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220720.zip
+ out=log20220720.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220721.zip
+ out=log20220721.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220722.zip
+ out=log20220722.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220723.zip
+ out=log20220723.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220724.zip
+ out=log20220724.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220725.zip
+ out=log20220725.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220726.zip
+ out=log20220726.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220727.zip
+ out=log20220727.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220728.zip
+ out=log20220728.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220729.zip
+ out=log20220729.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220730.zip
+ out=log20220730.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220731.zip
+ out=log20220731.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220801.zip
+ out=log20220801.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220802.zip
+ out=log20220802.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220803.zip
+ out=log20220803.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220804.zip
+ out=log20220804.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220805.zip
+ out=log20220805.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220806.zip
+ out=log20220806.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220807.zip
+ out=log20220807.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220808.zip
+ out=log20220808.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220809.zip
+ out=log20220809.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220810.zip
+ out=log20220810.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220811.zip
+ out=log20220811.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220812.zip
+ out=log20220812.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220813.zip
+ out=log20220813.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220814.zip
+ out=log20220814.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220815.zip
+ out=log20220815.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220816.zip
+ out=log20220816.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220817.zip
+ out=log20220817.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220818.zip
+ out=log20220818.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220819.zip
+ out=log20220819.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220820.zip
+ out=log20220820.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220821.zip
+ out=log20220821.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220822.zip
+ out=log20220822.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220823.zip
+ out=log20220823.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220824.zip
+ out=log20220824.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220825.zip
+ out=log20220825.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220826.zip
+ out=log20220826.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220827.zip
+ out=log20220827.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220828.zip
+ out=log20220828.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220829.zip
+ out=log20220829.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220830.zip
+ out=log20220830.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220831.zip
+ out=log20220831.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220901.zip
+ out=log20220901.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220902.zip
+ out=log20220902.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220903.zip
+ out=log20220903.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220904.zip
+ out=log20220904.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220905.zip
+ out=log20220905.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220906.zip
+ out=log20220906.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220907.zip
+ out=log20220907.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220908.zip
+ out=log20220908.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220909.zip
+ out=log20220909.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220910.zip
+ out=log20220910.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220911.zip
+ out=log20220911.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220912.zip
+ out=log20220912.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220913.zip
+ out=log20220913.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220914.zip
+ out=log20220914.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220915.zip
+ out=log20220915.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220916.zip
+ out=log20220916.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220917.zip
+ out=log20220917.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220918.zip
+ out=log20220918.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220919.zip
+ out=log20220919.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220920.zip
+ out=log20220920.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220921.zip
+ out=log20220921.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220922.zip
+ out=log20220922.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220923.zip
+ out=log20220923.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220924.zip
+ out=log20220924.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220925.zip
+ out=log20220925.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220926.zip
+ out=log20220926.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220927.zip
+ out=log20220927.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220928.zip
+ out=log20220928.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220929.zip
+ out=log20220929.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr3/log20220930.zip
+ out=log20220930.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221001.zip
+ out=log20221001.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221002.zip
+ out=log20221002.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221003.zip
+ out=log20221003.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221004.zip
+ out=log20221004.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221005.zip
+ out=log20221005.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221006.zip
+ out=log20221006.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221007.zip
+ out=log20221007.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221008.zip
+ out=log20221008.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221009.zip
+ out=log20221009.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221010.zip
+ out=log20221010.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221011.zip
+ out=log20221011.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221012.zip
+ out=log20221012.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221013.zip
+ out=log20221013.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221014.zip
+ out=log20221014.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221015.zip
+ out=log20221015.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221016.zip
+ out=log20221016.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221017.zip
+ out=log20221017.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221018.zip
+ out=log20221018.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221019.zip
+ out=log20221019.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221020.zip
+ out=log20221020.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221021.zip
+ out=log20221021.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221022.zip
+ out=log20221022.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221023.zip
+ out=log20221023.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221024.zip
+ out=log20221024.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221025.zip
+ out=log20221025.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221026.zip
+ out=log20221026.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221027.zip
+ out=log20221027.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221028.zip
+ out=log20221028.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221029.zip
+ out=log20221029.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221030.zip
+ out=log20221030.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221031.zip
+ out=log20221031.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221101.zip
+ out=log20221101.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221102.zip
+ out=log20221102.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221103.zip
+ out=log20221103.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221104.zip
+ out=log20221104.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221105.zip
+ out=log20221105.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221106.zip
+ out=log20221106.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221107.zip
+ out=log20221107.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221108.zip
+ out=log20221108.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221109.zip
+ out=log20221109.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221110.zip
+ out=log20221110.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221111.zip
+ out=log20221111.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221112.zip
+ out=log20221112.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221113.zip
+ out=log20221113.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221114.zip
+ out=log20221114.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221115.zip
+ out=log20221115.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221116.zip
+ out=log20221116.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221117.zip
+ out=log20221117.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221118.zip
+ out=log20221118.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221119.zip
+ out=log20221119.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221120.zip
+ out=log20221120.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221121.zip
+ out=log20221121.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221122.zip
+ out=log20221122.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221123.zip
+ out=log20221123.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221124.zip
+ out=log20221124.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221125.zip
+ out=log20221125.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221126.zip
+ out=log20221126.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221127.zip
+ out=log20221127.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221128.zip
+ out=log20221128.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221129.zip
+ out=log20221129.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221130.zip
+ out=log20221130.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221201.zip
+ out=log20221201.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221202.zip
+ out=log20221202.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221203.zip
+ out=log20221203.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221204.zip
+ out=log20221204.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221205.zip
+ out=log20221205.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221206.zip
+ out=log20221206.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221207.zip
+ out=log20221207.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221208.zip
+ out=log20221208.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221209.zip
+ out=log20221209.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221210.zip
+ out=log20221210.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221211.zip
+ out=log20221211.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221212.zip
+ out=log20221212.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221213.zip
+ out=log20221213.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221214.zip
+ out=log20221214.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221215.zip
+ out=log20221215.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221216.zip
+ out=log20221216.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221217.zip
+ out=log20221217.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221218.zip
+ out=log20221218.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221219.zip
+ out=log20221219.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221220.zip
+ out=log20221220.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221221.zip
+ out=log20221221.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221222.zip
+ out=log20221222.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221223.zip
+ out=log20221223.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221224.zip
+ out=log20221224.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221225.zip
+ out=log20221225.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221226.zip
+ out=log20221226.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221227.zip
+ out=log20221227.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221228.zip
+ out=log20221228.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221229.zip
+ out=log20221229.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221230.zip
+ out=log20221230.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2022/Qtr4/log20221231.zip
+ out=log20221231.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230101.zip
+ out=log20230101.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230102.zip
+ out=log20230102.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230103.zip
+ out=log20230103.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230104.zip
+ out=log20230104.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230105.zip
+ out=log20230105.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230106.zip
+ out=log20230106.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230107.zip
+ out=log20230107.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230108.zip
+ out=log20230108.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230109.zip
+ out=log20230109.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230110.zip
+ out=log20230110.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230111.zip
+ out=log20230111.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230112.zip
+ out=log20230112.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230113.zip
+ out=log20230113.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230114.zip
+ out=log20230114.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230115.zip
+ out=log20230115.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230116.zip
+ out=log20230116.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230117.zip
+ out=log20230117.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230118.zip
+ out=log20230118.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230119.zip
+ out=log20230119.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230120.zip
+ out=log20230120.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230121.zip
+ out=log20230121.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230122.zip
+ out=log20230122.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230123.zip
+ out=log20230123.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230124.zip
+ out=log20230124.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230125.zip
+ out=log20230125.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230126.zip
+ out=log20230126.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230127.zip
+ out=log20230127.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230128.zip
+ out=log20230128.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230129.zip
+ out=log20230129.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230130.zip
+ out=log20230130.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230131.zip
+ out=log20230131.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230201.zip
+ out=log20230201.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230202.zip
+ out=log20230202.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230203.zip
+ out=log20230203.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230204.zip
+ out=log20230204.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230205.zip
+ out=log20230205.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230206.zip
+ out=log20230206.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230207.zip
+ out=log20230207.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230208.zip
+ out=log20230208.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230209.zip
+ out=log20230209.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230210.zip
+ out=log20230210.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230211.zip
+ out=log20230211.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230212.zip
+ out=log20230212.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230213.zip
+ out=log20230213.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230214.zip
+ out=log20230214.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230215.zip
+ out=log20230215.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230216.zip
+ out=log20230216.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230217.zip
+ out=log20230217.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230218.zip
+ out=log20230218.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230219.zip
+ out=log20230219.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230220.zip
+ out=log20230220.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230221.zip
+ out=log20230221.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230222.zip
+ out=log20230222.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230223.zip
+ out=log20230223.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230224.zip
+ out=log20230224.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230225.zip
+ out=log20230225.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230226.zip
+ out=log20230226.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230227.zip
+ out=log20230227.zip
+https://www.sec.gov/dera/data/Public-EDGAR-log-file-data/2023/Qtr1/log20230228.zip
+ out=log20230228.zip
